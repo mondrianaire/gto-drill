@@ -1,0 +1,202 @@
+[
+  {
+    "scenario_id": "btn-vs-bb-3bet-pot-c-bet-decision-001",
+    "description": "100bb deep, BTN vs BB. You (BTN) opened to 2.5bb, BB 3-bet to 11bb, you called. Flop is Kh 7d 2s. BB checks to you. The pot is 22.5bb.",
+    "board": "Kh 7d 2s",
+    "action_history": ["BTN open 2.5bb", "BB 3-bet to 11bb", "BTN call", "BB check"],
+    "available_actions": ["Check back", "Bet 7bb (~30% pot)", "Bet 17bb (~75% pot)"],
+    "gto_action": "Check back",
+    "gto_explanation": "When the 3-bettor checks a high-equity board like K72 rainbow into the in-position cold-caller, the BB's range is heavily capped (they would c-bet most of their KK/AA/AK for protection and value). The BTN cold-caller has a range disadvantage on this board because BB has more Kx in their 3-bet range. Solvers strongly favor a high check-back frequency here to protect the BTN's range and to realize equity with weak pairs and backdoor draws.",
+    "lesson_tag": "Range-disadvantage check-back"
+  },
+  {
+    "scenario_id": "co-open-blind-defense-002",
+    "description": "100bb deep, full ring, folded to CO. CO opens 2.5bb. Hero is in the BB with A5 offsuit. Action is on Hero.",
+    "board": null,
+    "action_history": ["folds to CO", "CO open 2.5bb", "SB fold"],
+    "available_actions": ["Fold", "Call", "3-bet to 11bb"],
+    "gto_action": "3-bet to 11bb",
+    "gto_explanation": "A5o is at the bottom of BB's defending range but is a high-frequency 3-bet bluff candidate, not a flat. The blocker to AA/AK and the wheel-straight potential make it block more value than a hand like K5o, and 3-betting recovers fold equity that calling out of position cannot. Flatting OOP with A5o realizes equity poorly. Solvers 3-bet A5o in BB-vs-CO at high frequency.",
+    "lesson_tag": "BB 3-bet bluff blockers"
+  },
+  {
+    "scenario_id": "small-blind-vs-button-srp-turn-overbet-003",
+    "description": "100bb. SRP. SB completed, BTN raised to 3bb, SB called. Flop 9c 6c 2h: SB check, BTN bet 3bb, SB call. Turn 9c 6c 2h Tc (flush completing): SB check. Pot 14bb, stacks 87bb. Action on BTN.",
+    "board": "9c 6c 2h Tc",
+    "action_history": ["SB complete", "BTN raise 3bb", "SB call", "Flop SB check", "Flop BTN bet 3bb", "Flop SB call", "Turn SB check"],
+    "available_actions": ["Check back", "Bet 7bb (50% pot)", "Bet 14bb (100% pot)", "Bet 21bb (overbet 150% pot)"],
+    "gto_action": "Check back",
+    "gto_explanation": "The turned third club is a brutal scare card for BTN's range — BTN c-bet flop with a polarized range that includes many one-pair hands but few flush combinations relative to SB, who can have all the small suited connectors that flop a draw and got there. BTN's pure value (sets, two pair) is now drawn out on and BTN's bluffs lose equity against the calling range's many made flushes. Solvers strongly favor checking back most of BTN's range on this turn including most one-pair hands, betting only the nut-flush and bluffs containing the Ac blocker.",
+    "lesson_tag": "Range-flipping turn card"
+  },
+  {
+    "scenario_id": "mid-stack-utg-rfi-pocket-pair-004",
+    "description": "40bb effective. UTG (Hero) at a 6-max table with 22. Action on Hero.",
+    "board": null,
+    "action_history": ["UTG to act"],
+    "available_actions": ["Fold", "Open to 2.2bb", "Open to 3bb", "Limp"],
+    "gto_action": "Fold",
+    "gto_explanation": "At 40bb effective from UTG in 6-max, small pocket pairs like 22-44 no longer have the set-mining odds they need against the depth-adjusted calling/3-betting ranges. Implied odds shrink because if you flop a set against a 3-bettor at 40bb, you cannot get a full 'set value' stacked off the cooler. The mixed-strategy range tightens at this depth and 22 falls below the cutoff for UTG opens. This is a 'shallow-depth UTG fold' that players who open standard 100bb ranges leak with.",
+    "lesson_tag": "Short-stack range tightening"
+  },
+  {
+    "scenario_id": "blind-vs-blind-river-thin-value-005",
+    "description": "100bb. SB raised to 3bb, BB called. Flop Qh 7s 4d: SB bet 2bb, BB called. Turn Qh 7s 4d 8s: SB check, BB check. River Qh 7s 4d 8s 3h: BB check. Hero (SB) has KQ offsuit. Pot 10bb. Action on Hero.",
+    "board": "Qh 7s 4d 8s 3h",
+    "action_history": ["SB raise 3bb", "BB call", "Flop SB bet 2bb", "Flop BB call", "Turn SB check", "Turn BB check", "River BB check"],
+    "available_actions": ["Check back", "Bet 3bb (~30%)", "Bet 7bb (~70%)", "Bet 12bb (overbet)"],
+    "gto_action": "Bet 3bb (~30%)",
+    "gto_explanation": "KQ is top pair top kicker with strong showdown value, but on a river where BB checks twice on a low-action runout BB's range is full of Qx with worse kickers (Q9, QT, QJ at frequency), middle pairs, and busted spade draws. A small thin-value bet around 30% pot extracts value from worse Qx and weak middle pairs (8x, 7x) that will call once but never twice, while keeping the bluff range balanced. Over-betting bloats the pot against a range that has very little KQ+ left after the BB check-called flop and checked turn.",
+    "lesson_tag": "River thin value sizing"
+  },
+  {
+    "scenario_id": "ip-flop-overbet-on-paired-board-006",
+    "description": "100bb. CO opens 2.5bb, BTN (Hero) calls. Flop 8h 8d 3c: CO bets 5bb (~75% pot) into 6.5bb. Hero has 9d 9s. Action on Hero.",
+    "board": "8h 8d 3c",
+    "action_history": ["CO open 2.5bb", "BTN call", "Flop CO bet 5bb"],
+    "available_actions": ["Fold", "Call", "Raise to 16bb"],
+    "gto_action": "Call",
+    "gto_explanation": "99 is an overpair to the board but the texture is dynamic against CO's polar c-betting range. Raising blows out the small pairs and weak overcards CO is bluff-c-betting, which is the part of CO's range we beat. Folding is far too tight — we beat all bluffs and many of CO's middling pairs. Calling keeps CO's bluffs in and lets us reassess on the turn against a polarized barreling range. Solvers mostly call 99 here.",
+    "lesson_tag": "Call don't raise vs polar c-bet"
+  },
+  {
+    "scenario_id": "facing-river-overbet-with-bluff-catcher-007",
+    "description": "100bb. UTG opens 2.5bb, BTN calls. Flop Tc 9c 5d UTG bet 4bb, BTN call. Turn Tc 9c 5d 2h: UTG bet 11bb, BTN call. River Tc 9c 5d 2h 6s: UTG bets 50bb (~125% pot overbet). Hero (BTN) has Td Jd. Pot was 39bb. Action on Hero.",
+    "board": "Tc 9c 5d 2h 6s",
+    "action_history": ["UTG open 2.5bb", "BTN call", "Flop UTG bet 4bb", "Flop BTN call", "Turn UTG bet 11bb", "Turn BTN call", "River UTG overbet 50bb"],
+    "available_actions": ["Fold", "Call"],
+    "gto_action": "Fold",
+    "gto_explanation": "TJ on this runout is a marginal bluff-catcher with top pair decent kicker, but UTG's triple-barrel overbet line on a relatively dry river polarizes to sets, two pair, JJ+, and rivered straights (87, 8c7c missing some), with bluffs primarily missed flush draws. The minimum-defense frequency against an overbet of this size demands continuing only the strongest bluff-catchers; TJ blocks none of UTG's value combos (no straight blocker, no flush blocker since no club). Solvers fold TJ at high frequency in this exact spot.",
+    "lesson_tag": "MDF and blockers vs polar river overbet"
+  },
+  {
+    "scenario_id": "small-pair-vs-3bet-set-mine-008",
+    "description": "100bb. Hero opens 2.5bb from CO with 55. BTN 3-bets to 9bb. Action back on Hero.",
+    "board": null,
+    "action_history": ["CO open 2.5bb", "BTN 3-bet 9bb"],
+    "available_actions": ["Fold", "Call", "4-bet to 22bb"],
+    "gto_action": "Call",
+    "gto_explanation": "55 has clean set-mining odds against a 3-bet to 9bb when 100bb deep: paying 6.5bb to win a pot that can become ~200bb when you flop a set roughly 1 in 8.5 times gives the implied odds needed. 4-betting bloats the pot with a hand that has poor equity against the 3-betting continue range and that performs poorly post-flop without a set. Folding is too tight in position with set-mining odds and a hand that can still cooler aces.",
+    "lesson_tag": "Set-mining odds vs 3-bet"
+  },
+  {
+    "scenario_id": "out-of-position-double-barrel-equity-realization-009",
+    "description": "100bb. HJ opens 2.5bb. BB (Hero) calls with KdJd. Flop Kc 5h 4s: BB check, HJ bet 3bb, BB call. Turn Kc 5h 4s 7c: BB check, HJ bet 9bb. Hero must decide.",
+    "board": "Kc 5h 4s 7c",
+    "action_history": ["HJ open 2.5bb", "BB call", "Flop BB check", "Flop HJ bet 3bb", "Flop BB call", "Turn BB check", "Turn HJ bet 9bb"],
+    "available_actions": ["Fold", "Call", "Check-raise to 28bb"],
+    "gto_action": "Call",
+    "gto_explanation": "KJ is top pair with a decent kicker. Folding to a turn double barrel sized at ~70% pot when we beat all of HJ's bluffs and many of their thinner value bets (KT, K9 in some constructions, JJ-99) is far too tight. Check-raising turns our hand into a bluff and removes bluffs we beat from HJ's range. Solvers call KJ at very high frequency on K54r-7 here — it is precisely the type of hand the line is designed to defend.",
+    "lesson_tag": "OOP turn defense top pair"
+  },
+  {
+    "scenario_id": "donk-bet-decision-low-board-010",
+    "description": "100bb. CO opens 2.5bb. BB (Hero) calls. Flop 7c 6c 5d. Pot is 5.5bb. Hero has 8h 4h. Action on Hero.",
+    "board": "7c 6c 5d",
+    "action_history": ["CO open 2.5bb", "BB call", "Flop on BB"],
+    "available_actions": ["Check", "Donk lead 2bb (~35%)", "Donk lead 4bb (~70%)"],
+    "gto_action": "Donk lead 2bb (~35%)",
+    "gto_explanation": "On low connected boards like 765 the BB has a range advantage relative to the CO opener because BB calls all the small connectors (87, 76s, 65s, 54s, 87s for some constructions) that the CO does not open. Solvers have begun donking these boards at meaningful frequencies with the nutted part of the range (made straights) plus bluffs that have wheel equity. 84o is a strong donking bluff candidate here — it has clean equity to backdoor straight, blocks 87, and turns into a barrel target. Solvers donk lead BB on 765-type boards at ~25-40% frequency.",
+    "lesson_tag": "BB donk lead range advantage"
+  },
+  {
+    "scenario_id": "all-in-or-fold-short-stack-011",
+    "description": "12bb stack, MTT bubble. Hero (BTN) holds A8 offsuit. Folded to Hero. Blinds 1bb/2bb.",
+    "board": null,
+    "action_history": ["folds to BTN"],
+    "available_actions": ["Fold", "Open shove all-in (12bb)", "Min-raise to 4bb"],
+    "gto_action": "Open shove all-in (12bb)",
+    "gto_explanation": "At 12bb effective from the BTN A8 offsuit is a clear push in Nash open-shove tables. Min-raising at this depth creates terrible play decisions — you can't fold to a 3-bet shove but you put yourself in marginal flips for half your stack, and you let the blinds realize their equity. Shoving denies that equity and forces the blinds to call only with hands that dominate A8 or coin-flip with it. Folding A8o at 12bb on the BTN is a major Nash leak.",
+    "lesson_tag": "Push-fold A-high"
+  },
+  {
+    "scenario_id": "bluff-catcher-with-blocker-012",
+    "description": "100bb. SRP. BTN (Hero) opens 2.5bb, BB calls. Flop 9h 8h 2c: BB check, BTN bet 2bb, BB call. Turn 9h 8h 2c Jh (third heart): BB check, BTN check. River 9h 8h 2c Jh 4d: BB bets 8bb into a 9.5bb pot (~80%). Hero has AhKc.",
+    "board": "9h 8h 2c Jh 4d",
+    "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check", "Flop BTN bet 2bb", "Flop BB call", "Turn BB check", "Turn BTN check", "River BB bet 8bb"],
+    "available_actions": ["Fold", "Call", "Raise to 25bb"],
+    "gto_action": "Call",
+    "gto_explanation": "AhKc has the nut flush blocker and no showdown value otherwise. BB's range on this river contains made flushes, J-high pairs, two pair (84, 92 etc that flatted preflop), and some bluffs (busted gutshots that picked up the third heart and decided to bluff). The Ah blocker is exactly the card we want — we remove a big chunk of BB's flush combinations, making the bluff-to-value ratio much more favorable for a call. Folding is too tight given the price and the blocker; raising loses to all flushes BB has.",
+    "lesson_tag": "Nut-blocker bluff catch"
+  },
+  {
+    "scenario_id": "isolation-vs-limper-013",
+    "description": "100bb cash. UTG limps 1bb. Folds to BTN (Hero) with 89 suited.",
+    "board": null,
+    "action_history": ["UTG limp", "folds to BTN"],
+    "available_actions": ["Fold", "Limp behind", "Isolate to 5bb"],
+    "gto_action": "Isolate to 5bb",
+    "gto_explanation": "89 suited is a strong isolating hand against a UTG limper because it makes nutted hands (straights, flushes) when it flops well, plays well IP heads-up against a capped limping range, and discourages the blinds from coming along cheaply. Limping behind invites multiway pots which dilute equity for a hand like 89s. Folding is far too tight on the button against a limper. The isolation size is bigger than a standard open (5bb instead of 2.5bb) to charge the limper for being out of position.",
+    "lesson_tag": "Iso-raise sizing vs limper"
+  },
+  {
+    "scenario_id": "4bet-bluff-spot-014",
+    "description": "100bb cash. Hero opens HJ to 2.5bb with A5 suited. BTN 3-bets to 9bb. Folds back to Hero.",
+    "board": null,
+    "action_history": ["HJ open 2.5bb", "BTN 3-bet 9bb"],
+    "available_actions": ["Fold", "Call", "4-bet to 22bb"],
+    "gto_action": "4-bet to 22bb",
+    "gto_explanation": "A5s is one of the canonical 4-bet bluff candidates because of the ace blocker (removes AA/AK from BTN's continue range) and the wheel/flush potential when called. Flatting OOP with A5s realizes equity poorly. Folding gives up too much equity. 4-betting recovers fold equity, polarizes our range correctly, and makes a strong made hand when called. Solvers 4-bet bluff A5s at high frequency in HJ vs BTN 3-bet.",
+    "lesson_tag": "4-bet bluff blocker"
+  },
+  {
+    "scenario_id": "calling-station-river-thin-call-015",
+    "description": "100bb. CO opens 2.5bb, BTN (Hero) calls. Flop Js 8c 3d: CO bet 3bb, BTN call. Turn Js 8c 3d 4h: CO check, BTN bet 5bb, CO call. River Js 8c 3d 4h 2s: CO checks. Hero has 7d 7c. Pot is 19bb.",
+    "board": "Js 8c 3d 4h 2s",
+    "action_history": ["CO open 2.5bb", "BTN call", "Flop CO bet 3bb", "Flop BTN call", "Turn CO check", "Turn BTN bet 5bb", "Turn CO call", "River CO check"],
+    "available_actions": ["Check back", "Bet 5bb (~25%)", "Bet 14bb (~75%)"],
+    "gto_action": "Check back",
+    "gto_explanation": "77 has showdown value: we beat 88-... wait, we lose to 88. We beat 66, 55, weak 8x that BTN bet for thin value would not include here, and busted draws. CO's calling range on the turn likely contains Jx and middle pairs that beat us; betting for value gets called only by hands that beat us. Bluffing makes no sense because we have showdown value. Check back to realize the showdown. A common mistake is to 'put pressure' here when the right action is to take the cheap showdown.",
+    "lesson_tag": "Check back showdown value"
+  },
+  {
+    "scenario_id": "flush-draw-semibluff-c-bet-016",
+    "description": "100bb. BTN (Hero) opens 2.5bb with AcQc. BB calls. Flop 8c 5c 2h. BB checks. Pot 5.5bb.",
+    "board": "8c 5c 2h",
+    "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check"],
+    "available_actions": ["Check back", "Bet 2bb (~35%)", "Bet 4bb (~75%)"],
+    "gto_action": "Bet 2bb (~35%)",
+    "gto_explanation": "AcQc has the nut flush draw plus two overcards, with about 50% equity against BB's calling range. The small (~35% pot) c-bet captures BB's many missing-equity hands (the entire underpair-low-card range that called preflop), denies equity to overcards that beat us, and sets up a high-leverage turn semibluff if we hit our draw or fire again. Overbetting is unnecessary because BB's calling range is wide and merged on this dry-looking board; bigger sizes lose value from hands that fold to a small bet anyway.",
+    "lesson_tag": "Semi-bluff c-bet sizing"
+  },
+  {
+    "scenario_id": "river-overpair-vs-check-raise-017",
+    "description": "100bb. CO (Hero) opens 2.5bb with QQ. BTN calls. Flop 7h 4s 2d: CO bet 2bb, BTN call. Turn 7h 4s 2d 5s: CO bet 6bb, BTN call. River 7h 4s 2d 5s 6c (4-card straight on board): CO bet 10bb, BTN raises to 35bb. Hero must decide. Stacks left ~80bb each.",
+    "board": "7h 4s 2d 5s 6c",
+    "action_history": ["CO open 2.5bb", "BTN call", "Flop CO bet 2bb", "Flop BTN call", "Turn CO bet 6bb", "Turn BTN call", "River CO bet 10bb", "River BTN raise 35bb"],
+    "available_actions": ["Fold", "Call", "Shove all-in"],
+    "gto_action": "Fold",
+    "gto_explanation": "When a 4-card straight completes on the river and a flat-calling station finally check-raises, almost every combination of value they could have here is now a straight (8x, 3x). QQ blocks no straights and we have no equity against the straight portion of the range. The only hands BTN could be raising for value that we beat would be uncharacteristic spazz-bluffs; the calling line indicates BTN had a hand all along. Solvers fold even overpairs to a c/r in this exact texture at high frequency.",
+    "lesson_tag": "Fold to c/r on 4-card straight"
+  },
+  {
+    "scenario_id": "double-up-spot-set-vs-overpair-018",
+    "description": "100bb. Hero opens BTN 2.5bb with 66. BB calls. Flop 6h 9c 2s. BB checks, Hero bets 2bb, BB raises to 8bb. Hero is on the BTN with bottom set.",
+    "board": "6h 9c 2s",
+    "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check", "Flop BTN bet 2bb", "Flop BB raise 8bb"],
+    "available_actions": ["Fold", "Call", "Re-raise to 22bb"],
+    "gto_action": "Re-raise to 22bb",
+    "gto_explanation": "Bottom set on a relatively dry board against a check-raise is the canonical 'build the pot now' spot. BB's check-raise range includes 99 (top set), 22 (bottom set 2x), 9-6 two pair, semi-bluffs with backdoor equity, and some bluffs. We are far ahead of everything except 99 and we want to get the money in while BB's range still contains all the worse hands. Flatting risks the turn bringing a scare card that lets BB pot-control with us when we want to be punishing BB's whole range. Three-betting denies equity to draws and gets called by worse made hands.",
+    "lesson_tag": "Set on dry board: bet for value"
+  },
+  {
+    "scenario_id": "river-bluff-with-no-showdown-019",
+    "description": "100bb. BTN (Hero) opens with 5c 4c. BB calls. Flop Jh 7c 3c: BB check, BTN bet 2bb, BB call. Turn Jh 7c 3c Td: BB check, BTN check. River Jh 7c 3c Td 2s: BB checks. Pot 9bb. Hero has 5c 4c (missed flush, missed straight, busted).",
+    "board": "Jh 7c 3c Td 2s",
+    "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check", "Flop BTN bet 2bb", "Flop BB call", "Turn BB check", "Turn BTN check", "River BB check"],
+    "available_actions": ["Check back", "Bet 4bb (~45%)", "Bet 8bb (~90%)"],
+    "gto_action": "Bet 4bb (~45%)",
+    "gto_explanation": "We have zero showdown value (5-high) and the turn check has capped BB's range — they would have led most of their stronger Jx and Tx hands by the river or check-raised the turn. The river card is a brick. A medium-sized bluff exploits the capped check-check line: BB's range is predominantly weak Jx, busted draws, and low pairs, all of which fold to a polarized river bet. Checking back gives up the pot with the worst hand. Over-betting is unnecessary because we don't need to fold out the top of BB's range — there is no top.",
+    "lesson_tag": "River bluff into capped range"
+  },
+  {
+    "scenario_id": "limp-reraise-trap-020",
+    "description": "100bb. UTG limps 1bb. MP raises to 4bb. Folds back to UTG (Hero) who has AA. Action on Hero.",
+    "board": null,
+    "action_history": ["UTG limp", "MP raise to 4bb"],
+    "available_actions": ["Fold", "Call", "Re-raise to 14bb"],
+    "gto_action": "Re-raise to 14bb",
+    "gto_explanation": "The 'limp-reraise' is a legitimate balanced line at 100bb depth precisely because the limping range needs to include a few monsters to prevent opponents from blasting limpers off their hand profitably. Flatting AA after limping caps your range and invites multiway pots where AA performs poorly. The reraise size is roughly 3.5x the isolation to a similar effective number as a standard 3-bet. Folding AA is obviously catastrophic. Calling traps you in a multiway-prone pot.",
+    "lesson_tag": "Limp re-raise with monsters"
+  }
+]

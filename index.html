@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>GTO Duel</title>
+  <meta name="theme-color" content="#0f1a24" />
+  <meta name="description" content="Asynchronous head-to-head GTO poker quiz — two friends, the same gotcha hands, confidence-rated answers, joint-confidence-disagreement wrap-up." />
+  <link rel="manifest" href="./manifest.json" />
+  <link rel="apple-touch-icon" href="./icons/icon-192.svg" />
+  <link rel="icon" type="image/svg+xml" href="./icons/icon-192.svg" />
+  <link rel="stylesheet" href="./styles/app.css" />
+</head>
+<body>
+  <header class="app-header">
+    <h1 class="app-title">GTO Duel</h1>
+    <p class="app-tagline">Async head-to-head GTO quiz</p>
+  </header>
+  <main id="app-root" class="app-root">
+    <p class="boot-state" id="boot-state">Loading…</p>
+  </main>
+  <footer class="app-footer">
+    <p class="muted">GTO Duel — a small two-person quiz. Your config and game data live in your own free Firebase project.</p>
+  </footer>
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,40 @@
+{
+  "schema": "integrator/build-manifest/v1",
+  "build_id": "gto-poker-async-duel-integration-001",
+  "assembled_at": "2026-05-14T01:04:30Z",
+  "name": "GTO Duel",
+  "entry_point": "./index.html",
+  "deployment_target": "GitHub Pages (static, project subpath)",
+  "notes": "The 'manifest.json' at the project root is the Web App Manifest (W3C); this _build-manifest.json is the AutoBuilder integrator manifest. They are deliberately separated because the Web App Manifest path is load-bearing for PWA install on iOS Safari and must remain at ./manifest.json.",
+  "deliverable_layout": {
+    "index.html": "entrypoint; references ./manifest.json, ./styles/app.css, ./src/app.js, ./icons/icon-192.svg",
+    "manifest.json": "Web App Manifest (display: standalone) per IP2.A4",
+    "sw.js": "Service worker; registered at relative './sw.js' so scope == GitHub Pages subpath",
+    "firestore.rules": "user pastes this into Firebase Console > Firestore > Rules",
+    "README.md": "user setup instructions (load-bearing per F.3, S6.A4)",
+    "src/app.js": "boot + router",
+    "src/scenarios.js": "scenario library API",
+    "src/state.js": "Firebase adapter (the only file that imports firebase-app)",
+    "src/push.js": "Web Push pipeline (VAPID-signed client-side)",
+    "src/onboarding.js": "landing/create/join/waiting views",
+    "src/ui.js": "in-game + reveal + wrap-up views",
+    "src/flow.js": "round/phase state machine",
+    "src/stats.js": "wrap-up math (per-player accuracy, agreement, ranked disagreements)",
+    "src/config.js": "USER MUST EDIT — Firebase + VAPID config",
+    "data/scenarios.json": "20-scenario GTO gotcha library",
+    "styles/app.css": "vanilla CSS",
+    "icons/icon-192.svg": "PWA icon 192",
+    "icons/icon-512.svg": "PWA icon 512"
+  },
+  "sections_integrated": ["section-1", "section-2", "section-3", "section-4", "section-5", "section-6"],
+  "inline_deviations_at_integration": [],
+  "static_cross_check": {
+    "all_asset_paths_relative": true,
+    "manifest_display_value": "standalone",
+    "service_worker_registration_url": "./sw.js",
+    "service_worker_registration_scope": "./",
+    "firebase_sdk_imports_in_modules_other_than_state_js": 0,
+    "ancestor_path_references": 0,
+    "no_companion_server_present": true
+  }
+}

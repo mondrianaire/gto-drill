@@ -1,0 +1,25 @@
+{
+  "name": "GTO Duel",
+  "short_name": "GTO Duel",
+  "description": "Asynchronous head-to-head GTO poker quiz: two friends, the same gotcha scenarios, confidence-rated decisions, and a wrap-up that surfaces your highest-confidence disagreements.",
+  "start_url": ".",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f1a24",
+  "theme_color": "#0f1a24",
+  "icons": [
+    {
+      "src": "./icons/icon-192.svg",
+      "type": "image/svg+xml",
+      "sizes": "192x192",
+      "purpose": "any"
+    },
+    {
+      "src": "./icons/icon-512.svg",
+      "type": "image/svg+xml",
+      "sizes": "512x512",
+      "purpose": "any maskable"
+    }
+  ]
+}
