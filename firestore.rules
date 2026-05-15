@@ -11,8 +11,17 @@ service cloud.firestore {
 
     match /games/{gameId} {
 
-      allow read: if request.auth != null
-                  && request.auth.uid in resource.data.participantUids;
+      // get: a player may read their own game; a not-yet-joined player may
+      // read a game that still has an open slot (so the join transaction can
+      // read it before adding itself); reads of a non-existent doc are
+      // allowed and simply return "not found".
+      allow get: if request.auth != null
+                 && (resource == null
+                     || request.auth.uid in resource.data.participantUids
+                     || resource.data.participantUids.size() < 2);
+      // The app only ever accesses games by exact share code and never
+      // queries the collection — deny listing so games cannot be enumerated.
+      allow list: if false;
 
       allow create: if request.auth != null
                     && request.resource.data.participantUids.size() == 1

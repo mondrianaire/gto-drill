@@ -169,19 +169,14 @@ export async function createGame(config, displayName) {
   const rounds = clampInt(config.rounds, 1, 10);
   const handful = clampInt(config.handful_size, 1, 10);
 
-  // Generate share codes until we find an unused one. In practice the first
-  // attempt almost always succeeds (32^6 = ~1 billion codes).
-  let shareCode = null;
-  for (let attempt = 0; attempt < 5; attempt++) {
-    const candidate = generateShareCode(6);
-    const ref = doc(_db, "games", candidate);
-    const snap = await getDoc(ref);
-    if (!snap.exists()) {
-      shareCode = candidate;
-      break;
-    }
-  }
-  if (!shareCode) throw new Error("Could not allocate a share code; please try again.");
+  // A non-existent game document cannot be read under the Security Rules
+  // (the read rule dereferences resource.data, which is null for a missing
+  // doc), so we cannot probe a candidate code for availability. Instead we
+  // generate a random code and write directly: with 32^6 (~1 billion) codes
+  // and two players per game, collisions are negligible, and the create rule
+  // rejects any write that would land on an existing game — so a collision
+  // fails safely rather than corrupting another game.
+  const shareCode = generateShareCode(6);
 
   const scenarioSeed = shareCode; // deterministic per game
   const gameDoc = {
