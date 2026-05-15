@@ -34,9 +34,9 @@
 
 export const FIREBASE_CONFIG = {
   apiKey: "AIzaSyCxc5ICHwz4Fp_2kRwHogeLdgUeCGKgHss",
-  authDomain: "gto-poker-quiz.firebaseapp.com",
-  projectId: "gto-poker-quiz",
-  storageBucket: "gto-poker-quiz.firebasestorage.app",
+  authDomain: "gto-poker-qui.firebaseapp.com",
+  projectId: "gto-poker-qui",
+  storageBucket: "gto-poker-qui.firebasestorage.app",
   messagingSenderId: "607915389446",
   appId: "1:607915389446:web:5b1c777bf4fad0bc1c0987"
 };
