@@ -26,6 +26,7 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
   getFirestore,
+  initializeFirestore,
   doc,
   setDoc,
   getDoc,
@@ -66,7 +67,21 @@ export async function initFirebase(config) {
   const existing = getApps();
   _app = existing.length ? existing[0] : initializeApp(config);
   _auth = getAuth(_app);
-  _db = getFirestore(_app);
+  // Use initializeFirestore with auto-detect long polling so the SDK falls
+  // back from WebChannel/gRPC streaming to HTTP long-polling when the
+  // streaming transport is blocked by network conditions (firewalls, VPNs,
+  // certain HTTP/2 proxies, etc.). Without this, Firestore can return
+  // "client is offline" errors on networks that successfully reach the
+  // REST API but cannot maintain the streaming Listen channel.
+  try {
+    _db = initializeFirestore(_app, {
+      experimentalAutoDetectLongPolling: true,
+    });
+  } catch (_) {
+    // initializeFirestore throws if Firestore is already initialized for
+    // this app (e.g., hot-reload). Fall back to the existing instance.
+    _db = getFirestore(_app);
+  }
 }
 
 /**
