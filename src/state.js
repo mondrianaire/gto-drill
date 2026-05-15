@@ -27,6 +27,7 @@ import {
 import {
   getFirestore,
   initializeFirestore,
+  enableNetwork,
   doc,
   setDoc,
   getDoc,
@@ -67,21 +68,25 @@ export async function initFirebase(config) {
   const existing = getApps();
   _app = existing.length ? existing[0] : initializeApp(config);
   _auth = getAuth(_app);
-  // Use initializeFirestore with auto-detect long polling so the SDK falls
-  // back from WebChannel/gRPC streaming to HTTP long-polling when the
-  // streaming transport is blocked by network conditions (firewalls, VPNs,
-  // certain HTTP/2 proxies, etc.). Without this, Firestore can return
-  // "client is offline" errors on networks that successfully reach the
-  // REST API but cannot maintain the streaming Listen channel.
+  // Force HTTP long-polling rather than WebChannel/gRPC streaming. Streaming
+  // gets blocked by a wide range of network conditions (corporate firewalls,
+  // VPNs, HTTP/2 proxies, browser extensions, even ordinary IPv6 oddities)
+  // — and when it fails, Firestore returns "Missing or insufficient
+  // permissions" or "client is offline" even though the issue is transport-
+  // layer. Forcing long-polling sacrifices a small amount of latency for
+  // dramatically more reliable connectivity.
   try {
     _db = initializeFirestore(_app, {
-      experimentalAutoDetectLongPolling: true,
+      experimentalForceLongPolling: true,
     });
   } catch (_) {
     // initializeFirestore throws if Firestore is already initialized for
     // this app (e.g., hot-reload). Fall back to the existing instance.
     _db = getFirestore(_app);
   }
+  // Explicitly enable network — in case the SDK got into an offline-cache-
+  // only state from prior failed sessions persisted in IndexedDB.
+  try { await enableNetwork(_db); } catch (_) { /* best effort */ }
 }
 
 /**
