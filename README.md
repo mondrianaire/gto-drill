@@ -1,165 +1,47 @@
-# GTO Duel
+# gto-poker-async-duel
 
-A small two-person GTO poker quiz you and one specific friend play
-asynchronously. Same gotcha hands, your confidence on each, and at the
-end we surface the spots where you both felt sure and disagreed —
-those are the conversations worth having.
+> Build a GitHub-Pages-hostable web application that lets two users play an asynchronous head-to-head GTO poker quiz, submit per-decision confidence ratings, and receive a post-game summary highlighting their highest-confidence disagreements.
 
-This is a static web app you host on GitHub Pages. The two players'
-state lives in your own free Firebase project. There's no server you
-need to run.
+This standalone repository is the production deliverable from AutoBuilder run **`gto-poker-async-duel`**, forked here on 2026-05-16T21:06:14Z for ongoing product development.
 
-## What you need
+## Original prompt
 
-- A free Google account (for Firebase).
-- A free GitHub account (for hosting).
-- About 15 minutes for the one-time setup.
+```
+Previously you created an application called "GTO Poker Training" that was a proof of concept and a mini research and analysis project for creating a web application that allows a user to play poker, track useful GTO orientated poker stats and had an almost "quiz like" application relating to presenting various "edge cases" that highlight specific GTO philosophies and presenting the user with various choices and ranking them and providing feedback based on interpretation of GTO research.
 
-## Setup (one time, ~15 minutes)
+I introduced my mom to this application and she loved it. We would read through the hand descriptions, and guess to each other what the correct answer was. When we entered it and saw the actual data, it was so much fun and so informative to be able to read the GTO description and defense of "optimal" plays while identifying plays where confidence may be lower and the answer may not be as clear cut.
 
-### 1. Create a free Firebase project
+I do not live physically near my mom and I was thinking how easy it would be to extrapolate on this GTO build and attempt to create an asynchronous multiplayer GTO Poker head to head quiz game where users are presented with identical GTO "gotchas" and there is some type of communication either direct or in game to discuss or diagree with the GTO verified action.
 
-1. Go to **<https://console.firebase.google.com/>** and sign in.
-2. Click **Add project**, give it a name like `gto-duel-mom-and-me`,
-   and accept the defaults. Disable Google Analytics if you don't
-   want it — not required.
+In addition to a selection of a correct answer, it would be neat to implement a "confidence" function where users indicate how sure they are of their decisions. This would allow a post-game wrap up screen that highlighted the GTO gotchas that showed the highest confidence gap between differing answers.
 
-### 2. Enable Firestore
+It is imperative that this application fully can be hosted on github pages, that the game fully functions asynchronsly, and users can "build up" a handful of answers before they must wait for the other user to submit their answers and then create more for the opposing player. This rotation goes for a set number of rounds and then statistics regarding player performance and player agreement is shown to both users. If possible implement an opt in notification function that will use mobile or desktop notification libraries to notify the opposing player that it is their turn.
+```
 
-1. In your new project, in the left sidebar choose **Build → Firestore Database**.
-2. Click **Create database**, choose **Native mode**, and pick a region close to you.
-3. When asked about rules, accept the default test rules for now — you'll
-   replace them in step 5.
+## Build provenance
 
-### 3. Enable Anonymous Authentication
+| Field | Value |
+|---|---|
+| AutoBuilder verdict | `pass_with_concerns` |
+| First-delivery outcome | `succeeded_with_concerns` |
+| Ratified | 2026-05-16T10:17:18.869Z by **Jett** |
+| Architecture version | `unknown` |
+| Build wall-clock | 135 minutes |
 
-1. In the left sidebar choose **Build → Authentication**.
-2. Click **Get started**, then under **Sign-in method**, find
-   **Anonymous** in the list and click it.
-3. Toggle **Enable** to on and save.
+## What's here
 
-### 4. Get your Firebase web config
+This repository contains the production deliverable as built by AutoBuilder — the contents of `runs/gto-poker-async-duel/output/final/` at the time of ratification. The build substrate (design decisions, audit logs, run report, state, etc.) lives in the AutoBuilder corpus and is not duplicated here.
 
-1. In Project settings (the gear icon, top-left) → **General** tab,
-   scroll to **Your apps**.
-2. Click the web icon **`</>`** to register a new web app. Name it
-   anything ("duel-web" is fine). You do **not** need Firebase Hosting.
-3. Firebase will show you a `firebaseConfig` object that looks like:
-   ```js
-   const firebaseConfig = {
-     apiKey: "AIza…",
-     authDomain: "gto-duel-mom-and-me.firebaseapp.com",
-     projectId: "gto-duel-mom-and-me",
-     storageBucket: "gto-duel-mom-and-me.appspot.com",
-     messagingSenderId: "1234567890",
-     appId: "1:1234567890:web:abcdef…"
-   };
-   ```
-   Keep this open in a tab — you'll paste it in step 6.
+The entry point is typically `index.html` (for web apps) or the main script file for other deliverable kinds. See the build context link below for the run-report's full description of what this artifact is and how it was built.
 
-### 5. Paste the security rules
+## Build context
 
-1. In the Firebase console: **Firestore Database → Rules**.
-2. Open the file `firestore.rules` from this directory in a text editor,
-   copy the entire contents, and paste it into the Rules editor in
-   Firebase (replacing what's there).
-3. Click **Publish**.
+Full build provenance — design decisions, audit logs, run report, root-cause analysis if any — lives in the AutoBuilder corpus at:
 
-### 6. Generate a VAPID key pair (for turn notifications)
+  https://github.com/mondrianaire/auto-builder/tree/main/runs/gto-poker-async-duel
 
-Web Push needs a pair of "VAPID" keys. The simplest way to generate them:
+That corpus entry is **frozen at the ratification commit** and will not change going forward. The build factory is done with this build; what you're looking at here is the product, free to evolve.
 
-- In a terminal with Node.js installed, run:
-  ```
-  npx web-push generate-vapid-keys
-  ```
-  This prints a public key and a private key. Keep both.
+## Continuing development
 
-- (Alternative: any online "VAPID key generator" will produce a P-256
-  pair in URL-safe base64.)
-
-### 7. Paste your config values
-
-Open `src/config.js` in this directory in a text editor. Replace the
-`PASTE_…` placeholders with:
-
-- The six values from your `firebaseConfig` object (step 4) — into
-  `FIREBASE_CONFIG`.
-- Your VAPID public key (step 6) — into `VAPID_PUBLIC_KEY`.
-- Your VAPID private key (step 6) — into `VAPID_PRIVATE_KEY`.
-- Your contact email — into `VAPID_SUBJECT` (`mailto:you@example.com`).
-
-> **A small security note.** This is a fully static web app, so the VAPID
-> private key ships inside the JavaScript that gets sent to every visitor.
-> Anyone who reads the published source can read the private key and
-> use it to sign push notifications to your push subscribers. For a
-> two-person friends-and-family game this is fine — the realistic
-> "attacker" is only able to send you and your friend extra push
-> notifications, nothing more. If this ever stops being friends-and-family,
-> move the push send into a Cloud Function and remove the private key
-> from `config.js`.
-
-### 8. Push this directory to a GitHub repo
-
-1. Create a new GitHub repo (it can be public — none of the contents are
-   secret in a way that matters for the friends-and-family use case).
-2. Push the contents of this directory (the same directory that contains
-   `index.html`, `manifest.json`, `sw.js`, `src/`, etc.) to the repo root.
-
-### 9. Enable GitHub Pages
-
-1. In the repo on GitHub: **Settings → Pages**.
-2. Under **Build and deployment**, **Source**: choose **Deploy from a branch**.
-3. **Branch**: choose your default branch (e.g., `main`) and folder `/ (root)`.
-4. Click **Save**. After about a minute GitHub Pages will publish the app
-   at `https://<your-username>.github.io/<repo-name>/`.
-
-### 10. Try it
-
-1. Open the published URL on your phone or laptop.
-2. Tap **Create a new game**. Pick a display name and round/handful counts.
-3. Copy the share link and send it to your friend (text, email, anywhere).
-4. They open the link, pick their own display name, and join.
-5. You each play your handfuls when you have time. The app remembers
-   where you left off.
-
-### On iPhone / iPad
-
-iOS Safari only sends Web Push notifications to a site you've added to
-your Home Screen. Once you open the published URL on iPhone:
-
-1. Tap the **Share** icon at the bottom of Safari.
-2. Tap **Add to Home Screen**.
-3. Open GTO Duel from the new icon (not from Safari).
-4. Now the **Enable turn notifications** button will work.
-
-Without Add-to-Home-Screen on iOS, the game still works perfectly — you
-just won't get push alerts; you'll see your turn next time you open the app.
-
-## Files in this directory
-
-- `index.html` — the entry point.
-- `manifest.json` — Web App Manifest (display:standalone for iOS PWA).
-- `sw.js` — the service worker that receives push events.
-- `src/config.js` — **your** Firebase config and VAPID keys go here.
-- `src/app.js`, `src/state.js`, `src/onboarding.js`, `src/ui.js`,
-  `src/flow.js`, `src/stats.js`, `src/scenarios.js`, `src/push.js` —
-  the app's modules.
-- `data/scenarios.json` — the 20-scenario GTO gotcha library.
-- `styles/app.css` — styles.
-- `firestore.rules` — the Firestore Security Rules to paste in step 5.
-- `icons/` — app icons.
-
-## When something goes wrong
-
-- **The boot screen says "Setup needed"** — `src/config.js` still has
-  the placeholder values. Go back to step 7.
-- **"Could not create the game"** — Either Firestore isn't enabled
-  (step 2), Anonymous Authentication isn't enabled (step 3), or the
-  security rules aren't published (step 5).
-- **Push notifications never fire on iOS** — Did you Add-to-Home-Screen
-  and open from the home screen icon? (Required by Apple.)
-- **Push notifications never fire on Android/desktop either** — Check
-  that you ran step 6 and pasted both VAPID keys in step 7.
-
-Have fun. — and tell your mom hi for me.
+This repository is yours to evolve. Future commits, refactors, features, bug fixes — all land here, not in the AutoBuilder repo. The AutoBuilder corpus measurement of this build does not change retroactively based on what happens here.
