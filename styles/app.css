@@ -253,6 +253,80 @@ form { margin-top: 8px; }
 
 .error { color: var(--miss); margin-top: 8px; min-height: 1.2em; }
 
+/* In-game — decision screen (one hand at a time) */
+.hand-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.hand-count { font-size: 0.9rem; font-weight: 600; color: var(--text-dim); }
+.hand-dots { display: flex; gap: 6px; }
+.hand-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--bg-elev-2); border: 1px solid var(--border);
+}
+.hand-dot.is-done { background: var(--accent-soft); border-color: var(--accent); }
+.hand-dot.is-current { background: var(--accent); border-color: var(--accent); }
+
+.hand-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--pad);
+}
+.hand-words { margin-top: 10px; font-size: 0.9rem; }
+.hand-words summary { cursor: pointer; color: var(--accent); }
+.hand-words p { margin: 8px 0 0 0; color: var(--text-dim); }
+
+.decide {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.decide-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.decide-label-sub {
+  margin-top: 16px;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+}
+/* Action — the primary control: big, stacked, full-width. */
+.decide .actions-row {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin: 0;
+}
+.decide .action-btn {
+  width: 100%;
+  min-height: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+/* Confidence — secondary: a compact, lighter strip. */
+.decide .confidence-row { gap: 6px; margin: 0; }
+.decide .conf-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 38px;
+  font-size: 0.9rem;
+}
+.note-toggle { margin-top: 14px; font-size: 0.9rem; }
+.note-toggle summary { cursor: pointer; color: var(--accent); }
+.note-toggle .note-input { margin-top: 8px; }
+
+.hand-nav { display: flex; gap: 10px; margin-top: 14px; }
+.hand-nav .hand-back { flex: 0 0 auto; min-width: 92px; }
+.hand-nav .hand-fwd { flex: 1 1 auto; }
+
 /* Reveal */
 .reveal-list {
   display: flex;

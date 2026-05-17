@@ -57,9 +57,12 @@ export function mountInGameView(container, gameId) {
   let unsub = null;
   let lastGame = null;
   let draft = null; // current player's in-progress submission set
+  let handIdx = 0;  // which hand of the handful is currently on screen
   let submitting = false;
+  let replayCleanup = null; // stops the active replay's timer before re-render
 
   function render(game) {
+    if (replayCleanup) { try { replayCleanup(); } catch (_) {} replayCleanup = null; }
     clear(container);
     const myUid = getCurrentUid();
     const phase = computePhase(game, myUid);
@@ -90,108 +93,126 @@ export function mountInGameView(container, gameId) {
     }
   }
 
+  // The decision screen — one hand of the handful at a time. The replay
+  // table is the hero; the prose description is demoted; the action choice
+  // is the primary control and confidence a lighter secondary step.
   function renderMyTurn(round, game, myUid) {
-    // Initialize draft if this is a new round.
+    // (Re)initialise the draft when the round changes.
     if (!draft || draft.roundIndex !== round.roundIndex) {
       draft = {
         roundIndex: round.roundIndex,
         submissions: round.scenarioIds.map((id) => ({
-          scenario_id: id,
-          action: null,
-          confidence: null,
-          note: "",
+          scenario_id: id, action: null, confidence: null, note: "",
         })),
       };
+      handIdx = 0;
+    }
+    const total = round.scenarioIds.length;
+    handIdx = Math.max(0, Math.min(total - 1, handIdx));
+    const sub = draft.submissions[handIdx];
+    const scen = getScenarioById(round.scenarioIds[handIdx]);
+    const errorBox = h("div", { class: "error", role: "alert" });
+
+    // --- progress: "Hand X of N" + dots ---
+    const dots = h("div", { class: "hand-dots" });
+    for (let i = 0; i < total; i++) {
+      const done = draft.submissions[i].action && draft.submissions[i].confidence;
+      dots.appendChild(h("span", {
+        class: "hand-dot" + (i === handIdx ? " is-current" : "") + (done ? " is-done" : ""),
+      }));
+    }
+    const progress = h("div", { class: "hand-progress" },
+      h("span", { class: "hand-count" }, "Hand " + (handIdx + 1) + " of " + total),
+      dots
+    );
+
+    // --- the spot (hero) ---
+    const spot = h("div", { class: "hand-spot" });
+    if (scen && scen.replay) {
+      const replayHost = h("div", { class: "replay-host" });
+      spot.appendChild(replayHost);
+      const r = mountReplay(replayHost, scen.replay);
+      replayCleanup = r && r.unmount ? r.unmount : null;
+      spot.appendChild(h("details", { class: "hand-words" },
+        h("summary", null, "The spot in words"),
+        h("p", null, scen.description)
+      ));
+    } else if (scen) {
+      spot.appendChild(h("p", { class: "scenario-desc" }, scen.description));
+      if (scen.board) {
+        spot.appendChild(h("div", { class: "board" }, h("strong", null, "Board: "), scen.board));
+      }
+      if (Array.isArray(scen.action_history) && scen.action_history.length) {
+        spot.appendChild(h("div", { class: "action-history" },
+          h("strong", null, "Action: "), scen.action_history.join(" → ")));
+      }
     }
 
-    const errorBox = h("div", { class: "error", role: "alert" });
-    const list = h("div", { class: "scenario-list" });
-
-    round.scenarioIds.forEach((id, idx) => {
-      const scen = getScenarioById(id);
-      if (!scen) return;
-      const card = h("div", { class: "scenario-card" });
-      card.appendChild(h("h3", null, "Scenario " + (idx + 1) + ": " + scen.lesson_tag));
-      card.appendChild(h("p", { class: "scenario-desc" }, scen.description));
-      if (scen.replay) {
-        // Visual replay (scenarios that have structured data).
-        const replayHost = h("div", { class: "replay-host" });
-        card.appendChild(replayHost);
-        mountReplay(replayHost, scen.replay);
-      } else {
-        // Text fallback for scenarios not yet translated to structured data.
-        if (scen.board) {
-          card.appendChild(h("div", { class: "board" }, h("strong", null, "Board: "), scen.board));
-        }
-        if (Array.isArray(scen.action_history) && scen.action_history.length) {
-          card.appendChild(h(
-            "div",
-            { class: "action-history" },
-            h("strong", null, "Action: "),
-            scen.action_history.join(" -> ")
-          ));
-        }
-      }
-
-      // Action buttons
-      const actionRow = h("div", { class: "actions-row", role: "radiogroup", "aria-label": "Choose an action" });
-      for (const a of scen.available_actions) {
-        const btn = h("button", { type: "button", class: "action-btn", "data-action": a }, a);
-        btn.addEventListener("click", () => {
-          draft.submissions[idx].action = a;
-          actionRow.querySelectorAll(".action-btn").forEach((x) => x.classList.toggle("selected", x === btn));
-        });
-        actionRow.appendChild(btn);
-      }
-      card.appendChild(h("label", { class: "field-label" }, "Your action"));
-      card.appendChild(actionRow);
-
-      // Confidence 1-5
-      const confRow = h("div", { class: "confidence-row", role: "radiogroup", "aria-label": "Confidence" });
-      for (let c = 1; c <= 5; c++) {
-        const btn = h("button", { type: "button", class: "conf-btn", "data-conf": String(c) }, String(c));
-        btn.addEventListener("click", () => {
-          draft.submissions[idx].confidence = c;
-          confRow.querySelectorAll(".conf-btn").forEach((x) => x.classList.toggle("selected", x === btn));
-        });
-        confRow.appendChild(btn);
-      }
-      card.appendChild(h("label", { class: "field-label" }, "Confidence (1 = guess, 5 = sure)"));
-      card.appendChild(confRow);
-
-      // Note (optional)
-      const noteInput = h("textarea", {
-        class: "note-input",
-        placeholder: "Optional note (max 280 chars) — what's your read here?",
-        maxlength: "280",
-        rows: "2",
+    // --- decision: action (primary) ---
+    const actionRow = h("div", { class: "actions-row", role: "radiogroup", "aria-label": "Your move" });
+    (scen ? scen.available_actions : []).forEach((a) => {
+      const btn = h("button", { type: "button", class: "action-btn" + (sub.action === a ? " selected" : "") }, a);
+      btn.addEventListener("click", () => {
+        sub.action = a;
+        actionRow.querySelectorAll(".action-btn").forEach((x) => x.classList.toggle("selected", x === btn));
+        errorBox.textContent = "";
       });
-      noteInput.addEventListener("input", () => {
-        draft.submissions[idx].note = noteInput.value.slice(0, 280);
-      });
-      card.appendChild(h("label", { class: "field-label" }, "Note (optional)"));
-      card.appendChild(noteInput);
-
-      list.appendChild(card);
+      actionRow.appendChild(btn);
     });
 
-    const submitBtn = h("button", { type: "button", class: "primary submit-handful" }, "Submit handful");
-    submitBtn.addEventListener("click", async () => {
+    // --- decision: confidence (secondary) ---
+    const confRow = h("div", { class: "confidence-row", role: "radiogroup", "aria-label": "How sure are you" });
+    for (let c = 1; c <= 5; c++) {
+      const btn = h("button", { type: "button", class: "conf-btn" + (sub.confidence === c ? " selected" : "") }, String(c));
+      btn.addEventListener("click", () => {
+        sub.confidence = c;
+        confRow.querySelectorAll(".conf-btn").forEach((x) => x.classList.toggle("selected", x === btn));
+        errorBox.textContent = "";
+      });
+      confRow.appendChild(btn);
+    }
+
+    // --- note (tertiary, collapsed) ---
+    const noteInput = h("textarea", {
+      class: "note-input", maxlength: "280", rows: "2",
+      placeholder: "What's your read here? (optional, max 280 chars)",
+    });
+    noteInput.value = sub.note || "";
+    noteInput.addEventListener("input", () => { sub.note = noteInput.value.slice(0, 280); });
+    const noteToggle = h("details", { class: "note-toggle" },
+      h("summary", null, sub.note ? "Note added ✓" : "Add a note"),
+      noteInput
+    );
+    if (sub.note) noteToggle.open = true;
+
+    const decide = h("div", { class: "decide" },
+      h("span", { class: "decide-label" }, "Your move"),
+      actionRow,
+      h("span", { class: "decide-label decide-label-sub" }, "How sure?  (1 = guess, 5 = certain)"),
+      confRow,
+      noteToggle
+    );
+
+    // --- navigation ---
+    const isLast = handIdx === total - 1;
+    const backBtn = h("button", { type: "button", class: "secondary hand-back" }, "Back");
+    backBtn.disabled = handIdx === 0;
+    backBtn.addEventListener("click", () => { handIdx -= 1; render(lastGame); });
+
+    const fwdBtn = h("button", { type: "button", class: "primary hand-fwd" },
+      isLast ? "Submit handful" : "Next hand →");
+    fwdBtn.addEventListener("click", async () => {
       if (submitting) return;
-      errorBox.textContent = "";
-      // Validate
+      if (!sub.action) { errorBox.textContent = "Pick your move for this hand."; return; }
+      if (!sub.confidence) { errorBox.textContent = "Rate how sure you are (1–5)."; return; }
+      if (!isLast) { handIdx += 1; render(lastGame); return; }
+      // Last hand — make sure every hand is answered, then submit.
       for (let i = 0; i < draft.submissions.length; i++) {
         const s = draft.submissions[i];
-        if (!s.action) {
-          errorBox.textContent = "Pick an action for scenario " + (i + 1) + ".";
-          return;
-        }
-        if (!s.confidence) {
-          errorBox.textContent = "Pick a confidence (1-5) for scenario " + (i + 1) + ".";
-          return;
-        }
+        if (!s.action || !s.confidence) { handIdx = i; render(lastGame); return; }
       }
       submitting = true;
+      fwdBtn.disabled = true;
       const finalSubs = draft.submissions.map((s) => ({
         scenario_id: s.scenario_id,
         action: s.action,
@@ -204,25 +225,28 @@ export function mountInGameView(container, gameId) {
         if (!result.success) {
           errorBox.textContent = "Submit failed (" + result.status + "). Try again.";
           submitting = false;
+          fwdBtn.disabled = false;
           return;
         }
         draft = null;
         submitting = false;
+        // The Firestore write triggers a snapshot, which re-renders into the
+        // waiting / reveal view.
       } catch (err) {
         console.error(err);
         errorBox.textContent = "Network error. Try again.";
         submitting = false;
+        fwdBtn.disabled = false;
       }
     });
 
     container.appendChild(h(
       "section",
       { class: "in-game my-turn" },
-      h("h2", null, "Your handful"),
-      h("p", { class: "muted" }, "Pick an action and a confidence rating for each spot. The GTO answer is hidden until you and your opponent have both submitted."),
-      list,
+      progress,
+      h("div", { class: "hand-card" }, spot, decide),
       errorBox,
-      submitBtn
+      h("div", { class: "hand-nav" }, backBtn, fwdBtn)
     ));
   }
 
@@ -301,6 +325,7 @@ export function mountInGameView(container, gameId) {
   return {
     unmount: () => {
       if (unsub) unsub();
+      if (replayCleanup) { try { replayCleanup(); } catch (_) {} }
       clear(container);
     },
   };
