@@ -11,6 +11,7 @@ import { getScenarioById } from "./scenarios.js";
 import { computePhase } from "./flow.js";
 import { perPlayerAccuracy, interPlayerAgreement, rankedDisagreements } from "./stats.js";
 import { recordGame, writeActiveGameId } from "./history.js";
+import { mountReplay } from "./replay.js";
 
 // -----------------------------------------------------------------------
 // Small DOM helpers (duplicated from onboarding.js intentionally to keep
@@ -112,16 +113,24 @@ export function mountInGameView(container, gameId) {
       const card = h("div", { class: "scenario-card" });
       card.appendChild(h("h3", null, "Scenario " + (idx + 1) + ": " + scen.lesson_tag));
       card.appendChild(h("p", { class: "scenario-desc" }, scen.description));
-      if (scen.board) {
-        card.appendChild(h("div", { class: "board" }, h("strong", null, "Board: "), scen.board));
-      }
-      if (Array.isArray(scen.action_history) && scen.action_history.length) {
-        card.appendChild(h(
-          "div",
-          { class: "action-history" },
-          h("strong", null, "Action: "),
-          scen.action_history.join(" -> ")
-        ));
+      if (scen.replay) {
+        // Visual replay (scenarios that have structured data).
+        const replayHost = h("div", { class: "replay-host" });
+        card.appendChild(replayHost);
+        mountReplay(replayHost, scen.replay);
+      } else {
+        // Text fallback for scenarios not yet translated to structured data.
+        if (scen.board) {
+          card.appendChild(h("div", { class: "board" }, h("strong", null, "Board: "), scen.board));
+        }
+        if (Array.isArray(scen.action_history) && scen.action_history.length) {
+          card.appendChild(h(
+            "div",
+            { class: "action-history" },
+            h("strong", null, "Action: "),
+            scen.action_history.join(" -> ")
+          ));
+        }
       }
 
       // Action buttons

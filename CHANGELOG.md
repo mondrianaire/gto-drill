@@ -24,6 +24,13 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
   finished game is stamped with a pointer to the rematch so the other player
   sees a "Join the rematch" button on their wrap-up.
 - A "Back to home" button on the wrap-up screen.
+- Visual hand replay (`src/replay.js`): scenarios with structured `replay`
+  data render as a poker table — felt, seated players with stacks, CSS-drawn
+  cards (no image assets), board, pot, and a prev/next/autoplay stepper with a
+  clickable action history. Wired into the in-game decision screen; scenarios
+  without `replay` data still show the text description. The first 5 scenarios
+  carry replay data (see the Replay schema). `scripts/replay-dev.html` renders
+  every replay-enabled scenario standalone for visual review.
 
 ### Changed
 - Sign-in is now **Google sign-in** instead of silent anonymous auth. On first
