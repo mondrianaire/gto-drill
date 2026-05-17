@@ -1,6 +1,6 @@
 // state.js — section-2 (State and Backend Adapter)
 //
-// Wraps Firebase Firestore + Anonymous Auth. The ONLY module in the app that
+// Wraps Firebase Firestore + Google Auth. The ONLY module in the app that
 // imports the Firebase SDK directly. Every other section uses this adapter's
 // exported functions.
 //
@@ -21,7 +21,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getAuth,
-  signInAnonymously as fbSignInAnonymously,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  signOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
@@ -46,10 +50,11 @@ let _app = null;
 let _auth = null;
 let _db = null;
 let _uid = null;
+let _user = null;
 let _authReadyPromise = null;
 
 // -----------------------------------------------------------------------
-// Lifecycle: initFirebase + signInAnonymously
+// Lifecycle: initFirebase + Google Auth
 // -----------------------------------------------------------------------
 
 /**
@@ -89,41 +94,87 @@ export async function initFirebase(config) {
 }
 
 /**
- * Sign in anonymously and resolve with the UID. Idempotent: if already
- * signed in, returns the existing UID.
- * @returns {Promise<{uid: string}>}
+ * Resolve the initial auth state. Completes any pending redirect sign-in,
+ * then resolves once Firebase has determined whether a user is signed in
+ * (from a persisted session) or not. Idempotent.
+ * @returns {Promise<Object|null>} the signed-in user, or null.
  */
-export async function signInAnonymously() {
-  if (!_auth) throw new Error("initFirebase() must be called before signInAnonymously()");
-  if (_uid) return { uid: _uid };
-  if (!_authReadyPromise) {
-    _authReadyPromise = new Promise((resolve, reject) => {
-      const unsub = onAuthStateChanged(
-        _auth,
-        (user) => {
-          if (user) {
-            _uid = user.uid;
-            unsub();
-            resolve({ uid: _uid });
-          }
-        },
-        (err) => {
-          unsub();
-          reject(err);
-        }
-      );
-      fbSignInAnonymously(_auth).catch((err) => {
-        unsub();
-        reject(err);
+export function initAuth() {
+  if (_authReadyPromise) return _authReadyPromise;
+  if (!_auth) throw new Error("initFirebase() must be called before initAuth()");
+  _authReadyPromise = (async () => {
+    // If we just came back from a redirect-based sign-in, consume it first.
+    try { await getRedirectResult(_auth); } catch (_) { /* no pending redirect */ }
+    return new Promise((resolve) => {
+      onAuthStateChanged(_auth, (user) => {
+        // A leftover anonymous session (from before Google sign-in existed)
+        // is treated as "not signed in" so the Google gate still shows.
+        const real = user && !user.isAnonymous ? user : null;
+        _user = real;
+        _uid = real ? real.uid : null;
+        // resolve() only takes effect on the first call; later sign-in /
+        // sign-out events still keep _user and _uid current.
+        resolve(_user);
       });
     });
-  }
+  })();
   return _authReadyPromise;
+}
+
+/**
+ * Trigger Google sign-in. Uses a popup; falls back to a full-page redirect
+ * on browsers that block popups (common on mobile). MUST be called from a
+ * user gesture (click handler).
+ * @returns {Promise<Object|null>} the signed-in user, or null when a
+ *   redirect was started (the page navigates away in that case).
+ */
+export async function signInWithGoogle() {
+  if (!_auth) throw new Error("initFirebase() must be called first");
+  const provider = new GoogleAuthProvider();
+  try {
+    const cred = await signInWithPopup(_auth, provider);
+    _user = cred.user;
+    _uid = cred.user.uid;
+    return _user;
+  } catch (err) {
+    const code = err && err.code;
+    if (
+      code === "auth/popup-blocked" ||
+      code === "auth/cancelled-popup-request" ||
+      code === "auth/operation-not-supported-in-this-environment"
+    ) {
+      await signInWithRedirect(_auth, provider);
+      return null; // the page is navigating away to Google.
+    }
+    throw err; // e.g. auth/popup-closed-by-user — let the caller surface it.
+  }
+}
+
+/** Sign the current user out. */
+export async function signOutUser() {
+  if (!_auth) return;
+  await signOut(_auth);
+  _user = null;
+  _uid = null;
+}
+
+/**
+ * @returns {{uid:string, displayName:(string|null), email:(string|null),
+ *            photoURL:(string|null)}|null} the current user, or null.
+ */
+export function getCurrentUser() {
+  if (!_user) return null;
+  return {
+    uid: _user.uid,
+    displayName: _user.displayName || null,
+    email: _user.email || null,
+    photoURL: _user.photoURL || null,
+  };
 }
 
 export function getCurrentUid() {
   if (!_uid) {
-    throw new Error("getCurrentUid() called before signInAnonymously() resolved");
+    throw new Error("getCurrentUid() called before the user is signed in");
   }
   return _uid;
 }

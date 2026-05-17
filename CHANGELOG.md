@@ -25,6 +25,16 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
   sees a "Join the rematch" button on their wrap-up.
 - A "Back to home" button on the wrap-up screen.
 
+### Changed
+- Sign-in is now **Google sign-in** instead of silent anonymous auth. On first
+  open the app shows a "Continue with Google" gate; once signed in, the session
+  persists and follows the account across devices. This is stage one of the
+  pairing rework — it gives each player a stable identity so games and history
+  are no longer tied to a single browser. (Requires the Google provider to be
+  enabled in the Firebase Console, and the serving domain added to the
+  Authorized domains list.) A leftover anonymous session from before this
+  change is treated as "not signed in" so the Google gate still appears.
+
 ### Removed
 - The turn-notification subsystem (Web Push). Reliable browser-to-browser push
   delivery needs server-side infrastructure that doesn't fit this app's

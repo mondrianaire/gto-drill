@@ -4,8 +4,10 @@
 //
 // 1) Create a free Firebase project at https://console.firebase.google.com/
 //
-// 2) In that project: enable Firestore (Native mode) and Anonymous
-//    Authentication (Authentication > Sign-in method > Anonymous > Enable).
+// 2) In that project: enable Firestore (Native mode) and Google
+//    Authentication (Authentication > Sign-in method > Google > Enable).
+//    Then add the domain you serve the app from (e.g. your GitHub Pages
+//    domain) under Authentication > Settings > Authorized domains.
 //
 // 3) Open Project settings (gear icon) > General > Your apps > Add app >
 //    Web. Register the app, then copy the "firebaseConfig" object that

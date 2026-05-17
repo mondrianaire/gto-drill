@@ -372,6 +372,50 @@ form { margin-top: 8px; }
   border-top: 1px solid var(--border);
 }
 
+/* Sign-in gate */
+.signin {
+  text-align: center;
+  max-width: 420px;
+  margin: 0 auto;
+  padding-top: 24px;
+}
+.signin .tagline { margin-bottom: 28px; }
+.google-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  width: 100%;
+  background: #ffffff;
+  color: #1f1f1f;
+  border: 1px solid #dadce0;
+  font-weight: 600;
+  min-height: 48px;
+}
+.google-btn:hover { background: #f4f6f8; }
+.google-btn svg { display: block; flex: 0 0 auto; }
+.signin-note { margin-top: 20px; font-size: 0.82rem; }
+
+/* Account bar (landing) */
+.account-bar {
+  margin-top: 28px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  text-align: center;
+}
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--accent);
+  padding: 0;
+  min-height: 0;
+  font: inherit;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.link-btn:hover { background: none; color: #6cc4ff; }
+
 /* Mobile */
 @media (max-width: 480px) {
   .input-row { grid-template-columns: 1fr; }

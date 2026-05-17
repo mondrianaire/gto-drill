@@ -4,7 +4,7 @@
 // All backend writes go through section-2's adapter; this module never
 // touches Firebase directly.
 
-import { createGame, joinGame } from "./state.js";
+import { createGame, joinGame, signInWithGoogle, getCurrentUser, signOutUser } from "./state.js";
 import { listHistory, historySummary, writeActiveGameId } from "./history.js";
 
 // -----------------------------------------------------------------------
@@ -35,6 +35,76 @@ function h(tag, attrs, ...children) {
 
 function clear(container) {
   while (container.firstChild) container.removeChild(container.firstChild);
+}
+
+// The standard four-colour Google "G" mark, inlined so the sign-in button
+// needs no network request and works offline-friendly.
+const GOOGLE_G_SVG =
+  '<svg width="18" height="18" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">' +
+  '<path fill="#4285F4" d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"/>' +
+  '<path fill="#34A853" d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.259c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"/>' +
+  '<path fill="#FBBC05" d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.997 8.997 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"/>' +
+  '<path fill="#EA4335" d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"/>' +
+  "</svg>";
+
+// -----------------------------------------------------------------------
+// mountSignInView — the Google sign-in gate, shown before anything else
+// when no user is signed in.
+// -----------------------------------------------------------------------
+
+export function mountSignInView(container, onSignedIn) {
+  clear(container);
+  const errorBox = h("div", { class: "error", role: "alert" });
+
+  const btn = h("button", { type: "button", class: "google-btn" });
+  btn.innerHTML = GOOGLE_G_SVG + "<span>Continue with Google</span>";
+
+  let busy = false;
+  btn.addEventListener("click", async () => {
+    if (busy) return;
+    busy = true;
+    btn.disabled = true;
+    errorBox.textContent = "";
+    try {
+      const user = await signInWithGoogle();
+      if (user) onSignedIn();
+      // user === null means a redirect sign-in began; the page is navigating
+      // away to Google and will re-boot on return.
+    } catch (err) {
+      console.error(err);
+      const code = err && err.code;
+      if (code === "auth/popup-closed-by-user") {
+        errorBox.textContent = "Sign-in was cancelled. Tap the button to try again.";
+      } else if (code === "auth/unauthorized-domain") {
+        errorBox.textContent =
+          "This site isn't an authorized domain in Firebase yet. Add it under Authentication > Settings > Authorized domains.";
+      } else {
+        errorBox.textContent = "Could not sign in. Check your connection and try again.";
+      }
+      busy = false;
+      btn.disabled = false;
+    }
+  });
+
+  const root = h(
+    "section",
+    { class: "signin" },
+    h("h1", { class: "appname" }, "GTO Duel"),
+    h(
+      "p",
+      { class: "tagline" },
+      "An asynchronous head-to-head GTO poker quiz. Sign in to start a game with a friend — your games follow your account on any device."
+    ),
+    btn,
+    errorBox,
+    h(
+      "p",
+      { class: "signin-note muted" },
+      "Your Google account is used only to identify you to your opponent. Nothing is ever posted on your behalf."
+    )
+  );
+  container.appendChild(root);
+  return { unmount: () => clear(container) };
 }
 
 // -----------------------------------------------------------------------
@@ -71,10 +141,30 @@ export function mountLandingView(container, onCreate, onJoin) {
         h("li", null, "When all rounds are done, you both see a wrap-up with your individual GTO accuracy, your agreement rate, and the disagreements where you were both most sure.")
       )
     ),
-    buildHistorySection()
+    buildHistorySection(),
+    buildAccountBar()
   );
   container.appendChild(root);
   return { unmount: () => clear(container) };
+}
+
+// A small "Signed in as … · Sign out" line for the landing screen.
+function buildAccountBar() {
+  const u = getCurrentUser();
+  if (!u) return null;
+  const signOutBtn = h("button", { type: "button", class: "link-btn" }, "Sign out");
+  signOutBtn.addEventListener("click", () => {
+    signOutBtn.disabled = true;
+    signOutUser()
+      .catch(() => {})
+      .then(() => location.assign(location.origin + location.pathname));
+  });
+  return h(
+    "p",
+    { class: "account-bar muted" },
+    "Signed in as " + (u.displayName || u.email || "you") + " · ",
+    signOutBtn
+  );
 }
 
 // Builds the "Past games" panel from local history, or returns null when
@@ -137,8 +227,9 @@ function buildHistorySection() {
 export function mountCreateGameView(container, onCreated) {
   clear(container);
   let busy = false;
+  const me = getCurrentUser();
   const errorBox = h("div", { class: "error", role: "alert" });
-  const nameInput = h("input", { type: "text", id: "create-name", placeholder: "Your display name (e.g., Mom)", maxlength: "40" });
+  const nameInput = h("input", { type: "text", id: "create-name", placeholder: "Your display name (e.g., Mom)", maxlength: "40", value: (me && me.displayName) || "" });
   const roundsInput = h("input", { type: "number", id: "create-rounds", min: "1", max: "10", value: "5" });
   const handfulInput = h("input", { type: "number", id: "create-handful", min: "1", max: "10", value: "3" });
 
@@ -202,6 +293,7 @@ export function mountCreateGameView(container, onCreated) {
 export function mountJoinGameView(container, prefilledCode, onJoined) {
   clear(container);
   let busy = false;
+  const me = getCurrentUser();
   const errorBox = h("div", { class: "error", role: "alert" });
   const codeInput = h("input", {
     type: "text",
@@ -212,7 +304,7 @@ export function mountJoinGameView(container, prefilledCode, onJoined) {
     autocapitalize: "characters",
     autocomplete: "off",
   });
-  const nameInput = h("input", { type: "text", id: "join-name", placeholder: "Your display name", maxlength: "40" });
+  const nameInput = h("input", { type: "text", id: "join-name", placeholder: "Your display name", maxlength: "40", value: (me && me.displayName) || "" });
 
   async function submit() {
     if (busy) return;

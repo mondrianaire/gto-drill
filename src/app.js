@@ -14,9 +14,10 @@
 import { loadScenarios, listScenarios } from "./scenarios.js";
 import {
   initFirebase,
-  signInAnonymously,
+  initAuth,
 } from "./state.js";
 import {
+  mountSignInView,
   mountLandingView,
   mountCreateGameView,
   mountJoinGameView,
@@ -45,7 +46,15 @@ async function boot() {
       return;
     }
     await initFirebase(FIREBASE_CONFIG);
-    await signInAnonymously();
+
+    setBootState("Checking sign-in…");
+    const user = await initAuth();
+    if (!user) {
+      // Not signed in — show the Google sign-in gate. Once signed in, the
+      // callback mounts the router (which honours any ?join= code in the URL).
+      mountSignInView(root, () => mountRouter(root));
+      return;
+    }
 
     mountRouter(root);
   } catch (err) {
