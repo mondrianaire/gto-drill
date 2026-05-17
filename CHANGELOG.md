@@ -60,3 +60,13 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
   `src/config.js`. With notifications gone the key pair is unused; it is also
   no longer present in the current source. (The Firebase config remains — a
   Firebase web `apiKey` is public by design.)
+
+### Fixed
+- The app could hang on the boot screen ("Checking sign-in…") when the
+  remembered active-game pointer in `localStorage` referred to a game the
+  signed-in user can no longer read (a stale pointer left over from earlier
+  testing / the anonymous-auth era). `readGame()` now reports listener errors
+  and a missing document instead of silently dying, and the router treats an
+  unreadable or missing remembered game as "no active game" — it drops the
+  pointer and falls through to the home screen. A 9-second boot watchdog
+  guarantees the app can never hang on the boot screen again.

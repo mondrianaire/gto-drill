@@ -350,15 +350,25 @@ export async function cancelLobby(gameId) {
  * @param {(game:Object)=>void} onChange
  * @returns {()=>void} unsubscribe
  */
-export function readGame(gameId, onChange) {
+export function readGame(gameId, onChange, onError) {
   if (!_db) throw new Error("initFirebase() must be called first");
   const uid = getCurrentUid();
   const ref = doc(_db, "games", gameId);
-  return onSnapshot(ref, (snap) => {
-    if (!snap.exists()) return;
-    const raw = snap.data();
-    onChange(redactGameForViewer(raw, uid));
-  });
+  return onSnapshot(
+    ref,
+    (snap) => {
+      // onChange(null) signals the document does not exist.
+      if (!snap.exists()) { onChange(null); return; }
+      onChange(redactGameForViewer(snap.data(), uid));
+    },
+    (err) => {
+      // A failed read (e.g. permission-denied on a game the viewer is not in)
+      // would otherwise silently kill the listener and onChange would never
+      // fire — leaving callers hanging. Surface it instead.
+      console.warn("readGame: listener error —", (err && err.code) || err);
+      if (onError) onError(err);
+    }
+  );
 }
 
 /**

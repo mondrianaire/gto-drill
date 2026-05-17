@@ -134,23 +134,33 @@ function mountRouter(root) {
     clearRoot();
     let mounted = null;
     let firstRender = true;
-    const unsub = readGame(gameId, (game) => {
-      if (!game) return;
-      if (game.status === "waiting_for_opponent" && firstRender) {
-        firstRender = false;
-        if (mounted) mounted.unmount();
-        mounted = mountWaitingForOpponentView(root, gameId);
-      } else if (game.status === "in_progress" || game.status === "complete") {
-        unsub();
-        if (mounted) mounted.unmount();
-        if (game.status === "complete") goWrapUp(gameId);
-        else goInGame(gameId);
-      } else if (game.status === "cancelled") {
-        unsub();
-        if (mounted) mounted.unmount();
-        goLanding();
-      }
-    });
+    const bail = () => {
+      if (unsub) unsub();
+      if (mounted) mounted.unmount();
+      writeActiveGameId(null);
+      goLanding();
+    };
+    const unsub = readGame(
+      gameId,
+      (game) => {
+        if (!game) { bail(); return; } // game document is gone
+        if (game.status === "waiting_for_opponent" && firstRender) {
+          firstRender = false;
+          if (mounted) mounted.unmount();
+          mounted = mountWaitingForOpponentView(root, gameId);
+        } else if (game.status === "in_progress" || game.status === "complete") {
+          unsub();
+          if (mounted) mounted.unmount();
+          if (game.status === "complete") goWrapUp(gameId);
+          else goInGame(gameId);
+        } else if (game.status === "cancelled") {
+          unsub();
+          if (mounted) mounted.unmount();
+          goLanding();
+        }
+      },
+      () => bail() // can't read the game — drop it and go home
+    );
   }
 
   function goInGame(gameId) {
@@ -170,17 +180,36 @@ function mountRouter(root) {
   // Initial route resolution.
   const remembered = readActiveGameId();
   if (remembered) {
-    // Resume the active game. One-shot read to decide which view.
-    let routed = false;
-    const unsub = readGame(remembered, (game) => {
-      if (routed || !game) return;
-      routed = true;
-      unsub();
-      if (game.status === "complete") goWrapUp(remembered);
-      else if (game.status === "waiting_for_opponent") goWaitingOrGame(remembered);
-      else if (game.status === "cancelled") { writeActiveGameId(null); goLanding(); }
-      else goInGame(remembered);
-    });
+    // Resume the remembered game with a one-shot read. If it can't be read —
+    // a stale pointer, no longer a participant, deleted, or a slow network —
+    // drop the pointer and fall through to the home screen rather than
+    // hanging forever on the boot screen.
+    let settled = false;
+    let unsub = null;
+    const dropToLanding = () => {
+      if (settled) return;
+      settled = true;
+      if (unsub) unsub();
+      clearTimeout(watchdog);
+      writeActiveGameId(null);
+      goLanding();
+    };
+    const watchdog = setTimeout(dropToLanding, 9000);
+    unsub = readGame(
+      remembered,
+      (game) => {
+        if (settled) return;
+        if (!game) { dropToLanding(); return; }
+        settled = true;
+        if (unsub) unsub();
+        clearTimeout(watchdog);
+        if (game.status === "complete") goWrapUp(remembered);
+        else if (game.status === "waiting_for_opponent") goWaitingOrGame(remembered);
+        else if (game.status === "cancelled") { writeActiveGameId(null); goLanding(); }
+        else goInGame(remembered);
+      },
+      () => dropToLanding()
+    );
     return;
   }
   goLanding();
