@@ -387,6 +387,15 @@ form { margin-top: 8px; }
 }
 .history-stats { font-size: 0.85rem; margin-top: 2px; }
 .history-view { flex: 0 0 auto; min-height: 38px; padding: 6px 14px; }
+.history-remove {
+  flex: 0 0 auto;
+  text-decoration: none;
+  color: var(--text-dim);
+  font-size: 1.05rem;
+  line-height: 1;
+  padding: 6px 8px;
+}
+.history-remove:hover { color: var(--miss); }
 
 /* Wrap-up actions */
 .wrap-actions {

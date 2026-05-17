@@ -24,6 +24,9 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
   finished game is stamped with a pointer to the rematch so the other player
   sees a "Join the rematch" button on their wrap-up.
 - A "Back to home" button on the wrap-up screen.
+- A remove (✕) control on each row of the landing-screen "Past games" list.
+  History is device-local and kept indefinitely — this is the only thing that
+  clears it. Removing the last game hides the panel.
 - Visual hand replay (`src/replay.js`): scenarios with structured `replay`
   data render as a poker table — felt, seated players with stacks, CSS-drawn
   cards (no image assets), board, pot, and a prev/next/autoplay stepper with a
@@ -50,6 +53,9 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
   from the Google profile (the manual name field is removed).
   **Requires republishing `firestore.rules`** — listing open lobbies needs the
   new `allow list` rule for waiting games.
+- Sign out is now a clean reset — it clears the active-game pointer in
+  addition to ending the Firebase session, so nothing stale carries into the
+  next session. Local "Past games" history is intentionally kept.
 
 ### Removed
 - The turn-notification subsystem (Web Push). Reliable browser-to-browser push

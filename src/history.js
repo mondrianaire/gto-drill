@@ -57,6 +57,19 @@ export function recordGame(record) {
 }
 
 /**
+ * Remove one completed-game record from local history, by gameId. History is
+ * otherwise kept indefinitely — this is the only thing that deletes it.
+ * @param {string} gameId
+ */
+export function removeGame(gameId) {
+  if (!gameId) return;
+  try {
+    const kept = listHistory().filter((r) => r.gameId !== gameId);
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(kept));
+  } catch {}
+}
+
+/**
  * Aggregate tally across every recorded game.
  * @returns {{games:number, myPct:number, oppPct:number, agreePct:number,
  *            opponentName:(string|null)}|null} null when there is no history.
