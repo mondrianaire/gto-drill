@@ -159,13 +159,22 @@ export function mountReplay(container, replay) {
 
   function renderTable(state) {
     while (table.firstChild) table.removeChild(table.firstChild);
-    const others = replay.seats.filter((s) => s.pos !== replay.hero_seat);
     const turn = nextActor(replay, step);
 
-    // Opponent seats across the top.
-    others.forEach((s, i) => {
-      const cls = "rseat rseat-top" + (others.length === 1 ? " rseat-top-c" : i === 0 ? " rseat-top-l" : " rseat-top-r");
-      table.appendChild(seatEl(s, state.seats[s.pos], false, turn === s.pos, cls));
+    // Place every seat around the oval. `ring` is the seats in table order;
+    // it is rotated so the hero sits in slot 0 (bottom centre) and the rest
+    // follow clockwise into slots 1–5.
+    const ring = replay.seats.map((s) => s.pos);
+    let heroIdx = ring.indexOf(replay.hero_seat);
+    if (heroIdx < 0) heroIdx = 0;
+    const ordered = ring.slice(heroIdx).concat(ring.slice(0, heroIdx));
+    ordered.forEach((pos, slot) => {
+      const seatDef = replay.seats.find((s) => s.pos === pos);
+      const isHero = pos === replay.hero_seat;
+      table.appendChild(seatEl(
+        seatDef, state.seats[pos], isHero, turn === pos,
+        "rseat rslot-" + slot + (isHero ? " rseat-hero" : "")
+      ));
     });
 
     // Board + pot in the middle.
@@ -182,23 +191,26 @@ export function mountReplay(container, replay) {
         : [h("span", { class: "replay-board-empty" }, "preflop")]),
       h("div", { class: "replay-pot" }, "Pot " + fmtBb(round1(state.displayPot)))
     ));
-
-    // Hero seat at the bottom.
-    const heroSeat = replay.seats.find((s) => s.pos === replay.hero_seat);
-    table.appendChild(seatEl(heroSeat, state.seats[heroSeat.pos], true, turn === heroSeat.pos, "rseat rseat-hero"));
   }
 
   function seatEl(seatDef, st, isHero, isTurn, cls) {
-    const cards = isHero
-      ? (replay.hero_cards || [null, null]).map((c) => cardEl(c, "sm"))
-      : [cardEl(null, "sm"), cardEl(null, "sm")];
+    let cardRow;
+    if (st.folded && !isHero) {
+      // Folded players' cards are mucked — show that, not face-down cards.
+      cardRow = h("div", { class: "rseat-cards rseat-mucked" }, "folded");
+    } else {
+      const cards = isHero
+        ? (replay.hero_cards || [null, null]).map((c) => cardEl(c, "sm"))
+        : [cardEl(null, "sm"), cardEl(null, "sm")];
+      cardRow = h("div", { class: "rseat-cards" }, cards);
+    }
     const bet = st.street > 0
       ? h("div", { class: "rseat-bet" }, fmtBb(round1(st.street)))
       : null;
     return h(
       "div",
       { class: cls + (isTurn ? " rseat-turn" : "") + (st.folded ? " rseat-folded" : "") },
-      h("div", { class: "rseat-cards" }, cards),
+      cardRow,
       h("div", { class: "rseat-pos" }, seatDef.pos + (isHero ? " (you)" : "")),
       h("div", { class: "rseat-stack" }, fmtBb(round1(st.stack))),
       bet
