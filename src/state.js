@@ -6,8 +6,8 @@
 //
 // We use the official Firebase JS SDK loaded via ES module imports from the
 // gstatic CDN. The version is pinned to 10.12.x — a 10.x stable line. The
-// user's config (apiKey/projectId/etc., plus VAPID public key) lives in
-// ../config.js and is imported here.
+// user's Firebase config (apiKey/projectId/etc.) lives in ../config.js and
+// is imported here.
 //
 // Idempotency:
 //   - initFirebase() guards against double-init.
@@ -30,7 +30,6 @@ import {
   enableNetwork,
   doc,
   setDoc,
-  getDoc,
   updateDoc,
   onSnapshot,
   serverTimestamp,
@@ -190,7 +189,6 @@ export async function createGame(config, displayName) {
         uid,
         displayName: (displayName || "Player A").slice(0, 40),
         joinedAt: new Date().toISOString(),
-        pushSubscription: null,
       },
     ],
     rounds: precomputeRounds(rounds, handful, scenarioSeed, [uid]),
@@ -230,7 +228,6 @@ export async function joinGame(shareCode, displayName) {
           uid,
           displayName: (displayName || "Player B").slice(0, 40),
           joinedAt: new Date().toISOString(),
-          pushSubscription: null,
         },
       ]);
       const newUids = uids.concat([uid]);
@@ -340,58 +337,20 @@ export async function submitHandful(gameId, roundIndex, submissions) {
 }
 
 // -----------------------------------------------------------------------
-// Push-subscription persistence
+// Rematch
 // -----------------------------------------------------------------------
 
 /**
- * Persist the current player's push subscription on their participant entry.
- * @param {string} gameId
- * @param {Object} subscription PushSubscriptionRecord shape
+ * Stamp a rematch pointer onto a finished game so the other player can find
+ * and join the follow-up game from the wrap-up screen.
+ * @param {string} gameId         The finished game's id.
+ * @param {string} rematchGameId  The newly created follow-up game's id.
+ * @param {string} byUid          The uid of the player who started the rematch.
  */
-export async function savePushSubscription(gameId, subscription) {
+export async function setRematchGameId(gameId, rematchGameId, byUid) {
   if (!_db) throw new Error("initFirebase() must be called first");
-  const uid = getCurrentUid();
   const ref = doc(_db, "games", gameId);
-  await runTransaction(_db, async (tx) => {
-    const snap = await tx.get(ref);
-    if (!snap.exists()) throw new Error("game not found");
-    const data = snap.data();
-    const participants = (data.participants || []).map((p) =>
-      p.uid === uid ? { ...p, pushSubscription: subscription } : p
-    );
-    tx.update(ref, { participants });
-  });
-}
-
-/**
- * Read the opponent's stored push subscription (if any).
- * @param {string} gameId
- * @returns {Promise<Object|null>}
- */
-export async function readOpponentPushSubscription(gameId) {
-  if (!_db) throw new Error("initFirebase() must be called first");
-  const uid = getCurrentUid();
-  const ref = doc(_db, "games", gameId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return null;
-  const data = snap.data();
-  const opponent = (data.participants || []).find((p) => p.uid !== uid);
-  return opponent && opponent.pushSubscription ? opponent.pushSubscription : null;
-}
-
-/**
- * @param {string} gameId
- * @returns {Promise<string|null>}
- */
-export async function getOpponentUid(gameId) {
-  if (!_db) throw new Error("initFirebase() must be called first");
-  const uid = getCurrentUid();
-  const ref = doc(_db, "games", gameId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return null;
-  const data = snap.data();
-  const uids = data.participantUids || [];
-  return uids.find((u) => u !== uid) || null;
+  await updateDoc(ref, { rematchGameId, rematchBy: byUid });
 }
 
 // -----------------------------------------------------------------------

@@ -4,8 +4,7 @@
 //   1. Load the scenario library.
 //   2. Initialize Firebase from src/config.js.
 //   3. Sign in anonymously.
-//   4. Register the service worker (best-effort; failure non-fatal).
-//   5. Mount the router.
+//   4. Mount the router.
 //
 // Routing:
 //   - If ?join=<code> is in the URL and no active game state, route to JoinView.
@@ -17,7 +16,6 @@ import {
   initFirebase,
   signInAnonymously,
 } from "./state.js";
-import { registerServiceWorker, setActiveGameForPush } from "./push.js";
 import {
   mountLandingView,
   mountCreateGameView,
@@ -27,22 +25,11 @@ import {
 import { mountInGameView, mountWrapUpView } from "./ui.js";
 import { readGame } from "./state.js";
 import { FIREBASE_CONFIG } from "./config.js";
-
-const STORAGE_KEY = "gto-duel.activeGameId";
+import { readActiveGameId, writeActiveGameId } from "./history.js";
 
 function setBootState(msg) {
   const el = document.getElementById("boot-state");
   if (el) el.textContent = msg;
-}
-
-function readActiveGameId() {
-  try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
-}
-function writeActiveGameId(id) {
-  try {
-    if (id) localStorage.setItem(STORAGE_KEY, id);
-    else localStorage.removeItem(STORAGE_KEY);
-  } catch {}
 }
 
 async function boot() {
@@ -59,9 +46,6 @@ async function boot() {
     }
     await initFirebase(FIREBASE_CONFIG);
     await signInAnonymously();
-
-    // Service worker registration is best-effort.
-    try { await registerServiceWorker(); } catch (_) {}
 
     mountRouter(root);
   } catch (err) {
@@ -91,7 +75,6 @@ function mountRouter(root) {
   function goLanding() {
     clearRoot();
     writeActiveGameId(null);
-    setActiveGameForPush(null);
     history.replaceState({}, "", stripQuery());
     mountLandingView(
       root,
@@ -104,7 +87,6 @@ function mountRouter(root) {
     clearRoot();
     mountCreateGameView(root, (gameId) => {
       writeActiveGameId(gameId);
-      setActiveGameForPush(gameId);
       goWaitingOrGame(gameId);
     });
   }
@@ -113,7 +95,6 @@ function mountRouter(root) {
     clearRoot();
     mountJoinGameView(root, prefilledCode, (gameId) => {
       writeActiveGameId(gameId);
-      setActiveGameForPush(gameId);
       goInGame(gameId);
     });
   }
@@ -123,7 +104,6 @@ function mountRouter(root) {
     // (status === waiting_for_opponent) or jump to the in-game view (if
     // the opponent has already joined via the URL).
     clearRoot();
-    setActiveGameForPush(gameId);
     // Subscribe long enough to read the initial state.
     let mounted = null;
     let firstRender = true;
@@ -146,13 +126,11 @@ function mountRouter(root) {
 
   function goInGame(gameId) {
     clearRoot();
-    setActiveGameForPush(gameId);
     mountInGameView(root, gameId);
   }
 
   function goWrapUp(gameId) {
     clearRoot();
-    setActiveGameForPush(gameId);
     mountWrapUpView(root, gameId);
   }
 
@@ -170,7 +148,6 @@ function mountRouter(root) {
   const remembered = readActiveGameId();
   if (remembered) {
     // Resume the active game.
-    setActiveGameForPush(remembered);
     // Use a one-shot read to decide which view: status -> in-game or wrap-up.
     let routed = false;
     const unsub = readGame(remembered, (game) => {

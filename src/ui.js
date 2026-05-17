@@ -6,11 +6,11 @@
 // metadata comes from section-1. Notifications are triggered through
 // section-3.
 
-import { readGame, submitHandful, getCurrentUid, getOpponentUid } from "./state.js";
+import { readGame, submitHandful, getCurrentUid, createGame, setRematchGameId } from "./state.js";
 import { getScenarioById } from "./scenarios.js";
 import { computePhase } from "./flow.js";
 import { perPlayerAccuracy, interPlayerAgreement, rankedDisagreements } from "./stats.js";
-import { sendTurnNotification, notificationStatus, enableNotifications, setActiveGameForPush } from "./push.js";
+import { recordGame, writeActiveGameId } from "./history.js";
 
 // -----------------------------------------------------------------------
 // Small DOM helpers (duplicated from onboarding.js intentionally to keep
@@ -57,15 +57,13 @@ export function mountInGameView(container, gameId) {
   let lastGame = null;
   let draft = null; // current player's in-progress submission set
   let submitting = false;
-  setActiveGameForPush(gameId);
 
   function render(game) {
     clear(container);
     const myUid = getCurrentUid();
     const phase = computePhase(game, myUid);
     const headerBar = h("div", { class: "game-header" },
-      h("span", null, "Round ", String((phase.currentRoundIndex || 0) + 1), " of ", String(game.rounds.length)),
-      buildNotifControl(game)
+      h("span", null, "Round ", String((phase.currentRoundIndex || 0) + 1), " of ", String(game.rounds.length))
     );
     container.appendChild(headerBar);
 
@@ -199,17 +197,6 @@ export function mountInGameView(container, gameId) {
           submitting = false;
           return;
         }
-        // Fire turn notification to opponent (best-effort).
-        try {
-          const opp = await getOpponentUid(gameId);
-          if (opp) {
-            sendTurnNotification(gameId, opp, {
-              title: "Your turn",
-              body: getDisplayName(game, myUid) + " just submitted — it's your move.",
-              url: "./",
-            });
-          }
-        } catch (_) {}
         draft = null;
         submitting = false;
       } catch (err) {
@@ -238,7 +225,7 @@ export function mountInGameView(container, gameId) {
       { class: "in-game waiting" },
       h("h2", null, "Waiting for " + oppName),
       h("p", { class: "muted" }, "You submitted your handful for this round. We'll show the results once " + oppName + " submits theirs."),
-      h("p", { class: "muted" }, "You can close this page — the game's saved. If you turned on notifications, we'll let you know.")
+      h("p", { class: "muted" }, "You can close this page — the game's saved. It'll pick up right here the next time you open the app.")
     ));
   }
 
@@ -292,33 +279,6 @@ export function mountInGameView(container, gameId) {
     ));
   }
 
-  function buildNotifControl(game) {
-    const status = notificationStatus();
-    if (!status.platform_supports_push) {
-      return h("span", { class: "notif-state muted" }, "Notifications not supported on this browser.");
-    }
-    if (status.ios_requires_home_screen_install) {
-      return h("span", { class: "notif-state muted" }, "On iPhone? Add to Home Screen for notifications.");
-    }
-    if (status.permission === "denied") {
-      return h("span", { class: "notif-state muted" }, "Notifications blocked in browser settings.");
-    }
-    if (status.permission === "granted") {
-      return h("span", { class: "notif-state" }, "Notifications on.");
-    }
-    const btn = h("button", { type: "button", class: "notif-enable" }, "Enable turn notifications");
-    btn.addEventListener("click", async () => {
-      btn.disabled = true;
-      const res = await enableNotifications();
-      btn.disabled = false;
-      if (res.granted) btn.replaceWith(h("span", { class: "notif-state" }, "Notifications on."));
-      else if (res.reason === "denied") btn.replaceWith(h("span", { class: "notif-state muted" }, "Notifications blocked."));
-      else if (res.reason === "requires_pwa_install") btn.replaceWith(h("span", { class: "notif-state muted" }, "Add to Home Screen first (iOS)."));
-      else btn.replaceWith(h("span", { class: "notif-state muted" }, "Couldn't enable notifications."));
-    });
-    return btn;
-  }
-
   unsub = readGame(gameId, (g) => {
     lastGame = g;
     render(g);
@@ -353,6 +313,27 @@ export function mountWrapUpView(container, gameId, opts) {
     const acc = perPlayerAccuracy(game);
     const agree = interPlayerAgreement(game);
     const disagree = rankedDisagreements(game);
+
+    // Save this finished game to local history (idempotent — keyed by gameId).
+    const myUid = getCurrentUid();
+    const oppUid = uids.find((u) => u !== myUid) || b;
+    recordGame({
+      gameId,
+      completedAt: new Date().toISOString(),
+      myName: getDisplayName(game, myUid),
+      opponentName: getDisplayName(game, oppUid),
+      rounds: (game.rounds || []).length,
+      handfulSize: game.rounds[0] ? game.rounds[0].scenarioIds.length : 0,
+      myCorrect: acc[myUid] ? acc[myUid].correct : 0,
+      myTotal: acc[myUid] ? acc[myUid].total : 0,
+      myPct: acc[myUid] ? acc[myUid].pct : 0,
+      oppCorrect: acc[oppUid] ? acc[oppUid].correct : 0,
+      oppTotal: acc[oppUid] ? acc[oppUid].total : 0,
+      oppPct: acc[oppUid] ? acc[oppUid].pct : 0,
+      agreeSame: agree.same,
+      agreeTotal: agree.total,
+      agreePct: agree.pct,
+    });
 
     const accuracySection = h("section", { class: "wrap-accuracy" },
       h("h3", null, "Individual performance"),
@@ -413,6 +394,54 @@ export function mountWrapUpView(container, gameId, opts) {
       disagreementList
     );
 
+    // Rematch + navigation controls.
+    const base = location.origin + location.pathname;
+    const errorBox = h("div", { class: "error", role: "alert" });
+    let rematchControl;
+    if (game.rematchGameId) {
+      if (game.rematchBy === myUid) {
+        rematchControl = h("button", { type: "button", class: "primary" }, "Go to your rematch");
+        rematchControl.addEventListener("click", () => {
+          writeActiveGameId(game.rematchGameId);
+          location.assign(base);
+        });
+      } else {
+        rematchControl = h("button", { type: "button", class: "primary" }, "Join the rematch");
+        rematchControl.addEventListener("click", () => {
+          location.assign(base + "?join=" + encodeURIComponent(game.rematchGameId));
+        });
+      }
+    } else {
+      rematchControl = h("button", { type: "button", class: "primary" }, "Rematch — same settings");
+      rematchControl.addEventListener("click", async () => {
+        rematchControl.disabled = true;
+        errorBox.textContent = "";
+        try {
+          const { gameId: newId } = await createGame(
+            { rounds: game.config.rounds, handful_size: game.config.handful_size },
+            getDisplayName(game, myUid)
+          );
+          try { await setRematchGameId(gameId, newId, myUid); } catch (_) {}
+          writeActiveGameId(newId);
+          location.assign(base);
+        } catch (err) {
+          console.error(err);
+          errorBox.textContent = "Could not start a rematch. Check your connection and try again.";
+          rematchControl.disabled = false;
+        }
+      });
+    }
+    const homeBtn = h("button", { type: "button", class: "secondary" }, "Back to home");
+    homeBtn.addEventListener("click", () => {
+      writeActiveGameId(null);
+      location.assign(base);
+    });
+    const wrapActions = h("section", { class: "wrap-actions" },
+      rematchControl,
+      homeBtn,
+      errorBox
+    );
+
     container.appendChild(h(
       "section",
       { class: "wrap-up" },
@@ -420,7 +449,8 @@ export function mountWrapUpView(container, gameId, opts) {
       h("p", { class: "muted" }, "You played " + (game.rounds || []).length + " rounds, " + (game.rounds[0] ? game.rounds[0].scenarioIds.length : 0) + " spots each."),
       accuracySection,
       agreementSection,
-      disagreementSection
+      disagreementSection,
+      wrapActions
     ));
   }
 

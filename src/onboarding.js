@@ -5,7 +5,7 @@
 // touches Firebase directly.
 
 import { createGame, joinGame } from "./state.js";
-import { notificationStatus } from "./push.js";
+import { listHistory, historySummary, writeActiveGameId } from "./history.js";
 
 // -----------------------------------------------------------------------
 // Small DOM helpers — vanilla, no framework. We keep things tactile.
@@ -70,10 +70,64 @@ export function mountLandingView(container, onCreate, onJoin) {
         h("li", null, "The other player gets the same handful. Neither of you sees the other's answer until you've both submitted."),
         h("li", null, "When all rounds are done, you both see a wrap-up with your individual GTO accuracy, your agreement rate, and the disagreements where you were both most sure.")
       )
-    )
+    ),
+    buildHistorySection()
   );
   container.appendChild(root);
   return { unmount: () => clear(container) };
+}
+
+// Builds the "Past games" panel from local history, or returns null when
+// no games have been completed on this device yet.
+function buildHistorySection() {
+  const history = listHistory();
+  if (history.length === 0) return null;
+  const summary = historySummary();
+  const base = location.origin + location.pathname;
+
+  const items = h("ul", { class: "history-list" });
+  for (const r of history) {
+    let when = "";
+    try { when = new Date(r.completedAt).toLocaleDateString(); } catch {}
+    const viewBtn = h("button", { class: "secondary history-view" }, "View");
+    viewBtn.addEventListener("click", () => {
+      writeActiveGameId(r.gameId);
+      location.assign(base);
+    });
+    items.appendChild(h(
+      "li",
+      { class: "history-item" },
+      h("div", { class: "history-main" },
+        h("div", { class: "history-line" },
+          h("strong", null, "vs " + (r.opponentName || "opponent")),
+          h("span", { class: "muted" }, when)
+        ),
+        h("div", { class: "history-stats muted" },
+          "You " + (r.myPct || 0) + "%  ·  " + (r.opponentName || "Them") + " " + (r.oppPct || 0) +
+          "%  ·  agreed " + (r.agreePct || 0) + "%"
+        )
+      ),
+      viewBtn
+    ));
+  }
+
+  const summaryLine = summary
+    ? h(
+        "p",
+        { class: "history-summary" },
+        summary.games + (summary.games === 1 ? " game" : " games") +
+        (summary.opponentName ? " vs " + summary.opponentName : "") +
+        "  ·  your GTO accuracy " + summary.myPct + "%  ·  agreement " + summary.agreePct + "%"
+      )
+    : null;
+
+  return h(
+    "section",
+    { class: "past-games" },
+    h("h2", null, "Past games"),
+    summaryLine,
+    items
+  );
 }
 
 // -----------------------------------------------------------------------
@@ -220,8 +274,6 @@ export function mountJoinGameView(container, prefilledCode, onJoined) {
 
 export function mountWaitingForOpponentView(container, gameId, shareCode, joinUrl) {
   clear(container);
-  const status = notificationStatus();
-  const iosNeeded = status.ios_requires_home_screen_install;
 
   function copy(text, btn) {
     const oldText = btn.textContent;
@@ -266,11 +318,6 @@ export function mountWaitingForOpponentView(container, gameId, shareCode, joinUr
         urlBtn
       )
     ),
-    iosNeeded
-      ? h("div", { class: "ios-note" },
-          h("strong", null, "On iPhone or iPad?"),
-          h("p", null, "To get turn notifications on iOS, tap the Share icon in Safari, choose ", h("em", null, "Add to Home Screen"), ", then open GTO Duel from the new icon and enable notifications from there."))
-      : null,
     h(
       "details",
       { class: "share-help" },
@@ -280,7 +327,7 @@ export function mountWaitingForOpponentView(container, gameId, shareCode, joinUr
         null,
         h("li", null, "Text the link to your friend. When they open it, the code is filled in automatically."),
         h("li", null, "Or have them open this app and paste the code on the Join screen."),
-        h("li", null, "You can leave this page — when they join, you'll be notified (if you enabled notifications) or you'll see the game on next open.")
+        h("li", null, "You can leave this page — the game is saved. It will pick up where you left off the next time you open the app.")
       )
     )
   );

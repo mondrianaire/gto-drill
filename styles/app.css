@@ -171,16 +171,6 @@ form { margin-top: 8px; }
 .share-code { letter-spacing: 0.15em; font-size: 1.1rem; }
 .copy-btn { min-width: 90px; }
 
-.ios-note {
-  background: var(--accent-soft);
-  border: 1px solid var(--accent);
-  border-radius: var(--radius);
-  padding: var(--pad);
-  margin: 16px 0;
-}
-.ios-note strong { color: var(--accent); }
-.ios-note p { margin: 6px 0 0 0; }
-
 .share-help { margin-top: 16px; }
 
 /* In-game */
@@ -194,9 +184,6 @@ form { margin-top: 8px; }
   flex-wrap: wrap;
   gap: 8px;
 }
-.notif-state { font-size: 0.88rem; color: var(--text-dim); }
-.notif-enable { padding: 6px 10px; min-height: 36px; font-size: 0.88rem; }
-
 .scenario-list {
   display: flex;
   flex-direction: column;
@@ -335,6 +322,54 @@ form { margin-top: 8px; }
   background: var(--bg-elev-2);
   padding: 1px 6px;
   border-radius: 4px;
+}
+
+/* Past games (landing) */
+.past-games {
+  margin-top: 28px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+.past-games h2 { margin: 0 0 4px 0; font-size: 1.15rem; }
+.history-summary {
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  margin: 0 0 14px 0;
+}
+.history-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.history-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.history-main { flex: 1 1 auto; min-width: 0; }
+.history-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+.history-stats { font-size: 0.85rem; margin-top: 2px; }
+.history-view { flex: 0 0 auto; min-height: 38px; padding: 6px 14px; }
+
+/* Wrap-up actions */
+.wrap-actions {
+  display: flex;
+  flex-direction: column;
+  gap: var(--gap);
+  margin-top: 24px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border);
 }
 
 /* Mobile */

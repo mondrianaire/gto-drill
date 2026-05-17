@@ -32,7 +32,6 @@
  * @property {string} uid
  * @property {string} displayName
  * @property {string} joinedAt
- * @property {Object|null} [pushSubscription]
  *
  * @typedef {Object} Round
  * @property {number} roundIndex
@@ -47,11 +46,8 @@
  * @property {Participant[]} participants
  * @property {Round[]} rounds
  * @property {('waiting_for_opponent'|'in_progress'|'complete')} status
- *
- * @typedef {Object} PushSubscriptionRecord
- * @property {string} endpoint
- * @property {{p256dh:string, auth:string}} keys
- * @property {string} subscribed_at
+ * @property {string} [rematchGameId]  Set when a rematch has been started.
+ * @property {string} [rematchBy]      Uid of the player who started the rematch.
  */
 
 let _scenarios = null;
