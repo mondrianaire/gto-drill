@@ -13,7 +13,7 @@ import {
   getCurrentUser,
   signOutUser,
 } from "./state.js";
-import { listHistory, historySummary, writeActiveGameId } from "./history.js";
+import { listHistory, historySummary, removeGame, writeActiveGameId } from "./history.js";
 
 // -----------------------------------------------------------------------
 // Small DOM helpers — vanilla, no framework. We keep things tactile.
@@ -163,6 +163,9 @@ function buildAccountBar() {
   const signOutBtn = h("button", { type: "button", class: "link-btn" }, "Sign out");
   signOutBtn.addEventListener("click", () => {
     signOutBtn.disabled = true;
+    // Clean reset: drop the active-game pointer so nothing stale carries
+    // into the next session, then sign out and reload.
+    writeActiveGameId(null);
     signOutUser()
       .catch(() => {})
       .then(() => location.assign(location.origin + location.pathname));
@@ -176,23 +179,46 @@ function buildAccountBar() {
 }
 
 // Builds the "Past games" panel from local history, or returns null when
-// no games have been completed on this device yet.
+// no games have been completed on this device yet. History is device-local
+// and permanent — each row carries a remove control, the only way it clears.
 function buildHistorySection() {
-  const history = listHistory();
-  if (history.length === 0) return null;
-  const summary = historySummary();
+  if (listHistory().length === 0) return null;
   const base = location.origin + location.pathname;
 
   const items = h("ul", { class: "history-list" });
-  for (const r of history) {
+  const summaryLine = h("p", { class: "history-summary" });
+  const section = h("section", { class: "past-games" },
+    h("h2", null, "Past games"),
+    summaryLine,
+    items
+  );
+
+  function refreshSummary() {
+    const s = historySummary();
+    summaryLine.textContent = s
+      ? s.games + (s.games === 1 ? " game" : " games") +
+        (s.opponentName ? " vs " + s.opponentName : "") +
+        "  ·  your GTO accuracy " + s.myPct + "%  ·  agreement " + s.agreePct + "%"
+      : "";
+  }
+
+  for (const r of listHistory()) {
     let when = "";
     try { when = new Date(r.completedAt).toLocaleDateString(); } catch {}
+
     const viewBtn = h("button", { class: "secondary history-view" }, "View");
     viewBtn.addEventListener("click", () => {
       writeActiveGameId(r.gameId);
       location.assign(base);
     });
-    items.appendChild(h(
+
+    const removeBtn = h("button", {
+      class: "link-btn history-remove",
+      title: "Remove from history",
+      "aria-label": "Remove this game from history",
+    }, "✕");
+
+    const li = h(
       "li",
       { class: "history-item" },
       h("div", { class: "history-main" },
@@ -205,27 +231,22 @@ function buildHistorySection() {
           "%  ·  agreed " + (r.agreePct || 0) + "%"
         )
       ),
-      viewBtn
-    ));
+      viewBtn,
+      removeBtn
+    );
+
+    removeBtn.addEventListener("click", () => {
+      removeGame(r.gameId);
+      li.remove();
+      if (listHistory().length === 0) section.remove();
+      else refreshSummary();
+    });
+
+    items.appendChild(li);
   }
 
-  const summaryLine = summary
-    ? h(
-        "p",
-        { class: "history-summary" },
-        summary.games + (summary.games === 1 ? " game" : " games") +
-        (summary.opponentName ? " vs " + summary.opponentName : "") +
-        "  ·  your GTO accuracy " + summary.myPct + "%  ·  agreement " + summary.agreePct + "%"
-      )
-    : null;
-
-  return h(
-    "section",
-    { class: "past-games" },
-    h("h2", null, "Past games"),
-    summaryLine,
-    items
-  );
+  refreshSummary();
+  return section;
 }
 
 // -----------------------------------------------------------------------
