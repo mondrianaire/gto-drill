@@ -14,6 +14,8 @@ import { loadScenarios, listScenarios } from "./scenarios.js";
 import {
   initFirebase,
   initAuth,
+  getCurrentUser,
+  readGame,
 } from "./state.js";
 import {
   mountSignInView,
@@ -21,9 +23,9 @@ import {
   mountCreateGameView,
   mountJoinGameView,
   mountWaitingForOpponentView,
+  buildAvatar,
 } from "./onboarding.js";
 import { mountInGameView, mountWrapUpView } from "./ui.js";
-import { readGame } from "./state.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { readActiveGameId, writeActiveGameId } from "./history.js";
 
@@ -75,7 +77,25 @@ function renderConfigError(root) {
   root.appendChild(div);
 }
 
+// Fill the header with the signed-in user's avatar + first name.
+function renderHeaderUser() {
+  const el = document.getElementById("header-user");
+  if (!el) return;
+  while (el.firstChild) el.removeChild(el.firstChild);
+  const u = getCurrentUser();
+  if (!u) return;
+  const label = (u.displayName || u.email || "You").trim();
+  const first = label.split(/\s+/)[0];
+  el.appendChild(buildAvatar(label, u.photoURL));
+  const nameEl = document.createElement("span");
+  nameEl.className = "header-user-name";
+  nameEl.textContent = first;
+  el.appendChild(nameEl);
+}
+
 function mountRouter(root) {
+  renderHeaderUser();
+
   function clearRoot() {
     while (root.firstChild) root.removeChild(root.firstChild);
   }

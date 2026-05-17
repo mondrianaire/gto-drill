@@ -291,7 +291,7 @@ export function mountCreateGameView(container, onCreated) {
 
 // Builds an avatar element: the player's Google photo, or a clean initials
 // circle when they have no photo set.
-function buildAvatar(name, photoURL) {
+export function buildAvatar(name, photoURL) {
   if (photoURL) {
     return h("img", { class: "avatar", src: photoURL, alt: "", referrerpolicy: "no-referrer" });
   }

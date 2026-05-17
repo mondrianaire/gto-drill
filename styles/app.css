@@ -36,18 +36,30 @@ body { padding-bottom: 4rem; }
 a { color: var(--accent); }
 
 .app-header {
-  padding: 20px 16px 4px 16px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 14px 16px;
 }
 .app-title {
-  font-size: 1.6rem;
+  font-size: 1.4rem;
   margin: 0;
   letter-spacing: 0.02em;
 }
-.app-tagline {
-  margin: 4px 0 0 0;
+.header-user {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.header-user .avatar { width: 30px; height: 30px; }
+.header-user .avatar-fallback { font-size: 0.95rem; }
+.header-user-name {
+  font-size: 0.9rem;
+  font-weight: 600;
   color: var(--text-dim);
-  font-size: 0.92rem;
 }
 
 .app-root {
