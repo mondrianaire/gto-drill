@@ -288,10 +288,15 @@ export function mountInGameView(container, gameId) {
     ));
   }
 
-  unsub = readGame(gameId, (g) => {
-    lastGame = g;
-    render(g);
-  });
+  unsub = readGame(
+    gameId,
+    (g) => {
+      if (!g) return;
+      lastGame = g;
+      render(g);
+    },
+    (err) => { console.warn("in-game game read failed:", (err && err.code) || err); }
+  );
 
   return {
     unmount: () => {
@@ -482,7 +487,11 @@ export function mountWrapUpView(container, gameId, opts) {
     render(opts.reuseGame);
     return { unmount: () => clear(container) };
   }
-  unsub = readGame(gameId, (g) => render(g));
+  unsub = readGame(
+    gameId,
+    (g) => { if (g) render(g); },
+    (err) => { console.warn("wrap-up game read failed:", (err && err.code) || err); }
+  );
   return {
     unmount: () => {
       if (unsub) unsub();
