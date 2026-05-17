@@ -71,6 +71,22 @@
   },
   {
     "scenario_id": "small-pair-vs-3bet-set-mine-008",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "CO",
+      "hero_cards": ["5s", "5h"],
+      "starting_pot_bb": 1.5,
+      "seats": [
+        { "pos": "CO", "stack_bb": 100 },
+        { "pos": "BTN", "stack_bb": 100 }
+      ],
+      "board": { "flop": [], "turn": [], "river": [] },
+      "actions": [
+        { "street": "preflop", "actor": "CO", "type": "raise", "amount_bb": 2.5 },
+        { "street": "preflop", "actor": "BTN", "type": "raise", "amount_bb": 9 }
+      ]
+    },
     "description": "100bb. Hero opens 2.5bb from CO with 55. BTN 3-bets to 9bb. Action back on Hero.",
     "board": null,
     "action_history": ["CO open 2.5bb", "BTN 3-bet 9bb"],
@@ -81,6 +97,27 @@
   },
   {
     "scenario_id": "out-of-position-double-barrel-equity-realization-009",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BB",
+      "hero_cards": ["Kd", "Jd"],
+      "starting_pot_bb": 1.5,
+      "seats": [
+        { "pos": "HJ", "stack_bb": 100 },
+        { "pos": "BB", "stack_bb": 100 }
+      ],
+      "board": { "flop": ["Kc", "5h", "4s"], "turn": ["7c"], "river": [] },
+      "actions": [
+        { "street": "preflop", "actor": "HJ", "type": "raise", "amount_bb": 2.5 },
+        { "street": "preflop", "actor": "BB", "type": "call", "amount_bb": 2.5 },
+        { "street": "flop", "actor": "BB", "type": "check" },
+        { "street": "flop", "actor": "HJ", "type": "bet", "amount_bb": 3 },
+        { "street": "flop", "actor": "BB", "type": "call", "amount_bb": 3 },
+        { "street": "turn", "actor": "BB", "type": "check" },
+        { "street": "turn", "actor": "HJ", "type": "bet", "amount_bb": 9 }
+      ]
+    },
     "description": "100bb. HJ opens 2.5bb. BB (Hero) calls with KdJd. Flop Kc 5h 4s: BB check, HJ bet 3bb, BB call. Turn Kc 5h 4s 7c: BB check, HJ bet 9bb. Hero must decide.",
     "board": "Kc 5h 4s 7c",
     "action_history": ["HJ open 2.5bb", "BB call", "Flop BB check", "Flop HJ bet 3bb", "Flop BB call", "Turn BB check", "Turn HJ bet 9bb"],
@@ -101,6 +138,20 @@
   },
   {
     "scenario_id": "all-in-or-fold-short-stack-011",
+    "replay": {
+      "format": "tournament",
+      "stack_depth_bb": 12,
+      "hero_seat": "BTN",
+      "hero_cards": ["As", "8h"],
+      "starting_pot_bb": 1.5,
+      "seats": [
+        { "pos": "BTN", "stack_bb": 12 },
+        { "pos": "SB", "stack_bb": 12 },
+        { "pos": "BB", "stack_bb": 12 }
+      ],
+      "board": { "flop": [], "turn": [], "river": [] },
+      "actions": []
+    },
     "description": "12bb stack, MTT bubble. Hero (BTN) holds A8 offsuit. Folded to Hero. Blinds 1bb/2bb.",
     "board": null,
     "action_history": ["folds to BTN"],
@@ -151,6 +202,23 @@
   },
   {
     "scenario_id": "flush-draw-semibluff-c-bet-016",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": ["Ac", "Qc"],
+      "starting_pot_bb": 1.5,
+      "seats": [
+        { "pos": "BTN", "stack_bb": 100 },
+        { "pos": "BB", "stack_bb": 100 }
+      ],
+      "board": { "flop": ["8c", "5c", "2h"], "turn": [], "river": [] },
+      "actions": [
+        { "street": "preflop", "actor": "BTN", "type": "raise", "amount_bb": 2.5 },
+        { "street": "preflop", "actor": "BB", "type": "call", "amount_bb": 2.5 },
+        { "street": "flop", "actor": "BB", "type": "check" }
+      ]
+    },
     "description": "100bb. BTN (Hero) opens 2.5bb with AcQc. BB calls. Flop 8c 5c 2h. BB checks. Pot 5.5bb.",
     "board": "8c 5c 2h",
     "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check"],
@@ -441,6 +509,30 @@
   },
   {
     "scenario_id": "raise-river-with-the-nuts-045",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BB",
+      "hero_cards": ["9c", "8c"],
+      "starting_pot_bb": 1.5,
+      "seats": [
+        { "pos": "CO", "stack_bb": 100 },
+        { "pos": "BB", "stack_bb": 100 }
+      ],
+      "board": { "flop": ["Td", "7s", "4c"], "turn": ["5h"], "river": ["6d"] },
+      "actions": [
+        { "street": "preflop", "actor": "CO", "type": "raise", "amount_bb": 2.5 },
+        { "street": "preflop", "actor": "BB", "type": "call", "amount_bb": 2.5 },
+        { "street": "flop", "actor": "BB", "type": "check" },
+        { "street": "flop", "actor": "CO", "type": "bet", "amount_bb": 2 },
+        { "street": "flop", "actor": "BB", "type": "call", "amount_bb": 2 },
+        { "street": "turn", "actor": "BB", "type": "check" },
+        { "street": "turn", "actor": "CO", "type": "bet", "amount_bb": 6 },
+        { "street": "turn", "actor": "BB", "type": "call", "amount_bb": 6 },
+        { "street": "river", "actor": "BB", "type": "check" },
+        { "street": "river", "actor": "CO", "type": "bet", "amount_bb": 10 }
+      ]
+    },
     "description": "100bb. CO opens 2.5bb, BB (Hero) calls. Flop Td 7s 4c: BB check, CO bet 2bb, BB call. Turn Td 7s 4c 5h: BB check, CO bet 6bb, BB call. River Td 7s 4c 5h 6d: BB check, CO bets 10bb. Hero has 9c 8c — the nut straight. Pot was 19bb.",
     "board": "Td 7s 4c 5h 6d",
     "action_history": ["CO open 2.5bb", "BB call", "Flop BB check", "Flop CO bet 2bb", "Flop BB call", "Turn BB check", "Turn CO bet 6bb", "Turn BB call", "River BB check", "River CO bet 10bb"],
