@@ -327,6 +327,30 @@ form { margin-top: 8px; }
 .hand-nav .hand-back { flex: 0 0 auto; min-width: 92px; }
 .hand-nav .hand-fwd { flex: 1 1 auto; }
 
+/* Per-hand reveal */
+.hand-result {
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+.hand-result.is-ok { background: rgba(74, 222, 128, 0.08); border-color: rgba(74, 222, 128, 0.45); }
+.hand-result.is-miss { background: rgba(248, 113, 113, 0.08); border-color: rgba(248, 113, 113, 0.45); }
+.result-verdict { font-weight: 700; margin-bottom: 6px; }
+.hand-result.is-ok .result-verdict { color: var(--ok); }
+.hand-result.is-miss .result-verdict { color: var(--miss); }
+.result-picks { display: flex; flex-direction: column; gap: 3px; font-size: 0.93rem; }
+.hand-opp {
+  border-top: 1px solid var(--border);
+  margin-top: 12px;
+  padding-top: 12px;
+  font-size: 0.93rem;
+}
+.hand-agree { margin-top: 2px; }
+.test-row { margin-top: 16px; }
+.test-it { width: 100%; }
+.test-note { margin-top: 8px; font-size: 0.85rem; }
+
 /* Reveal */
 .reveal-list {
   display: flex;

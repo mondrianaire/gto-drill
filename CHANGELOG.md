@@ -71,6 +71,14 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
   table is the visual hero; the prose description is demoted to a collapsible
   ("The spot in words"); the action choice is the primary full-width control
   and confidence a lighter secondary strip; the note collapses until wanted.
+- **Per-hand feedback.** Each hand now plays in two beats: decide (pick your
+  action + confidence, then "Lock in & see GTO"), then reveal — the GTO line,
+  whether you matched it, and the GTO defence, immediately, hand by hand,
+  instead of only at the end of the game. When your opponent has already
+  played a hand, the reveal also shows their call, the agreement, and the
+  confidence gap. A "Test it" button stubs the upcoming Monte Carlo equity
+  tool. Opponent-answer gating moved from document-level redaction to
+  per-hand in the UI (an answer is shown only after you have locked yours).
 
 ### Removed
 - The turn-notification subsystem (Web Push). Reliable browser-to-browser push
