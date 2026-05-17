@@ -6,6 +6,11 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 ## [Unreleased]
 
 ### Added
+- Every one of the 45 GTO scenarios now has structured `replay` data — the
+  visual poker-table replay is no longer limited to the first 5. Each scenario
+  plays out the full six-handed table and complete betting line up to the
+  decision point. (Also corrected a card clash in scenario 043, where the
+  hero's hand collided with a board card.)
 - Local development server (`scripts/dev-server.mjs`) — a zero-dependency Node
   static file server so the app can be run and tested locally over
   `http://localhost` before pushing to GitHub Pages. Run with `npm start` or

@@ -1,6 +1,105 @@
 [
   {
     "scenario_id": "btn-vs-bb-3bet-pot-c-bet-decision-001",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": null,
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Kh",
+          "7d",
+          "2s"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "raise",
+          "amount_bb": 11
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 11
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb deep, BTN vs BB. You (BTN) opened to 2.5bb, BB 3-bet to 11bb, you called. Flop is Kh 7d 2s. BB checks to you. The pot is 22.5bb.",
     "board": "Kh 7d 2s",
     "action_history": ["BTN open 2.5bb", "BB 3-bet to 11bb", "BTN call", "BB check"],
@@ -11,6 +110,87 @@
   },
   {
     "scenario_id": "co-open-blind-defense-002",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BB",
+      "hero_cards": [
+        "As",
+        "5h"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        }
+      ]
+    },
     "description": "100bb deep, full ring, folded to CO. CO opens 2.5bb. Hero is in the BB with A5 offsuit. Action is on Hero.",
     "board": null,
     "action_history": ["folds to CO", "CO open 2.5bb", "SB fold"],
@@ -21,6 +201,118 @@
   },
   {
     "scenario_id": "small-blind-vs-button-srp-turn-overbet-003",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": null,
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "9c",
+          "6c",
+          "2h"
+        ],
+        "turn": [
+          "Tc"
+        ],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 3
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "call",
+          "amount_bb": 3
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        },
+        {
+          "street": "flop",
+          "actor": "SB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "bet",
+          "amount_bb": 3
+        },
+        {
+          "street": "flop",
+          "actor": "SB",
+          "type": "call",
+          "amount_bb": 3
+        },
+        {
+          "street": "turn",
+          "actor": "SB",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. SRP. SB completed, BTN raised to 3bb, SB called. Flop 9c 6c 2h: SB check, BTN bet 3bb, SB call. Turn 9c 6c 2h Tc (flush completing): SB check. Pot 14bb, stacks 87bb. Action on BTN.",
     "board": "9c 6c 2h Tc",
     "action_history": ["SB complete", "BTN raise 3bb", "SB call", "Flop SB check", "Flop BTN bet 3bb", "Flop SB call", "Turn SB check"],
@@ -31,6 +323,61 @@
   },
   {
     "scenario_id": "mid-stack-utg-rfi-pocket-pair-004",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 40,
+      "hero_seat": "UTG",
+      "hero_cards": [
+        "2c",
+        "2d"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 40
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 40
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 40
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 40
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 40
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 40
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        }
+      ]
+    },
     "description": "40bb effective. UTG (Hero) at a 6-max table with 22. Action on Hero.",
     "board": null,
     "action_history": ["UTG to act"],
@@ -41,6 +388,128 @@
   },
   {
     "scenario_id": "blind-vs-blind-river-thin-value-005",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "SB",
+      "hero_cards": [
+        "Kc",
+        "Qd"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Qh",
+          "7s",
+          "4d"
+        ],
+        "turn": [
+          "8s"
+        ],
+        "river": [
+          "3h"
+        ]
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "raise",
+          "amount_bb": 3
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 3
+        },
+        {
+          "street": "flop",
+          "actor": "SB",
+          "type": "bet",
+          "amount_bb": 2
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2
+        },
+        {
+          "street": "turn",
+          "actor": "SB",
+          "type": "check"
+        },
+        {
+          "street": "turn",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "river",
+          "actor": "BB",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. SB raised to 3bb, BB called. Flop Qh 7s 4d: SB bet 2bb, BB called. Turn Qh 7s 4d 8s: SB check, BB check. River Qh 7s 4d 8s 3h: BB check. Hero (SB) has KQ offsuit. Pot 10bb. Action on Hero.",
     "board": "Qh 7s 4d 8s 3h",
     "action_history": ["SB raise 3bb", "BB call", "Flop SB bet 2bb", "Flop BB call", "Turn SB check", "Turn BB check", "River BB check"],
@@ -51,6 +520,103 @@
   },
   {
     "scenario_id": "ip-flop-overbet-on-paired-board-006",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "9d",
+        "9s"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "8h",
+          "8d",
+          "3c"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        },
+        {
+          "street": "flop",
+          "actor": "CO",
+          "type": "bet",
+          "amount_bb": 5
+        }
+      ]
+    },
     "description": "100bb. CO opens 2.5bb, BTN (Hero) calls. Flop 8h 8d 3c: CO bets 5bb (~75% pot) into 6.5bb. Hero has 9d 9s. Action on Hero.",
     "board": "8h 8d 3c",
     "action_history": ["CO open 2.5bb", "BTN call", "Flop CO bet 5bb"],
@@ -61,6 +627,131 @@
   },
   {
     "scenario_id": "facing-river-overbet-with-bluff-catcher-007",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "Td",
+        "Jd"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Tc",
+          "9c",
+          "5d"
+        ],
+        "turn": [
+          "2h"
+        ],
+        "river": [
+          "6s"
+        ]
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        },
+        {
+          "street": "flop",
+          "actor": "UTG",
+          "type": "bet",
+          "amount_bb": 4
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 4
+        },
+        {
+          "street": "turn",
+          "actor": "UTG",
+          "type": "bet",
+          "amount_bb": 11
+        },
+        {
+          "street": "turn",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 11
+        },
+        {
+          "street": "river",
+          "actor": "UTG",
+          "type": "bet",
+          "amount_bb": 50
+        }
+      ]
+    },
     "description": "100bb. UTG opens 2.5bb, BTN calls. Flop Tc 9c 5d UTG bet 4bb, BTN call. Turn Tc 9c 5d 2h: UTG bet 11bb, BTN call. River Tc 9c 5d 2h 6s: UTG bets 50bb (~125% pot overbet). Hero (BTN) has Td Jd. Pot was 39bb. Action on Hero.",
     "board": "Tc 9c 5d 2h 6s",
     "action_history": ["UTG open 2.5bb", "BTN call", "Flop UTG bet 4bb", "Flop BTN call", "Turn UTG bet 11bb", "Turn BTN call", "River UTG overbet 50bb"],
@@ -148,6 +839,97 @@
   },
   {
     "scenario_id": "donk-bet-decision-low-board-010",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BB",
+      "hero_cards": [
+        "8h",
+        "4h"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "7c",
+          "6c",
+          "5d"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        }
+      ]
+    },
     "description": "100bb. CO opens 2.5bb. BB (Hero) calls. Flop 7c 6c 5d. Pot is 5.5bb. Hero has 8h 4h. Action on Hero.",
     "board": "7c 6c 5d",
     "action_history": ["CO open 2.5bb", "BB call", "Flop on BB"],
@@ -191,6 +973,134 @@
   },
   {
     "scenario_id": "bluff-catcher-with-blocker-012",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "Ah",
+        "Kc"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "9h",
+          "8h",
+          "2c"
+        ],
+        "turn": [
+          "Jh"
+        ],
+        "river": [
+          "4d"
+        ]
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "bet",
+          "amount_bb": 2
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2
+        },
+        {
+          "street": "turn",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "turn",
+          "actor": "BTN",
+          "type": "check"
+        },
+        {
+          "street": "river",
+          "actor": "BB",
+          "type": "bet",
+          "amount_bb": 8
+        }
+      ]
+    },
     "description": "100bb. SRP. BTN (Hero) opens 2.5bb, BB calls. Flop 9h 8h 2c: BB check, BTN bet 2bb, BB call. Turn 9h 8h 2c Jh (third heart): BB check, BTN check. River 9h 8h 2c Jh 4d: BB bets 8bb into a 9.5bb pot (~80%). Hero has AhKc.",
     "board": "9h 8h 2c Jh 4d",
     "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check", "Flop BTN bet 2bb", "Flop BB call", "Turn BB check", "Turn BTN check", "River BB bet 8bb"],
@@ -201,6 +1111,77 @@
   },
   {
     "scenario_id": "isolation-vs-limper-013",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "8h",
+        "9h"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "call",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        }
+      ]
+    },
     "description": "100bb cash. UTG limps 1bb. Folds to BTN (Hero) with 89 suited.",
     "board": null,
     "action_history": ["UTG limp", "folds to BTN"],
@@ -211,6 +1192,93 @@
   },
   {
     "scenario_id": "4bet-bluff-spot-014",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "HJ",
+      "hero_cards": [
+        "As",
+        "5s"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 9
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        }
+      ]
+    },
     "description": "100bb cash. Hero opens HJ to 2.5bb with A5 suited. BTN 3-bets to 9bb. Folds back to Hero.",
     "board": null,
     "action_history": ["HJ open 2.5bb", "BTN 3-bet 9bb"],
@@ -221,6 +1289,135 @@
   },
   {
     "scenario_id": "calling-station-river-thin-call-015",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "7d",
+        "7c"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Js",
+          "8c",
+          "3d"
+        ],
+        "turn": [
+          "4h"
+        ],
+        "river": [
+          "2s"
+        ]
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        },
+        {
+          "street": "flop",
+          "actor": "CO",
+          "type": "bet",
+          "amount_bb": 3
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 3
+        },
+        {
+          "street": "turn",
+          "actor": "CO",
+          "type": "check"
+        },
+        {
+          "street": "turn",
+          "actor": "BTN",
+          "type": "bet",
+          "amount_bb": 5
+        },
+        {
+          "street": "turn",
+          "actor": "CO",
+          "type": "call",
+          "amount_bb": 5
+        },
+        {
+          "street": "river",
+          "actor": "CO",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. CO opens 2.5bb, BTN (Hero) calls. Flop Js 8c 3d: CO bet 3bb, BTN call. Turn Js 8c 3d 4h: CO check, BTN bet 5bb, CO call. River Js 8c 3d 4h 2s: CO checks. Hero has 7d 7c. Pot is 19bb.",
     "board": "Js 8c 3d 4h 2s",
     "action_history": ["CO open 2.5bb", "BTN call", "Flop CO bet 3bb", "Flop BTN call", "Turn CO check", "Turn BTN bet 5bb", "Turn CO call", "River CO check"],
@@ -268,6 +1465,137 @@
   },
   {
     "scenario_id": "river-overpair-vs-check-raise-017",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "CO",
+      "hero_cards": [
+        "Qc",
+        "Qd"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "7h",
+          "4s",
+          "2d"
+        ],
+        "turn": [
+          "5s"
+        ],
+        "river": [
+          "6c"
+        ]
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        },
+        {
+          "street": "flop",
+          "actor": "CO",
+          "type": "bet",
+          "amount_bb": 2
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 2
+        },
+        {
+          "street": "turn",
+          "actor": "CO",
+          "type": "bet",
+          "amount_bb": 6
+        },
+        {
+          "street": "turn",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 6
+        },
+        {
+          "street": "river",
+          "actor": "CO",
+          "type": "bet",
+          "amount_bb": 10
+        },
+        {
+          "street": "river",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 35
+        }
+      ]
+    },
     "description": "100bb. CO (Hero) opens 2.5bb with QQ. BTN calls. Flop 7h 4s 2d: CO bet 2bb, BTN call. Turn 7h 4s 2d 5s: CO bet 6bb, BTN call. River 7h 4s 2d 5s 6c (4-card straight on board): CO bet 10bb, BTN raises to 35bb. Hero must decide. Stacks left ~80bb each.",
     "board": "7h 4s 2d 5s 6c",
     "action_history": ["CO open 2.5bb", "BTN call", "Flop CO bet 2bb", "Flop BTN call", "Turn CO bet 6bb", "Turn BTN call", "River CO bet 10bb", "River BTN raise 35bb"],
@@ -278,6 +1606,114 @@
   },
   {
     "scenario_id": "double-up-spot-set-vs-overpair-018",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "6c",
+        "6d"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "6h",
+          "9c",
+          "2s"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "bet",
+          "amount_bb": 2
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "raise",
+          "amount_bb": 8
+        }
+      ]
+    },
     "description": "100bb. Hero opens BTN 2.5bb with 66. BB calls. Flop 6h 9c 2s. BB checks, Hero bets 2bb, BB raises to 8bb. Hero is on the BTN with bottom set.",
     "board": "6h 9c 2s",
     "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check", "Flop BTN bet 2bb", "Flop BB raise 8bb"],
@@ -288,6 +1724,133 @@
   },
   {
     "scenario_id": "river-bluff-with-no-showdown-019",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "5c",
+        "4c"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Jh",
+          "7c",
+          "3c"
+        ],
+        "turn": [
+          "Td"
+        ],
+        "river": [
+          "2s"
+        ]
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "bet",
+          "amount_bb": 2
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2
+        },
+        {
+          "street": "turn",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "turn",
+          "actor": "BTN",
+          "type": "check"
+        },
+        {
+          "street": "river",
+          "actor": "BB",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. BTN (Hero) opens with 5c 4c. BB calls. Flop Jh 7c 3c: BB check, BTN bet 2bb, BB call. Turn Jh 7c 3c Td: BB check, BTN check. River Jh 7c 3c Td 2s: BB checks. Pot 9bb. Hero has 5c 4c (missed flush, missed straight, busted).",
     "board": "Jh 7c 3c Td 2s",
     "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check", "Flop BTN bet 2bb", "Flop BB call", "Turn BB check", "Turn BTN check", "River BB check"],
@@ -298,6 +1861,93 @@
   },
   {
     "scenario_id": "limp-reraise-trap-020",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "UTG",
+      "hero_cards": [
+        "As",
+        "Ah"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "call",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "raise",
+          "amount_bb": 4
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        }
+      ]
+    },
     "description": "100bb. UTG limps 1bb. MP raises to 4bb. Folds back to UTG (Hero) who has AA. Action on Hero.",
     "board": null,
     "action_history": ["UTG limp", "MP raise to 4bb"],
@@ -308,6 +1958,114 @@
   },
   {
     "scenario_id": "four-bet-pot-range-cbet-021",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "Ac",
+        "Qd"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Kd",
+          "7s",
+          "4h"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "raise",
+          "amount_bb": 9
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 21
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "call",
+          "amount_bb": 21
+        },
+        {
+          "street": "flop",
+          "actor": "SB",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. SB 3-bets Hero's BTN open, Hero (BTN) 4-bets to 21bb, SB calls. Flop Kd 7s 4h. Pot ~43bb with ~79bb behind (SPR ~1.8). SB checks. Hero holds Ac Qd.",
     "board": "Kd 7s 4h",
     "action_history": ["BTN open 2.5bb", "SB 3-bet to 9bb", "BTN 4-bet to 21bb", "SB call", "Flop SB check"],
@@ -318,6 +2076,140 @@
   },
   {
     "scenario_id": "river-bluff-busted-draw-blocker-022",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "CO",
+      "hero_cards": [
+        "Ks",
+        "Ts"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Qs",
+          "9s",
+          "4d"
+        ],
+        "turn": [
+          "6c"
+        ],
+        "river": [
+          "2h"
+        ]
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "CO",
+          "type": "bet",
+          "amount_bb": 2
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2
+        },
+        {
+          "street": "turn",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "turn",
+          "actor": "CO",
+          "type": "bet",
+          "amount_bb": 7
+        },
+        {
+          "street": "turn",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 7
+        },
+        {
+          "street": "river",
+          "actor": "BB",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. SRP. CO (Hero) opens 2.5bb, BB calls. Flop Qs 9s 4d: BB check, CO bet 2bb, BB call. Turn Qs 9s 4d 6c: BB check, CO bet 7bb, BB call. River Qs 9s 4d 6c 2h: BB checks. Hero has Ks Ts (missed flush and straight draw). Pot ~24bb.",
     "board": "Qs 9s 4d 6c 2h",
     "action_history": ["CO open 2.5bb", "BB call", "Flop BB check", "Flop CO bet 2bb", "Flop BB call", "Turn BB check", "Turn CO bet 7bb", "Turn BB call", "River BB check"],
@@ -328,6 +2220,108 @@
   },
   {
     "scenario_id": "bb-monster-draw-check-raise-023",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BB",
+      "hero_cards": [
+        "Jh",
+        "Th"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "9h",
+          "8h",
+          "4c"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "bet",
+          "amount_bb": 2
+        }
+      ]
+    },
     "description": "100bb. BTN opens 2.5bb, BB (Hero) calls. Flop 9h 8h 4c: BB check, BTN bet 2bb (~35% pot). Hero has Jh Th (open-ended straight draw plus flush draw).",
     "board": "9h 8h 4c",
     "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check", "Flop BTN bet 2bb"],
@@ -338,6 +2332,109 @@
   },
   {
     "scenario_id": "turn-probe-bet-vs-checked-flop-024",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BB",
+      "hero_cards": [
+        "8c",
+        "7c"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Kc",
+          "8d",
+          "3s"
+        ],
+        "turn": [
+          "5h"
+        ],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "HJ",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. SRP. HJ opens 2.5bb, BB (Hero) calls. Flop Kc 8d 3s: BB check, HJ check. Turn Kc 8d 3s 5h: action on BB. Hero has 8c 7c (middle pair). Pot 6bb.",
     "board": "Kc 8d 3s 5h",
     "action_history": ["HJ open 2.5bb", "BB call", "Flop BB check", "Flop HJ check", "Turn on BB"],
@@ -348,6 +2445,109 @@
   },
   {
     "scenario_id": "delayed-cbet-after-flop-check-025",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "CO",
+      "hero_cards": [
+        "Ac",
+        "Jc"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Ts",
+          "6s",
+          "2c"
+        ],
+        "turn": [
+          "7d"
+        ],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        },
+        {
+          "street": "flop",
+          "actor": "CO",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. CO (Hero) opens 2.5bb, BTN calls. Flop Ts 6s 2c: CO check, BTN check. Turn Ts 6s 2c 7d: action on CO. Hero has Ac Jc. Pot 6.5bb.",
     "board": "Ts 6s 2c 7d",
     "action_history": ["CO open 2.5bb", "BTN call", "Flop CO check", "Flop BTN check", "Turn on CO"],
@@ -358,6 +2558,93 @@
   },
   {
     "scenario_id": "flat-suited-connector-vs-3bet-ip-026",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "7h",
+        "6h"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "raise",
+          "amount_bb": 11
+        }
+      ]
+    },
     "description": "100bb cash. Hero opens BTN 2.5bb with 7h 6h. BB 3-bets to 11bb. Action back on Hero.",
     "board": null,
     "action_history": ["BTN open 2.5bb", "BB 3-bet to 11bb"],
@@ -368,6 +2655,88 @@
   },
   {
     "scenario_id": "bb-squeeze-vs-open-and-caller-027",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BB",
+      "hero_cards": [
+        "Ah",
+        "Jh"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        }
+      ]
+    },
     "description": "100bb. HJ opens 2.5bb, CO calls. Hero is in the BB with Ah Jh. Action on Hero.",
     "board": null,
     "action_history": ["HJ open 2.5bb", "CO call", "SB fold", "BB on Hero"],
@@ -378,6 +2747,81 @@
   },
   {
     "scenario_id": "sb-vs-bb-raise-first-in-028",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "SB",
+      "hero_cards": [
+        "Kd",
+        "9d"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        }
+      ]
+    },
     "description": "100bb cash. Folded around to the SB (Hero), who holds Kd 9d. Only the BB remains. Action on Hero.",
     "board": null,
     "action_history": ["folds to SB"],
@@ -388,6 +2832,114 @@
   },
   {
     "scenario_id": "top-two-vs-check-raise-wet-board-029",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "Qs",
+        "Js"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Qh",
+          "Jd",
+          "9d"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "bet",
+          "amount_bb": 4
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "raise",
+          "amount_bb": 14
+        }
+      ]
+    },
     "description": "100bb. Hero opens BTN 2.5bb with Qs Js, BB calls. Flop Qh Jd 9d: BB check, BTN bet 4bb, BB raises to 14bb. Hero has top two pair. Pot was 6.5bb.",
     "board": "Qh Jd 9d",
     "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check", "Flop BTN bet 4bb", "Flop BB raise to 14bb"],
@@ -398,6 +2950,97 @@
   },
   {
     "scenario_id": "overpair-on-monotone-flop-030",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "CO",
+      "hero_cards": [
+        "Ks",
+        "Kh"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "9c",
+          "6c",
+          "3c"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        }
+      ]
+    },
     "description": "100bb. CO (Hero) opens 2.5bb with Ks Kh, BTN calls. Flop 9c 6c 3c (monotone). Pot 6.5bb. Action on Hero. Hero holds no club.",
     "board": "9c 6c 3c",
     "action_history": ["CO open 2.5bb", "BTN call", "Flop on CO"],
@@ -408,6 +3051,121 @@
   },
   {
     "scenario_id": "turn-barrel-give-up-031",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "Ac",
+        "5c"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Kd",
+          "8h",
+          "3s"
+        ],
+        "turn": [
+          "9h"
+        ],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "bet",
+          "amount_bb": 2
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2
+        },
+        {
+          "street": "turn",
+          "actor": "BB",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. Hero opens BTN 2.5bb with Ac 5c, BB calls. Flop Kd 8h 3s: BB check, BTN bet 2bb, BB call. Turn Kd 8h 3s 9h: BB check. Hero has Ac 5c (no pair, no draw).",
     "board": "Kd 8h 3s 9h",
     "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check", "Flop BTN bet 2bb", "Flop BB call", "Turn BB check"],
@@ -418,6 +3176,128 @@
   },
   {
     "scenario_id": "overbet-the-nuts-vs-capped-range-032",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BB",
+      "hero_cards": [
+        "Tc",
+        "9c"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "7h",
+          "6h",
+          "2c"
+        ],
+        "turn": [
+          "5d"
+        ],
+        "river": [
+          "8s"
+        ]
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "CO",
+          "type": "bet",
+          "amount_bb": 2
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2
+        },
+        {
+          "street": "turn",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "turn",
+          "actor": "CO",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. SRP. CO opens 2.5bb, BB (Hero) calls. Flop 7h 6h 2c: BB check, CO bet 2bb, BB call. Turn 7h 6h 2c 5d: BB check, CO check. River 7h 6h 2c 5d 8s: action on BB. Hero has Tc 9c — the nut straight. Pot 12bb.",
     "board": "7h 6h 2c 5d 8s",
     "action_history": ["CO open 2.5bb", "BB call", "Flop BB check", "Flop CO bet 2bb", "Flop BB call", "Turn BB check", "Turn CO check", "River on BB"],
@@ -428,6 +3308,109 @@
   },
   {
     "scenario_id": "tptk-vs-flop-min-raise-033",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "HJ",
+      "hero_cards": [
+        "Ah",
+        "Kd"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Ac",
+          "8c",
+          "5h"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        },
+        {
+          "street": "flop",
+          "actor": "HJ",
+          "type": "bet",
+          "amount_bb": 4
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 9
+        }
+      ]
+    },
     "description": "100bb. Hero opens MP 2.5bb with Ah Kd, BTN calls. Flop Ac 8c 5h: MP bet 4bb, BTN raises to 9bb (a small click-back raise). Hero has top pair top kicker.",
     "board": "Ac 8c 5h",
     "action_history": ["MP open 2.5bb", "BTN call", "Flop MP bet 4bb", "Flop BTN raise to 9bb"],
@@ -438,6 +3421,98 @@
   },
   {
     "scenario_id": "multiway-cbet-sizing-overpair-034",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "UTG",
+      "hero_cards": [
+        "Qh",
+        "Qd"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Jh",
+          "6c",
+          "3d"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        }
+      ]
+    },
     "description": "100bb. UTG (Hero) opens 2.5bb with Qh Qd, MP calls, BTN calls. Flop Jh 6c 3d. Pot ~9bb, three-handed. Action on Hero.",
     "board": "Jh 6c 3d",
     "action_history": ["UTG open 2.5bb", "MP call", "BTN call", "Flop on UTG"],
@@ -448,6 +3523,114 @@
   },
   {
     "scenario_id": "nut-flush-draw-check-raise-3bet-pot-035",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BB",
+      "hero_cards": [
+        "Ac",
+        "Tc"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "8c",
+          "7c",
+          "5d"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "raise",
+          "amount_bb": 11
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 11
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "bet",
+          "amount_bb": 6
+        }
+      ]
+    },
     "description": "100bb. Hero 3-bets from the BB over a BTN open; BTN calls. Flop 8c 7c 5d. Pot ~19bb. Hero checks, BTN bets 6bb. Hero has Ac Tc (nut flush draw plus a gutshot).",
     "board": "8c 7c 5d",
     "action_history": ["BTN open 2.5bb", "BB 3-bet to 11bb", "BTN call", "Flop BB check", "Flop BTN bet 6bb"],
@@ -458,6 +3641,76 @@
   },
   {
     "scenario_id": "icm-bubble-fold-marginal-shove-036",
+    "replay": {
+      "format": "tournament",
+      "stack_depth_bb": 20,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "Ah",
+        "9h"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 20
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 20
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 20
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 20
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 20
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 20
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        }
+      ]
+    },
     "description": "Satellite-style final table: 4 players left, 3 seats paid, all stacks roughly equal at ~20bb. Folded to Hero on the BTN with Ah 9h. Action on Hero.",
     "board": null,
     "action_history": ["folds to BTN"],
@@ -468,6 +3721,87 @@
   },
   {
     "scenario_id": "bb-flat-offsuit-broadway-vs-btn-037",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BB",
+      "hero_cards": [
+        "Kc",
+        "Js"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        }
+      ]
+    },
     "description": "100bb. Folded to the BTN, who opens 2.5bb. Hero is in the BB with Kc Js (offsuit). Action on Hero.",
     "board": null,
     "action_history": ["folds to BTN", "BTN open 2.5bb", "SB fold"],
@@ -478,6 +3812,111 @@
   },
   {
     "scenario_id": "middle-set-on-flush-turn-038",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "CO",
+      "hero_cards": [
+        "5h",
+        "5s"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "9h",
+          "5d",
+          "2h"
+        ],
+        "turn": [
+          "Kh"
+        ],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        },
+        {
+          "street": "flop",
+          "actor": "CO",
+          "type": "bet",
+          "amount_bb": 3
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "call",
+          "amount_bb": 3
+        }
+      ]
+    },
     "description": "100bb. CO (Hero) opens 2.5bb with 5h 5s, BTN calls. Flop 9h 5d 2h: CO bet 3bb, BTN call. Turn 9h 5d 2h Kh (front-door flush completes). Pot ~13bb. Action on Hero.",
     "board": "9h 5d 2h Kh",
     "action_history": ["CO open 2.5bb", "BTN call", "Flop CO bet 3bb", "Flop BTN call", "Turn on CO"],
@@ -488,6 +3927,103 @@
   },
   {
     "scenario_id": "fold-ace-high-vs-donk-lead-039",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "CO",
+      "hero_cards": [
+        "Ad",
+        "Kc"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "6s",
+          "5s",
+          "4d"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "bet",
+          "amount_bb": 3
+        }
+      ]
+    },
     "description": "100bb. Hero opens CO 2.5bb with Ad Kc, BB calls. Flop 6s 5s 4d: BB leads (donks) 3bb into a 6bb pot. Hero has ace-king high with a backdoor flush draw.",
     "board": "6s 5s 4d",
     "action_history": ["CO open 2.5bb", "BB call", "Flop BB donk bet 3bb"],
@@ -498,6 +4034,133 @@
   },
   {
     "scenario_id": "river-blocker-no-bluff-check-040",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "Ah",
+        "5h"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Kh",
+          "9h",
+          "4c"
+        ],
+        "turn": [
+          "7s"
+        ],
+        "river": [
+          "2d"
+        ]
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "BTN",
+          "type": "bet",
+          "amount_bb": 2
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2
+        },
+        {
+          "street": "turn",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "turn",
+          "actor": "BTN",
+          "type": "check"
+        },
+        {
+          "street": "river",
+          "actor": "BB",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. BTN (Hero) opens 2.5bb with Ah 5h, BB calls. Flop Kh 9h 4c: BB check, BTN bet 2bb, BB call. Turn Kh 9h 4c 7s: BB check, BTN check. River Kh 9h 4c 7s 2d: BB checks. Hero has Ah 5h — a missed flush, ace-high. Pot 9bb.",
     "board": "Kh 9h 4c 7s 2d",
     "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check", "Flop BTN bet 2bb", "Flop BB call", "Turn BB check", "Turn BTN check", "River BB check"],
@@ -508,6 +4171,106 @@
   },
   {
     "scenario_id": "call-5bet-shove-with-ak-041",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "HJ",
+      "hero_cards": [
+        "Ah",
+        "Ks"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 9
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "raise",
+          "amount_bb": 21
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 100,
+          "all_in": true
+        }
+      ]
+    },
     "description": "100bb. Hero opens HJ 2.5bb with Ah Ks, BTN 3-bets to 9bb, Hero 4-bets to 21bb, BTN moves all-in for 100bb. Action on Hero.",
     "board": null,
     "action_history": ["HJ open 2.5bb", "BTN 3-bet to 9bb", "HJ 4-bet to 21bb", "BTN 5-bet all-in 100bb"],
@@ -518,6 +4281,102 @@
   },
   {
     "scenario_id": "range-cbet-small-dry-ace-board-042",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "Kc",
+        "Tc"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "As",
+          "Kd",
+          "7c"
+        ],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        }
+      ]
+    },
     "description": "100bb. BTN (Hero) opens 2.5bb, BB calls. Flop As Kd 7c. BB checks. Hero has Kc Tc — second pair. Pot 5.5bb.",
     "board": "As Kd 7c",
     "action_history": ["BTN open 2.5bb", "BB call", "Flop BB check"],
@@ -528,7 +4387,122 @@
   },
   {
     "scenario_id": "turn-check-back-pot-control-043",
-    "description": "100bb. Hero opens CO 2.5bb with Ad Js, BB calls. Flop Js 8d 3c: BB check, CO bet 3bb, BB call. Turn Js 8d 3c Qh: BB check. Hero has top pair, decent kicker. Pot ~12bb.",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "CO",
+      "hero_cards": [
+        "Ad",
+        "Jc"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [
+          "Js",
+          "8d",
+          "3c"
+        ],
+        "turn": [
+          "Qh"
+        ],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "check"
+        },
+        {
+          "street": "flop",
+          "actor": "CO",
+          "type": "bet",
+          "amount_bb": 3
+        },
+        {
+          "street": "flop",
+          "actor": "BB",
+          "type": "call",
+          "amount_bb": 3
+        },
+        {
+          "street": "turn",
+          "actor": "BB",
+          "type": "check"
+        }
+      ]
+    },
+    "description": "100bb. Hero opens CO 2.5bb with Ad Jc, BB calls. Flop Js 8d 3c: BB check, CO bet 3bb, BB call. Turn Js 8d 3c Qh: BB check. Hero has top pair, decent kicker. Pot ~12bb.",
     "board": "Js 8d 3c Qh",
     "action_history": ["CO open 2.5bb", "BB call", "Flop BB check", "Flop CO bet 3bb", "Flop BB call", "Turn BB check"],
     "available_actions": ["Check back", "Bet 6bb (~50%)", "Bet 12bb (~100%)"],
@@ -538,6 +4512,93 @@
   },
   {
     "scenario_id": "flat-jj-vs-3bet-in-position-044",
+    "replay": {
+      "format": "cash",
+      "stack_depth_bb": 100,
+      "hero_seat": "BTN",
+      "hero_cards": [
+        "Js",
+        "Jd"
+      ],
+      "starting_pot_bb": 0,
+      "seats": [
+        {
+          "pos": "UTG",
+          "stack_bb": 100
+        },
+        {
+          "pos": "HJ",
+          "stack_bb": 100
+        },
+        {
+          "pos": "CO",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BTN",
+          "stack_bb": 100
+        },
+        {
+          "pos": "SB",
+          "stack_bb": 100
+        },
+        {
+          "pos": "BB",
+          "stack_bb": 100
+        }
+      ],
+      "board": {
+        "flop": [],
+        "turn": [],
+        "river": []
+      },
+      "actions": [
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "post",
+          "amount_bb": 0.5
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "post",
+          "amount_bb": 1
+        },
+        {
+          "street": "preflop",
+          "actor": "UTG",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "HJ",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "CO",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BTN",
+          "type": "raise",
+          "amount_bb": 2.5
+        },
+        {
+          "street": "preflop",
+          "actor": "SB",
+          "type": "fold"
+        },
+        {
+          "street": "preflop",
+          "actor": "BB",
+          "type": "raise",
+          "amount_bb": 11
+        }
+      ]
+    },
     "description": "100bb. Hero opens BTN 2.5bb with Js Jd. BB 3-bets to 11bb. Action back on Hero.",
     "board": null,
     "action_history": ["BTN open 2.5bb", "BB 3-bet to 11bb"],
