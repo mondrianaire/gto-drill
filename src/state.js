@@ -1,13 +1,13 @@
 // state.js — section-2 (State and Backend Adapter)
 //
-// Wraps Firebase Firestore + Anonymous Auth. The ONLY module in the app that
+// Wraps Firebase Firestore + Google Auth. The ONLY module in the app that
 // imports the Firebase SDK directly. Every other section uses this adapter's
 // exported functions.
 //
 // We use the official Firebase JS SDK loaded via ES module imports from the
 // gstatic CDN. The version is pinned to 10.12.x — a 10.x stable line. The
-// user's config (apiKey/projectId/etc., plus VAPID public key) lives in
-// ../config.js and is imported here.
+// user's Firebase config (apiKey/projectId/etc.) lives in ../config.js and
+// is imported here.
 //
 // Idempotency:
 //   - initFirebase() guards against double-init.
@@ -21,7 +21,11 @@ import {
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-app.js";
 import {
   getAuth,
-  signInAnonymously as fbSignInAnonymously,
+  GoogleAuthProvider,
+  signInWithPopup,
+  signInWithRedirect,
+  getRedirectResult,
+  signOut,
   onAuthStateChanged,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-auth.js";
 import {
@@ -30,11 +34,13 @@ import {
   enableNetwork,
   doc,
   setDoc,
-  getDoc,
   updateDoc,
   onSnapshot,
   serverTimestamp,
   runTransaction,
+  collection,
+  query,
+  where,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 import { sampleNScenarioIds } from "./scenarios.js";
@@ -47,10 +53,11 @@ let _app = null;
 let _auth = null;
 let _db = null;
 let _uid = null;
+let _user = null;
 let _authReadyPromise = null;
 
 // -----------------------------------------------------------------------
-// Lifecycle: initFirebase + signInAnonymously
+// Lifecycle: initFirebase + Google Auth
 // -----------------------------------------------------------------------
 
 /**
@@ -90,41 +97,87 @@ export async function initFirebase(config) {
 }
 
 /**
- * Sign in anonymously and resolve with the UID. Idempotent: if already
- * signed in, returns the existing UID.
- * @returns {Promise<{uid: string}>}
+ * Resolve the initial auth state. Completes any pending redirect sign-in,
+ * then resolves once Firebase has determined whether a user is signed in
+ * (from a persisted session) or not. Idempotent.
+ * @returns {Promise<Object|null>} the signed-in user, or null.
  */
-export async function signInAnonymously() {
-  if (!_auth) throw new Error("initFirebase() must be called before signInAnonymously()");
-  if (_uid) return { uid: _uid };
-  if (!_authReadyPromise) {
-    _authReadyPromise = new Promise((resolve, reject) => {
-      const unsub = onAuthStateChanged(
-        _auth,
-        (user) => {
-          if (user) {
-            _uid = user.uid;
-            unsub();
-            resolve({ uid: _uid });
-          }
-        },
-        (err) => {
-          unsub();
-          reject(err);
-        }
-      );
-      fbSignInAnonymously(_auth).catch((err) => {
-        unsub();
-        reject(err);
+export function initAuth() {
+  if (_authReadyPromise) return _authReadyPromise;
+  if (!_auth) throw new Error("initFirebase() must be called before initAuth()");
+  _authReadyPromise = (async () => {
+    // If we just came back from a redirect-based sign-in, consume it first.
+    try { await getRedirectResult(_auth); } catch (_) { /* no pending redirect */ }
+    return new Promise((resolve) => {
+      onAuthStateChanged(_auth, (user) => {
+        // A leftover anonymous session (from before Google sign-in existed)
+        // is treated as "not signed in" so the Google gate still shows.
+        const real = user && !user.isAnonymous ? user : null;
+        _user = real;
+        _uid = real ? real.uid : null;
+        // resolve() only takes effect on the first call; later sign-in /
+        // sign-out events still keep _user and _uid current.
+        resolve(_user);
       });
     });
-  }
+  })();
   return _authReadyPromise;
+}
+
+/**
+ * Trigger Google sign-in. Uses a popup; falls back to a full-page redirect
+ * on browsers that block popups (common on mobile). MUST be called from a
+ * user gesture (click handler).
+ * @returns {Promise<Object|null>} the signed-in user, or null when a
+ *   redirect was started (the page navigates away in that case).
+ */
+export async function signInWithGoogle() {
+  if (!_auth) throw new Error("initFirebase() must be called first");
+  const provider = new GoogleAuthProvider();
+  try {
+    const cred = await signInWithPopup(_auth, provider);
+    _user = cred.user;
+    _uid = cred.user.uid;
+    return _user;
+  } catch (err) {
+    const code = err && err.code;
+    if (
+      code === "auth/popup-blocked" ||
+      code === "auth/cancelled-popup-request" ||
+      code === "auth/operation-not-supported-in-this-environment"
+    ) {
+      await signInWithRedirect(_auth, provider);
+      return null; // the page is navigating away to Google.
+    }
+    throw err; // e.g. auth/popup-closed-by-user — let the caller surface it.
+  }
+}
+
+/** Sign the current user out. */
+export async function signOutUser() {
+  if (!_auth) return;
+  await signOut(_auth);
+  _user = null;
+  _uid = null;
+}
+
+/**
+ * @returns {{uid:string, displayName:(string|null), email:(string|null),
+ *            photoURL:(string|null)}|null} the current user, or null.
+ */
+export function getCurrentUser() {
+  if (!_user) return null;
+  return {
+    uid: _user.uid,
+    displayName: _user.displayName || null,
+    email: _user.email || null,
+    photoURL: _user.photoURL || null,
+  };
 }
 
 export function getCurrentUid() {
   if (!_uid) {
-    throw new Error("getCurrentUid() called before signInAnonymously() resolved");
+    throw new Error("getCurrentUid() called before the user is signed in");
   }
   return _uid;
 }
@@ -145,99 +198,72 @@ function generateShareCode(len = 6) {
   return s;
 }
 
-function buildJoinUrl(code) {
-  // Anchored at current origin + pathname so the URL reflects whichever
-  // GitHub Pages subpath the artifact is served from.
-  const loc = globalThis.location;
-  if (!loc) return "?join=" + encodeURIComponent(code);
-  return `${loc.origin}${loc.pathname}?join=${encodeURIComponent(code)}`;
-}
-
 // -----------------------------------------------------------------------
-// Game lifecycle: createGame, joinGame
+// Game lifecycle: createGame, joinGame, watchOpenLobbies, cancelLobby
 // -----------------------------------------------------------------------
 
 /**
- * Create a new game in Firestore.
+ * Create a new game (an open lobby) in Firestore. The creator is the owner;
+ * their Google name and photo identify the lobby to other players.
  * @param {{rounds:number, handful_size:number}} config
- * @param {string} displayName
- * @returns {Promise<{gameId:string, shareCode:string, joinUrl:string}>}
+ * @returns {Promise<{gameId:string}>}
  */
-export async function createGame(config, displayName) {
+export async function createGame(config) {
   if (!_db) throw new Error("initFirebase() must be called first");
-  const uid = getCurrentUid();
+  const me = getCurrentUser();
+  if (!me) throw new Error("Must be signed in to create a game");
   const rounds = clampInt(config.rounds, 1, 10);
   const handful = clampInt(config.handful_size, 1, 10);
 
-  // A non-existent game document cannot be read under the Security Rules
-  // (the read rule dereferences resource.data, which is null for a missing
-  // doc), so we cannot probe a candidate code for availability. Instead we
-  // generate a random code and write directly: with 32^6 (~1 billion) codes
-  // and two players per game, collisions are negligible, and the create rule
-  // rejects any write that would land on an existing game — so a collision
+  // The game id is a random code used as the Firestore document id. With
+  // 32^6 (~1 billion) values, collisions are negligible, and the create rule
+  // rejects a write that would land on an existing game — so a collision
   // fails safely rather than corrupting another game.
-  const shareCode = generateShareCode(6);
+  const gameId = generateShareCode(6);
 
-  const scenarioSeed = shareCode; // deterministic per game
+  const scenarioSeed = gameId; // deterministic per game
   const gameDoc = {
-    gameId: shareCode,
+    gameId,
     createdAt: new Date().toISOString(),
     createdAtServer: serverTimestamp(),
     config: { rounds, handful_size: handful, scenario_seed: scenarioSeed },
-    participantUids: [uid], // queryable array for Security Rules
-    participants: [
-      {
-        uid,
-        displayName: (displayName || "Player A").slice(0, 40),
-        joinedAt: new Date().toISOString(),
-        pushSubscription: null,
-      },
-    ],
-    rounds: precomputeRounds(rounds, handful, scenarioSeed, [uid]),
+    participantUids: [me.uid], // queryable array for Security Rules
+    participants: [participantRecord(me)],
+    rounds: precomputeRounds(rounds, handful, scenarioSeed, [me.uid]),
     status: "waiting_for_opponent",
   };
-  await setDoc(doc(_db, "games", shareCode), gameDoc);
-  return {
-    gameId: shareCode,
-    shareCode,
-    joinUrl: buildJoinUrl(shareCode),
-  };
+  await setDoc(doc(_db, "games", gameId), gameDoc);
+  return { gameId };
 }
 
 /**
- * Join an existing game by share code. Returns gameId on success, or an
- * error tag on failure (so section-5 can render a specific message).
- * @param {string} shareCode
- * @param {string} displayName
- * @returns {Promise<{gameId:string}|{error:'not_found'|'game_full'|'permission_denied'}>}
+ * Join an open lobby by its game id. Returns gameId on success, or an error
+ * tag on failure (so section-5 can render a specific message).
+ * @param {string} gameId
+ * @returns {Promise<{gameId:string}|{error:string}>}
  */
-export async function joinGame(shareCode, displayName) {
+export async function joinGame(gameId) {
   if (!_db) throw new Error("initFirebase() must be called first");
-  const uid = getCurrentUid();
-  const normalized = String(shareCode || "").trim().toUpperCase();
-  if (!normalized) return { error: "not_found" };
-  const ref = doc(_db, "games", normalized);
+  const me = getCurrentUser();
+  if (!me) return { error: "not_signed_in" };
+  const id = String(gameId || "").trim().toUpperCase();
+  if (!id) return { error: "not_found" };
+  const ref = doc(_db, "games", id);
   try {
     const result = await runTransaction(_db, async (tx) => {
       const snap = await tx.get(ref);
       if (!snap.exists()) return { error: "not_found" };
       const data = snap.data();
+      if (data.status === "cancelled") return { error: "cancelled" };
       const uids = data.participantUids || [];
-      if (uids.includes(uid)) return { gameId: normalized };
+      if (uids.includes(me.uid)) return { gameId: id };
       if (uids.length >= 2) return { error: "game_full" };
-      const newParticipants = (data.participants || []).concat([
-        {
-          uid,
-          displayName: (displayName || "Player B").slice(0, 40),
-          joinedAt: new Date().toISOString(),
-          pushSubscription: null,
-        },
-      ]);
-      const newUids = uids.concat([uid]);
+      const newParticipants = (data.participants || []).concat([participantRecord(me)]);
+      const newUids = uids.concat([me.uid]);
       // Set round leader alternation now that we have both UIDs.
       const newRounds = (data.rounds || []).map((r, i) => ({
         ...r,
-        leaderUid: i % 2 === 0 ? uids[0] : uid,
+        leaderUid: i % 2 === 0 ? uids[0] : me.uid,
       }));
       tx.update(ref, {
         participantUids: newUids,
@@ -245,13 +271,68 @@ export async function joinGame(shareCode, displayName) {
         rounds: newRounds,
         status: "in_progress",
       });
-      return { gameId: normalized };
+      return { gameId: id };
     });
     return result;
   } catch (err) {
     if (err && err.code === "permission-denied") return { error: "permission_denied" };
     throw err;
   }
+}
+
+/** Build a participant record from a signed-in user. */
+function participantRecord(me) {
+  return {
+    uid: me.uid,
+    displayName: (me.displayName || me.email || "Player").slice(0, 60),
+    photoURL: me.photoURL || null,
+    joinedAt: new Date().toISOString(),
+  };
+}
+
+/**
+ * Subscribe to the list of open lobbies (games waiting for an opponent).
+ * The viewer's own lobbies are filtered out. onChange receives an array of
+ * lobby summaries, or (null, error) if the read failed.
+ * @param {(lobbies:(Array|null), error?:Error)=>void} onChange
+ * @returns {()=>void} unsubscribe
+ */
+export function watchOpenLobbies(onChange) {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  const q = query(collection(_db, "games"), where("status", "==", "waiting_for_opponent"));
+  return onSnapshot(
+    q,
+    (snap) => {
+      const lobbies = [];
+      snap.forEach((d) => {
+        const g = d.data();
+        const owner = (g.participants || [])[0] || {};
+        if (owner.uid === _uid) return; // can't join your own lobby
+        lobbies.push({
+          gameId: g.gameId || d.id,
+          ownerUid: owner.uid || null,
+          ownerName: owner.displayName || "Player",
+          ownerPhoto: owner.photoURL || null,
+          rounds: (g.config && g.config.rounds) || 0,
+          handfulSize: (g.config && g.config.handful_size) || 0,
+          createdAt: g.createdAt || "",
+        });
+      });
+      // Newest first.
+      lobbies.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+      onChange(lobbies);
+    },
+    (err) => {
+      console.warn("watchOpenLobbies error:", err);
+      onChange(null, err);
+    }
+  );
+}
+
+/** Cancel an open lobby (owner abandons it before anyone joins). */
+export async function cancelLobby(gameId) {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  await updateDoc(doc(_db, "games", gameId), { status: "cancelled" });
 }
 
 // -----------------------------------------------------------------------
@@ -340,58 +421,20 @@ export async function submitHandful(gameId, roundIndex, submissions) {
 }
 
 // -----------------------------------------------------------------------
-// Push-subscription persistence
+// Rematch
 // -----------------------------------------------------------------------
 
 /**
- * Persist the current player's push subscription on their participant entry.
- * @param {string} gameId
- * @param {Object} subscription PushSubscriptionRecord shape
+ * Stamp a rematch pointer onto a finished game so the other player can find
+ * and join the follow-up game from the wrap-up screen.
+ * @param {string} gameId         The finished game's id.
+ * @param {string} rematchGameId  The newly created follow-up game's id.
+ * @param {string} byUid          The uid of the player who started the rematch.
  */
-export async function savePushSubscription(gameId, subscription) {
+export async function setRematchGameId(gameId, rematchGameId, byUid) {
   if (!_db) throw new Error("initFirebase() must be called first");
-  const uid = getCurrentUid();
   const ref = doc(_db, "games", gameId);
-  await runTransaction(_db, async (tx) => {
-    const snap = await tx.get(ref);
-    if (!snap.exists()) throw new Error("game not found");
-    const data = snap.data();
-    const participants = (data.participants || []).map((p) =>
-      p.uid === uid ? { ...p, pushSubscription: subscription } : p
-    );
-    tx.update(ref, { participants });
-  });
-}
-
-/**
- * Read the opponent's stored push subscription (if any).
- * @param {string} gameId
- * @returns {Promise<Object|null>}
- */
-export async function readOpponentPushSubscription(gameId) {
-  if (!_db) throw new Error("initFirebase() must be called first");
-  const uid = getCurrentUid();
-  const ref = doc(_db, "games", gameId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return null;
-  const data = snap.data();
-  const opponent = (data.participants || []).find((p) => p.uid !== uid);
-  return opponent && opponent.pushSubscription ? opponent.pushSubscription : null;
-}
-
-/**
- * @param {string} gameId
- * @returns {Promise<string|null>}
- */
-export async function getOpponentUid(gameId) {
-  if (!_db) throw new Error("initFirebase() must be called first");
-  const uid = getCurrentUid();
-  const ref = doc(_db, "games", gameId);
-  const snap = await getDoc(ref);
-  if (!snap.exists()) return null;
-  const data = snap.data();
-  const uids = data.participantUids || [];
-  return uids.find((u) => u !== uid) || null;
+  await updateDoc(ref, { rematchGameId, rematchBy: byUid });
 }
 
 // -----------------------------------------------------------------------

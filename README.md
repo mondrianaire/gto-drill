@@ -42,6 +42,28 @@ Full build provenance — design decisions, audit logs, run report, root-cause a
 
 That corpus entry is **frozen at the ratification commit** and will not change going forward. The build factory is done with this build; what you're looking at here is the product, free to evolve.
 
+## Local development
+
+GTO Duel is a static ES-module app, but it **cannot be opened directly as a
+`file://` page** — browsers block ES-module imports and the `fetch()` of
+`data/scenarios.json` under the `file:` protocol. Run the bundled dev server
+instead:
+
+```bash
+npm start
+# or, equivalently, with no install step:
+node scripts/dev-server.mjs
+```
+
+Then open <http://localhost:8000/>. The default port is `8000`; override it
+with `node scripts/dev-server.mjs 3000` or the `PORT` environment variable.
+The server has no dependencies — it uses only Node's built-in modules
+(requires Node 18+).
+
+> **Note:** local runs connect to the same production Firebase project as the
+> deployed site, so games you create while testing locally land in the same
+> Firestore as real games.
+
 ## Continuing development
 
 This repository is yours to evolve. Future commits, refactors, features, bug fixes — all land here, not in the AutoBuilder repo. The AutoBuilder corpus measurement of this build does not change retroactively based on what happens here.

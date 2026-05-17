@@ -15,6 +15,28 @@
  * @property {string} gto_action
  * @property {string} gto_explanation
  * @property {string} lesson_tag
+ * @property {Replay} [replay]  Structured replay data; present on translated scenarios.
+ *
+ * @typedef {Object} ReplaySeat
+ * @property {string} pos       Position label (UTG, HJ, CO, BTN, SB, BB).
+ * @property {number} stack_bb  Starting stack, in big blinds.
+ *
+ * @typedef {Object} ReplayAction
+ * @property {('preflop'|'flop'|'turn'|'river')} street
+ * @property {string} actor     Position label of the acting player.
+ * @property {('post'|'fold'|'check'|'call'|'bet'|'raise')} type
+ * @property {number} [amount_bb]  Chips committed: bet/raise = total bet "to"; call = amount called.
+ * @property {boolean} [all_in]
+ *
+ * @typedef {Object} Replay
+ * @property {('cash'|'tournament')} format
+ * @property {number} stack_depth_bb         Effective stack, in big blinds.
+ * @property {string} hero_seat              Position label of the hero.
+ * @property {(string[]|null)} hero_cards    Hero's two cards (e.g. ["Kd","Jd"]), or null for a range-based spot.
+ * @property {number} starting_pot_bb        Blinds/antes already in the pot before the action list.
+ * @property {ReplaySeat[]} seats
+ * @property {{flop:string[], turn:string[], river:string[]}} board
+ * @property {ReplayAction[]} actions        Ordered; the quiz decision point immediately follows the last action.
  *
  * @typedef {Object} PlayerSubmission
  * @property {ScenarioId} scenario_id
@@ -31,8 +53,8 @@
  * @typedef {Object} Participant
  * @property {string} uid
  * @property {string} displayName
+ * @property {string|null} photoURL
  * @property {string} joinedAt
- * @property {Object|null} [pushSubscription]
  *
  * @typedef {Object} Round
  * @property {number} roundIndex
@@ -46,12 +68,9 @@
  * @property {GameConfig} config
  * @property {Participant[]} participants
  * @property {Round[]} rounds
- * @property {('waiting_for_opponent'|'in_progress'|'complete')} status
- *
- * @typedef {Object} PushSubscriptionRecord
- * @property {string} endpoint
- * @property {{p256dh:string, auth:string}} keys
- * @property {string} subscribed_at
+ * @property {('waiting_for_opponent'|'in_progress'|'complete'|'cancelled')} status
+ * @property {string} [rematchGameId]  Set when a rematch has been started.
+ * @property {string} [rematchBy]      Uid of the player who started the rematch.
  */
 
 let _scenarios = null;

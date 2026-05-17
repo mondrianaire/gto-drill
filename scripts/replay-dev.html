@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Replay renderer — dev preview</title>
+  <link rel="stylesheet" href="../styles/app.css" />
+  <style>
+    body { max-width: 720px; margin: 0 auto; padding: 16px 16px 4rem; }
+    .dev-scenario { margin-bottom: 30px; }
+    .dev-id { color: var(--text-dim); font-size: 0.78rem; }
+  </style>
+</head>
+<body>
+  <h1 class="app-title">Replay renderer — dev preview</h1>
+  <p class="muted">
+    Every scenario that has structured <code>replay</code> data, rendered
+    standalone (no Firebase, no sign-in). Open at
+    <code>/scripts/replay-dev.html</code> via the dev server.
+  </p>
+  <main id="dev-root"><p class="muted">Loading…</p></main>
+
+  <script type="module">
+    import { loadScenarios, listScenarios } from "../src/scenarios.js";
+    import { mountReplay } from "../src/replay.js";
+
+    const root = document.getElementById("dev-root");
+    loadScenarios()
+      .then(() => {
+        root.textContent = "";
+        const withReplay = listScenarios().filter((s) => s.replay);
+        if (withReplay.length === 0) {
+          root.textContent = "No scenarios have replay data yet.";
+          return;
+        }
+        for (const s of withReplay) {
+          const card = document.createElement("section");
+          card.className = "scenario-card dev-scenario";
+          const id = document.createElement("div");
+          id.className = "dev-id";
+          id.textContent = s.scenario_id;
+          const h3 = document.createElement("h3");
+          h3.textContent = s.lesson_tag;
+          const desc = document.createElement("p");
+          desc.className = "scenario-desc";
+          desc.textContent = s.description;
+          card.append(id, h3, desc);
+          const host = document.createElement("div");
+          card.appendChild(host);
+          root.appendChild(card);
+          mountReplay(host, s.replay);
+        }
+      })
+      .catch((err) => {
+        root.textContent = "Error: " + err.message;
+      });
+  </script>
+</body>
+</html>

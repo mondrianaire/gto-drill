@@ -19,9 +19,13 @@ service cloud.firestore {
                  && (resource == null
                      || request.auth.uid in resource.data.participantUids
                      || resource.data.participantUids.size() < 2);
-      // The app only ever accesses games by exact share code and never
-      // queries the collection — deny listing so games cannot be enumerated.
-      allow list: if false;
+      // Signed-in users may list OPEN lobbies only. Because this rule
+      // references resource.data.status, Firestore requires every query to
+      // be constrained to status == 'waiting_for_opponent' — so in-progress
+      // and completed games (which hold both players' answers) can never be
+      // enumerated. This is what powers the lobby list on the Join screen.
+      allow list: if request.auth != null
+                  && resource.data.status == 'waiting_for_opponent';
 
       allow create: if request.auth != null
                     && request.resource.data.participantUids.size() == 1

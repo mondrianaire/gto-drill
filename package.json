@@ -1,0 +1,14 @@
+{
+  "name": "gto-poker-async-duel",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Asynchronous two-player head-to-head GTO poker quiz — static GitHub-Pages app.",
+  "scripts": {
+    "start": "node scripts/dev-server.mjs",
+    "dev": "node scripts/dev-server.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

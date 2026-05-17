@@ -3,46 +3,35 @@
 // Boot sequence (strict order):
 //   1. Load the scenario library.
 //   2. Initialize Firebase from src/config.js.
-//   3. Sign in anonymously.
-//   4. Register the service worker (best-effort; failure non-fatal).
-//   5. Mount the router.
+//   3. Resolve Google auth — show the sign-in gate if not signed in.
+//   4. Mount the router.
 //
 // Routing:
-//   - If ?join=<code> is in the URL and no active game state, route to JoinView.
-//   - Else if there's a remembered active game (localStorage), route to InGameView.
-//   - Else, route to LandingView.
+//   - If there's a remembered active game (localStorage), resume it.
+//   - Else, route to LandingView (Start / Join).
 
 import { loadScenarios, listScenarios } from "./scenarios.js";
 import {
   initFirebase,
-  signInAnonymously,
+  initAuth,
+  getCurrentUser,
+  readGame,
 } from "./state.js";
-import { registerServiceWorker, setActiveGameForPush } from "./push.js";
 import {
+  mountSignInView,
   mountLandingView,
   mountCreateGameView,
   mountJoinGameView,
   mountWaitingForOpponentView,
+  buildAvatar,
 } from "./onboarding.js";
 import { mountInGameView, mountWrapUpView } from "./ui.js";
-import { readGame } from "./state.js";
 import { FIREBASE_CONFIG } from "./config.js";
-
-const STORAGE_KEY = "gto-duel.activeGameId";
+import { readActiveGameId, writeActiveGameId } from "./history.js";
 
 function setBootState(msg) {
   const el = document.getElementById("boot-state");
   if (el) el.textContent = msg;
-}
-
-function readActiveGameId() {
-  try { return localStorage.getItem(STORAGE_KEY); } catch { return null; }
-}
-function writeActiveGameId(id) {
-  try {
-    if (id) localStorage.setItem(STORAGE_KEY, id);
-    else localStorage.removeItem(STORAGE_KEY);
-  } catch {}
 }
 
 async function boot() {
@@ -58,10 +47,15 @@ async function boot() {
       return;
     }
     await initFirebase(FIREBASE_CONFIG);
-    await signInAnonymously();
 
-    // Service worker registration is best-effort.
-    try { await registerServiceWorker(); } catch (_) {}
+    setBootState("Checking sign-in…");
+    const user = await initAuth();
+    if (!user) {
+      // Not signed in — show the Google sign-in gate. Once signed in, the
+      // callback mounts the router.
+      mountSignInView(root, () => mountRouter(root));
+      return;
+    }
 
     mountRouter(root);
   } catch (err) {
@@ -83,7 +77,25 @@ function renderConfigError(root) {
   root.appendChild(div);
 }
 
+// Fill the header with the signed-in user's avatar + first name.
+function renderHeaderUser() {
+  const el = document.getElementById("header-user");
+  if (!el) return;
+  while (el.firstChild) el.removeChild(el.firstChild);
+  const u = getCurrentUser();
+  if (!u) return;
+  const label = (u.displayName || u.email || "You").trim();
+  const first = label.split(/\s+/)[0];
+  el.appendChild(buildAvatar(label, u.photoURL));
+  const nameEl = document.createElement("span");
+  nameEl.className = "header-user-name";
+  nameEl.textContent = first;
+  el.appendChild(nameEl);
+}
+
 function mountRouter(root) {
+  renderHeaderUser();
+
   function clearRoot() {
     while (root.firstChild) root.removeChild(root.firstChild);
   }
@@ -91,12 +103,11 @@ function mountRouter(root) {
   function goLanding() {
     clearRoot();
     writeActiveGameId(null);
-    setActiveGameForPush(null);
     history.replaceState({}, "", stripQuery());
     mountLandingView(
       root,
       () => goCreate(),
-      () => goJoin(null)
+      () => goJoin()
     );
   }
 
@@ -104,27 +115,23 @@ function mountRouter(root) {
     clearRoot();
     mountCreateGameView(root, (gameId) => {
       writeActiveGameId(gameId);
-      setActiveGameForPush(gameId);
       goWaitingOrGame(gameId);
     });
   }
 
-  function goJoin(prefilledCode) {
+  function goJoin() {
     clearRoot();
-    mountJoinGameView(root, prefilledCode, (gameId) => {
+    mountJoinGameView(root, (gameId) => {
       writeActiveGameId(gameId);
-      setActiveGameForPush(gameId);
       goInGame(gameId);
     });
   }
 
   function goWaitingOrGame(gameId) {
-    // After create, we either show the waiting-for-opponent share screen
-    // (status === waiting_for_opponent) or jump to the in-game view (if
-    // the opponent has already joined via the URL).
+    // After Start, show the waiting screen until an opponent joins
+    // (status flips to in_progress), or jump straight to the in-game /
+    // wrap-up view if the game is already further along.
     clearRoot();
-    setActiveGameForPush(gameId);
-    // Subscribe long enough to read the initial state.
     let mounted = null;
     let firstRender = true;
     const unsub = readGame(gameId, (game) => {
@@ -132,27 +139,27 @@ function mountRouter(root) {
       if (game.status === "waiting_for_opponent" && firstRender) {
         firstRender = false;
         if (mounted) mounted.unmount();
-        const shareCode = game.gameId;
-        const joinUrl = `${location.origin}${location.pathname}?join=${encodeURIComponent(shareCode)}`;
-        mounted = mountWaitingForOpponentView(root, gameId, shareCode, joinUrl);
+        mounted = mountWaitingForOpponentView(root, gameId);
       } else if (game.status === "in_progress" || game.status === "complete") {
         unsub();
         if (mounted) mounted.unmount();
         if (game.status === "complete") goWrapUp(gameId);
         else goInGame(gameId);
+      } else if (game.status === "cancelled") {
+        unsub();
+        if (mounted) mounted.unmount();
+        goLanding();
       }
     });
   }
 
   function goInGame(gameId) {
     clearRoot();
-    setActiveGameForPush(gameId);
     mountInGameView(root, gameId);
   }
 
   function goWrapUp(gameId) {
     clearRoot();
-    setActiveGameForPush(gameId);
     mountWrapUpView(root, gameId);
   }
 
@@ -161,17 +168,9 @@ function mountRouter(root) {
   }
 
   // Initial route resolution.
-  const params = new URLSearchParams(location.search);
-  const joinCode = params.get("join");
-  if (joinCode) {
-    goJoin(joinCode.toUpperCase());
-    return;
-  }
   const remembered = readActiveGameId();
   if (remembered) {
-    // Resume the active game.
-    setActiveGameForPush(remembered);
-    // Use a one-shot read to decide which view: status -> in-game or wrap-up.
+    // Resume the active game. One-shot read to decide which view.
     let routed = false;
     const unsub = readGame(remembered, (game) => {
       if (routed || !game) return;
@@ -179,6 +178,7 @@ function mountRouter(root) {
       unsub();
       if (game.status === "complete") goWrapUp(remembered);
       else if (game.status === "waiting_for_opponent") goWaitingOrGame(remembered);
+      else if (game.status === "cancelled") { writeActiveGameId(null); goLanding(); }
       else goInGame(remembered);
     });
     return;
