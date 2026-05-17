@@ -163,6 +163,9 @@ function buildAccountBar() {
   const signOutBtn = h("button", { type: "button", class: "link-btn" }, "Sign out");
   signOutBtn.addEventListener("click", () => {
     signOutBtn.disabled = true;
+    // Clean reset: drop the active-game pointer so nothing stale carries
+    // into the next session, then sign out and reload.
+    writeActiveGameId(null);
     signOutUser()
       .catch(() => {})
       .then(() => location.assign(location.origin + location.pathname));
