@@ -3,13 +3,12 @@
 // Boot sequence (strict order):
 //   1. Load the scenario library.
 //   2. Initialize Firebase from src/config.js.
-//   3. Sign in anonymously.
+//   3. Resolve Google auth — show the sign-in gate if not signed in.
 //   4. Mount the router.
 //
 // Routing:
-//   - If ?join=<code> is in the URL and no active game state, route to JoinView.
-//   - Else if there's a remembered active game (localStorage), route to InGameView.
-//   - Else, route to LandingView.
+//   - If there's a remembered active game (localStorage), resume it.
+//   - Else, route to LandingView (Start / Join).
 
 import { loadScenarios, listScenarios } from "./scenarios.js";
 import {
@@ -51,7 +50,7 @@ async function boot() {
     const user = await initAuth();
     if (!user) {
       // Not signed in — show the Google sign-in gate. Once signed in, the
-      // callback mounts the router (which honours any ?join= code in the URL).
+      // callback mounts the router.
       mountSignInView(root, () => mountRouter(root));
       return;
     }
@@ -88,7 +87,7 @@ function mountRouter(root) {
     mountLandingView(
       root,
       () => goCreate(),
-      () => goJoin(null)
+      () => goJoin()
     );
   }
 
@@ -100,20 +99,19 @@ function mountRouter(root) {
     });
   }
 
-  function goJoin(prefilledCode) {
+  function goJoin() {
     clearRoot();
-    mountJoinGameView(root, prefilledCode, (gameId) => {
+    mountJoinGameView(root, (gameId) => {
       writeActiveGameId(gameId);
       goInGame(gameId);
     });
   }
 
   function goWaitingOrGame(gameId) {
-    // After create, we either show the waiting-for-opponent share screen
-    // (status === waiting_for_opponent) or jump to the in-game view (if
-    // the opponent has already joined via the URL).
+    // After Start, show the waiting screen until an opponent joins
+    // (status flips to in_progress), or jump straight to the in-game /
+    // wrap-up view if the game is already further along.
     clearRoot();
-    // Subscribe long enough to read the initial state.
     let mounted = null;
     let firstRender = true;
     const unsub = readGame(gameId, (game) => {
@@ -121,14 +119,16 @@ function mountRouter(root) {
       if (game.status === "waiting_for_opponent" && firstRender) {
         firstRender = false;
         if (mounted) mounted.unmount();
-        const shareCode = game.gameId;
-        const joinUrl = `${location.origin}${location.pathname}?join=${encodeURIComponent(shareCode)}`;
-        mounted = mountWaitingForOpponentView(root, gameId, shareCode, joinUrl);
+        mounted = mountWaitingForOpponentView(root, gameId);
       } else if (game.status === "in_progress" || game.status === "complete") {
         unsub();
         if (mounted) mounted.unmount();
         if (game.status === "complete") goWrapUp(gameId);
         else goInGame(gameId);
+      } else if (game.status === "cancelled") {
+        unsub();
+        if (mounted) mounted.unmount();
+        goLanding();
       }
     });
   }
@@ -148,16 +148,9 @@ function mountRouter(root) {
   }
 
   // Initial route resolution.
-  const params = new URLSearchParams(location.search);
-  const joinCode = params.get("join");
-  if (joinCode) {
-    goJoin(joinCode.toUpperCase());
-    return;
-  }
   const remembered = readActiveGameId();
   if (remembered) {
-    // Resume the active game.
-    // Use a one-shot read to decide which view: status -> in-game or wrap-up.
+    // Resume the active game. One-shot read to decide which view.
     let routed = false;
     const unsub = readGame(remembered, (game) => {
       if (routed || !game) return;
@@ -165,6 +158,7 @@ function mountRouter(root) {
       unsub();
       if (game.status === "complete") goWrapUp(remembered);
       else if (game.status === "waiting_for_opponent") goWaitingOrGame(remembered);
+      else if (game.status === "cancelled") { writeActiveGameId(null); goLanding(); }
       else goInGame(remembered);
     });
     return;

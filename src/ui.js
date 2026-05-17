@@ -6,7 +6,7 @@
 // metadata comes from section-1. Notifications are triggered through
 // section-3.
 
-import { readGame, submitHandful, getCurrentUid, createGame, setRematchGameId } from "./state.js";
+import { readGame, submitHandful, getCurrentUid, createGame, joinGame, setRematchGameId } from "./state.js";
 import { getScenarioById } from "./scenarios.js";
 import { computePhase } from "./flow.js";
 import { perPlayerAccuracy, interPlayerAgreement, rankedDisagreements } from "./stats.js";
@@ -407,8 +407,23 @@ export function mountWrapUpView(container, gameId, opts) {
         });
       } else {
         rematchControl = h("button", { type: "button", class: "primary" }, "Join the rematch");
-        rematchControl.addEventListener("click", () => {
-          location.assign(base + "?join=" + encodeURIComponent(game.rematchGameId));
+        rematchControl.addEventListener("click", async () => {
+          rematchControl.disabled = true;
+          errorBox.textContent = "";
+          try {
+            const res = await joinGame(game.rematchGameId);
+            if (res && res.error) {
+              errorBox.textContent = "Could not join the rematch (" + res.error + ").";
+              rematchControl.disabled = false;
+              return;
+            }
+            writeActiveGameId(res.gameId);
+            location.assign(base);
+          } catch (err) {
+            console.error(err);
+            errorBox.textContent = "Could not join the rematch. Check your connection.";
+            rematchControl.disabled = false;
+          }
         });
       }
     } else {
@@ -417,10 +432,10 @@ export function mountWrapUpView(container, gameId, opts) {
         rematchControl.disabled = true;
         errorBox.textContent = "";
         try {
-          const { gameId: newId } = await createGame(
-            { rounds: game.config.rounds, handful_size: game.config.handful_size },
-            getDisplayName(game, myUid)
-          );
+          const { gameId: newId } = await createGame({
+            rounds: game.config.rounds,
+            handful_size: game.config.handful_size,
+          });
           try { await setRematchGameId(gameId, newId, myUid); } catch (_) {}
           writeActiveGameId(newId);
           location.assign(base);

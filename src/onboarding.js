@@ -4,7 +4,15 @@
 // All backend writes go through section-2's adapter; this module never
 // touches Firebase directly.
 
-import { createGame, joinGame, signInWithGoogle, getCurrentUser, signOutUser } from "./state.js";
+import {
+  createGame,
+  joinGame,
+  watchOpenLobbies,
+  cancelLobby,
+  signInWithGoogle,
+  getCurrentUser,
+  signOutUser,
+} from "./state.js";
 import { listHistory, historySummary, writeActiveGameId } from "./history.js";
 
 // -----------------------------------------------------------------------
@@ -125,7 +133,7 @@ export function mountLandingView(container, onCreate, onJoin) {
     h(
       "div",
       { class: "landing-actions" },
-      h("button", { class: "primary", onClick: () => onCreate() }, "Create a new game"),
+      h("button", { class: "primary", onClick: () => onCreate() }, "Start a game"),
       h("button", { class: "secondary", onClick: () => onJoin() }, "Join a game")
     ),
     h(
@@ -135,9 +143,9 @@ export function mountLandingView(container, onCreate, onJoin) {
       h(
         "ol",
         null,
-        h("li", null, "One player creates a game, picks how many rounds and how many hands per round, and shares the join link."),
-        h("li", null, "Each round, one of you plays the handful first. You see the spot, pick an action, rate your confidence 1-5, and (optionally) drop a note."),
-        h("li", null, "The other player gets the same handful. Neither of you sees the other's answer until you've both submitted."),
+        h("li", null, "One player presses Start and picks the game length. Their game opens as a lobby."),
+        h("li", null, "The other player presses Join, sees the open game, and taps it — no codes."),
+        h("li", null, "Each round you both get the same hands. You pick an action, rate your confidence 1-5, and (optionally) drop a note. Neither of you sees the other's answer until you've both submitted."),
         h("li", null, "When all rounds are done, you both see a wrap-up with your individual GTO accuracy, your agreement rate, and the disagreements where you were both most sure.")
       )
     ),
@@ -227,9 +235,7 @@ function buildHistorySection() {
 export function mountCreateGameView(container, onCreated) {
   clear(container);
   let busy = false;
-  const me = getCurrentUser();
   const errorBox = h("div", { class: "error", role: "alert" });
-  const nameInput = h("input", { type: "text", id: "create-name", placeholder: "Your display name (e.g., Mom)", maxlength: "40", value: (me && me.displayName) || "" });
   const roundsInput = h("input", { type: "number", id: "create-rounds", min: "1", max: "10", value: "5" });
   const handfulInput = h("input", { type: "number", id: "create-handful", min: "1", max: "10", value: "3" });
 
@@ -239,17 +245,12 @@ export function mountCreateGameView(container, onCreated) {
     errorBox.textContent = "";
     const rounds = Math.max(1, Math.min(10, parseInt(roundsInput.value, 10) || 5));
     const handful = Math.max(1, Math.min(10, parseInt(handfulInput.value, 10) || 3));
-    const name = (nameInput.value || "").trim() || "Player A";
     try {
-      const { gameId } = await createGame(
-        { rounds, handful_size: handful, scenario_seed: "" },
-        name
-      );
+      const { gameId } = await createGame({ rounds, handful_size: handful });
       onCreated(gameId);
     } catch (err) {
       console.error(err);
-      errorBox.textContent =
-        "Could not create the game. Check that Firebase is configured in src/config.js and that Firestore is enabled.";
+      errorBox.textContent = "Could not start the game. Check your connection and try again.";
       busy = false;
     }
   }
@@ -257,17 +258,15 @@ export function mountCreateGameView(container, onCreated) {
   const root = h(
     "section",
     { class: "create-game" },
-    h("h2", null, "Create a new game"),
+    h("h2", null, "Start a game"),
     h(
       "p",
       { class: "muted" },
-      "Pick a display name, how many rounds you'll play, and how many hands per round. Defaults: 5 rounds of 3 hands."
+      "Choose how many rounds you'll play and how many hands per round, then start. Your game opens as a lobby for someone to join. Defaults: 5 rounds of 3 hands."
     ),
     h(
       "form",
       { onSubmit: (e) => { e.preventDefault(); submit(); } },
-      h("label", { for: "create-name" }, "Your display name"),
-      nameInput,
       h("div", { class: "input-row" },
         h("div", null,
           h("label", { for: "create-rounds" }, "Rounds (1-10)"),
@@ -278,7 +277,7 @@ export function mountCreateGameView(container, onCreated) {
           handfulInput
         )
       ),
-      h("button", { type: "submit", class: "primary" }, "Create and get a share link"),
+      h("button", { type: "submit", class: "primary" }, "Start the game"),
       errorBox
     )
   );
@@ -287,141 +286,140 @@ export function mountCreateGameView(container, onCreated) {
 }
 
 // -----------------------------------------------------------------------
-// mountJoinGameView
+// mountJoinGameView — a live list of open lobbies
 // -----------------------------------------------------------------------
 
-export function mountJoinGameView(container, prefilledCode, onJoined) {
-  clear(container);
-  let busy = false;
-  const me = getCurrentUser();
-  const errorBox = h("div", { class: "error", role: "alert" });
-  const codeInput = h("input", {
-    type: "text",
-    id: "join-code",
-    placeholder: "Share code (e.g., AB3C7K)",
-    maxlength: "8",
-    value: prefilledCode || "",
-    autocapitalize: "characters",
-    autocomplete: "off",
-  });
-  const nameInput = h("input", { type: "text", id: "join-name", placeholder: "Your display name", maxlength: "40", value: (me && me.displayName) || "" });
+// Builds an avatar element: the player's Google photo, or a clean initials
+// circle when they have no photo set.
+function buildAvatar(name, photoURL) {
+  if (photoURL) {
+    return h("img", { class: "avatar", src: photoURL, alt: "", referrerpolicy: "no-referrer" });
+  }
+  const initial = ((name || "?").trim()[0] || "?").toUpperCase();
+  return h("div", { class: "avatar avatar-fallback" }, initial);
+}
 
-  async function submit() {
+function buildLobbyCard(lobby, onJoin) {
+  const card = h(
+    "button",
+    { type: "button", class: "lobby-card" },
+    buildAvatar(lobby.ownerName, lobby.ownerPhoto),
+    h("div", { class: "lobby-main" },
+      h("strong", null, lobby.ownerName),
+      h("span", { class: "muted lobby-detail" },
+        lobby.rounds + (lobby.rounds === 1 ? " round" : " rounds") + " · " +
+        lobby.handfulSize + " hands each")
+    ),
+    h("span", { class: "lobby-go" }, "Join")
+  );
+  card.addEventListener("click", () => onJoin(card));
+  return card;
+}
+
+export function mountJoinGameView(container, onJoined) {
+  clear(container);
+  let unsub = null;
+  let busy = false;
+
+  const statusEl = h("p", { class: "muted" }, "Looking for open games…");
+  const listEl = h("div", { class: "lobby-list" });
+  const errorBox = h("div", { class: "error", role: "alert" });
+
+  async function joinLobby(lobby, card) {
     if (busy) return;
     busy = true;
+    card.disabled = true;
     errorBox.textContent = "";
-    const code = (codeInput.value || "").trim().toUpperCase();
-    const name = (nameInput.value || "").trim() || "Player B";
-    if (!code) {
-      errorBox.textContent = "Please enter the share code your friend gave you.";
-      busy = false;
-      return;
-    }
     try {
-      const res = await joinGame(code, name);
+      const res = await joinGame(lobby.gameId);
       if (res && res.error) {
-        if (res.error === "not_found") errorBox.textContent = "No game with that code. Double-check the code and try again.";
-        else if (res.error === "game_full") errorBox.textContent = "That game already has two players.";
-        else errorBox.textContent = "Could not join: " + res.error;
+        if (res.error === "game_full") errorBox.textContent = "Someone else joined that game first — pick another.";
+        else if (res.error === "cancelled" || res.error === "not_found") errorBox.textContent = "That game is no longer open.";
+        else errorBox.textContent = "Couldn't join: " + res.error;
         busy = false;
+        card.disabled = false;
         return;
       }
+      if (unsub) unsub();
       onJoined(res.gameId);
     } catch (err) {
       console.error(err);
-      errorBox.textContent = "Could not join. Check your connection.";
+      errorBox.textContent = "Couldn't join. Check your connection and try again.";
       busy = false;
+      card.disabled = false;
     }
   }
+
+  function render(lobbies, err) {
+    clear(listEl);
+    if (err) {
+      statusEl.textContent = "";
+      errorBox.textContent =
+        "Couldn't load open games. If the Firestore rules were just updated, make sure they've been published in the Firebase Console.";
+      return;
+    }
+    errorBox.textContent = "";
+    if (!lobbies || lobbies.length === 0) {
+      statusEl.textContent = "No open games right now. Ask someone to press Start — or start one yourself.";
+      return;
+    }
+    statusEl.textContent = lobbies.length === 1 ? "1 open game" : lobbies.length + " open games";
+    for (const lobby of lobbies) {
+      listEl.appendChild(buildLobbyCard(lobby, (card) => joinLobby(lobby, card)));
+    }
+  }
+
+  unsub = watchOpenLobbies((lobbies, err) => render(lobbies, err));
 
   const root = h(
     "section",
     { class: "join-game" },
     h("h2", null, "Join a game"),
-    h(
-      "p",
-      { class: "muted" },
-      prefilledCode
-        ? "Your friend's share code is filled in. Add your name and tap join."
-        : "Enter the share code your friend sent you and pick a display name."
-    ),
-    h(
-      "form",
-      { onSubmit: (e) => { e.preventDefault(); submit(); } },
-      h("label", { for: "join-code" }, "Share code"),
-      codeInput,
-      h("label", { for: "join-name" }, "Your display name"),
-      nameInput,
-      h("button", { type: "submit", class: "primary" }, "Join the game"),
-      errorBox
-    )
+    h("p", { class: "muted" }, "Tap an open game to join it. First come, first served."),
+    statusEl,
+    listEl,
+    errorBox
   );
   container.appendChild(root);
-  return { unmount: () => clear(container) };
+  return {
+    unmount: () => {
+      if (unsub) unsub();
+      clear(container);
+    },
+  };
 }
 
 // -----------------------------------------------------------------------
-// mountWaitingForOpponentView
+// mountWaitingForOpponentView — shown to the lobby owner until someone joins
 // -----------------------------------------------------------------------
 
-export function mountWaitingForOpponentView(container, gameId, shareCode, joinUrl) {
+export function mountWaitingForOpponentView(container, gameId) {
   clear(container);
+  const base = location.origin + location.pathname;
 
-  function copy(text, btn) {
-    const oldText = btn.textContent;
-    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject())
-      .then(() => {
-        btn.textContent = "Copied!";
-        setTimeout(() => { btn.textContent = oldText; }, 1500);
-      })
-      .catch(() => {
-        // Fallback: select the text in a hidden input.
-        const t = document.createElement("textarea");
-        t.value = text; t.style.position = "fixed"; t.style.opacity = "0";
-        document.body.appendChild(t); t.select();
-        try { document.execCommand("copy"); btn.textContent = "Copied!"; setTimeout(() => { btn.textContent = oldText; }, 1500); }
-        finally { document.body.removeChild(t); }
-      });
-  }
-
-  const codeBtn = h("button", { class: "copy-btn" }, "Copy code");
-  const urlBtn = h("button", { class: "copy-btn" }, "Copy link");
-  codeBtn.addEventListener("click", () => copy(shareCode, codeBtn));
-  urlBtn.addEventListener("click", () => copy(joinUrl, urlBtn));
+  const cancelBtn = h("button", { type: "button", class: "secondary" }, "Cancel this game");
+  cancelBtn.addEventListener("click", async () => {
+    cancelBtn.disabled = true;
+    try { await cancelLobby(gameId); } catch (err) { console.warn(err); }
+    writeActiveGameId(null);
+    location.assign(base);
+  });
 
   const root = h(
     "section",
     { class: "waiting" },
-    h("h2", null, "Waiting for your opponent to join"),
+    h("h2", null, "Waiting for an opponent"),
     h(
       "p",
       { class: "muted" },
-      "Send your friend the share code (or the join link). Once they join, your game starts."
-    ),
-    h("div", { class: "share-block" },
-      h("label", null, "Share code"),
-      h("div", { class: "share-row" },
-        h("code", { class: "share-code" }, shareCode),
-        codeBtn
-      ),
-      h("label", null, "Join link"),
-      h("div", { class: "share-row" },
-        h("code", { class: "share-url" }, joinUrl),
-        urlBtn
-      )
+      "Your game is open in the lobby. As soon as someone taps Join, you'll both start on the same hands."
     ),
     h(
-      "details",
-      { class: "share-help" },
-      h("summary", null, "How to share"),
-      h(
-        "ul",
-        null,
-        h("li", null, "Text the link to your friend. When they open it, the code is filled in automatically."),
-        h("li", null, "Or have them open this app and paste the code on the Join screen."),
-        h("li", null, "You can leave this page — the game is saved. It will pick up where you left off the next time you open the app.")
-      )
-    )
+      "p",
+      { class: "muted" },
+      "You can leave this page — the game is saved and will resume the next time you open the app."
+    ),
+    cancelBtn
   );
   container.appendChild(root);
   return { unmount: () => clear(container) };

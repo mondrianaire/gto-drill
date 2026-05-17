@@ -34,6 +34,15 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
   enabled in the Firebase Console, and the serving domain added to the
   Authorized domains list.) A leftover anonymous session from before this
   change is treated as "not signed in" so the Google gate still appears.
+- Pairing is now a **lobby model** instead of share codes. Pressing **Start**
+  opens a lobby; pressing **Join** shows a live list of open lobbies, each
+  identified by the owner's Google name and photo — tap one to join,
+  first-come-first-served. Share codes, the join link, and the `?join=` URL
+  parameter are gone. The waiting screen drops the code/link UI and gains a
+  "Cancel this game" button. Player display names and photos now come straight
+  from the Google profile (the manual name field is removed).
+  **Requires republishing `firestore.rules`** — listing open lobbies needs the
+  new `allow list` rule for waiting games.
 
 ### Removed
 - The turn-notification subsystem (Web Push). Reliable browser-to-browser push

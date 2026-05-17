@@ -31,6 +31,7 @@
  * @typedef {Object} Participant
  * @property {string} uid
  * @property {string} displayName
+ * @property {string|null} photoURL
  * @property {string} joinedAt
  *
  * @typedef {Object} Round
@@ -45,7 +46,7 @@
  * @property {GameConfig} config
  * @property {Participant[]} participants
  * @property {Round[]} rounds
- * @property {('waiting_for_opponent'|'in_progress'|'complete')} status
+ * @property {('waiting_for_opponent'|'in_progress'|'complete'|'cancelled')} status
  * @property {string} [rematchGameId]  Set when a rematch has been started.
  * @property {string} [rematchBy]      Uid of the player who started the rematch.
  */
