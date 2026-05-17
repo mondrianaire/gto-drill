@@ -341,25 +341,25 @@ export async function cancelLobby(gameId) {
 
 /**
  * Subscribe to live updates for a game document. Returns an unsubscribe fn.
- * onChange may receive a *redacted* GameDocument — opponent submissions for
- * the current round are masked until the current player has submitted.
- * Security Rules separately deny direct reads of the opponent's pre-submit
- * data; this redaction is defense-in-depth at the UI layer.
+ * onChange receives the full GameDocument, or null when the document does
+ * not exist. The in-game view gates the opponent's per-hand answers itself —
+ * each is shown only once the viewer has locked their own answer for that
+ * hand — so no document-level redaction happens here.
  *
  * @param {string} gameId
- * @param {(game:Object)=>void} onChange
+ * @param {(game:(Object|null))=>void} onChange
+ * @param {(err:Error)=>void} [onError]
  * @returns {()=>void} unsubscribe
  */
 export function readGame(gameId, onChange, onError) {
   if (!_db) throw new Error("initFirebase() must be called first");
-  const uid = getCurrentUid();
   const ref = doc(_db, "games", gameId);
   return onSnapshot(
     ref,
     (snap) => {
       // onChange(null) signals the document does not exist.
       if (!snap.exists()) { onChange(null); return; }
-      onChange(redactGameForViewer(snap.data(), uid));
+      onChange(snap.data());
     },
     (err) => {
       // A failed read (e.g. permission-denied on a game the viewer is not in)
@@ -473,27 +473,6 @@ function precomputeRounds(roundCount, handful, seed, knownUids) {
   return out;
 }
 
-/**
- * Mask opponent submissions for rounds where the viewer has not yet
- * submitted. This is layered behind Firestore Security Rules, not in place
- * of them.
- */
-function redactGameForViewer(game, viewerUid) {
-  if (!game || !Array.isArray(game.rounds)) return game;
-  const rounds = game.rounds.map((r) => {
-    const subs = r.submissionsByUid || {};
-    const viewerSub = subs[viewerUid];
-    if (Array.isArray(viewerSub) && viewerSub.length === (r.scenarioIds || []).length) {
-      // viewer has submitted this round; opponent submissions can be revealed
-      return r;
-    }
-    // Viewer has NOT submitted this round; mask opponent submissions.
-    const redactedSubs = {};
-    for (const uid of Object.keys(subs)) {
-      if (uid === viewerUid) redactedSubs[uid] = subs[uid];
-      else redactedSubs[uid] = { _redacted: true, count: (subs[uid] || []).length };
-    }
-    return { ...r, submissionsByUid: redactedSubs };
-  });
-  return { ...game, rounds };
-}
+// (Opponent-answer gating is handled per-hand in the in-game view, so there
+// is no document-level redaction here. The Firestore rules already permit a
+// participant to read the whole game document.)
