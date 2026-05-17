@@ -253,6 +253,80 @@ form { margin-top: 8px; }
 
 .error { color: var(--miss); margin-top: 8px; min-height: 1.2em; }
 
+/* In-game — decision screen (one hand at a time) */
+.hand-progress {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.hand-count { font-size: 0.9rem; font-weight: 600; color: var(--text-dim); }
+.hand-dots { display: flex; gap: 6px; }
+.hand-dot {
+  width: 9px; height: 9px; border-radius: 50%;
+  background: var(--bg-elev-2); border: 1px solid var(--border);
+}
+.hand-dot.is-done { background: var(--accent-soft); border-color: var(--accent); }
+.hand-dot.is-current { background: var(--accent); border-color: var(--accent); }
+
+.hand-card {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: var(--pad);
+}
+.hand-words { margin-top: 10px; font-size: 0.9rem; }
+.hand-words summary { cursor: pointer; color: var(--accent); }
+.hand-words p { margin: 8px 0 0 0; color: var(--text-dim); }
+
+.decide {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 14px;
+}
+.decide-label {
+  display: block;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 8px;
+}
+.decide-label-sub {
+  margin-top: 16px;
+  font-size: 0.66rem;
+  letter-spacing: 0.06em;
+}
+/* Action — the primary control: big, stacked, full-width. */
+.decide .actions-row {
+  flex-direction: column;
+  flex-wrap: nowrap;
+  gap: 8px;
+  margin: 0;
+}
+.decide .action-btn {
+  width: 100%;
+  min-height: 50px;
+  font-size: 1rem;
+  font-weight: 600;
+}
+/* Confidence — secondary: a compact, lighter strip. */
+.decide .confidence-row { gap: 6px; margin: 0; }
+.decide .conf-btn {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 38px;
+  font-size: 0.9rem;
+}
+.note-toggle { margin-top: 14px; font-size: 0.9rem; }
+.note-toggle summary { cursor: pointer; color: var(--accent); }
+.note-toggle .note-input { margin-top: 8px; }
+
+.hand-nav { display: flex; gap: 10px; margin-top: 14px; }
+.hand-nav .hand-back { flex: 0 0 auto; min-width: 92px; }
+.hand-nav .hand-fwd { flex: 1 1 auto; }
+
 /* Reveal */
 .reveal-list {
   display: flex;
@@ -462,7 +536,7 @@ form { margin-top: 8px; }
 }
 .replay-table {
   position: relative;
-  height: 250px;
+  height: 300px;
   background: radial-gradient(ellipse at center, #2c6e52 0%, #1b4736 100%);
   border: 4px solid #14342780;
   border-radius: 120px;
@@ -476,13 +550,23 @@ form { margin-top: 8px; }
   border-radius: 8px;
   text-align: center;
 }
-.rseat-hero { bottom: 8px; left: 50%; transform: translateX(-50%); }
-.rseat-top { top: 8px; }
-.rseat-top-c { left: 50%; transform: translateX(-50%); }
-.rseat-top-l { left: 6px; }
-.rseat-top-r { right: 6px; }
+.rslot-0 { bottom: 6px; left: 50%; transform: translateX(-50%); }
+.rslot-1 { bottom: 6px; left: 4px; }
+.rslot-2 { top: 8px; left: 4px; }
+.rslot-3 { top: 8px; left: 50%; transform: translateX(-50%); }
+.rslot-4 { top: 8px; right: 4px; }
+.rslot-5 { bottom: 6px; right: 4px; }
 .rseat-turn { background: rgba(76, 182, 255, 0.16); box-shadow: 0 0 0 2px var(--accent); }
-.rseat-folded { opacity: 0.4; }
+.rseat-folded { opacity: 0.45; }
+.rseat-mucked {
+  min-height: 36px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-style: italic;
+  color: #9fb6ab;
+}
 .rseat-cards { display: flex; justify-content: center; gap: 3px; margin-bottom: 3px; }
 .rseat-pos {
   font-size: 0.72rem;
@@ -507,8 +591,8 @@ form { margin-top: 8px; }
   border-radius: 999px;
   white-space: nowrap;
 }
-.rseat-top .rseat-bet { bottom: -19px; }
-.rseat-hero .rseat-bet { top: -19px; }
+.rslot-0 .rseat-bet, .rslot-1 .rseat-bet, .rslot-5 .rseat-bet { top: -19px; }
+.rslot-2 .rseat-bet, .rslot-3 .rseat-bet, .rslot-4 .rseat-bet { bottom: -19px; }
 
 .replay-center {
   position: absolute;

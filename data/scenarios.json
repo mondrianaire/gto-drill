@@ -76,15 +76,25 @@
       "stack_depth_bb": 100,
       "hero_seat": "CO",
       "hero_cards": ["5s", "5h"],
-      "starting_pot_bb": 1.5,
+      "starting_pot_bb": 0,
       "seats": [
+        { "pos": "UTG", "stack_bb": 100 },
+        { "pos": "HJ", "stack_bb": 100 },
         { "pos": "CO", "stack_bb": 100 },
-        { "pos": "BTN", "stack_bb": 100 }
+        { "pos": "BTN", "stack_bb": 100 },
+        { "pos": "SB", "stack_bb": 100 },
+        { "pos": "BB", "stack_bb": 100 }
       ],
       "board": { "flop": [], "turn": [], "river": [] },
       "actions": [
+        { "street": "preflop", "actor": "SB", "type": "post", "amount_bb": 0.5 },
+        { "street": "preflop", "actor": "BB", "type": "post", "amount_bb": 1 },
+        { "street": "preflop", "actor": "UTG", "type": "fold" },
+        { "street": "preflop", "actor": "HJ", "type": "fold" },
         { "street": "preflop", "actor": "CO", "type": "raise", "amount_bb": 2.5 },
-        { "street": "preflop", "actor": "BTN", "type": "raise", "amount_bb": 9 }
+        { "street": "preflop", "actor": "BTN", "type": "raise", "amount_bb": 9 },
+        { "street": "preflop", "actor": "SB", "type": "fold" },
+        { "street": "preflop", "actor": "BB", "type": "fold" }
       ]
     },
     "description": "100bb. Hero opens 2.5bb from CO with 55. BTN 3-bets to 9bb. Action back on Hero.",
@@ -102,14 +112,24 @@
       "stack_depth_bb": 100,
       "hero_seat": "BB",
       "hero_cards": ["Kd", "Jd"],
-      "starting_pot_bb": 1.5,
+      "starting_pot_bb": 0,
       "seats": [
+        { "pos": "UTG", "stack_bb": 100 },
         { "pos": "HJ", "stack_bb": 100 },
+        { "pos": "CO", "stack_bb": 100 },
+        { "pos": "BTN", "stack_bb": 100 },
+        { "pos": "SB", "stack_bb": 100 },
         { "pos": "BB", "stack_bb": 100 }
       ],
       "board": { "flop": ["Kc", "5h", "4s"], "turn": ["7c"], "river": [] },
       "actions": [
+        { "street": "preflop", "actor": "SB", "type": "post", "amount_bb": 0.5 },
+        { "street": "preflop", "actor": "BB", "type": "post", "amount_bb": 1 },
+        { "street": "preflop", "actor": "UTG", "type": "fold" },
         { "street": "preflop", "actor": "HJ", "type": "raise", "amount_bb": 2.5 },
+        { "street": "preflop", "actor": "CO", "type": "fold" },
+        { "street": "preflop", "actor": "BTN", "type": "fold" },
+        { "street": "preflop", "actor": "SB", "type": "fold" },
         { "street": "preflop", "actor": "BB", "type": "call", "amount_bb": 2.5 },
         { "street": "flop", "actor": "BB", "type": "check" },
         { "street": "flop", "actor": "HJ", "type": "bet", "amount_bb": 3 },
@@ -143,14 +163,23 @@
       "stack_depth_bb": 12,
       "hero_seat": "BTN",
       "hero_cards": ["As", "8h"],
-      "starting_pot_bb": 1.5,
+      "starting_pot_bb": 0,
       "seats": [
+        { "pos": "UTG", "stack_bb": 12 },
+        { "pos": "HJ", "stack_bb": 12 },
+        { "pos": "CO", "stack_bb": 12 },
         { "pos": "BTN", "stack_bb": 12 },
         { "pos": "SB", "stack_bb": 12 },
         { "pos": "BB", "stack_bb": 12 }
       ],
       "board": { "flop": [], "turn": [], "river": [] },
-      "actions": []
+      "actions": [
+        { "street": "preflop", "actor": "SB", "type": "post", "amount_bb": 0.5 },
+        { "street": "preflop", "actor": "BB", "type": "post", "amount_bb": 1 },
+        { "street": "preflop", "actor": "UTG", "type": "fold" },
+        { "street": "preflop", "actor": "HJ", "type": "fold" },
+        { "street": "preflop", "actor": "CO", "type": "fold" }
+      ]
     },
     "description": "12bb stack, MTT bubble. Hero (BTN) holds A8 offsuit. Folded to Hero. Blinds 1bb/2bb.",
     "board": null,
@@ -207,14 +236,24 @@
       "stack_depth_bb": 100,
       "hero_seat": "BTN",
       "hero_cards": ["Ac", "Qc"],
-      "starting_pot_bb": 1.5,
+      "starting_pot_bb": 0,
       "seats": [
+        { "pos": "UTG", "stack_bb": 100 },
+        { "pos": "HJ", "stack_bb": 100 },
+        { "pos": "CO", "stack_bb": 100 },
         { "pos": "BTN", "stack_bb": 100 },
+        { "pos": "SB", "stack_bb": 100 },
         { "pos": "BB", "stack_bb": 100 }
       ],
       "board": { "flop": ["8c", "5c", "2h"], "turn": [], "river": [] },
       "actions": [
+        { "street": "preflop", "actor": "SB", "type": "post", "amount_bb": 0.5 },
+        { "street": "preflop", "actor": "BB", "type": "post", "amount_bb": 1 },
+        { "street": "preflop", "actor": "UTG", "type": "fold" },
+        { "street": "preflop", "actor": "HJ", "type": "fold" },
+        { "street": "preflop", "actor": "CO", "type": "fold" },
         { "street": "preflop", "actor": "BTN", "type": "raise", "amount_bb": 2.5 },
+        { "street": "preflop", "actor": "SB", "type": "fold" },
         { "street": "preflop", "actor": "BB", "type": "call", "amount_bb": 2.5 },
         { "street": "flop", "actor": "BB", "type": "check" }
       ]
@@ -514,14 +553,24 @@
       "stack_depth_bb": 100,
       "hero_seat": "BB",
       "hero_cards": ["9c", "8c"],
-      "starting_pot_bb": 1.5,
+      "starting_pot_bb": 0,
       "seats": [
+        { "pos": "UTG", "stack_bb": 100 },
+        { "pos": "HJ", "stack_bb": 100 },
         { "pos": "CO", "stack_bb": 100 },
+        { "pos": "BTN", "stack_bb": 100 },
+        { "pos": "SB", "stack_bb": 100 },
         { "pos": "BB", "stack_bb": 100 }
       ],
       "board": { "flop": ["Td", "7s", "4c"], "turn": ["5h"], "river": ["6d"] },
       "actions": [
+        { "street": "preflop", "actor": "SB", "type": "post", "amount_bb": 0.5 },
+        { "street": "preflop", "actor": "BB", "type": "post", "amount_bb": 1 },
+        { "street": "preflop", "actor": "UTG", "type": "fold" },
+        { "street": "preflop", "actor": "HJ", "type": "fold" },
         { "street": "preflop", "actor": "CO", "type": "raise", "amount_bb": 2.5 },
+        { "street": "preflop", "actor": "BTN", "type": "fold" },
+        { "street": "preflop", "actor": "SB", "type": "fold" },
         { "street": "preflop", "actor": "BB", "type": "call", "amount_bb": 2.5 },
         { "street": "flop", "actor": "BB", "type": "check" },
         { "street": "flop", "actor": "CO", "type": "bet", "amount_bb": 2 },

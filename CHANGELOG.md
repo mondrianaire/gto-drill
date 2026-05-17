@@ -56,6 +56,16 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 - Sign out is now a clean reset — it clears the active-game pointer in
   addition to ending the Firebase session, so nothing stale carries into the
   next session. Local "Past games" history is intentionally kept.
+- The poker-hand replay now renders the **full six-handed table** and the
+  **complete preflop betting round** — posted blinds and every fold around to
+  the action, with folded players shown mucked. Blinds are modelled as posts
+  so pot sizes are exact. (Applies to the 5 scenarios with replay data.)
+- The in-game **decision screen is recomposed** (per the design audit): one
+  hand at a time with a "Hand X of N" progress indicator and Back / Next
+  navigation, instead of the whole handful stacked into one scroll. The replay
+  table is the visual hero; the prose description is demoted to a collapsible
+  ("The spot in words"); the action choice is the primary full-width control
+  and confidence a lighter secondary strip; the note collapses until wanted.
 
 ### Removed
 - The turn-notification subsystem (Web Push). Reliable browser-to-browser push
