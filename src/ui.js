@@ -11,7 +11,7 @@ import { getScenarioById } from "./scenarios.js";
 import { computePhase } from "./flow.js";
 import { perPlayerAccuracy, interPlayerAgreement, rankedDisagreements } from "./stats.js";
 import { recordGame, writeActiveGameId } from "./history.js";
-import { mountReplay } from "./replay.js";
+import { mountReplay, cardEl, liveVillains } from "./replay.js";
 
 // -----------------------------------------------------------------------
 // Small DOM helpers (duplicated from onboarding.js intentionally to keep
@@ -42,6 +42,65 @@ function h(tag, attrs, ...children) {
 
 function clear(container) {
   while (container.firstChild) container.removeChild(container.firstChild);
+}
+
+// -----------------------------------------------------------------------
+// richText — turn GTO prose into DOM with inline card icons, position
+// chips, and a shared Hero/Villain colour identity (matching the table).
+// -----------------------------------------------------------------------
+
+/** Every card known to be in play for a scenario (hero hand + board). */
+function knownCards(scen) {
+  const set = new Set();
+  const r = scen && scen.replay;
+  if (r) {
+    (r.hero_cards || []).forEach((c) => c && set.add(c));
+    const b = r.board || {};
+    [].concat(b.flop || [], b.turn || [], b.river || []).forEach((c) => c && set.add(c));
+  }
+  return set;
+}
+
+// card run (one or more space-separated codes) | position | Hero/Villain word
+const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b/g;
+
+/**
+ * @param {string} text
+ * @param {Object} scen  The scenario (for replay context).
+ * @returns {DocumentFragment}
+ */
+function richText(text, scen) {
+  const frag = document.createDocumentFragment();
+  if (!text) return frag;
+  const heroPos = scen && scen.replay ? scen.replay.hero_seat : null;
+  const villains = liveVillains(scen && scen.replay);
+  const known = knownCards(scen);
+  RICH_RE.lastIndex = 0;
+  let last = 0;
+  let m;
+  while ((m = RICH_RE.exec(text))) {
+    if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
+    if (m[1]) {
+      const codes = m[1].split(/\s+/);
+      // Multi-card runs are always iconified; a lone code only if it's a
+      // card actually in play (avoids "As"/"Ah" English-word false hits).
+      if (codes.length >= 2 || known.has(codes[0])) {
+        codes.forEach((c) => frag.appendChild(cardEl(c, "inline")));
+      } else {
+        frag.appendChild(document.createTextNode(m[1]));
+      }
+    } else if (m[2]) {
+      const pos = m[2];
+      const role = pos === heroPos ? " is-hero" : villains.includes(pos) ? " is-villain" : "";
+      frag.appendChild(h("span", { class: "tok-pos" + role }, pos));
+    } else if (m[3]) {
+      const role = /^h/i.test(m[3]) ? " is-hero" : " is-villain";
+      frag.appendChild(h("span", { class: "tok-word" + role }, m[3]));
+    }
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+  return frag;
 }
 
 function getDisplayName(game, uid) {
@@ -135,10 +194,10 @@ export function mountInGameView(container, gameId) {
       replayCleanup = r && r.unmount ? r.unmount : null;
       spot.appendChild(h("details", { class: "hand-words" },
         h("summary", null, "The spot in words"),
-        h("p", null, scen.description)
+        h("p", null, richText(scen.description, scen))
       ));
     } else if (scen) {
-      spot.appendChild(h("p", { class: "scenario-desc" }, scen.description));
+      spot.appendChild(h("p", { class: "scenario-desc" }, richText(scen.description, scen)));
       if (scen.board) {
         spot.appendChild(h("div", { class: "board" }, h("strong", null, "Board: "), scen.board));
       }
@@ -223,7 +282,7 @@ export function mountInGameView(container, gameId) {
             h("strong", { class: "gto-action" }, gto))
         )
       );
-      const explain = h("p", { class: "gto-explanation" }, scen ? scen.gto_explanation : "");
+      const explain = h("p", { class: "gto-explanation" }, scen ? richText(scen.gto_explanation, scen) : "");
 
       // Opponent comparison — only when the opponent has already played this hand.
       const oppUid = (game.participantUids || []).find((u) => u !== myUid);
@@ -335,7 +394,7 @@ export function mountInGameView(container, gameId) {
       const bRight = subB && subB.action === gto;
       const card = h("div", { class: "reveal-card" },
         h("h3", null, "Scenario " + (idx + 1) + ": " + scen.lesson_tag),
-        h("p", { class: "scenario-desc" }, scen.description),
+        h("p", { class: "scenario-desc" }, richText(scen.description, scen)),
         h("div", { class: "player-result" },
           h("strong", null, aName),
           h("span", { class: aRight ? "ok" : "miss" }, subA ? subA.action : "—"),
@@ -352,7 +411,7 @@ export function mountInGameView(container, gameId) {
           h("strong", null, "GTO answer: "),
           h("span", { class: "gto-action" }, gto)
         ),
-        h("p", { class: "gto-explanation" }, scen.gto_explanation)
+        h("p", { class: "gto-explanation" }, richText(scen.gto_explanation, scen))
       );
       reveals.appendChild(card);
     });
@@ -464,7 +523,7 @@ export function mountWrapUpView(container, gameId, opts) {
             h("span", { class: "muted" }, " Round " + (d.roundIndex + 1))
           ),
           h("h4", null, d.scenario ? d.scenario.lesson_tag : d.scenario_id),
-          h("p", { class: "scenario-desc" }, d.scenario ? d.scenario.description : ""),
+          h("p", { class: "scenario-desc" }, d.scenario ? richText(d.scenario.description, d.scenario) : ""),
           h("div", { class: "dis-row" },
             h("strong", null, aName + ": "), d.playerA_action, " (conf " + d.playerA_confidence + ")",
             d.playerA_note ? h("p", { class: "player-note" }, "“" + d.playerA_note + "”") : null
@@ -476,7 +535,7 @@ export function mountWrapUpView(container, gameId, opts) {
           h("div", { class: "dis-row gto" },
             h("strong", null, "GTO: "), d.scenario ? d.scenario.gto_action : "—"
           ),
-          d.scenario ? h("p", { class: "gto-explanation" }, d.scenario.gto_explanation) : null
+          d.scenario ? h("p", { class: "gto-explanation" }, richText(d.scenario.gto_explanation, d.scenario)) : null
         );
         disagreementList.appendChild(card);
       });

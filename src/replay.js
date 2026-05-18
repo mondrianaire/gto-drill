@@ -39,9 +39,14 @@ const SUITS = {
 // Card rendering
 // -----------------------------------------------------------------------
 
-/** A single playing card. `code` like "Kd"/"Tc"; null/undefined = face down. */
-function cardEl(code, size) {
-  const cls = "pcard" + (size === "sm" ? " pcard-sm" : "");
+/**
+ * A single playing card. `code` like "Kd"/"Tc"; null/undefined = face down.
+ * `size` is "sm" (small table card), "inline" (text-flow card) or default.
+ */
+export function cardEl(code, size) {
+  let cls = "pcard";
+  if (size === "sm") cls += " pcard-sm";
+  else if (size === "inline") cls += " pcard-inline";
   if (!code) return h("div", { class: cls + " pcard-back" });
   const rank = code[0] === "T" ? "10" : code[0];
   const suit = SUITS[code[1]] || { glyph: "?", red: false };
@@ -102,6 +107,19 @@ function nextActor(replay, step) {
   const actions = replay.actions || [];
   if (step < actions.length) return actions[step].actor;
   return replay.hero_seat;
+}
+
+/**
+ * Positions still live in the hand at the decision point, excluding the
+ * hero — i.e. the villain(s) the hero is up against. Used to give the
+ * villain a shared visual identity in both the table and the GTO prose.
+ */
+export function liveVillains(replay) {
+  if (!replay) return [];
+  const { seats } = deriveState(replay, (replay.actions || []).length);
+  return Object.values(seats)
+    .filter((s) => !s.folded && s.pos !== replay.hero_seat)
+    .map((s) => s.pos);
 }
 
 // -----------------------------------------------------------------------
@@ -209,7 +227,8 @@ export function mountReplay(container, replay) {
       : null;
     return h(
       "div",
-      { class: cls + (isTurn ? " rseat-turn" : "") + (st.folded ? " rseat-folded" : "") },
+      { class: cls + (isTurn ? " rseat-turn" : "") + (st.folded ? " rseat-folded" : "") +
+        (!isHero && !st.folded ? " rseat-villain" : "") },
       cardRow,
       h("div", { class: "rseat-pos" }, seatDef.pos + (isHero ? " (you)" : "")),
       h("div", { class: "rseat-stack" }, fmtBb(round1(st.stack))),

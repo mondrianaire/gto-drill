@@ -41,6 +41,16 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
   every replay-enabled scenario standalone for visual review.
 
 ### Changed
+- **Hero/Villain visual identity.** The hero (blue) and the live opponent(s)
+  (amber) now share one colour identity across the whole game. On the replay
+  table the villain seat(s) get an amber ring and amber position label;
+  in the GTO prose the matching position chips are tinted to match, and the
+  words "Hero"/"Villain" pick up the same colours.
+- **Iconified GTO prose.** Scenario descriptions and GTO explanations now
+  render card codes (`Kh 7d 2s`) as inline mini-cards and position names
+  (`BTN`, `BB`, …) as chips, instead of as plain text.
+- Playing-card rank/suit now sit in fixed flex-centred boxes, so the differing
+  metrics of the Unicode suit glyphs (♣♦♥♠) no longer nudge them off-centre.
 - Sign-in is now **Google sign-in** instead of silent anonymous auth. On first
   open the app shows a "Continue with Google" gate; once signed in, the session
   persists and follows the account across devices. This is stage one of the

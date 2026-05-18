@@ -8,6 +8,10 @@
   --text-dim: #8aa1b1;
   --accent: #4cb6ff;
   --accent-soft: #1e3a52;
+  --hero: #4cb6ff;
+  --hero-soft: rgba(76, 182, 255, 0.2);
+  --villain: #e8a93f;
+  --villain-soft: rgba(232, 169, 63, 0.2);
   --ok: #4ade80;
   --miss: #f87171;
   --border: #243646;
@@ -388,6 +392,24 @@ form { margin-top: 8px; }
 .gto-action { font-weight: 600; }
 .gto-explanation { color: var(--text-dim); margin-top: 8px; font-size: 0.95rem; }
 
+/* Rich-text tokens — position chips & Hero/Villain identity in GTO prose. */
+.tok-pos {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.82em;
+  padding: 0 5px;
+  border-radius: 4px;
+  background: rgba(138, 161, 177, 0.18);
+  color: var(--text);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.tok-pos.is-hero { background: var(--hero-soft); color: var(--hero); }
+.tok-pos.is-villain { background: var(--villain-soft); color: var(--villain); }
+.tok-word { font-weight: 700; }
+.tok-word.is-hero { color: var(--hero); }
+.tok-word.is-villain { color: var(--villain); }
+
 /* Wrap-up */
 .wrap-up h2 { margin-bottom: 4px; }
 .wrap-up h3 { margin-bottom: 8px; margin-top: 24px; }
@@ -581,6 +603,7 @@ form { margin-top: 8px; }
 .rslot-4 { top: 8px; right: 4px; }
 .rslot-5 { bottom: 6px; right: 4px; }
 .rseat-turn { background: rgba(76, 182, 255, 0.16); box-shadow: 0 0 0 2px var(--accent); }
+.rseat-villain:not(.rseat-turn) { box-shadow: 0 0 0 1.5px rgba(232, 169, 63, 0.6); }
 .rseat-folded { opacity: 0.45; }
 .rseat-mucked {
   min-height: 36px;
@@ -598,6 +621,8 @@ form { margin-top: 8px; }
   color: #fff;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
+.rseat-hero .rseat-pos { color: var(--hero); }
+.rseat-villain .rseat-pos { color: var(--villain); }
 .rseat-stack {
   font-size: 0.72rem;
   color: #d5ece0;
@@ -661,10 +686,33 @@ form { margin-top: 8px; }
 }
 .pcard-sm { width: 26px; height: 36px; }
 .pcard-red { color: #c0202a; }
+/* Rank and suit each sit in a fixed flex-centred box, so the differing
+   intrinsic metrics of the Unicode suit glyphs (♣♦♥♠) can't push them
+   off-centre — the box centres the glyph regardless of its own ascent. */
+.pcard-rank, .pcard-suit {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 1em;
+  line-height: 1;
+}
 .pcard-rank { font-weight: 700; font-size: 0.78rem; }
 .pcard-suit { font-size: 0.92rem; }
 .pcard-sm .pcard-rank { font-size: 0.68rem; }
 .pcard-sm .pcard-suit { font-size: 0.82rem; }
+/* Inline card — flows inside GTO prose alongside text. */
+.pcard-inline {
+  display: inline-flex;
+  width: 17px;
+  height: 23px;
+  border-radius: 3px;
+  vertical-align: -5px;
+  margin: 0 1px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+}
+.pcard-inline .pcard-rank { font-size: 0.58rem; }
+.pcard-inline .pcard-suit { font-size: 0.64rem; }
 .pcard-back {
   background: repeating-linear-gradient(45deg, #2b5d8a, #2b5d8a 4px, #24507a 4px, #24507a 8px);
   border-color: #1c3e5e;
