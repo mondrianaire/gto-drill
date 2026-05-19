@@ -52,6 +52,14 @@ export function mountSoloView(container, onExit) {
     return { unmount: () => clear(container) };
   }
 
+  // Optional `?scenario=<id>` URL param pins solo to a specific scenario,
+  // useful for sharing or for inspecting a particular spot. When pinned,
+  // "Next hand" still cycles through the pinned scenario (you re-decide
+  // the same spot rather than getting a random one).
+  const params = new URLSearchParams(location.search);
+  const pinnedId = params.get("scenario");
+  const pinned = pinnedId ? scenarios.find((s) => s.scenario_id === pinnedId) : null;
+
   // Tracking which scenarios we've shown recently, to avoid immediate
   // repeats. Window = half the library or 10, whichever is smaller.
   const recentWindow = Math.min(10, Math.max(1, Math.floor(scenarios.length / 2)));
@@ -64,6 +72,7 @@ export function mountSoloView(container, onExit) {
   let correctSoFar = 0;
 
   function pickRandomScenario() {
+    if (pinned) return pinned;
     let pool = scenarios.filter((s) => !recent.includes(s.scenario_id));
     if (pool.length === 0) pool = scenarios.slice();
     const next = pool[(Math.random() * pool.length) | 0];

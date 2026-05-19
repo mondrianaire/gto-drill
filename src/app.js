@@ -58,6 +58,23 @@ async function boot() {
 
     setBootState("Checking sign-in…");
     const user = await initAuth();
+
+    // `?scenario=<id>` deep-link → go straight to solo mode pinned on that
+    // scenario, regardless of sign-in state. Lets us share specific spots
+    // by URL ("look at this hand → live.url/?scenario=…").
+    const params = new URLSearchParams(location.search);
+    if (params.get("scenario")) {
+      const goSignIn = () => mountSignInView(root, () => mountRouter(root), () => goSolo());
+      const goSolo = () => mountSoloView(root, () => {
+        // On exit from a pinned solo session, drop the param and go home.
+        history.replaceState({}, "", location.origin + location.pathname);
+        if (user) mountRouter(root);
+        else goSignIn();
+      });
+      goSolo();
+      return;
+    }
+
     if (!user) {
       // Not signed in — show the Google sign-in gate. Once signed in, the
       // callback mounts the router. There's also a "Practice solo" escape
