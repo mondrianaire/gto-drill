@@ -6,6 +6,16 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 ## [Unreleased]
 
 ### Added
+- **`?scenario=<id>` deep-link** routes straight into solo mode pinned
+  on that scenario — useful for sharing spots by URL and for inspecting
+  any single scenario without depending on the random shuffle.
+- **Hero-hand picker for the two range-perspective scenarios.** The
+  scenarios where `replay.hero_cards` is null (BTN vs BB 3-bet pot c-bet
+  decision, SB vs BTN turn overbet) now mount a compact 4-suit × 13-rank
+  card-select grid in the equity panel. Click two cards to set your
+  sample hero hand — the Run button enables and the rest of the panel
+  works identically to the pinned-hero scenarios. Board cards are
+  disabled in the grid; FIFO replacement when both slots are taken.
 - **App version stamp** in the header (`v2026-05-19.4-...`) so you can
   tell at a glance which build you're on. If GitHub Pages serves a
   stale cache (~10 min TTL) the version will still read the old build —
