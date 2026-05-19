@@ -6,6 +6,16 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 ## [Unreleased]
 
 ### Added
+- **Monte Carlo equity tool (the "Test it" button)**. On the per-hand reveal,
+  the previously-stubbed "🎲 Test it — equity vs a range" button now opens a
+  full equity calculator. The user picks a villain range on a 13×13 hand
+  grid (with `Any two` / `Pairs` / `Broadways` / `Clear` presets), and the
+  app runs a 5000-trial Monte Carlo against the scenario's hero hand + the
+  current board, displaying hero equity with a hero/villain split bar,
+  win/tie/loss counts, and timing. Engine (`src/equity.js`) verified
+  against full enumeration (1.7M boards) and against eight known
+  benchmark matchups. Scenarios without a pinned `hero_cards` show a
+  friendly notice (a hand-picker for those is coming next).
 - Every one of the 45 GTO scenarios now has structured `replay` data — the
   visual poker-table replay is no longer limited to the first 5. Each scenario
   plays out the full six-handed table and complete betting line up to the

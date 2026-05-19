@@ -12,6 +12,7 @@ import { computePhase } from "./flow.js";
 import { perPlayerAccuracy, interPlayerAgreement, rankedDisagreements } from "./stats.js";
 import { recordGame, writeActiveGameId } from "./history.js";
 import { mountReplay, cardEl, liveVillains } from "./replay.js";
+import { mountEquityPanel } from "./equity-panel.js";
 
 // -----------------------------------------------------------------------
 // Small DOM helpers (duplicated from onboarding.js intentionally to keep
@@ -304,11 +305,22 @@ export function mountInGameView(container, gameId) {
         );
       }
 
-      // "Test it!" — hooked placeholder for the Monte Carlo equity tool.
-      const testNote = h("div", { class: "muted test-note" });
+      // "Test it!" — Monte Carlo equity vs a user-picked villain range.
+      const testHost = h("div", { class: "test-host" });
+      let panelOpen = false;
+      let panelHandle = null;
       const testBtn = h("button", { type: "button", class: "secondary test-it" }, "🎲  Test it — equity vs a range");
       testBtn.addEventListener("click", () => {
-        testNote.textContent = "The Monte Carlo equity tool is coming next.";
+        if (panelOpen) {
+          if (panelHandle) panelHandle.unmount();
+          panelHandle = null;
+          panelOpen = false;
+          testBtn.textContent = "🎲  Test it — equity vs a range";
+        } else {
+          panelHandle = mountEquityPanel(testHost, scen);
+          panelOpen = true;
+          testBtn.textContent = "Hide equity panel";
+        }
       });
 
       body = h("div", { class: "hand-reveal" },
@@ -316,7 +328,7 @@ export function mountInGameView(container, gameId) {
         explain,
         oppBlock,
         h("div", { class: "test-row" }, testBtn),
-        testNote
+        testHost
       );
 
       fwdBtn = h("button", { type: "button", class: "primary hand-fwd" },

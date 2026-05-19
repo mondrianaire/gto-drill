@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Equity panel — dev view</title>
+<link rel="stylesheet" href="../styles/app.css" />
+<style>body { padding: 24px; } .scen { max-width: 720px; margin: 0 auto 32px; }</style>
+</head>
+<body>
+<h1 style="font-size:1.2rem;">Equity panel — dev view</h1>
+<p class="muted" style="max-width:720px;margin:0 auto 16px;">A scenario with <code>hero_cards</code> set and one without, mounted side-by-side to verify both code paths.</p>
+<div class="scen" id="withHero"><h2 style="font-size:1rem;">Scenario with hero_cards</h2></div>
+<div class="scen" id="noHero"><h2 style="font-size:1rem;">Scenario without hero_cards</h2></div>
+
+<script type="module">
+  import { mountEquityPanel } from "../src/equity-panel.js";
+  const scens = await (await fetch("../data/scenarios.json")).json();
+  const arr = Array.isArray(scens) ? scens : scens.scenarios;
+  const withHero = arr.find(s => s.replay && s.replay.hero_cards);
+  const noHero = arr.find(s => s.replay && !s.replay.hero_cards);
+  if (withHero) mountEquityPanel(document.getElementById("withHero"), withHero);
+  if (noHero) mountEquityPanel(document.getElementById("noHero"), noHero);
+</script>
+</body>
+</html>
