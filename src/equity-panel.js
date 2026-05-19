@@ -139,7 +139,10 @@ function mountHeroPicker(host, opts) {
     }
   }
 
-  const root = h("div", { class: "hero-pick" }, titleEl, slotsRow, grid, noteEl);
+  // Wrap the grid in a horizontally-scrollable container so cells can stay
+  // touch-target-sized on narrow phones without breaking the layout.
+  const gridScroll = h("div", { class: "hero-pick-grid-scroll" }, grid);
+  const root = h("div", { class: "hero-pick" }, titleEl, slotsRow, gridScroll, noteEl);
   host.appendChild(root);
   syncSlots();
   syncGrid();

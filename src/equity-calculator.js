@@ -249,12 +249,16 @@ export function mountEquityCalculator(container, onExit) {
   });
 
   // -------- assemble --------
+  // Wrap the 4x13 card grid in a horizontally-scrollable container so cells
+  // stay touch-friendly on narrow phones (matches the .hero-pick-grid-scroll
+  // pattern used in equity-panel's hero picker).
+  const gridScroll = h("div", { class: "hero-pick-grid-scroll" }, grid);
   const root = h("section", { class: "calc-view" },
     header,
     h("div", { class: "calc-section" },
       heroSlotsRow,
       boardSlotsRow,
-      grid,
+      gridScroll,
       statusEl
     ),
     h("div", { class: "eq-picker-section calc-villain-section" },
