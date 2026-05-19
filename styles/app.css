@@ -863,7 +863,25 @@ form { margin-top: 8px; }
 }
 .solo-header h2 { margin: 0; font-size: 1.1rem; flex: 0 0 auto; }
 .solo-stats { font-size: 0.85rem; flex: 1 1 auto; }
-.solo-exit { padding: 4px 8px; font-size: 0.85rem; flex: 0 0 auto; }
+.solo-share, .solo-exit { padding: 4px 8px; font-size: 0.85rem; flex: 0 0 auto; }
+.solo-share.is-copied { color: var(--ok); }
+.solo-share-fallback {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px 10px;
+  margin: 0 0 12px;
+  font-size: 0.85rem;
+}
+.solo-share-input {
+  flex: 1 1 auto;
+  margin: 0;
+  font-size: 0.82rem;
+  padding: 6px 8px;
+}
 
 /* Account bar (landing) */
 .account-bar {

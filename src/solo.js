@@ -38,6 +38,40 @@ function clear(container) {
   while (container.firstChild) container.removeChild(container.firstChild);
 }
 
+/**
+ * Copy a string to the OS clipboard. Returns a promise resolving to true on
+ * success, false on failure. Tries the modern Clipboard API first; falls
+ * back to a hidden-textarea + execCommand("copy") for older browsers and
+ * insecure contexts (since `navigator.clipboard` needs HTTPS).
+ */
+async function copyToClipboard(text) {
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {}
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.style.position = "fixed";
+    ta.style.opacity = "0";
+    ta.style.left = "-9999px";
+    document.body.appendChild(ta);
+    ta.focus();
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return !!ok;
+  } catch {}
+  return false;
+}
+
+/** Build the deep-link URL for a given scenario id. */
+function shareUrlForScenario(scenarioId) {
+  return location.origin + location.pathname + "?scenario=" + encodeURIComponent(scenarioId);
+}
+
 // -----------------------------------------------------------------------
 // mountSoloView — the whole solo practice loop.
 //
@@ -105,9 +139,41 @@ export function mountSoloView(container, onExit) {
           "Hands " + handsCompleted + " · GTO accuracy " +
           Math.round((correctSoFar / handsCompleted) * 100) + "%")
       : h("span", { class: "muted solo-stats" }, "Hands 0");
+    // "Copy share link" — writes the deep-link URL for the current scenario
+    // to the clipboard. Brief "Copied!" confirmation; falls back to showing
+    // the URL inline if clipboard access is blocked.
+    const shareBtn = h("button",
+      { type: "button", class: "link-btn solo-share", title: "Copy a permalink for this hand to the clipboard" },
+      "🔗 Copy share link");
+    const shareFallback = h("div", { class: "solo-share-fallback", hidden: true });
+    shareBtn.addEventListener("click", async () => {
+      const url = shareUrlForScenario(scen.scenario_id);
+      const ok = await copyToClipboard(url);
+      if (ok) {
+        const prev = shareBtn.textContent;
+        shareBtn.classList.add("is-copied");
+        shareBtn.textContent = "✓ Link copied!";
+        setTimeout(() => {
+          shareBtn.classList.remove("is-copied");
+          shareBtn.textContent = prev;
+        }, 1800);
+      } else {
+        // Clipboard failed — surface the URL inline so the user can copy by hand.
+        shareFallback.hidden = false;
+        clear(shareFallback);
+        const input = h("input", { type: "text", readonly: true, value: url, class: "solo-share-input" });
+        const close = h("button", { type: "button", class: "link-btn" }, "✕");
+        close.addEventListener("click", () => { shareFallback.hidden = true; clear(shareFallback); });
+        shareFallback.appendChild(h("span", { class: "muted" }, "Copy this link:"));
+        shareFallback.appendChild(input);
+        shareFallback.appendChild(close);
+        setTimeout(() => { input.focus(); input.select(); }, 0);
+      }
+    });
     const header = h("div", { class: "solo-header" },
       h("h2", null, "Solo practice"),
       stats,
+      shareBtn,
       exitBtn
     );
 
@@ -245,6 +311,7 @@ export function mountSoloView(container, onExit) {
       "section",
       { class: "in-game my-turn solo-view" },
       header,
+      shareFallback,
       h("div", { class: "hand-card" }, spot, body),
       errorBox,
       h("div", { class: "hand-nav" }, primaryBtn)

@@ -6,6 +6,12 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 ## [Unreleased]
 
 ### Added
+- **🔗 Copy share link** button in the solo-practice header. Click to
+  copy the current scenario's deep-link URL to the clipboard ("✓ Link
+  copied!" briefly confirms). Send the link to a friend (or paste it
+  into a chat for analysis) and they land directly on the same spot.
+  Falls back to a read-only input field if the Clipboard API is blocked
+  (insecure context, etc.).
 - **Accumulating Run + trials-per-click selector** on every equity
   surface (per-scenario panel + standalone calculator). The Run button
   now accumulates: each click adds the selected trial count (5,000 /
