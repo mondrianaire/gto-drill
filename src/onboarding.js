@@ -60,7 +60,7 @@ const GOOGLE_G_SVG =
 // when no user is signed in.
 // -----------------------------------------------------------------------
 
-export function mountSignInView(container, onSignedIn) {
+export function mountSignInView(container, onSignedIn, onSolo) {
   clear(container);
   const errorBox = h("div", { class: "error", role: "alert" });
 
@@ -94,6 +94,16 @@ export function mountSignInView(container, onSignedIn) {
     }
   });
 
+  // Anonymous-solo escape hatch — same size as the Google button, muted.
+  const soloBtn = h(
+    "button",
+    { type: "button", class: "solo-btn" },
+    "🃏  Practice solo (no sign-in, no opponent)"
+  );
+  soloBtn.addEventListener("click", () => {
+    if (onSolo) onSolo();
+  });
+
   const root = h(
     "section",
     { class: "signin" },
@@ -104,6 +114,7 @@ export function mountSignInView(container, onSignedIn) {
       "An asynchronous head-to-head GTO poker quiz. Sign in to start a game with a friend — your games follow your account on any device."
     ),
     btn,
+    soloBtn,
     errorBox,
     h(
       "p",

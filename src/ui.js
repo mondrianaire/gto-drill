@@ -12,6 +12,7 @@ import { computePhase } from "./flow.js";
 import { perPlayerAccuracy, interPlayerAgreement, rankedDisagreements } from "./stats.js";
 import { recordGame, writeActiveGameId } from "./history.js";
 import { mountReplay, cardEl, liveVillains } from "./replay.js";
+import { mountEquityPanel } from "./equity-panel.js";
 
 // -----------------------------------------------------------------------
 // Small DOM helpers (duplicated from onboarding.js intentionally to keep
@@ -64,12 +65,11 @@ function knownCards(scen) {
 // card run (one or more space-separated codes) | position | Hero/Villain word
 const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b/g;
 
-/**
- * @param {string} text
- * @param {Object} scen  The scenario (for replay context).
- * @returns {DocumentFragment}
- */
-function richText(text, scen) {
+/** Escape regex meta-characters for safe use inside a constructed RegExp. */
+function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
+
+/** Tokenize a chunk of prose (no anchor handling) into card icons + chips. */
+function tokenizeProse(text, scen) {
   const frag = document.createDocumentFragment();
   if (!text) return frag;
   const heroPos = scen && scen.replay ? scen.replay.hero_seat : null;
@@ -100,6 +100,61 @@ function richText(text, scen) {
     last = m.index + m[0].length;
   }
   if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+  return frag;
+}
+
+/** A clickable inline range chip: the anchor text + a 🎲 icon. */
+function makeRangeChip(matchedText, range, onClick) {
+  const summary = range && range.summary ? range.summary : "";
+  const title = summary ? (range.label + " — " + summary) : (range && range.label) || "";
+  const chip = h(
+    "span",
+    { class: "tok-range", title, role: "button", tabindex: "0" },
+    matchedText,
+    h("span", { class: "tok-range-icon", "aria-hidden": "true" }, "🎲")
+  );
+  chip.addEventListener("click", (ev) => { ev.preventDefault(); onClick(range); });
+  chip.addEventListener("keydown", (ev) => {
+    if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); onClick(range); }
+  });
+  return chip;
+}
+
+/**
+ * Render GTO prose with:
+ *   - inline card icons, position chips, Hero/Villain identity (always);
+ *   - clickable range chips on any anchor in `scen.villain_ranges`
+ *     (only when `opts.onRangeClick` is provided).
+ *
+ * Exported so the solo-practice view can reuse the same rendering.
+ *
+ * @param {string} text
+ * @param {Object} scen
+ * @param {{ onRangeClick?: (range:any) => void }} [opts]
+ * @returns {DocumentFragment}
+ */
+export function richText(text, scen, opts) {
+  const frag = document.createDocumentFragment();
+  if (!text) return frag;
+  const ranges = (scen && Array.isArray(scen.villain_ranges)) ? scen.villain_ranges : [];
+  const onRangeClick = opts && opts.onRangeClick;
+  if (!ranges.length || !onRangeClick) {
+    frag.appendChild(tokenizeProse(text, scen));
+    return frag;
+  }
+  // Longest anchor first so "BB's 3-bet range" wins over "3-bet range".
+  const sorted = ranges.slice().sort((a, b) => b.anchor.length - a.anchor.length);
+  const anchorRe = new RegExp("(" + sorted.map((r) => reEscape(r.anchor)).join("|") + ")", "g");
+  let last = 0;
+  let m;
+  while ((m = anchorRe.exec(text))) {
+    if (m.index > last) frag.appendChild(tokenizeProse(text.slice(last, m.index), scen));
+    const matched = m[1];
+    const range = sorted.find((r) => r.anchor === matched);
+    frag.appendChild(makeRangeChip(matched, range, onRangeClick));
+    last = m.index + m[0].length;
+  }
+  if (last < text.length) frag.appendChild(tokenizeProse(text.slice(last), scen));
   return frag;
 }
 
@@ -282,7 +337,40 @@ export function mountInGameView(container, gameId) {
             h("strong", { class: "gto-action" }, gto))
         )
       );
-      const explain = h("p", { class: "gto-explanation" }, scen ? richText(scen.gto_explanation, scen) : "");
+      // "Test it!" — Monte Carlo equity vs a user-picked villain range.
+      // (Declared up here so inline range chips in the explanation prose can
+      // call into the same panel.)
+      const testHost = h("div", { class: "test-host" });
+      const eqState = { open: false, handle: null };
+      const testBtn = h("button", { type: "button", class: "secondary test-it" }, "🎲  Test it — equity vs a range");
+      function closeEquityPanel() {
+        if (eqState.handle) eqState.handle.unmount();
+        eqState.handle = null;
+        eqState.open = false;
+        testBtn.textContent = "🎲  Test it — equity vs a range";
+      }
+      function openEquityWithRange(range) {
+        const classes = (range && range.classes) || [];
+        const label = (range && range.label) || "";
+        if (eqState.open && eqState.handle) {
+          eqState.handle.setRange(classes, label);
+        } else {
+          eqState.handle = mountEquityPanel(testHost, scen, { initialRange: classes, initialRangeLabel: label });
+          eqState.open = true;
+          testBtn.textContent = "Hide equity panel";
+        }
+        if (eqState.handle && eqState.handle.root && eqState.handle.root.scrollIntoView) {
+          eqState.handle.root.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+      testBtn.addEventListener("click", () => {
+        if (eqState.open) closeEquityPanel();
+        else openEquityWithRange(null);
+      });
+
+      const explain = h("p", { class: "gto-explanation" }, scen
+        ? richText(scen.gto_explanation, scen, { onRangeClick: openEquityWithRange })
+        : "");
 
       // Opponent comparison — only when the opponent has already played this hand.
       const oppUid = (game.participantUids || []).find((u) => u !== myUid);
@@ -304,19 +392,12 @@ export function mountInGameView(container, gameId) {
         );
       }
 
-      // "Test it!" — hooked placeholder for the Monte Carlo equity tool.
-      const testNote = h("div", { class: "muted test-note" });
-      const testBtn = h("button", { type: "button", class: "secondary test-it" }, "🎲  Test it — equity vs a range");
-      testBtn.addEventListener("click", () => {
-        testNote.textContent = "The Monte Carlo equity tool is coming next.";
-      });
-
       body = h("div", { class: "hand-reveal" },
         result,
         explain,
         oppBlock,
         h("div", { class: "test-row" }, testBtn),
-        testNote
+        testHost
       );
 
       fwdBtn = h("button", { type: "button", class: "primary hand-fwd" },

@@ -6,6 +6,44 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 ## [Unreleased]
 
 ### Added
+- **App version stamp** in the header (`v2026-05-19.4-...`) so you can
+  tell at a glance which build you're on. If GitHub Pages serves a
+  stale cache (~10 min TTL) the version will still read the old build —
+  that's the cue to hard-refresh (Ctrl+Shift+R / Cmd+Shift+R). Bumped
+  every commit in `src/version.js`.
+- **Solo practice mode** — a "🃏 Practice solo (no sign-in, no
+  opponent)" button below the Google sign-in button on the gate screen.
+  No Firebase, no opponent, no progress saved across sessions: one
+  random scenario at a time, the full decide → reveal flow with the GTO
+  explanation, range chips, and Monte Carlo equity panel all working
+  identically to multiplayer. Running stats show "Hands N · GTO
+  accuracy X%" at the top, and an Exit button returns to the sign-in
+  screen. The scenario picker avoids immediate repeats (sliding window
+  of ~10 recent hands).
+- **Inline range chips in GTO prose**. Whenever a scenario's GTO
+  explanation calls out a named villain range ("BB's 3-bet range", "BTN's
+  c-bet range", "CO's polar c-betting range" …), that phrase is now an
+  underlined 🎲 chip you can click — the Monte Carlo equity panel opens
+  below the explanation with that range pre-selected on the 13×13 grid.
+  Hit Run to see the equity. Click another chip and the panel switches
+  to that range without remounting. **40 of the 45 scenarios** carry
+  range annotations (45 named ranges total); the remaining 5 scenarios
+  are pure hero-side strategy spots with no explicit villain-range
+  reference.
+- The equity engine now also understands fully-specified 2-card combos
+  like `AcKc` / `Th9h` (not just hand-class labels), so range
+  annotations can pin down specific suited holdings on a textured board
+  (the heart-flush combos, etc.).
+- **Monte Carlo equity tool (the "Test it" button)**. On the per-hand reveal,
+  the previously-stubbed "🎲 Test it — equity vs a range" button now opens a
+  full equity calculator. The user picks a villain range on a 13×13 hand
+  grid (with `Any two` / `Pairs` / `Broadways` / `Clear` presets), and the
+  app runs a 5000-trial Monte Carlo against the scenario's hero hand + the
+  current board, displaying hero equity with a hero/villain split bar,
+  win/tie/loss counts, and timing. Engine (`src/equity.js`) verified
+  against full enumeration (1.7M boards) and against eight known
+  benchmark matchups. Scenarios without a pinned `hero_cards` show a
+  friendly notice (a hand-picker for those is coming next).
 - Every one of the 45 GTO scenarios now has structured `replay` data — the
   visual poker-table replay is no longer limited to the first 5. Each scenario
   plays out the full six-handed table and complete betting line up to the

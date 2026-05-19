@@ -1,0 +1,254 @@
+// solo.js — anonymous, single-player practice mode.
+//
+// No Firebase, no sign-in, no opponent. Pulls one random scenario at a
+// time from the loaded library, runs the same decide -> reveal flow as
+// the multiplayer in-game view (so the GTO explanation, range chips,
+// and Monte Carlo equity panel all work identically), then shuffles to
+// a fresh hand on "Next hand".
+
+import { listScenarios } from "./scenarios.js";
+import { mountReplay } from "./replay.js";
+import { mountEquityPanel } from "./equity-panel.js";
+import { richText } from "./ui.js";
+
+// -----------------------------------------------------------------------
+// Tiny DOM helper (local; intentionally duplicated to keep this module
+// self-contained, matching the project's existing pattern).
+// -----------------------------------------------------------------------
+
+function h(tag, attrs, ...children) {
+  const el = document.createElement(tag);
+  if (attrs) {
+    for (const k of Object.keys(attrs)) {
+      const v = attrs[k];
+      if (k === "class") el.className = v;
+      else if (k.startsWith("on") && typeof v === "function") el.addEventListener(k.slice(2).toLowerCase(), v);
+      else if (v !== false && v != null) el.setAttribute(k, v);
+    }
+  }
+  for (const c of children.flat()) {
+    if (c == null || c === false) continue;
+    if (typeof c === "string") el.appendChild(document.createTextNode(c));
+    else el.appendChild(c);
+  }
+  return el;
+}
+
+function clear(container) {
+  while (container.firstChild) container.removeChild(container.firstChild);
+}
+
+// -----------------------------------------------------------------------
+// mountSoloView — the whole solo practice loop.
+//
+// @param {HTMLElement} container
+// @param {() => void} onExit  Called when the user backs out to sign-in.
+// -----------------------------------------------------------------------
+
+export function mountSoloView(container, onExit) {
+  const scenarios = listScenarios();
+  if (scenarios.length === 0) {
+    container.appendChild(h("p", { class: "muted" }, "No scenarios loaded — try refreshing."));
+    return { unmount: () => clear(container) };
+  }
+
+  // Tracking which scenarios we've shown recently, to avoid immediate
+  // repeats. Window = half the library or 10, whichever is smaller.
+  const recentWindow = Math.min(10, Math.max(1, Math.floor(scenarios.length / 2)));
+  const recent = [];
+  let currentScen = null;
+  // Per-hand state — gets reset on each Next hand.
+  let draft = null;
+  let replayCleanup = null;
+  let handsCompleted = 0;
+  let correctSoFar = 0;
+
+  function pickRandomScenario() {
+    let pool = scenarios.filter((s) => !recent.includes(s.scenario_id));
+    if (pool.length === 0) pool = scenarios.slice();
+    const next = pool[(Math.random() * pool.length) | 0];
+    recent.push(next.scenario_id);
+    while (recent.length > recentWindow) recent.shift();
+    return next;
+  }
+
+  function nextHand() {
+    currentScen = pickRandomScenario();
+    draft = { action: null, confidence: null, note: "", revealed: false };
+    render();
+  }
+
+  function render() {
+    if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
+    clear(container);
+
+    const scen = currentScen;
+    const errorBox = h("div", { class: "error", role: "alert" });
+
+    // --- header strip --------------------------------------------------------
+    const exitBtn = h("button", { type: "button", class: "link-btn solo-exit" }, "← Exit solo");
+    exitBtn.addEventListener("click", () => {
+      if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
+      if (onExit) onExit();
+    });
+    const stats = handsCompleted
+      ? h("span", { class: "muted solo-stats" },
+          "Hands " + handsCompleted + " · GTO accuracy " +
+          Math.round((correctSoFar / handsCompleted) * 100) + "%")
+      : h("span", { class: "muted solo-stats" }, "Hands 0");
+    const header = h("div", { class: "solo-header" },
+      h("h2", null, "Solo practice"),
+      stats,
+      exitBtn
+    );
+
+    // --- the spot ------------------------------------------------------------
+    const spot = h("div", { class: "hand-spot" });
+    if (scen.replay) {
+      const replayHost = h("div", { class: "replay-host" });
+      spot.appendChild(replayHost);
+      const r = mountReplay(replayHost, scen.replay);
+      replayCleanup = r && r.unmount ? r.unmount : null;
+      spot.appendChild(h("details", { class: "hand-words" },
+        h("summary", null, "The spot in words"),
+        h("p", null, richText(scen.description, scen))
+      ));
+    } else {
+      spot.appendChild(h("p", { class: "scenario-desc" }, richText(scen.description, scen)));
+    }
+
+    // --- body: decide or reveal ---------------------------------------------
+    let body, primaryBtn;
+    if (!draft.revealed) {
+      const actionRow = h("div", { class: "actions-row", role: "radiogroup", "aria-label": "Your move" });
+      (scen.available_actions || []).forEach((a) => {
+        const btn = h("button", { type: "button", class: "action-btn" + (draft.action === a ? " selected" : "") }, a);
+        btn.addEventListener("click", () => {
+          draft.action = a;
+          actionRow.querySelectorAll(".action-btn").forEach((x) => x.classList.toggle("selected", x === btn));
+          errorBox.textContent = "";
+        });
+        actionRow.appendChild(btn);
+      });
+
+      const confRow = h("div", { class: "confidence-row", role: "radiogroup", "aria-label": "How sure are you" });
+      for (let c = 1; c <= 5; c++) {
+        const btn = h("button", { type: "button", class: "conf-btn" + (draft.confidence === c ? " selected" : "") }, String(c));
+        btn.addEventListener("click", () => {
+          draft.confidence = c;
+          confRow.querySelectorAll(".conf-btn").forEach((x) => x.classList.toggle("selected", x === btn));
+          errorBox.textContent = "";
+        });
+        confRow.appendChild(btn);
+      }
+
+      const noteInput = h("textarea", {
+        class: "note-input", maxlength: "280", rows: "2",
+        placeholder: "What's your read here? (optional)",
+      });
+      noteInput.value = draft.note || "";
+      noteInput.addEventListener("input", () => { draft.note = noteInput.value.slice(0, 280); });
+      const noteToggle = h("details", { class: "note-toggle" },
+        h("summary", null, draft.note ? "Note added ✓" : "Add a note"),
+        noteInput
+      );
+      if (draft.note) noteToggle.open = true;
+
+      body = h("div", { class: "decide" },
+        h("span", { class: "decide-label" }, "Your move"),
+        actionRow,
+        h("span", { class: "decide-label decide-label-sub" }, "How sure?  (1 = guess, 5 = certain)"),
+        confRow,
+        noteToggle
+      );
+
+      primaryBtn = h("button", { type: "button", class: "primary hand-fwd" }, "Lock in & see GTO →");
+      primaryBtn.addEventListener("click", () => {
+        if (!draft.action) { errorBox.textContent = "Pick your move."; return; }
+        if (!draft.confidence) { errorBox.textContent = "Rate how sure you are (1–5)."; return; }
+        draft.revealed = true;
+        handsCompleted += 1;
+        if (draft.action === scen.gto_action) correctSoFar += 1;
+        render();
+      });
+    } else {
+      // ===================== REVEAL =====================
+      const gto = scen.gto_action;
+      const correct = draft.action === gto;
+
+      const result = h("div", { class: "hand-result" + (correct ? " is-ok" : " is-miss") },
+        h("div", { class: "result-verdict" }, correct ? "✓ You matched the GTO line" : "✗ Off the GTO line"),
+        h("div", { class: "result-picks" },
+          h("div", null,
+            h("span", { class: "muted" }, "You played  "),
+            h("strong", { class: correct ? "ok" : "miss" }, draft.action),
+            h("span", { class: "muted" }, "   ·   confidence " + draft.confidence + "/5")),
+          h("div", null,
+            h("span", { class: "muted" }, "GTO line  "),
+            h("strong", { class: "gto-action" }, gto))
+        )
+      );
+
+      // Equity panel + range chips — same wiring as multiplayer reveal.
+      const testHost = h("div", { class: "test-host" });
+      const eqState = { open: false, handle: null };
+      const testBtn = h("button", { type: "button", class: "secondary test-it" }, "🎲  Test it — equity vs a range");
+      function closePanel() {
+        if (eqState.handle) eqState.handle.unmount();
+        eqState.handle = null;
+        eqState.open = false;
+        testBtn.textContent = "🎲  Test it — equity vs a range";
+      }
+      function openWithRange(range) {
+        const classes = (range && range.classes) || [];
+        const label = (range && range.label) || "";
+        if (eqState.open && eqState.handle) {
+          eqState.handle.setRange(classes, label);
+        } else {
+          eqState.handle = mountEquityPanel(testHost, scen, { initialRange: classes, initialRangeLabel: label });
+          eqState.open = true;
+          testBtn.textContent = "Hide equity panel";
+        }
+        if (eqState.handle && eqState.handle.root && eqState.handle.root.scrollIntoView) {
+          eqState.handle.root.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+      testBtn.addEventListener("click", () => {
+        if (eqState.open) closePanel();
+        else openWithRange(null);
+      });
+
+      const explain = h("p", { class: "gto-explanation" },
+        richText(scen.gto_explanation, scen, { onRangeClick: openWithRange }));
+
+      body = h("div", { class: "hand-reveal" },
+        result,
+        explain,
+        h("div", { class: "test-row" }, testBtn),
+        testHost
+      );
+
+      primaryBtn = h("button", { type: "button", class: "primary hand-fwd" }, "Next hand →");
+      primaryBtn.addEventListener("click", () => { nextHand(); });
+    }
+
+    container.appendChild(h(
+      "section",
+      { class: "in-game my-turn solo-view" },
+      header,
+      h("div", { class: "hand-card" }, spot, body),
+      errorBox,
+      h("div", { class: "hand-nav" }, primaryBtn)
+    ));
+  }
+
+  // Pick the first scenario and render.
+  nextHand();
+
+  return {
+    unmount: () => {
+      if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
+      clear(container);
+    },
+  };
+}

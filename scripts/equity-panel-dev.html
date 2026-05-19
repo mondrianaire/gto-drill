@@ -1,0 +1,63 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Equity panel — dev view</title>
+<link rel="stylesheet" href="../styles/app.css" />
+<style>body { padding: 24px; } .scen { max-width: 720px; margin: 0 auto 32px; }</style>
+</head>
+<body>
+<h1 style="font-size:1.2rem;">Equity panel — dev view</h1>
+<p class="muted" style="max-width:720px;margin:0 auto 16px;">A scenario with <code>hero_cards</code> set and one without, mounted side-by-side to verify both code paths.</p>
+<div class="scen" id="withRanges"><h2 style="font-size:1rem;">Scenario with villain_ranges — chip + panel</h2></div>
+<div class="scen" id="withHero"><h2 style="font-size:1rem;">Plain scenario with hero_cards</h2></div>
+<div class="scen" id="noHero"><h2 style="font-size:1rem;">Scenario without hero_cards</h2></div>
+
+<script type="module">
+  import { mountEquityPanel } from "../src/equity-panel.js";
+  const scens = await (await fetch("../data/scenarios.json")).json();
+  const arr = Array.isArray(scens) ? scens : scens.scenarios;
+
+  // Inline the same richText + reveal-style wiring used in ui.js, but isolated for this dev page.
+  const wr = arr.find(s => Array.isArray(s.villain_ranges) && s.villain_ranges.length && s.replay && s.replay.hero_cards);
+  if (wr) {
+    const host = document.getElementById("withRanges");
+    // Show the gto_explanation with anchors highlighted as buttons.
+    const exp = document.createElement("p");
+    exp.className = "gto-explanation";
+    const text = wr.gto_explanation;
+    let last = 0;
+    const anchors = wr.villain_ranges.slice().sort((a,b)=>b.anchor.length-a.anchor.length);
+    const re = new RegExp("(" + anchors.map(r=>r.anchor.replace(/[.*+?^${}()|[\\]\\\\]/g,'\\\\$&')).join("|") + ")", "g");
+    let panelHandle = null;
+    function openWith(range) {
+      const classes = range && range.classes || [];
+      if (panelHandle) panelHandle.setRange(classes, range.label);
+      else panelHandle = mountEquityPanel(host, wr, { initialRange: classes, initialRangeLabel: range.label });
+    }
+    let m;
+    while ((m = re.exec(text))) {
+      if (m.index > last) exp.appendChild(document.createTextNode(text.slice(last, m.index)));
+      const matched = m[1];
+      const range = anchors.find(r => r.anchor === matched);
+      const chip = document.createElement("span");
+      chip.className = "tok-range"; chip.tabIndex = 0;
+      chip.appendChild(document.createTextNode(matched));
+      const ic = document.createElement("span"); ic.className = "tok-range-icon"; ic.textContent = "🎲";
+      chip.appendChild(ic);
+      chip.addEventListener("click", () => openWith(range));
+      exp.appendChild(chip);
+      last = m.index + m[0].length;
+    }
+    if (last < text.length) exp.appendChild(document.createTextNode(text.slice(last)));
+    host.appendChild(exp);
+    // Don't mount the panel by default — open on chip click.
+  }
+
+  const withHero = arr.find(s => s.replay && s.replay.hero_cards && !s.villain_ranges);
+  const noHero = arr.find(s => s.replay && !s.replay.hero_cards);
+  if (withHero) mountEquityPanel(document.getElementById("withHero"), withHero);
+  if (noHero) mountEquityPanel(document.getElementById("noHero"), noHero);
+</script>
+</body>
+</html>

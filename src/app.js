@@ -26,15 +26,23 @@ import {
   buildAvatar,
 } from "./onboarding.js";
 import { mountInGameView, mountWrapUpView } from "./ui.js";
+import { mountSoloView } from "./solo.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { readActiveGameId, writeActiveGameId } from "./history.js";
+import { APP_VERSION } from "./version.js";
 
 function setBootState(msg) {
   const el = document.getElementById("boot-state");
   if (el) el.textContent = msg;
 }
 
+function renderVersionStamp() {
+  const el = document.getElementById("app-version");
+  if (el) el.textContent = "v" + APP_VERSION;
+}
+
 async function boot() {
+  renderVersionStamp();
   const root = document.getElementById("app-root");
   try {
     setBootState("Loading scenarios…");
@@ -52,8 +60,11 @@ async function boot() {
     const user = await initAuth();
     if (!user) {
       // Not signed in — show the Google sign-in gate. Once signed in, the
-      // callback mounts the router.
-      mountSignInView(root, () => mountRouter(root));
+      // callback mounts the router. There's also a "Practice solo" escape
+      // hatch that bypasses Firebase entirely for anonymous practice.
+      const goSignIn = () => mountSignInView(root, () => mountRouter(root), () => goSolo());
+      const goSolo = () => mountSoloView(root, () => goSignIn());
+      goSignIn();
       return;
     }
 

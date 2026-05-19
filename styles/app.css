@@ -53,6 +53,16 @@ a { color: var(--accent); }
   margin: 0;
   letter-spacing: 0.02em;
 }
+.app-version {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  margin-left: 6px;
+  vertical-align: 4px;
+  cursor: help;
+}
+.app-version:empty { display: none; }
 .header-user {
   display: flex;
   align-items: center;
@@ -353,7 +363,127 @@ form { margin-top: 8px; }
 .hand-agree { margin-top: 2px; }
 .test-row { margin-top: 16px; }
 .test-it { width: 100%; }
-.test-note { margin-top: 8px; font-size: 0.85rem; }
+.test-host { margin-top: 8px; }
+
+/* ----- Equity (Monte Carlo) panel ------------------------------------- */
+.eq-panel {
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 12px;
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.eq-header { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; }
+.eq-cards { display: flex; align-items: center; gap: 6px; }
+.eq-cards-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  margin-right: 2px;
+}
+.eq-picker-section { display: flex; flex-direction: column; gap: 6px; }
+.eq-picker-title {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+.eq-picker-title > span:first-child { color: var(--text); font-weight: 600; }
+.eq-count { font-size: 0.78rem; }
+.eq-range-label {
+  font-size: 0.78rem;
+  color: var(--villain);
+  font-style: italic;
+  margin-right: auto;
+  padding-left: 8px;
+}
+.eq-range-label:empty { display: none; }
+.eq-run-row { display: flex; }
+.eq-run { width: 100%; }
+.eq-result {
+  font-size: 0.92rem;
+  padding: 8px 10px;
+  border-radius: var(--radius);
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+}
+.eq-result-empty { font-style: italic; }
+.eq-bar {
+  display: flex;
+  height: 14px;
+  border-radius: 8px;
+  overflow: hidden;
+  background: #222;
+  margin-bottom: 6px;
+}
+.eq-bar-hero { background: var(--hero); }
+.eq-bar-vill { background: var(--villain); }
+.eq-numbers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 0.85rem;
+}
+.eq-hero-pct { color: var(--hero); font-weight: 700; }
+.eq-vill-pct { color: var(--villain); font-weight: 700; }
+
+/* ----- Range picker (13×13 hand grid) --------------------------------- */
+.range-picker {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.rp-grid {
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 2px;
+}
+.rp-cell {
+  font-family: var(--font-stack);
+  font-size: 0.62rem;
+  font-weight: 700;
+  padding: 0;
+  height: 22px;
+  border-radius: 2px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  cursor: pointer;
+  min-width: 0;
+  min-height: 0;
+}
+.rp-cell:hover { filter: brightness(1.2); }
+.rp-pair    { background: rgba(76, 182, 255, 0.08); }
+.rp-suited  { background: rgba(74, 222, 128, 0.06); }
+.rp-offsuit { background: rgba(248, 113, 113, 0.04); }
+.rp-cell.is-on {
+  background: var(--accent);
+  color: #061018;
+  border-color: var(--accent);
+}
+.rp-cell.is-on.rp-suited { background: var(--ok); border-color: var(--ok); }
+.rp-cell.is-on.rp-offsuit { background: #e8a93f; border-color: #e8a93f; color: #1a1a1a; }
+.rp-presets {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.rp-preset {
+  font-size: 0.78rem;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+}
+.rp-preset:hover { background: var(--accent-soft); }
+.rp-clear { color: var(--miss); }
 
 /* Reveal */
 .reveal-list {
@@ -409,6 +539,24 @@ form { margin-top: 8px; }
 .tok-word { font-weight: 700; }
 .tok-word.is-hero { color: var(--hero); }
 .tok-word.is-villain { color: var(--villain); }
+
+/* Inline range chip — clickable anchor that pre-loads the equity panel. */
+.tok-range {
+  color: var(--villain);
+  border-bottom: 1px dotted var(--villain);
+  cursor: pointer;
+  padding: 0 1px;
+  border-radius: 3px;
+  transition: background 0.12s;
+}
+.tok-range:hover,
+.tok-range:focus { background: var(--villain-soft); outline: none; }
+.tok-range-icon {
+  margin-left: 4px;
+  font-size: 0.82em;
+  vertical-align: 1px;
+  opacity: 0.9;
+}
 
 /* Wrap-up */
 .wrap-up h2 { margin-bottom: 4px; }
@@ -549,7 +697,38 @@ form { margin-top: 8px; }
 }
 .google-btn:hover { background: #f4f6f8; }
 .google-btn svg { display: block; flex: 0 0 auto; }
+/* Anonymous-solo escape hatch on the sign-in screen — matches the Google
+   button's size and stack position, intentionally muted ("greyed out"). */
+.solo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px dashed var(--border);
+  font-weight: 500;
+  min-height: 48px;
+}
+.solo-btn:hover {
+  background: var(--bg-elev);
+  color: var(--text);
+  border-color: var(--text-dim);
+}
 .signin-note { margin-top: 20px; font-size: 0.82rem; }
+
+/* ----- Solo practice view ---------------------------------------------- */
+.solo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.solo-header h2 { margin: 0; font-size: 1.1rem; flex: 0 0 auto; }
+.solo-stats { font-size: 0.85rem; flex: 1 1 auto; }
+.solo-exit { padding: 4px 8px; font-size: 0.85rem; flex: 0 0 auto; }
 
 /* Account bar (landing) */
 .account-bar {
