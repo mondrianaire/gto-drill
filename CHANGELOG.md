@@ -6,6 +6,13 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 ## [Unreleased]
 
 ### Added
+- **Accumulating Run + trials-per-click selector** on every equity
+  surface (per-scenario panel + standalone calculator). The Run button
+  now accumulates: each click adds the selected trial count (5,000 /
+  25,000 / 100,000) to the running totals, so the user can dial in
+  precision with extra clicks. Result shows total trials (with commas)
+  + W/T/L + a "reset" link. Any input change (hero / board / villain
+  range) resets the accumulator automatically.
 - **Standalone equity calculator** — a third main-menu button below
   "Practice solo" opens a freestanding Monte Carlo tool: pick 2 hero
   cards from a 52-card grid (hero ring blue), pick 0–5 board cards from

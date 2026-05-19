@@ -403,8 +403,29 @@ form { margin-top: 8px; }
   padding-left: 8px;
 }
 .eq-range-label:empty { display: none; }
-.eq-run-row { display: flex; }
-.eq-run { width: 100%; }
+.eq-run-row { display: flex; gap: 8px; align-items: stretch; }
+.eq-run { flex: 1 1 auto; }
+.eq-trials-sel {
+  flex: 0 0 auto;
+  background: var(--bg-elev);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0 10px;
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+.eq-reset {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+.eq-reset:hover { color: var(--text); }
 .eq-result {
   font-size: 0.92rem;
   padding: 8px 10px;
