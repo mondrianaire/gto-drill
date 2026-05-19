@@ -6,6 +6,20 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 ## [Unreleased]
 
 ### Added
+- **Inline range chips in GTO prose**. Whenever a scenario's GTO
+  explanation calls out a named villain range ("BB's 3-bet range", "BTN's
+  c-bet range", "CO's polar c-betting range" …), that phrase is now an
+  underlined 🎲 chip you can click — the Monte Carlo equity panel opens
+  below the explanation with that range pre-selected on the 13×13 grid.
+  Hit Run to see the equity. Click another chip and the panel switches
+  to that range without remounting. **40 of the 45 scenarios** carry
+  range annotations (45 named ranges total); the remaining 5 scenarios
+  are pure hero-side strategy spots with no explicit villain-range
+  reference.
+- The equity engine now also understands fully-specified 2-card combos
+  like `AcKc` / `Th9h` (not just hand-class labels), so range
+  annotations can pin down specific suited holdings on a textured board
+  (the heart-flush combos, etc.).
 - **Monte Carlo equity tool (the "Test it" button)**. On the per-hand reveal,
   the previously-stubbed "🎲 Test it — equity vs a range" button now opens a
   full equity calculator. The user picks a villain range on a 13×13 hand

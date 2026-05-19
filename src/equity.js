@@ -208,14 +208,32 @@ export function runEquity({ heroHand, board, villainRange, trials = 5000 }) {
 
 /**
  * Expand a 169-grid hand class like "AKs", "AKo", "AA" into all card combos.
+ * Also accepts a fully-specified 4-char combo (e.g. "AcKc") and returns it
+ * as the single combo it names — useful when GTO prose calls out specific
+ * suited holdings on a textured board ("the AhKh hearts flush").
+ *
  * - Pairs (e.g. "AA") → 6 combos
  * - Suited (e.g. "AKs") → 4 combos
  * - Offsuit (e.g. "AKo") → 12 combos
+ * - Specific combo (e.g. "AcKc") → 1 combo
+ *
  * @param {string} cls
  * @returns {string[][]}
  */
 export function expandHandClass(cls) {
-  if (cls.length < 2 || cls.length > 3) return [];
+  // 4-char specific combo: "AcKc", "Th9h", etc.
+  if (cls && cls.length === 4) {
+    const a = cls.slice(0, 2), b = cls.slice(2, 4);
+    if (
+      a[0] in RANK_MAP && b[0] in RANK_MAP &&
+      SUIT_CHARS.indexOf(a[1]) >= 0 && SUIT_CHARS.indexOf(b[1]) >= 0 &&
+      a !== b
+    ) {
+      return [[a, b]];
+    }
+    return [];
+  }
+  if (cls == null || cls.length < 2 || cls.length > 3) return [];
   const r1 = cls[0], r2 = cls[1];
   if (!(r1 in RANK_MAP) || !(r2 in RANK_MAP)) return [];
   const out = [];

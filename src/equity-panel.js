@@ -34,9 +34,12 @@ function boardCards(replay) {
  * Mount the equity panel into `container` for a given scenario.
  * @param {HTMLElement} container
  * @param {Object} scen   Scenario object (uses scen.replay for hero/board).
- * @returns {{ unmount: () => void }}
+ * @param {Object} [opts]
+ * @param {string[]} [opts.initialRange]  Hand-class labels to pre-select.
+ * @param {string} [opts.initialRangeLabel]  Friendly name for the pre-loaded range.
+ * @returns {{ unmount: () => void, root: HTMLElement, setRange: (classes:string[], label?:string) => void }}
  */
-export function mountEquityPanel(container, scen) {
+export function mountEquityPanel(container, scen, opts = {}) {
   const replay = scen && scen.replay;
   const hero = (replay && replay.hero_cards) || null;
   const board = boardCards(replay);
@@ -51,7 +54,11 @@ export function mountEquityPanel(container, scen) {
         "needs both hole cards. (Hand-picker coming soon.)")
     );
     container.appendChild(note);
-    return { unmount: () => { if (note.parentNode) note.parentNode.removeChild(note); } };
+    return {
+      unmount: () => { if (note.parentNode) note.parentNode.removeChild(note); },
+      root: note,
+      setRange: () => {},
+    };
   }
 
   // ----- header strip: hero + board -----
@@ -65,8 +72,10 @@ export function mountEquityPanel(container, scen) {
   // ----- range picker -----
   const pickerHost = h("div", { class: "eq-picker-host" });
   const countLabel = h("span", { class: "eq-count" }, "0 combos · pick a range below");
+  const rangeLabel = h("span", { class: "eq-range-label" }, opts.initialRangeLabel || "");
   let currentCombos = [];
-  mountRangePicker(pickerHost, {
+  const picker = mountRangePicker(pickerHost, {
+    initial: opts.initialRange || [],
     onChange: (sel) => {
       currentCombos = sel.combos;
       const live = sel.combos.filter((c) => !c.includes(hero[0]) && !c.includes(hero[1]) && !board.includes(c[0]) && !board.includes(c[1]));
@@ -121,6 +130,7 @@ export function mountEquityPanel(container, scen) {
     h("div", { class: "eq-picker-section" },
       h("div", { class: "eq-picker-title" },
         h("span", null, "Villain range"),
+        rangeLabel,
         countLabel),
       pickerHost
     ),
@@ -129,7 +139,27 @@ export function mountEquityPanel(container, scen) {
   );
   container.appendChild(root);
 
+  // Force-emit once after mounting so countLabel reflects the initial range.
+  picker.getSelection && (function () {
+    const sel = picker.getSelection();
+    currentCombos = sel.combos;
+    const live = sel.combos.filter((c) => !c.includes(hero[0]) && !c.includes(hero[1]) && !board.includes(c[0]) && !board.includes(c[1]));
+    if (sel.classes.length) {
+      countLabel.textContent =
+        sel.classes.length + " hand class" + (sel.classes.length === 1 ? "" : "es") +
+        " · " + live.length + " combos vs this spot";
+      runBtn.disabled = live.length === 0;
+    }
+  })();
+
+  function setRange(classes, label) {
+    picker.setSelection(classes || []);
+    rangeLabel.textContent = label || "";
+  }
+
   return {
     unmount: () => { if (root.parentNode) root.parentNode.removeChild(root); },
+    root,
+    setRange,
   };
 }

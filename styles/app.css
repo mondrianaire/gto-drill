@@ -385,6 +385,14 @@ form { margin-top: 8px; }
 }
 .eq-picker-title > span:first-child { color: var(--text); font-weight: 600; }
 .eq-count { font-size: 0.78rem; }
+.eq-range-label {
+  font-size: 0.78rem;
+  color: var(--villain);
+  font-style: italic;
+  margin-right: auto;
+  padding-left: 8px;
+}
+.eq-range-label:empty { display: none; }
 .eq-run-row { display: flex; }
 .eq-run { width: 100%; }
 .eq-result {
@@ -521,6 +529,24 @@ form { margin-top: 8px; }
 .tok-word { font-weight: 700; }
 .tok-word.is-hero { color: var(--hero); }
 .tok-word.is-villain { color: var(--villain); }
+
+/* Inline range chip — clickable anchor that pre-loads the equity panel. */
+.tok-range {
+  color: var(--villain);
+  border-bottom: 1px dotted var(--villain);
+  cursor: pointer;
+  padding: 0 1px;
+  border-radius: 3px;
+  transition: background 0.12s;
+}
+.tok-range:hover,
+.tok-range:focus { background: var(--villain-soft); outline: none; }
+.tok-range-icon {
+  margin-left: 4px;
+  font-size: 0.82em;
+  vertical-align: 1px;
+  opacity: 0.9;
+}
 
 /* Wrap-up */
 .wrap-up h2 { margin-bottom: 4px; }

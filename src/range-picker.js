@@ -97,8 +97,12 @@ export function mountRangePicker(container, opts = {}) {
   }
 
   function setSelection(labels) {
+    // Keep ALL labels in the selection set — even specific-combo labels like
+    // "AcKc" that have no grid cell. The grid mirrors only the class labels
+    // that have buttons; the underlying selection still drives the combo
+    // expansion in getSelection().
     selected.clear();
-    for (const l of labels) if (l in buttons) selected.add(l);
+    for (const l of labels) selected.add(l);
     syncButtons();
     emit();
   }
