@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Equity engine — test harness</title>
+<style>
+  body { font-family: -apple-system, system-ui, sans-serif; background:#0f1a24; color:#e6edf3; margin:24px; }
+  h1 { font-size: 1.2rem; margin: 0 0 12px; }
+  .row { display: grid; grid-template-columns: 1fr 70px 80px 80px 80px; gap: 8px; padding: 4px 0; border-bottom: 1px solid #243646; font-size: 0.92rem; }
+  .row.head { font-weight: 700; color: #8aa1b1; }
+  .pass { color: #4ade80; }
+  .fail { color: #f87171; }
+  code { background: #16222e; padding: 1px 5px; border-radius: 3px; font-size: 0.85em; }
+  #status { margin: 12px 0; color: #8aa1b1; }
+</style>
+</head>
+<body>
+  <h1>Equity engine — test harness</h1>
+  <div id="status">Running…</div>
+  <h2 style="font-size: 0.95rem;">Evaluator unit tests</h2>
+  <div id="evalTests"></div>
+  <h2 style="font-size: 0.95rem; margin-top: 16px;">Monte Carlo matchups (5000 trials each)</h2>
+  <div id="mcTests"></div>
+
+<script type="module">
+  import { evaluate, parseCard, runEquity, expandHandClass, expandRange } from "../src/equity.js";
+
+  // --- evaluator unit tests --------------------------------------------------
+  function P(codes) { return codes.map(parseCard); }
+  const evalTests = [
+    { name: "Royal flush > king-high straight flush",
+      a: P(["Ah","Kh","Qh","Jh","Th","2c","3d"]),
+      b: P(["Kh","Qh","Jh","Th","9h","2c","3d"]),
+      expect: ">" },
+    { name: "Quad aces > full house",
+      a: P(["Ah","As","Ad","Ac","2h","3d","4s"]),
+      b: P(["Kh","Ks","Kd","Qc","Qh","2d","3s"]),
+      expect: ">" },
+    { name: "Full house > flush",
+      a: P(["Ah","As","Ad","Kc","Kh","2d","3s"]),
+      b: P(["Ah","2h","5h","7h","9h","Kc","Qd"]),
+      expect: ">" },
+    { name: "Wheel straight = 5-high (beats high card)",
+      a: P(["As","2c","3d","4h","5s","Kd","9c"]),
+      b: P(["Ah","Kh","Qd","Jc","9s","2h","3c"]),
+      expect: ">" },
+    { name: "Higher pair beats lower with same kickers",
+      a: P(["Ah","As","Kd","Qc","Jh","9d","2s"]),
+      b: P(["Kh","Ks","Ad","Qc","Jh","9d","2s"]),
+      // hand A: pair of AA, kickers KQJ
+      // hand B: pair of KK, kickers AQJ → AA beats KK
+      expect: ">" },
+    { name: "Two pair AA KK kicker Q > two pair AA KK kicker J",
+      a: P(["Ah","As","Kd","Kc","Qh","9d","2s"]),
+      b: P(["Ah","As","Kd","Kc","Jh","9d","2s"]),
+      expect: ">" },
+    { name: "Flush ace-high > flush king-high (same suit not possible cross-hand, use 7-card mix)",
+      a: P(["Ah","Th","7h","5h","2h","Kc","Qd"]),
+      b: P(["Kh","Th","7h","5h","2h","Ac","Qd"]),
+      // a: A-high heart flush; b: K-high heart flush → a wins
+      expect: ">" },
+  ];
+
+  const evalDiv = document.getElementById("evalTests");
+  evalDiv.innerHTML = `<div class="row head"><div>Test</div><div>A</div><div>B</div><div>Expect</div><div>Pass</div></div>`;
+  let evalPassed = 0, evalFailed = 0;
+  for (const t of evalTests) {
+    const sa = evaluate(t.a), sb = evaluate(t.b);
+    const got = sa > sb ? ">" : sa < sb ? "<" : "=";
+    const pass = got === t.expect;
+    if (pass) evalPassed++; else evalFailed++;
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<div>${t.name}</div><div>${sa.toExponential(2)}</div><div>${sb.toExponential(2)}</div><div>${t.expect}</div><div class="${pass?'pass':'fail'}">${pass?'PASS':'FAIL ('+got+')'}</div>`;
+    evalDiv.appendChild(row);
+  }
+
+  // --- Monte Carlo matchups --------------------------------------------------
+  // Reference equities sourced from canonical preflop matchups (ProPokerTools).
+  const mcTests = [
+    { name: "AhAd vs KsKc (preflop, no board)",
+      heroHand: ["Ah","Ad"], board: [], villainRange: [["Ks","Kc"]],
+      expect: 0.817, tol: 0.020 },
+    { name: "AsKs vs QcQd (preflop, no board)",
+      heroHand: ["As","Ks"], board: [], villainRange: [["Qc","Qd"]],
+      expect: 0.463, tol: 0.020 },
+    { name: "AhKd vs 2c2d (preflop) — exact 47.35% via full enumeration",
+      heroHand: ["Ah","Kd"], board: [], villainRange: [["2c","2d"]],
+      expect: 0.4735, tol: 0.02 },
+    { name: "JhTh vs AsKd on flop 9c8d2s (OE draw vs overcards)",
+      heroHand: ["Jh","Th"], board: ["9c","8d","2s"], villainRange: [["As","Kd"]],
+      // JT has 8 outs straight + 6 outs pair (often dominated); AK has 6 outs overcard pair.
+      expect: 0.505, tol: 0.025 },
+    { name: "AhAd vs KhKd, flop 2c7sJd (AA still dominates, ~92%)",
+      heroHand: ["Ah","Ad"], board: ["2c","7s","Jd"], villainRange: [["Kh","Kd"]],
+      expect: 0.92, tol: 0.03 },
+    { name: "5h5d vs AhKh, turn 9s2d4cTh (set vs nut flush+gutter draws gone — pair holds)",
+      heroHand: ["5h","5d"], board: ["9s","2d","4c","Th"], villainRange: [["Ah","Kh"]],
+      // AK has 6 outs to pair; 55 already ahead. ~87%.
+      expect: 0.87, tol: 0.04 },
+    { name: "AA vs entire pairs range (22-KK) preflop",
+      heroHand: ["Ah","Ad"], board: [],
+      villainRange: expandRange(["KK","QQ","JJ","TT","99","88","77","66","55","44","33","22"]),
+      expect: 0.81, tol: 0.025 },
+    { name: "QQ vs AKo preflop",
+      heroHand: ["Qh","Qs"], board: [],
+      villainRange: expandHandClass("AKo"),
+      expect: 0.564, tol: 0.025 },
+  ];
+
+  const mcDiv = document.getElementById("mcTests");
+  mcDiv.innerHTML = `<div class="row head"><div>Matchup</div><div>Trials</div><div>Equity</div><div>Expect</div><div>Pass</div></div>`;
+  let mcPassed = 0, mcFailed = 0;
+  for (const t of mcTests) {
+    const res = runEquity({ heroHand: t.heroHand, board: t.board, villainRange: t.villainRange, trials: 5000 });
+    const e = res.equity;
+    const diff = e == null ? Infinity : Math.abs(e - t.expect);
+    const pass = diff <= t.tol;
+    if (pass) mcPassed++; else mcFailed++;
+    const row = document.createElement("div");
+    row.className = "row";
+    row.innerHTML = `<div>${t.name}</div><div>${res.trials}</div><div>${e==null?'—':(e*100).toFixed(1)+'%'}</div><div>${(t.expect*100).toFixed(1)}% ±${(t.tol*100).toFixed(1)}</div><div class="${pass?'pass':'fail'}">${pass?'PASS':'FAIL ('+(diff*100).toFixed(1)+' off)'}</div>`;
+    mcDiv.appendChild(row);
+  }
+
+  document.getElementById("status").textContent =
+    `Evaluator: ${evalPassed}/${evalTests.length} pass · Monte Carlo: ${mcPassed}/${mcTests.length} pass`;
+</script>
+</body>
+</html>
