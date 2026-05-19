@@ -27,6 +27,7 @@ import {
 } from "./onboarding.js";
 import { mountInGameView, mountWrapUpView } from "./ui.js";
 import { mountSoloView } from "./solo.js";
+import { mountEquityCalculator } from "./equity-calculator.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { readActiveGameId, writeActiveGameId } from "./history.js";
 import { APP_VERSION } from "./version.js";
@@ -78,9 +79,11 @@ async function boot() {
     if (!user) {
       // Not signed in — show the Google sign-in gate. Once signed in, the
       // callback mounts the router. There's also a "Practice solo" escape
-      // hatch that bypasses Firebase entirely for anonymous practice.
-      const goSignIn = () => mountSignInView(root, () => mountRouter(root), () => goSolo());
+      // hatch and a standalone equity calculator that bypass Firebase
+      // entirely for anonymous use.
+      const goSignIn = () => mountSignInView(root, () => mountRouter(root), () => goSolo(), () => goCalc());
       const goSolo = () => mountSoloView(root, () => goSignIn());
+      const goCalc = () => mountEquityCalculator(root, () => goSignIn());
       goSignIn();
       return;
     }

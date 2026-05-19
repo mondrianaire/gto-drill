@@ -785,6 +785,54 @@ form { margin-top: 8px; }
 }
 .signin-note { margin-top: 20px; font-size: 0.82rem; }
 
+/* ----- Standalone equity calculator ------------------------------------ */
+.calc-view {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.calc-header {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 4px 12px;
+  align-items: start;
+}
+.calc-header h2 { margin: 0; font-size: 1.2rem; }
+.calc-blurb { margin: 2px 0 0; font-size: 0.85rem; grid-column: 1; }
+.calc-exit { padding: 4px 8px; font-size: 0.85rem; grid-row: 1; grid-column: 2; }
+.calc-section {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.calc-slots {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.calc-slot-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  font-weight: 700;
+  min-width: 50px;
+}
+.calc-hero-slots .hero-pick-slot.is-filled { border-color: var(--hero); }
+.calc-board-slots .hero-pick-slot.is-filled { border-color: var(--villain); }
+.calc-grid { margin-top: 4px; }
+.calc-grid .hero-pick-cell.is-board {
+  box-shadow: 0 0 0 2px var(--villain);
+}
+.calc-status { font-size: 0.82rem; }
+.calc-villain-section { margin-top: 0; }
+.calc-btn { /* third main-menu button; same look as solo-btn */ }
+
 /* ----- Solo practice view ---------------------------------------------- */
 .solo-header {
   display: flex;

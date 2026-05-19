@@ -6,6 +6,12 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 ## [Unreleased]
 
 ### Added
+- **Standalone equity calculator** — a third main-menu button below
+  "Practice solo" opens a freestanding Monte Carlo tool: pick 2 hero
+  cards from a 52-card grid (hero ring blue), pick 0–5 board cards from
+  the same grid (board ring amber), pick a villain range on the 13×13,
+  Run. No Firebase, no scenario context. Useful for ad-hoc equity
+  questions outside of any specific scenario.
 - **`?scenario=<id>` deep-link** routes straight into solo mode pinned
   on that scenario — useful for sharing spots by URL and for inspecting
   any single scenario without depending on the random shuffle.

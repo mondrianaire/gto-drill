@@ -60,7 +60,7 @@ const GOOGLE_G_SVG =
 // when no user is signed in.
 // -----------------------------------------------------------------------
 
-export function mountSignInView(container, onSignedIn, onSolo) {
+export function mountSignInView(container, onSignedIn, onSolo, onCalculator) {
   clear(container);
   const errorBox = h("div", { class: "error", role: "alert" });
 
@@ -104,6 +104,16 @@ export function mountSignInView(container, onSignedIn, onSolo) {
     if (onSolo) onSolo();
   });
 
+  // Standalone equity calculator — third main-menu option.
+  const calcBtn = h(
+    "button",
+    { type: "button", class: "solo-btn calc-btn" },
+    "🧮  Equity calculator (hole cards + board + range)"
+  );
+  calcBtn.addEventListener("click", () => {
+    if (onCalculator) onCalculator();
+  });
+
   const root = h(
     "section",
     { class: "signin" },
@@ -115,6 +125,7 @@ export function mountSignInView(container, onSignedIn, onSolo) {
     ),
     btn,
     soloBtn,
+    calcBtn,
     errorBox,
     h(
       "p",
