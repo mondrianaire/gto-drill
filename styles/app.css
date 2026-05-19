@@ -53,6 +53,16 @@ a { color: var(--accent); }
   margin: 0;
   letter-spacing: 0.02em;
 }
+.app-version {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--text-dim);
+  letter-spacing: 0.04em;
+  margin-left: 6px;
+  vertical-align: 4px;
+  cursor: help;
+}
+.app-version:empty { display: none; }
 .header-user {
   display: flex;
   align-items: center;
@@ -687,7 +697,38 @@ form { margin-top: 8px; }
 }
 .google-btn:hover { background: #f4f6f8; }
 .google-btn svg { display: block; flex: 0 0 auto; }
+/* Anonymous-solo escape hatch on the sign-in screen — matches the Google
+   button's size and stack position, intentionally muted ("greyed out"). */
+.solo-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  width: 100%;
+  margin-top: 10px;
+  background: transparent;
+  color: var(--text-dim);
+  border: 1px dashed var(--border);
+  font-weight: 500;
+  min-height: 48px;
+}
+.solo-btn:hover {
+  background: var(--bg-elev);
+  color: var(--text);
+  border-color: var(--text-dim);
+}
 .signin-note { margin-top: 20px; font-size: 0.82rem; }
+
+/* ----- Solo practice view ---------------------------------------------- */
+.solo-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.solo-header h2 { margin: 0; font-size: 1.1rem; flex: 0 0 auto; }
+.solo-stats { font-size: 0.85rem; flex: 1 1 auto; }
+.solo-exit { padding: 4px 8px; font-size: 0.85rem; flex: 0 0 auto; }
 
 /* Account bar (landing) */
 .account-bar {

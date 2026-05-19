@@ -6,6 +6,20 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 ## [Unreleased]
 
 ### Added
+- **App version stamp** in the header (`v2026-05-19.4-...`) so you can
+  tell at a glance which build you're on. If GitHub Pages serves a
+  stale cache (~10 min TTL) the version will still read the old build —
+  that's the cue to hard-refresh (Ctrl+Shift+R / Cmd+Shift+R). Bumped
+  every commit in `src/version.js`.
+- **Solo practice mode** — a "🃏 Practice solo (no sign-in, no
+  opponent)" button below the Google sign-in button on the gate screen.
+  No Firebase, no opponent, no progress saved across sessions: one
+  random scenario at a time, the full decide → reveal flow with the GTO
+  explanation, range chips, and Monte Carlo equity panel all working
+  identically to multiplayer. Running stats show "Hands N · GTO
+  accuracy X%" at the top, and an Exit button returns to the sign-in
+  screen. The scenario picker avoids immediate repeats (sliding window
+  of ~10 recent hands).
 - **Inline range chips in GTO prose**. Whenever a scenario's GTO
   explanation calls out a named villain range ("BB's 3-bet range", "BTN's
   c-bet range", "CO's polar c-betting range" …), that phrase is now an

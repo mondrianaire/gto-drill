@@ -126,12 +126,14 @@ function makeRangeChip(matchedText, range, onClick) {
  *   - clickable range chips on any anchor in `scen.villain_ranges`
  *     (only when `opts.onRangeClick` is provided).
  *
+ * Exported so the solo-practice view can reuse the same rendering.
+ *
  * @param {string} text
  * @param {Object} scen
  * @param {{ onRangeClick?: (range:any) => void }} [opts]
  * @returns {DocumentFragment}
  */
-function richText(text, scen, opts) {
+export function richText(text, scen, opts) {
   const frag = document.createDocumentFragment();
   if (!text) return frag;
   const ranges = (scen && Array.isArray(scen.villain_ranges)) ? scen.villain_ranges : [];
