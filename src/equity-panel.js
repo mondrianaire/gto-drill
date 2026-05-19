@@ -209,6 +209,7 @@ export function mountEquityPanel(container, scen, opts = {}) {
         ? sel.classes.length + " hand class" + (sel.classes.length === 1 ? "" : "es") + " · pick a hero hand to enable Run"
         : "0 combos · pick a range and a hero hand";
       runBtn.disabled = true;
+      resetAcc();
       return;
     }
     const live = sel.combos.filter((c) =>
@@ -218,6 +219,7 @@ export function mountEquityPanel(container, scen, opts = {}) {
       sel.classes.length + " hand class" + (sel.classes.length === 1 ? "" : "es") +
       " · " + live.length + " combos vs this spot";
     runBtn.disabled = live.length === 0;
+    resetAcc();
   }
 
   const picker = mountRangePicker(pickerHost, {
@@ -226,38 +228,72 @@ export function mountEquityPanel(container, scen, opts = {}) {
   });
 
   // ----- run + result -------------------------------------------------------
+  // Accumulator — consecutive Run clicks add their trials so the user can
+  // dial in precision without an extra control. Any input change resets it
+  // (see resetAcc in recomputeLive above).
+  let acc = { wins: 0, ties: 0, losses: 0 };
+
+  const trialsSel = h("select", { class: "eq-trials-sel", title: "Trials per click" },
+    h("option", { value: "5000" }, "+5,000"),
+    h("option", { value: "25000" }, "+25,000"),
+    h("option", { value: "100000" }, "+100,000"));
+
   const result = h("div", { class: "eq-result muted" }, "Run a simulation to see hero equity.");
   const runBtn = h("button", { type: "button", class: "primary eq-run" }, "Run simulation");
   runBtn.disabled = true;
+
+  function resetAcc() {
+    acc = { wins: 0, ties: 0, losses: 0 };
+    runBtn.textContent = "Run simulation";
+    while (result.firstChild) result.removeChild(result.firstChild);
+    result.className = "eq-result muted";
+    result.textContent = "Run a simulation to see hero equity.";
+  }
+
+  function renderAccResult() {
+    const total = acc.wins + acc.ties + acc.losses;
+    if (total === 0) { resetAcc(); return; }
+    const equity = (acc.wins + acc.ties / 2) / total;
+    const pct = (equity * 100).toFixed(1);
+    const opp = (100 - parseFloat(pct)).toFixed(1);
+    while (result.firstChild) result.removeChild(result.firstChild);
+    result.className = "eq-result";
+    result.appendChild(h("div", { class: "eq-bar" },
+      h("div", { class: "eq-bar-hero", style: "width:" + pct + "%" }),
+      h("div", { class: "eq-bar-vill", style: "width:" + opp + "%" })));
+    const resetLink = h("button", { type: "button", class: "link-btn eq-reset" }, "reset");
+    resetLink.addEventListener("click", resetAcc);
+    result.appendChild(h("div", { class: "eq-numbers" },
+      h("span", { class: "eq-hero-pct" }, "Hero " + pct + "%"),
+      h("span", { class: "eq-vill-pct" }, "Villain " + opp + "%"),
+      h("span", { class: "muted" },
+        " · " + total.toLocaleString() + " trials · " +
+        acc.wins + "W / " + acc.ties + "T / " + acc.losses + "L · "),
+      resetLink));
+  }
+
   runBtn.addEventListener("click", () => {
     if (!currentCombos.length || hero.length !== 2) return;
+    const trials = parseInt(trialsSel.value, 10) || 5000;
     runBtn.disabled = true;
     runBtn.textContent = "Running…";
     setTimeout(() => {
-      const t0 = performance.now();
-      const r = runEquity({ heroHand: hero, board, villainRange: currentCombos, trials: 5000 });
-      const ms = Math.round(performance.now() - t0);
+      const r = runEquity({ heroHand: hero, board, villainRange: currentCombos, trials });
       if (r.equity == null) {
+        acc = { wins: 0, ties: 0, losses: 0 };
         result.className = "eq-result eq-result-empty muted";
-        result.textContent = "No valid villain combos given the dead cards. Pick a wider range.";
-      } else {
-        const pct = (r.equity * 100).toFixed(1);
-        const opp = (100 - parseFloat(pct)).toFixed(1);
-        result.className = "eq-result";
         while (result.firstChild) result.removeChild(result.firstChild);
-        result.appendChild(h("div", { class: "eq-bar" },
-          h("div", { class: "eq-bar-hero", style: "width:" + pct + "%" }),
-          h("div", { class: "eq-bar-vill", style: "width:" + opp + "%" })
-        ));
-        result.appendChild(h("div", { class: "eq-numbers" },
-          h("span", { class: "eq-hero-pct" }, "Hero " + pct + "%"),
-          h("span", { class: "eq-vill-pct" }, "Villain " + opp + "%"),
-          h("span", { class: "muted" },
-            " · " + r.trials + " trials · " + r.wins + "W / " + r.ties + "T / " + r.losses + "L · " + ms + "ms")
-        ));
+        result.textContent = "No valid villain combos given the dead cards. Pick a wider range.";
+        runBtn.disabled = false;
+        runBtn.textContent = "Run simulation";
+        return;
       }
+      acc.wins += r.wins;
+      acc.ties += r.ties;
+      acc.losses += r.losses;
+      renderAccResult();
       runBtn.disabled = false;
-      runBtn.textContent = "Run simulation";
+      runBtn.textContent = (acc.wins + acc.ties + acc.losses) > 0 ? "Run more trials" : "Run simulation";
     }, 0);
   });
 
@@ -274,7 +310,7 @@ export function mountEquityPanel(container, scen, opts = {}) {
         countLabel),
       pickerHost
     ),
-    h("div", { class: "eq-run-row" }, runBtn),
+    h("div", { class: "eq-run-row" }, trialsSel, runBtn),
     result
   );
   container.appendChild(root);
