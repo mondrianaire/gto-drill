@@ -774,6 +774,26 @@ form { margin-top: 8px; }
   margin-left: 1px;
 }
 
+/* When the bb chip is nested inside an already-colored container (poker
+   table chrome — pot pill, bet bubble, stack label, info bar), strip
+   the chip's own pill background + dim-unit color and inherit the
+   container's text color. The chip still reads as "Nbb" with the unit
+   styled smaller, but it no longer fights the chrome's contrast. */
+.replay-pot .tok-bb,
+.rseat-bet .tok-bb,
+.rseat-stack .tok-bb,
+.replay-gameinfo .tok-bb {
+  background: transparent;
+  padding: 0;
+}
+.replay-pot .tok-bb-unit,
+.rseat-bet .tok-bb-unit,
+.rseat-stack .tok-bb-unit,
+.replay-gameinfo .tok-bb-unit {
+  color: inherit;
+  opacity: 0.78;
+}
+
 /* Any-suit card — "Kx" / "Ax" / "Qx" renders as a card-shaped pill with
    the rank + a tiny 4-suit rainbow row indicating "any suit". */
 .tok-anysuit {
