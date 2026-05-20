@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText } from "./ui.js";
+import { richText, buildRevealResult } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
 
 // -----------------------------------------------------------------------
@@ -200,20 +200,13 @@ export function mountSoloView(container, onExit) {
     } else {
       // ===================== REVEAL =====================
       const gto = scen.gto_action;
-      const correct = draft.action === gto;
 
-      const result = h("div", { class: "hand-result" + (correct ? " is-ok" : " is-miss") },
-        h("div", { class: "result-verdict" }, correct ? "✓ You matched the GTO line" : "✗ Off the GTO line"),
-        h("div", { class: "result-picks" },
-          h("div", null,
-            h("span", { class: "muted" }, "You played  "),
-            h("strong", { class: correct ? "ok" : "miss" }, richText(draft.action, scen)),
-            h("span", { class: "muted" }, "   ·   confidence " + draft.confidence + "/5")),
-          h("div", null,
-            h("span", { class: "muted" }, "GTO line  "),
-            h("strong", { class: "gto-action" }, richText(gto, scen)))
-        )
-      );
+      const result = buildRevealResult({
+        scen,
+        userAction: draft.action,
+        gtoAction: gto,
+        confidence: draft.confidence,
+      });
 
       // Equity panel + range chips — same wiring as multiplayer reveal.
       const testHost = h("div", { class: "test-host" });

@@ -345,29 +345,161 @@ form { margin-top: 8px; }
 .hand-nav .hand-back { flex: 0 0 auto; min-width: 92px; }
 .hand-nav .hand-fwd { flex: 1 1 auto; }
 
-/* Per-hand reveal */
-.hand-result {
+/* Per-hand reveal — the educational moment of every hand. Replaces the
+   old cramped text-block layout. Two visual modes:
+
+     .reveal-compare-single   — used when the user matched the GTO line.
+                                One centered tile (showing the action twice
+                                would be silly).
+     .reveal-compare-split    — used when the user missed. Two-column
+                                comparison: YOUR PLAY | GTO LINE. Stacks
+                                vertically on narrow widths. */
+
+.reveal-result {
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px 14px;
+  overflow: hidden;          /* keeps the verdict bar's corners clean */
   margin-bottom: 12px;
+  background: var(--bg-elev);
 }
-.hand-result.is-ok { background: rgba(74, 222, 128, 0.08); border-color: rgba(74, 222, 128, 0.45); }
-.hand-result.is-miss { background: rgba(248, 113, 113, 0.08); border-color: rgba(248, 113, 113, 0.45); }
-.result-verdict { font-weight: 700; margin-bottom: 6px; }
-.hand-result.is-ok .result-verdict { color: var(--ok); }
-.hand-result.is-miss .result-verdict { color: var(--miss); }
-.result-picks { display: flex; flex-direction: column; gap: 3px; font-size: 0.93rem; }
-.hand-opp {
-  border-top: 1px solid var(--border);
+.reveal-result.is-ok   { border-color: rgba(74, 222, 128, 0.45); }
+.reveal-result.is-miss { border-color: rgba(248, 113, 113, 0.45); }
+
+/* Big verdict bar across the top — symbol + words */
+.reveal-verdict {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 12px 16px;
+  font-weight: 700;
+  font-size: 1.05rem;
+  border-bottom: 1px solid var(--border);
+}
+.reveal-result.is-ok   .reveal-verdict { background: rgba(74, 222, 128, 0.12); color: var(--ok); }
+.reveal-result.is-miss .reveal-verdict { background: rgba(248, 113, 113, 0.12); color: var(--miss); }
+.reveal-verdict-icon {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+/* Comparison region */
+.reveal-compare {
+  display: grid;
+  gap: 0;
+}
+.reveal-compare-single { grid-template-columns: 1fr; }
+.reveal-compare-split  { grid-template-columns: 1fr 1fr; }
+
+.reveal-side {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;        /* let long content wrap inside the cell */
+}
+.reveal-compare-split .reveal-side + .reveal-side {
+  border-left: 1px solid var(--border);
+}
+
+/* The action itself: big & bold so it reads at a glance. Token chips
+   inside (bb · pot %, cards, etc.) inherit their own sizing. */
+.reveal-side-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.reveal-side-action {
+  font-size: 1.1rem;
+  font-weight: 700;
+  line-height: 1.3;
+}
+.reveal-side-correct .reveal-side-action,
+.reveal-side-gto     .reveal-side-action { color: var(--ok); }
+.reveal-side-miss    .reveal-side-action { color: var(--miss); }
+/* On a single-tile (correct) reveal, centre everything inside the tile so
+   the action and the confidence row both sit on the centre axis. */
+.reveal-side-correct {
+  text-align: center;
+  align-items: center;
+}
+
+/* Confidence row — five dots, filled vs empty */
+.reveal-conf-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+.reveal-conf-label {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+.reveal-conf {
+  display: inline-flex;
+  gap: 4px;
+}
+.reveal-conf-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: transparent;
+  border: 1.5px solid var(--text-dim);
+  opacity: 0.55;
+}
+.reveal-conf-dot.is-filled {
+  background: var(--text-dim);
+  opacity: 1;
+}
+/* In the correct (centred) tile, dots inherit the green accent */
+.reveal-side-correct .reveal-conf-dot         { border-color: var(--ok); opacity: 0.55; }
+.reveal-side-correct .reveal-conf-dot.is-filled { background: var(--ok); border-color: var(--ok); opacity: 1; }
+
+/* Opponent comparison block (multiplayer reveal). Lives below the main
+   result; same chrome but lighter. */
+.reveal-opp {
   margin-top: 12px;
-  padding-top: 12px;
-  font-size: 0.93rem;
+  padding: 14px 16px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
-.hand-agree { margin-top: 2px; }
+.reveal-opp.is-ok   { border-color: rgba(74, 222, 128, 0.35); }
+.reveal-opp.is-miss { border-color: rgba(248, 113, 113, 0.35); }
+.reveal-opp-header {
+  font-size: 0.95rem;
+}
+.reveal-opp-name { font-weight: 700; }
+.reveal-agree {
+  font-size: 0.88rem;
+}
+.reveal-agree.is-agree    { color: var(--ok); }
+.reveal-agree.is-disagree { color: var(--text-dim); }
+.reveal-opp-note {
+  font-style: italic;
+  color: var(--text-dim);
+  margin: 4px 0 0;
+  border-left: 2px solid var(--border);
+  padding-left: 10px;
+}
+
 .test-row { margin-top: 16px; }
 .test-it { width: 100%; }
 .test-host { margin-top: 8px; }
+
+/* Narrow widths: stack the two-column comparison vertically so each side
+   has room to breathe and tokens don't wrap mid-action. */
+@media (max-width: 560px) {
+  .reveal-compare-split { grid-template-columns: 1fr; }
+  .reveal-compare-split .reveal-side + .reveal-side {
+    border-left: none;
+    border-top: 1px solid var(--border);
+  }
+}
 
 /* ----- Equity (Monte Carlo) panel ------------------------------------- */
 .eq-panel {
