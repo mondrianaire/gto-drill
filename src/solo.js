@@ -129,7 +129,14 @@ export function mountSoloView(container, onExit) {
     const errorBox = h("div", { class: "error", role: "alert" });
 
     // --- header strip --------------------------------------------------------
-    const exitBtn = h("button", { type: "button", class: "link-btn solo-exit" }, "← Exit solo");
+    // Two-row header: title + action buttons on row 1, stats on row 2. The
+    // action buttons (Share + Exit) are icon-only at <480px so the row never
+    // overflows on narrow phones.
+    const exitIcon = h("span", { "aria-hidden": "true" }, "←");
+    const exitLabel = h("span", { class: "solo-exit-label" }, " Exit solo");
+    const exitBtn = h("button",
+      { type: "button", class: "link-btn solo-exit", title: "Exit solo practice" },
+      exitIcon, exitLabel);
     exitBtn.addEventListener("click", () => {
       if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
       if (onExit) onExit();
@@ -142,20 +149,25 @@ export function mountSoloView(container, onExit) {
     // "Copy share link" — writes the deep-link URL for the current scenario
     // to the clipboard. Brief "Copied!" confirmation; falls back to showing
     // the URL inline if clipboard access is blocked.
+    const shareIcon = h("span", { "aria-hidden": "true" }, "🔗");
+    const shareLabel = h("span", { class: "solo-share-label" }, " Copy share link");
     const shareBtn = h("button",
       { type: "button", class: "link-btn solo-share", title: "Copy a permalink for this hand to the clipboard" },
-      "🔗 Copy share link");
+      shareIcon, shareLabel);
     const shareFallback = h("div", { class: "solo-share-fallback", hidden: true });
     shareBtn.addEventListener("click", async () => {
       const url = shareUrlForScenario(scen.scenario_id);
       const ok = await copyToClipboard(url);
       if (ok) {
-        const prev = shareBtn.textContent;
+        const prevIcon = shareIcon.textContent;
+        const prevLabel = shareLabel.textContent;
         shareBtn.classList.add("is-copied");
-        shareBtn.textContent = "✓ Link copied!";
+        shareIcon.textContent = "✓";
+        shareLabel.textContent = " Copied!";
         setTimeout(() => {
           shareBtn.classList.remove("is-copied");
-          shareBtn.textContent = prev;
+          shareIcon.textContent = prevIcon;
+          shareLabel.textContent = prevLabel;
         }, 1800);
       } else {
         // Clipboard failed — surface the URL inline so the user can copy by hand.
@@ -171,10 +183,11 @@ export function mountSoloView(container, onExit) {
       }
     });
     const header = h("div", { class: "solo-header" },
-      h("h2", null, "Solo practice"),
-      stats,
-      shareBtn,
-      exitBtn
+      h("div", { class: "solo-header-top" },
+        h("h2", null, "Solo practice"),
+        h("div", { class: "solo-header-actions" }, shareBtn, exitBtn)
+      ),
+      stats
     );
 
     // --- the spot ------------------------------------------------------------

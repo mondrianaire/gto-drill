@@ -1,0 +1,540 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Design audit — GTO Duel mobile formatting</title>
+<style>
+  :root {
+    --bg:#0c0e12; --panel:#14171d; --panel2:#1b1f27;
+    --text:#e6e9ef; --dim:#8b93a2; --faint:#5b6271;
+    --border:#262b34; --accent:#4cb6ff; --anno:#ff5d9e;
+    --ok:#4ade80; --warn:#f6c177; --crit:#f87171;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans); font-size:16px; line-height:1.55; }
+  body { max-width:1080px; margin:0 auto; padding:48px 28px 96px; }
+  a { color:var(--accent); }
+  code { background:var(--panel); padding:2px 6px; border-radius:4px; font-size:0.88em; }
+
+  .stamp { font-size:12px; color:var(--faint); letter-spacing:.04em;
+    border-bottom:1px solid var(--border); padding-bottom:14px; margin-bottom:30px;
+    display:flex; gap:18px; flex-wrap:wrap; }
+  .stamp b { color:var(--dim); font-weight:600; }
+  .lbl { display:inline-block; font-size:11px; text-transform:lowercase;
+    letter-spacing:.16em; color:var(--accent); font-weight:600; margin-bottom:12px; }
+  h1.lede { font-size:33px; line-height:1.2; font-weight:700; letter-spacing:-0.02em; margin:0 0 14px; }
+  p.deck { font-size:18px; color:var(--dim); margin:0 0 30px; line-height:1.5; }
+
+  .telos { background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; padding:20px 22px; margin-bottom:40px; }
+  .telos p { margin:0; color:var(--text); }
+  .telos p + p { margin-top:10px; color:var(--dim); font-size:14.5px; }
+
+  h2.sec { font-size:13px; text-transform:uppercase; letter-spacing:.14em;
+    color:var(--dim); font-weight:600; margin:52px 0 18px;
+    border-top:1px solid var(--border); padding-top:22px; }
+
+  /* Executive summary table */
+  table.sum { width:100%; border-collapse:collapse; font-size:14px; margin-bottom:20px; }
+  table.sum th, table.sum td { text-align:left; padding:10px 12px;
+    border-bottom:1px solid var(--border); vertical-align:top; }
+  table.sum th { color:var(--dim); font-weight:600; font-size:12px;
+    text-transform:uppercase; letter-spacing:.08em; }
+  table.sum td.id { color:var(--faint); font-family:monospace; }
+  .sev { display:inline-block; padding:2px 8px; border-radius:999px;
+    font-size:11px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; }
+  .sev-high { background:rgba(248,113,113,0.15); color:var(--crit); border:1px solid rgba(248,113,113,0.4); }
+  .sev-med { background:rgba(246,193,119,0.15); color:var(--warn); border:1px solid rgba(246,193,119,0.4); }
+  .sev-low { background:rgba(74,222,128,0.12); color:var(--ok); border:1px solid rgba(74,222,128,0.3); }
+
+  /* Per-finding */
+  .finding { border-top:1px solid var(--border); padding-top:30px; margin-top:36px; }
+  .finding-head { display:flex; gap:14px; align-items:baseline; flex-wrap:wrap; }
+  .finding-id { font-family:monospace; color:var(--faint); font-size:14px; font-weight:600; }
+  .finding-head h3 { font-size:22px; font-weight:700; letter-spacing:-0.01em; margin:0; }
+  .finding-where { font-size:13px; color:var(--dim); margin:4px 0 16px; }
+  .finding-where b { color:var(--text); font-weight:600; }
+  .problem, .matters, .fix-label {
+    font-size:11px; text-transform:uppercase; letter-spacing:.12em;
+    color:var(--dim); font-weight:700; margin:18px 0 6px; }
+  .desc, .why { font-size:15px; color:var(--dim); margin:0; }
+  .desc strong, .why strong { color:var(--text); }
+
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:18px; margin-top:20px; }
+  @media (max-width: 760px) { .compare { grid-template-columns:1fr; } }
+  .panel { background:var(--panel); border:1px solid var(--border);
+    border-radius:10px; overflow:hidden; }
+  .panel-head { padding:9px 13px; font-size:11px; letter-spacing:.1em;
+    text-transform:uppercase; font-weight:600;
+    border-bottom:1px solid var(--border); display:flex;
+    justify-content:space-between; align-items:center; }
+  .panel-head .tag-c { color:var(--anno); }
+  .panel-head .tag-r { color:var(--ok); }
+  .panel-head .meta { color:var(--faint); letter-spacing:.02em; text-transform:none; font-weight:500; }
+  .panel-body { padding:0; background:#0f1a24; }
+  .panel-body iframe { display:block; width:100%; height:560px; border:0;
+    background:#0f1a24; }
+
+  /* Inline mockups (proposed fix renderings) */
+  .mockup { background:#0f1a24; padding:16px; min-height:300px;
+    font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+    font-size:14px; color:#e6edf3; }
+  .mockup-narrow { max-width:343px; margin:0 auto; }
+  .mockup pre { background:#16222e; border:1px solid #243646; padding:10px 12px;
+    border-radius:6px; font-size:12px; color:#cfe6da; overflow-x:auto; margin:8px 0 0; }
+
+  ol.priorities { padding-left:0; list-style:none; counter-reset:p; margin:0; }
+  ol.priorities li { counter-increment:p; position:relative; padding:14px 0 14px 50px;
+    border-bottom:1px solid var(--border); font-size:15px; }
+  ol.priorities li:before { content:counter(p); position:absolute; left:0; top:12px;
+    width:34px; height:34px; border-radius:50%; background:var(--accent); color:#06121d;
+    font-weight:700; display:flex; align-items:center; justify-content:center; font-size:15px; }
+  ol.priorities li b { color:var(--text); font-weight:600; }
+  ol.priorities li .note { color:var(--dim); font-size:13.5px; margin-top:4px; display:block; }
+
+  .caveat { background:var(--panel); border:1px solid var(--border);
+    border-left:3px solid var(--anno); border-radius:8px; padding:14px 16px;
+    font-size:13.5px; color:var(--dim); margin:20px 0; }
+  .caveat b { color:var(--text); }
+</style>
+</head>
+<body>
+  <div class="stamp">
+    <b>artifact</b> mobile-audit.html
+    &nbsp;·&nbsp; <b>scope</b> #10 Mobile formatting analysis + recommendations
+    &nbsp;·&nbsp; <b>widths</b> 375px primary (iPhone SE / 12 mini / 13 mini), 360px Android
+    &nbsp;·&nbsp; <b>build at audit</b> v2026-05-19.10-sharelink
+  </div>
+
+  <span class="lbl">design audit</span>
+  <h1 class="lede">Mobile formatting — GTO Duel</h1>
+  <p class="deck">The app is mobile-first by intent — two players, mostly on phones — but the rapid feature build pushed several surfaces past their comfortable mobile widths. This audit walks every screen at 375 px (the narrowest common iPhone) and flags every layout that's broken, cramped, or simply uncomfortable to thumb.</p>
+
+  <div class="telos">
+    <p><b>Telos.</b> A two-person poker quiz on phones. Each click should land cleanly, every screen should fit without horizontal scrolling, and the tactile cadence (decide → reveal → next) should never make the user fight the layout.</p>
+    <p>This audit assumes: (a) the user is one-thumb on the phone; (b) the dominant interaction is tapping (cards, action buttons, range cells); (c) GTO prose, range grids, and the equity panel are the heaviest text-density surfaces and need the most attention.</p>
+  </div>
+
+  <div class="caveat">
+    <b>How to read this report.</b> The "Current" panels are <code>&lt;iframe&gt;</code>s pointing at the running dev server (<code>localhost:8000</code>) — open this file from the same server (<code>http://localhost:8000/design-audit/mobile-audit.html</code>) so they render live. The "Proposed" panels are static HTML/CSS mockups showing the redesign idea, with the relevant CSS snippet for review. Mockups intentionally don't include the full visual chrome — they show the <em>structural change</em>, not the final pixel polish.
+  </div>
+
+  <h2 class="sec">Executive summary</h2>
+
+  <table class="sum">
+    <thead>
+      <tr><th>ID</th><th>Severity</th><th>Issue</th><th>Where</th><th>Effort</th></tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="id">H-1</td>
+        <td><span class="sev sev-high">High</span></td>
+        <td>Solo header overflow — stats wrap to 3 lines, Exit button clipped</td>
+        <td>Solo practice (decide + reveal)</td>
+        <td>Small</td>
+      </tr>
+      <tr>
+        <td class="id">H-2</td>
+        <td><span class="sev sev-high">High</span></td>
+        <td>Replay table seat collisions — bottom-row seats overlap</td>
+        <td>Every scenario with a hand replay</td>
+        <td>Medium</td>
+      </tr>
+      <tr>
+        <td class="id">H-3</td>
+        <td><span class="sev sev-high">High</span></td>
+        <td>13×13 range grid cells fall below 44 px touch target (≈22 × 18 px)</td>
+        <td>Per-scenario equity panel + standalone calculator</td>
+        <td>Medium</td>
+      </tr>
+      <tr>
+        <td class="id">M-1</td>
+        <td><span class="sev sev-med">Med</span></td>
+        <td>4×13 hero/board card grid borderline touch target (≈24 × 30 px)</td>
+        <td>Hero picker + standalone calculator</td>
+        <td>Small</td>
+      </tr>
+      <tr>
+        <td class="id">M-2</td>
+        <td><span class="sev sev-med">Med</span></td>
+        <td>Long button labels on the sign-in screen wrap awkwardly</td>
+        <td>Sign-in screen — Solo + Calculator buttons</td>
+        <td>Trivial</td>
+      </tr>
+      <tr>
+        <td class="id">L-1</td>
+        <td><span class="sev sev-low">Low</span></td>
+        <td>Sign-in screen shows "GTO Duel" twice (header + appname)</td>
+        <td>Sign-in screen</td>
+        <td>Trivial</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 class="sec">Findings</h2>
+
+  <!-- ============================================================ -->
+  <div class="finding" id="h-1">
+    <div class="finding-head">
+      <span class="finding-id">H-1</span>
+      <h3>Solo header overflows at narrow widths</h3>
+      <span class="sev sev-high">High</span>
+    </div>
+    <div class="finding-where">
+      <b>Where:</b> Solo practice view (both decide and reveal). The header row crams together "Solo practice", running stats ("Hands N · GTO accuracy X%"), Copy share link, and ← Exit solo. At 375 px the row breaks: stats wrap to two or three lines and the Exit label clips at the right edge.
+    </div>
+    <div class="problem">The problem</div>
+    <p class="desc">The current header is a single <code>display:flex</code> row with four flex items (title, stats, share, exit). The stats text grows in length the longer you play ("Hands 12 · GTO accuracy 67%"), so even with <code>flex:1 1 auto</code> it muscles other items out. Exit clips, Copy share link sometimes wraps, and the visual hierarchy of "what's at the top of the screen" turns into a wall of text.</p>
+    <div class="matters">Why it matters</div>
+    <p class="why">The header is the user's anchor in solo mode — it's where you read your running accuracy and where you reach to exit or share. <strong>The Exit button getting clipped is a real bug</strong> — at 375 px the visible label is "← Ex", which looks like a layout error to a casual user.</p>
+
+    <div class="compare">
+      <div class="panel">
+        <div class="panel-head"><span class="tag-c">Current</span> <span class="meta">live · 375 px</span></div>
+        <div class="panel-body">
+          <iframe src="../index.html?scenario=blind-vs-blind-river-thin-value-005" title="Current solo header"></iframe>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="tag-r">Proposed</span> <span class="meta">two-row, icon actions</span></div>
+        <div class="panel-body">
+          <div class="mockup">
+            <div class="mockup-narrow">
+              <!-- proposed two-row header -->
+              <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;">
+                <strong style="font-size:1.05rem;">Solo practice</strong>
+                <div style="display:flex; gap:10px;">
+                  <button style="background:transparent;border:1px solid #243646;color:#8aa1b1;border-radius:8px;padding:6px 9px;cursor:pointer;font-size:1rem;line-height:1;" title="Copy share link">🔗</button>
+                  <button style="background:transparent;border:1px solid #243646;color:#8aa1b1;border-radius:8px;padding:6px 9px;cursor:pointer;font-size:1rem;line-height:1;" title="Exit solo">✕</button>
+                </div>
+              </div>
+              <div style="font-size:0.82rem;color:#8aa1b1;letter-spacing:.02em;">
+                Hand 12 · 67% GTO · 8/12 correct
+              </div>
+              <pre>.solo-header {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.solo-header-row {
+  display:flex;
+  justify-content:space-between;
+  align-items:baseline;
+}
+.solo-share, .solo-exit {
+  /* icon-only at &lt;480px */
+  padding: 6px 9px;
+  font-size: 1rem;
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fix-label">Proposed fix</div>
+    <p class="why">Two-row header: title + icon-only Share and Exit on row 1, full stats line on row 2. On wider widths (≥480 px) the share/exit revert to labeled buttons. The two-row structure removes the four-way fight for horizontal space and uses the stats line as the natural anchor under the title. <strong>Touch targets stay ≥36 px</strong> for the icon buttons.</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="finding" id="h-2">
+    <div class="finding-head">
+      <span class="finding-id">H-2</span>
+      <h3>Replay table seats overlap at 375 px</h3>
+      <span class="sev sev-high">High</span>
+    </div>
+    <div class="finding-where">
+      <b>Where:</b> The replay table mounts inside every scenario. The 6-max ring is positioned with absolute pixel offsets (<code>.rslot-1 { left: 4px }</code>, etc.) and 80-px-wide seats. At 720-px container width those seat boxes are well separated; at 375 px container width (343 after padding) the three bottom seats and the three top seats get crammed against each other.
+    </div>
+    <div class="problem">The problem</div>
+    <p class="desc">Quick math: the table is 343 px wide at 375 px viewport. Three bottom seats × 80 px each = 240 px just for seat boxes, plus 4 px padding on each outside seat = 248 px. The center seat is positioned at <code>left: 50%; transform: translateX(-50%)</code> with another 80 px = 320 px taken up. That leaves <strong>23 px total</strong> for the gaps between the three seats — they visually overlap, and the hero's bet bubble overlaps the next seat's stack number.</p>
+    <div class="matters">Why it matters</div>
+    <p class="why">The table is the centerpiece of every scenario. Seat overlap obscures position labels, stack sizes, and bet sizes — exactly the data the user reads to decide. It also makes the table look broken, undermining confidence in the rest of the UI.</p>
+
+    <div class="compare">
+      <div class="panel">
+        <div class="panel-head"><span class="tag-c">Current</span> <span class="meta">live · 375 px</span></div>
+        <div class="panel-body">
+          <iframe src="../index.html?scenario=blind-vs-blind-river-thin-value-005" title="Current replay table" style="height:680px;"></iframe>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="tag-r">Proposed</span> <span class="meta">narrower seats + percentage offsets</span></div>
+        <div class="panel-body">
+          <div class="mockup">
+            <div class="mockup-narrow" style="position:relative; height:300px; background:radial-gradient(ellipse at center,#2c6e52 0%,#1b4736 100%); border:4px solid #14342780; border-radius:120px; box-shadow:inset 0 0 30px rgba(0,0,0,0.35); margin-top:0;">
+              <!-- 6 seats at percentage offsets, 64px wide -->
+              <div style="position:absolute; bottom:6px; left:50%; transform:translateX(-50%); width:64px; text-align:center;">
+                <div style="display:flex; justify-content:center; gap:2px; margin-bottom:3px;">
+                  <div style="width:24px; height:34px; background:#fdfdfb; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.62rem; line-height:1; color:#1a1a1a;"><span style="font-weight:700;">K</span><span>♣</span></div>
+                  <div style="width:24px; height:34px; background:#fdfdfb; border-radius:4px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.62rem; line-height:1; color:#c0202a;"><span style="font-weight:700;">Q</span><span>♦</span></div>
+                </div>
+                <div style="font-size:.66rem; color:#4cb6ff; font-weight:700;">SB (you)</div>
+                <div style="font-size:.66rem; color:#d5ece0;">95bb</div>
+              </div>
+              <div style="position:absolute; bottom:6px; left:2%; width:64px; text-align:center;">
+                <div style="height:34px; display:flex; align-items:center; justify-content:center; font-size:.55rem; font-style:italic; color:#9fb6ab;">folded</div>
+                <div style="font-size:.66rem; color:#e8a93f; font-weight:700;">BB</div>
+                <div style="font-size:.66rem; color:#d5ece0;">95bb</div>
+              </div>
+              <div style="position:absolute; bottom:6px; right:2%; width:64px; text-align:center; opacity:0.45;">
+                <div style="height:34px; display:flex; align-items:center; justify-content:center; font-size:.55rem; font-style:italic; color:#9fb6ab;">folded</div>
+                <div style="font-size:.66rem; color:#fff; font-weight:700;">BTN</div>
+                <div style="font-size:.66rem; color:#d5ece0;">100bb</div>
+              </div>
+              <div style="position:absolute; top:8px; left:50%; transform:translateX(-50%); width:64px; text-align:center; opacity:0.45;">
+                <div style="height:24px; display:flex; align-items:center; justify-content:center; font-size:.55rem; font-style:italic; color:#9fb6ab;">folded</div>
+                <div style="font-size:.66rem; color:#fff; font-weight:700;">HJ</div>
+                <div style="font-size:.66rem; color:#d5ece0;">100bb</div>
+              </div>
+              <div style="position:absolute; top:8px; left:2%; width:64px; text-align:center; opacity:0.45;">
+                <div style="height:24px; display:flex; align-items:center; justify-content:center; font-size:.55rem; font-style:italic; color:#9fb6ab;">folded</div>
+                <div style="font-size:.66rem; color:#fff; font-weight:700;">UTG</div>
+                <div style="font-size:.66rem; color:#d5ece0;">100bb</div>
+              </div>
+              <div style="position:absolute; top:8px; right:2%; width:64px; text-align:center; opacity:0.45;">
+                <div style="height:24px; display:flex; align-items:center; justify-content:center; font-size:.55rem; font-style:italic; color:#9fb6ab;">folded</div>
+                <div style="font-size:.66rem; color:#fff; font-weight:700;">CO</div>
+                <div style="font-size:.66rem; color:#d5ece0;">100bb</div>
+              </div>
+              <div style="position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); display:flex; flex-direction:column; align-items:center; gap:5px;">
+                <div style="display:flex; gap:3px;">
+                  <div style="width:18px; height:24px; background:#fdfdfb; border-radius:3px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.5rem; line-height:1; color:#c0202a;"><span style="font-weight:700;">Q</span><span>♥</span></div>
+                  <div style="width:18px; height:24px; background:#fdfdfb; border-radius:3px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.5rem; line-height:1; color:#1a1a1a;"><span style="font-weight:700;">7</span><span>♠</span></div>
+                  <div style="width:18px; height:24px; background:#fdfdfb; border-radius:3px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.5rem; line-height:1; color:#c0202a;"><span style="font-weight:700;">4</span><span>♦</span></div>
+                  <div style="width:18px; height:24px; background:#fdfdfb; border-radius:3px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.5rem; line-height:1; color:#1a1a1a;"><span style="font-weight:700;">8</span><span>♠</span></div>
+                  <div style="width:18px; height:24px; background:#fdfdfb; border-radius:3px; display:flex; flex-direction:column; align-items:center; justify-content:center; font-size:.5rem; line-height:1; color:#c0202a;"><span style="font-weight:700;">3</span><span>♥</span></div>
+                </div>
+                <div style="background:rgba(0,0,0,0.45); color:#fff; font-size:.66rem; font-weight:600; padding:1px 9px; border-radius:999px;">Pot 10bb</div>
+              </div>
+            </div>
+            <pre>@media (max-width: 480px) {
+  .replay-table { height: 280px; }
+  .rseat { width: 64px; }
+  /* shrink card glyphs */
+  .rseat .pcard-sm {
+    width: 22px; height: 32px;
+  }
+  /* percentage offsets, not 4px */
+  .rslot-1 { left: 2%; }
+  .rslot-2 { left: 2%; }
+  .rslot-4 { right: 2%; }
+  .rslot-5 { right: 2%; }
+}</pre>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fix-label">Proposed fix</div>
+    <p class="why">Two CSS changes for narrow widths: (1) shrink seat width from 80 → 64 px, (2) switch hard-coded 4 px edge offsets to percentage (<code>left:2%</code>). The center seat still uses <code>translateX(-50%)</code>. Math: 64 + 64 + 64 + (8 + 8 + 14 + 14) gap = 236 px total, leaving 107 px of breathing room on a 343-px container. Seats no longer overlap, position labels and stack sizes stay readable.</p>
+    <p class="why" style="margin-top:8px;"><strong>Alternative (more invasive):</strong> at &lt;380 px, switch the layout from an oval ring to a stacked list — hero seat at the top, board in the middle, opponents folded out below as a horizontal strip. Less "poker table"-like but uses screen real estate efficiently. Worth considering as part of the bigger table rework (task #14).</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="finding" id="h-3">
+    <div class="finding-head">
+      <span class="finding-id">H-3</span>
+      <h3>13×13 range grid cells fall below touch-target minimum</h3>
+      <span class="sev sev-high">High</span>
+    </div>
+    <div class="finding-where">
+      <b>Where:</b> The villain-range picker (the 13×13 hand grid). Used inside the per-scenario equity panel AND the standalone calculator.
+    </div>
+    <div class="problem">The problem</div>
+    <p class="desc">At 375 px, the 13×13 grid lays out cells at roughly <strong>22 × 18 px</strong> each. That's well below the iOS Human Interface Guidelines minimum of 44 × 44 px and Material Design's 48 × 48 px. Mishit rate on small touch targets goes up exponentially as the target shrinks — a thumb landing on the intended cell becomes a coin flip when cells are this size, especially on the diagonal pair cells.</p>
+    <div class="matters">Why it matters</div>
+    <p class="why">Picking ranges is the highest-frequency interaction on the equity surface. If every cell tap is a 50/50 to hit the right cell, the feature is effectively unusable on phones. Right now this would push the user to use presets (Any two / Pairs / Broadways) — which is fine for those three, but the whole point of the 13×13 grid is fine-grained custom ranges.</p>
+
+    <div class="compare">
+      <div class="panel">
+        <div class="panel-head"><span class="tag-c">Current</span> <span class="meta">live · 375 px · equity panel</span></div>
+        <div class="panel-body">
+          <iframe src="../index.html?scenario=blind-vs-blind-river-thin-value-005" title="Current 13x13 grid" style="height:720px;"></iframe>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="tag-r">Proposed</span> <span class="meta">horizontally scrolling grid, larger cells</span></div>
+        <div class="panel-body">
+          <div class="mockup">
+            <div class="mockup-narrow">
+              <div style="font-size:.85rem; color:#fff; font-weight:600; margin-bottom:6px; display:flex; justify-content:space-between;">
+                <span>Villain range</span>
+                <span style="color:#8aa1b1; font-size:.78rem;">29 classes · 156 combos</span>
+              </div>
+              <div style="overflow-x:auto; -webkit-overflow-scrolling:touch; background:#0f1a24; border:1px solid #243646; border-radius:6px; padding:4px; box-shadow:inset -8px 0 8px -8px rgba(76,182,255,0.4);">
+                <div style="display:grid; grid-template-columns:repeat(13, 36px); gap:3px; min-width:507px;">
+                  <!-- 13 cells per row, 36px wide each -->
+                  <!-- Top row sample -->
+                  <button style="height:32px; padding:0; background:#4cb6ff; color:#061018; border:1px solid #4cb6ff; border-radius:3px; font-size:.7rem; font-weight:700;">AA</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">AKs</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">AQs</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">AJs</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">ATs</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">A9s</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">A8s</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">A7s</button>
+                  <!-- remaining cells -->
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">A6s</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">A5s</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">A4s</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">A3s</button>
+                  <button style="height:32px; padding:0; background:rgba(74,222,128,0.06); color:#8aa1b1; border:1px solid #243646; border-radius:3px; font-size:.7rem; font-weight:700;">A2s</button>
+                </div>
+              </div>
+              <div style="font-size:.74rem; color:#8aa1b1; margin-top:6px; font-style:italic;">Swipe horizontally to see all 13 columns →</div>
+              <pre>@media (max-width: 480px) {
+  /* host scrolls horizontally;
+     grid keeps fixed 36px cells   */
+  .eq-picker-host {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .rp-grid {
+    grid-template-columns:
+      repeat(13, 36px);
+    min-width: 507px;
+  }
+  .rp-cell { height: 32px; }
+}</pre>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fix-label">Proposed fix</div>
+    <p class="why">Wrap the grid in a horizontally-scrollable container at &lt;480 px and use fixed-pixel cells (36 × 32 px). The grid takes ~507 px of inner width; the user swipes left/right to reach the off-screen columns. A subtle right-edge fade hints at the overflow.</p>
+    <p class="why" style="margin-top:8px;"><strong>Alternative (recommended for follow-up):</strong> add a "compact picker" mode for mobile — pick a row (A, K, Q, …) and the column expands to a single horizontally-scrollable strip of cells for that rank. Two-tap workflow but every tap is on a generous 44 × 44 button. More involved; could fold into the broader table-rework (#14) or design-system pass (#15).</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="finding" id="m-1">
+    <div class="finding-head">
+      <span class="finding-id">M-1</span>
+      <h3>4×13 hero/board card grid borderline touch target</h3>
+      <span class="sev sev-med">Med</span>
+    </div>
+    <div class="finding-where">
+      <b>Where:</b> The hero-hand picker (for the 2 null-hero scenarios) and the standalone equity calculator (both hero and board pickers share the same grid).
+    </div>
+    <div class="problem">The problem</div>
+    <p class="desc">At 375 px, the 4×13 card grid lays out cells at roughly <strong>24 × 30 px</strong>. Better than the 13×13 grid but still below the iOS/Material minimums. Each cell contains a mini playing-card glyph, so the visual is recognizable, but the tap target is small enough that adjacent-cell mishits will happen.</p>
+    <div class="matters">Why it matters</div>
+    <p class="why">Picking hero cards is a quick 2-tap interaction; picking board cards adds up to 5 more. If even 1 in 8 taps lands on the wrong card, the user spends as much time correcting as picking — a frustrating rhythm.</p>
+    <div class="fix-label">Proposed fix</div>
+    <p class="why">Same pattern as H-3: at &lt;480 px, wrap the grid in a horizontally-scrollable container and bump cells to <strong>36 × 44 px</strong> (full touch-target compliance). The grid stays 4 rows tall but extends ~507 px wide; users swipe between A–8 and 7–2.</p>
+    <p class="why" style="margin-top:8px;">An even better alternative would be to combine the hero/board picker with a <strong>"recent picks" row</strong> — most users will pick cards from a small subset (the cards mentioned in the prose). Surfacing those at the top would mean 1-tap selection for the common case. Worth exploring during #15.</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="finding" id="m-2">
+    <div class="finding-head">
+      <span class="finding-id">M-2</span>
+      <h3>Sign-in buttons wrap awkwardly on the gate screen</h3>
+      <span class="sev sev-med">Med</span>
+    </div>
+    <div class="finding-where">
+      <b>Where:</b> Sign-in screen (the gate before signed-in routes). The "Practice solo" and "Equity calculator" buttons.
+    </div>
+    <div class="problem">The problem</div>
+    <p class="desc">Current labels: "🃏 Practice solo (no sign-in, no opponent)" and "🧮 Equity calculator (hole cards + board + range)". Both wrap to 2 lines at 375 px and the parentheticals dominate the button visually. The user has to read past the verbose qualifier to grasp the action.</p>
+    <div class="matters">Why it matters</div>
+    <p class="why">Buttons should announce their action, not their disclaimers. Parentheticals belong in subtext under the button, or in tooltip-style microcopy, not stuffed inside the click target.</p>
+
+    <div class="compare">
+      <div class="panel">
+        <div class="panel-head"><span class="tag-c">Current</span> <span class="meta">labels wrap</span></div>
+        <div class="panel-body">
+          <div class="mockup">
+            <div class="mockup-narrow">
+              <button style="display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:10px; background:transparent; color:#8aa1b1; border:1px dashed #243646; font-weight:500; min-height:48px; border-radius:10px; padding:10px 14px; font-size:1rem;">
+                🃏  Practice solo (no sign-in, no opponent)
+              </button>
+              <button style="display:inline-flex; align-items:center; justify-content:center; gap:8px; width:100%; margin-top:10px; background:transparent; color:#8aa1b1; border:1px dashed #243646; font-weight:500; min-height:48px; border-radius:10px; padding:10px 14px; font-size:1rem;">
+                🧮  Equity calculator (hole cards + board + range)
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="tag-r">Proposed</span> <span class="meta">label + subtext</span></div>
+        <div class="panel-body">
+          <div class="mockup">
+            <div class="mockup-narrow">
+              <button style="display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%; margin-top:10px; background:transparent; color:#e6edf3; border:1px dashed #243646; font-weight:600; min-height:60px; border-radius:10px; padding:10px 14px; text-align:left; cursor:pointer;">
+                <span style="font-size:1rem;">🃏 &nbsp;Practice solo</span>
+                <span style="font-size:.78rem; color:#8aa1b1; font-weight:400;">No sign-in. No opponent. Random scenarios.</span>
+              </button>
+              <button style="display:flex; flex-direction:column; align-items:flex-start; gap:2px; width:100%; margin-top:10px; background:transparent; color:#e6edf3; border:1px dashed #243646; font-weight:600; min-height:60px; border-radius:10px; padding:10px 14px; text-align:left; cursor:pointer;">
+                <span style="font-size:1rem;">🧮 &nbsp;Equity calculator</span>
+                <span style="font-size:.78rem; color:#8aa1b1; font-weight:400;">Hole cards + board + range. Pure Monte Carlo.</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="fix-label">Proposed fix</div>
+    <p class="why">Restructure the button labels: bold action line + muted single-line subtext. Action reads at a glance; subtext explains. Keeps the dashed-border / muted visual style.</p>
+  </div>
+
+  <!-- ============================================================ -->
+  <div class="finding" id="l-1">
+    <div class="finding-head">
+      <span class="finding-id">L-1</span>
+      <h3>"GTO Duel" appears twice on the sign-in screen</h3>
+      <span class="sev sev-low">Low</span>
+    </div>
+    <div class="finding-where">
+      <b>Where:</b> Sign-in screen. The header at the top of the page already says "GTO Duel v…", and then the sign-in card has a huge <code>&lt;h1 class="appname"&gt;GTO Duel&lt;/h1&gt;</code> directly under it.
+    </div>
+    <div class="problem">The problem</div>
+    <p class="desc">Visual stutter. The user sees the app name twice within ~80 px of vertical space. The landing screen for signed-in users hides the in-page appname via <code>.landing h1.appname { display:none; }</code> but the sign-in screen doesn't apply the same rule.</p>
+    <div class="matters">Why it matters</div>
+    <p class="why">Minor — it's not broken, just not polished. Removing the duplicate also reclaims ~60 px of vertical space that could go to the tagline or push the buttons further up the fold.</p>
+    <div class="fix-label">Proposed fix</div>
+    <p class="why">Extend the existing rule to cover sign-in too:</p>
+    <pre style="background:#16222e; border:1px solid #243646; padding:10px 12px; border-radius:6px; font-size:13px; color:#cfe6da; overflow-x:auto;">.landing h1.appname,
+.signin h1.appname { display: none; }</pre>
+  </div>
+
+  <h2 class="sec">Implementation priority</h2>
+  <p style="color:var(--dim); font-size:14.5px; margin-top:0;">Suggested order — fastest wins first, then the structural changes. All six should ship as a single mobile-fixes PR after you sign off on these recommendations.</p>
+  <ol class="priorities">
+    <li><b>L-1, M-2</b> — sign-in screen cleanup (trivial CSS + label restructure).
+      <span class="note">~30 min. Pure polish; quick to ship and review.</span></li>
+    <li><b>H-1</b> — solo header restructure (two-row layout, icon-only Share/Exit at &lt;480 px).
+      <span class="note">~45 min. Fixes a real clipping bug.</span></li>
+    <li><b>H-2</b> — replay table seat compaction at &lt;480 px (narrower seats, percentage offsets).
+      <span class="note">~1 hr. CSS-only minimum-viable fix; the deeper layout reconsideration is part of #14.</span></li>
+    <li><b>H-3, M-1</b> — horizontally-scrollable grid containers for the 13×13 villain picker and the 4×13 hero/board picker.
+      <span class="note">~1.5 hr. Fixed-pixel cells + overflow-x scroll; subtle edge fade for affordance.</span></li>
+  </ol>
+
+  <h2 class="sec">Out of scope</h2>
+  <p style="color:var(--dim); font-size:14.5px; margin-top:0;">Things this audit deliberately does NOT propose, because they belong elsewhere:</p>
+  <ul style="color:var(--dim); font-size:14.5px;">
+    <li><b>Visual redesign of the replay table.</b> The seat-overlap fix is structural-only. A full visual rework (felt texture, chip animations, hero/villain branding) lives in <strong>#14</strong>.</li>
+    <li><b>Unified text voice.</b> Bb-chip, pot-% formatting, any-suit glyph — all part of <strong>#15</strong>. The mobile audit assumes those won't ship in this round.</li>
+    <li><b>Auto-animate replay open.</b> Part of <strong>#11</strong>, absorbed by <strong>#14</strong>.</li>
+    <li><b>The "compact picker" two-step pattern</b> (pick a rank row → expand to a single strip) for the 13×13. Worth doing but it's a UX rethink, not a layout fix; fold into <strong>#14</strong> or <strong>#15</strong>.</li>
+    <li><b>Multiplayer in-game header.</b> Not audited because reaching it from this anonymous session requires a live game. Suspect it has the same kind of header-overflow issue as solo — worth a follow-up screenshot review.</li>
+  </ul>
+
+  <h2 class="sec">Verification plan (after fixes ship)</h2>
+  <ol style="color:var(--dim); font-size:14.5px;">
+    <li>Resize the preview viewport to 375 × 812 (the same iPhone SE / 12 mini width used here) and walk every screen captured in this audit.</li>
+    <li>Resize to 360 × 800 (Android baseline) and re-walk — should still hold up.</li>
+    <li>Resize to 430 × 932 (iPhone 14 Pro Max) and confirm no regressions at the larger end of the phone range.</li>
+    <li>Re-check the replay table at 768 × 1024 (tablet) and 1280 × 800 (desktop) to confirm the breakpoint logic isn't bleeding into larger widths.</li>
+    <li>Real-device check: open the deployed URL on your phone (and your mom's) and run through one solo scenario.</li>
+  </ol>
+
+</body>
+</html>

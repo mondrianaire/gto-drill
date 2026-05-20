@@ -5,6 +5,29 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 
 ## [Unreleased]
 
+### Changed
+- **Mobile pass 1 fixes** (from `design-audit/mobile-audit.html`).
+  Five of the six audit findings, sequenced before the deeper table
+  rework. **H-2** (replay-table seat overlap) is intentionally deferred
+  to the table-rework pass since any CSS we'd ship would be redone.
+  - **L-1.** The sign-in card no longer prints "GTO Duel" twice (the
+    page header already shows it, same pattern as the landing screen).
+  - **M-2.** The "Practice solo" and "Equity calculator" buttons on the
+    sign-in screen are restructured as bold action label + muted
+    subtext, so parenthetical disclaimers don't wrap awkwardly inside
+    the click target.
+  - **H-1.** The solo-practice header is now two-row: title + action
+    buttons (Share / Exit) on row 1, running stats on row 2. At &lt;480 px
+    the action buttons collapse to icon-only (🔗 / ←) so the row never
+    overflows and the Exit label can't clip.
+  - ~~**H-3** / **M-1**~~ (grid horizontal scroll + bigger cells) —
+    initially shipped, then reverted. On the audience's actual phones
+    (iPhone 15 / iPhone 17 Pro Max), the original cells were tight but
+    tappable, and the horizontal-scroll workaround was a worse user
+    experience than the problem it solved. Reverted in
+    `2026-05-19.12-mobile-relax`. The original fluid grids stay on
+    mobile.
+
 ### Added
 - **🔗 Copy share link** button in the solo-practice header. Click to
   copy the current scenario's deep-link URL to the clipboard ("✓ Link

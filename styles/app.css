@@ -886,6 +886,9 @@ form { margin-top: 8px; }
   margin: 0 auto;
   padding-top: 24px;
 }
+/* L-1: the page header already prints "GTO Duel"; don't repeat it in the
+   sign-in card body. (Same pattern as the landing screen.) */
+.signin h1.appname { display: none; }
 .signin .tagline { margin-bottom: 28px; }
 .google-btn {
   display: inline-flex;
@@ -901,25 +904,38 @@ form { margin-top: 8px; }
 }
 .google-btn:hover { background: #f4f6f8; }
 .google-btn svg { display: block; flex: 0 0 auto; }
-/* Anonymous-solo escape hatch on the sign-in screen — matches the Google
-   button's size and stack position, intentionally muted ("greyed out"). */
+/* Anonymous escape hatches on the sign-in screen (Practice solo + Equity
+   calculator) — bold action label + muted subtext (M-2). Same overall size
+   as the Google button, intentionally muted ("greyed out"). */
 .solo-btn {
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 2px;
   width: 100%;
   margin-top: 10px;
   background: transparent;
-  color: var(--text-dim);
+  color: var(--text);
   border: 1px dashed var(--border);
   font-weight: 500;
-  min-height: 48px;
+  min-height: 56px;
+  padding: 8px 14px;
+  text-align: center;
 }
 .solo-btn:hover {
   background: var(--bg-elev);
-  color: var(--text);
   border-color: var(--text-dim);
+}
+.alt-btn-label {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.alt-btn-sub {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  font-weight: 400;
 }
 .signin-note { margin-top: 20px; font-size: 0.82rem; }
 
@@ -972,14 +988,28 @@ form { margin-top: 8px; }
 .calc-btn { /* third main-menu button; same look as solo-btn */ }
 
 /* ----- Solo practice view ---------------------------------------------- */
+/* H-1: two-row header — title + action buttons on row 1, stats on row 2.
+   At <480px the action buttons (Share + Exit) collapse to icon-only so
+   the row never overflows on narrow phones. */
 .solo-header {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  gap: 4px;
   margin-bottom: 12px;
 }
+.solo-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+}
+.solo-header-actions {
+  display: flex;
+  gap: 10px;
+  flex: 0 0 auto;
+}
 .solo-header h2 { margin: 0; font-size: 1.1rem; flex: 0 0 auto; }
-.solo-stats { font-size: 0.85rem; flex: 1 1 auto; }
+.solo-stats { font-size: 0.85rem; }
 .solo-share, .solo-exit { padding: 4px 8px; font-size: 0.85rem; flex: 0 0 auto; }
 .solo-share.is-copied { color: var(--ok); }
 .solo-share-fallback {
@@ -1194,4 +1224,28 @@ form { margin-top: 8px; }
   .stat-block.big { grid-column: span 1; }
   .app-title { font-size: 1.4rem; }
   .actions-row .action-btn { flex: 1 1 100%; }
+
+  /* H-1: at narrow widths, the share/exit buttons go icon-only. */
+  .solo-share-label, .solo-exit-label { display: none; }
+  .solo-share, .solo-exit {
+    padding: 6px 10px;
+    font-size: 1.05rem;
+    min-width: 40px;
+    text-align: center;
+    text-decoration: none;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text-dim);
+  }
+  .solo-share:hover, .solo-exit:hover {
+    background: var(--bg-elev);
+    color: var(--text);
+  }
+  .solo-share.is-copied { color: var(--ok); border-color: var(--ok); }
+
+  /* H-3 / M-1 (grid touch targets) intentionally NOT enforced here.
+     The original fluid 13x13 villain grid and 4x13 hero/board grid
+     stay as-is on mobile. On the audience's devices (iPhone 15 /
+     iPhone 17 Pro Max), the original cells are tight but tappable;
+     the horizontal-scroll workaround was worse than the problem. */
 }

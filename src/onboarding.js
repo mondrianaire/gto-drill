@@ -95,10 +95,13 @@ export function mountSignInView(container, onSignedIn, onSolo, onCalculator) {
   });
 
   // Anonymous-solo escape hatch — same size as the Google button, muted.
+  // Two-line label structure (bold action + muted subtext) so parenthetical
+  // disclaimers don't wrap awkwardly inside the click target on narrow phones.
   const soloBtn = h(
     "button",
     { type: "button", class: "solo-btn" },
-    "🃏  Practice solo (no sign-in, no opponent)"
+    h("span", { class: "alt-btn-label" }, "🃏  Practice solo"),
+    h("span", { class: "alt-btn-sub" }, "No sign-in. No opponent. Random scenarios.")
   );
   soloBtn.addEventListener("click", () => {
     if (onSolo) onSolo();
@@ -108,7 +111,8 @@ export function mountSignInView(container, onSignedIn, onSolo, onCalculator) {
   const calcBtn = h(
     "button",
     { type: "button", class: "solo-btn calc-btn" },
-    "🧮  Equity calculator (hole cards + board + range)"
+    h("span", { class: "alt-btn-label" }, "🧮  Equity calculator"),
+    h("span", { class: "alt-btn-sub" }, "Hole cards + board + range. Pure Monte Carlo.")
   );
   calcBtn.addEventListener("click", () => {
     if (onCalculator) onCalculator();

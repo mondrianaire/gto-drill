@@ -1,0 +1,941 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Grid picker alternatives — mobile</title>
+<style>
+  :root {
+    --bg:#0c0e12; --panel:#14171d; --panel2:#1b1f27;
+    --text:#e6e9ef; --dim:#8b93a2; --faint:#5b6271;
+    --border:#262b34; --accent:#4cb6ff; --anno:#ff5d9e;
+    --ok:#4ade80; --villain:#e8a93f;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans); font-size:15px; line-height:1.5; }
+  body { max-width:1080px; margin:0 auto; padding:32px 24px 96px; }
+  h1 { font-size:24px; margin:0 0 8px; }
+  h2.sec { font-size:13px; text-transform:uppercase; letter-spacing:.14em;
+    color:var(--dim); font-weight:600; margin:40px 0 14px;
+    border-top:1px solid var(--border); padding-top:18px; }
+  p.deck { color:var(--dim); margin:0 0 20px; font-size:15px; }
+
+  /* Each panel emulates a 375px-wide phone viewport */
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media (max-width: 860px) { .compare { grid-template-columns:1fr; } }
+  .phone {
+    width:375px; max-width:100%; margin:0 auto;
+    border:1px solid var(--border); border-radius:18px;
+    background:#0f1a24; padding:14px 12px; overflow:hidden;
+  }
+  .phone-title { display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:10px; }
+  .phone-title strong { font-size:13px; color:var(--text); letter-spacing:.04em; }
+  .phone-title .tag { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    font-weight:700; padding:2px 8px; border-radius:999px; }
+  .tag-cur { background:rgba(255,93,158,0.15); color:var(--anno); border:1px solid rgba(255,93,158,0.35); }
+  .tag-alt { background:rgba(74,222,128,0.12); color:var(--ok); border:1px solid rgba(74,222,128,0.3); }
+
+  /* ------------------------------------------------------------------ */
+  /* Shared poker-style cell aesthetics                                  */
+  button {
+    font:inherit; cursor:pointer; background:#16222e; color:#e6edf3;
+    border:1px solid #243646; border-radius:6px;
+    padding:0; min-height:0;
+  }
+  button:hover { background:#1c2c39; }
+  .cell-pair    { background:rgba(76,182,255,0.10); border-color:#1e3a52; }
+  .cell-suited  { background:rgba(74,222,128,0.08); border-color:#1c3a26; }
+  .cell-offsuit { background:rgba(248,113,113,0.06); border-color:#3a1c1c; }
+  .is-on        { background:#4cb6ff !important; color:#061018 !important; border-color:#4cb6ff !important; font-weight:700; }
+
+  .panel-stats { font-size:12px; color:var(--dim); margin-top:10px; padding:6px 8px;
+    background:#16222e; border:1px solid #243646; border-radius:6px; }
+  .panel-stats b { color:#fff; font-weight:600; }
+
+  /* ------------------------------------------------------------------ */
+  /* CURRENT — Pass 1 horizontal scroll                                  */
+  .v-scroll-host { overflow-x:auto; -webkit-overflow-scrolling:touch;
+    padding:2px; margin:0 -2px; }
+  .v-scroll-grid { display:grid; grid-template-columns:repeat(13, 36px);
+    gap:3px; min-width:507px; }
+  .v-scroll-grid button { height:32px; font-size:.62rem; font-weight:700; color:#8aa1b1; }
+
+  /* ------------------------------------------------------------------ */
+  /* ALT A — Master-detail (tap rank on left, hands appear on right)    */
+  .md { display:grid; grid-template-columns:64px 1fr; gap:8px;
+    background:#0c1620; border-radius:8px; padding:6px; border:1px solid #1a2735; }
+  .md-ranks { display:flex; flex-direction:column; gap:4px; }
+  .md-ranks button { height:32px; font-size:.78rem; font-weight:700;
+    color:#cfe6da; padding:0 6px; }
+  .md-ranks button.is-active { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+  .md-detail { display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .md-detail-title { font-size:11px; color:#8aa1b1; text-transform:uppercase;
+    letter-spacing:.08em; padding:0 4px; }
+  .md-cells { display:grid; grid-template-columns:repeat(2, 1fr); gap:4px; }
+  .md-cells button { min-height:38px; font-size:.78rem; font-weight:600;
+    color:#cfe6da; padding:6px 4px; }
+
+  /* ------------------------------------------------------------------ */
+  /* HERO PICKERS                                                        */
+  .h-slots { display:flex; gap:8px; margin-bottom:10px; align-items:center; }
+  .h-slots .lbl { font-size:11px; color:#8aa1b1; text-transform:uppercase;
+    letter-spacing:.08em; font-weight:700; min-width:46px; }
+  .h-slot { width:38px; height:50px; border:1px dashed #243646;
+    border-radius:5px; display:inline-flex; align-items:center; justify-content:center;
+    color:#5b6271; background:transparent; cursor:pointer; }
+  .h-slot.is-filled { border:1px solid #4cb6ff; padding:1px; color:#fff;
+    background:#fdfdfb; }
+  .h-slot.is-filled .pcard { display:flex; flex-direction:column; align-items:center;
+    justify-content:center; line-height:1; width:34px; height:46px; color:#1a1a1a; }
+  .h-slot.is-filled .pcard.is-red { color:#c0202a; }
+  .h-slot.is-filled .pcard .rk { font-weight:700; font-size:.74rem; }
+  .h-slot.is-filled .pcard .su { font-size:.78rem; }
+
+  /* Hero current — horizontal scroll grid                              */
+  .hc-scroll-host { overflow-x:auto; -webkit-overflow-scrolling:touch;
+    padding:2px; margin:0 -2px; }
+  .hc-scroll-grid { display:grid; grid-template-columns:repeat(13, 36px);
+    grid-template-rows:repeat(4, 44px); gap:3px; min-width:507px; }
+  .hc-scroll-grid button { padding:0; }
+  .hc-scroll-grid .pcard { width:32px; height:40px; display:flex;
+    flex-direction:column; align-items:center; justify-content:center;
+    background:#fdfdfb; border-radius:3px; color:#1a1a1a; line-height:1; }
+  .hc-scroll-grid .pcard.is-red { color:#c0202a; }
+  .hc-scroll-grid .pcard .rk { font-weight:700; font-size:.62rem; }
+  .hc-scroll-grid .pcard .su { font-size:.66rem; }
+  .hc-scroll-grid button.is-on .pcard { box-shadow:0 0 0 2px #4cb6ff; }
+  .hc-scroll-grid button.is-dead .pcard { opacity:0.3; filter:grayscale(60%); }
+
+  /* Villain alt B — matrix-as-hero, controls collapsible             */
+  .sm { display:flex; flex-direction:column; gap:10px; }
+
+  /* The pre-loaded range label sits prominently above the matrix.    */
+  .sm-loaded-label {
+    color:#e8a93f; font-size:.78rem; font-weight:600;
+    margin-right:6px;
+  }
+
+  /* Disclosure toggle for the input controls (collapsed by default). */
+  .sm-modify-btn {
+    background:transparent; border:1px solid #243646;
+    color:#8aa1b1; font-size:.78rem; font-weight:600;
+    padding:5px 11px; border-radius:6px; min-height:0;
+    cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+  }
+  .sm-modify-btn:hover { color:#e6edf3; border-color:#4cb6ff; }
+  .sm-modify-btn .chev {
+    display:inline-block; transition:transform 0.18s;
+    font-size:.7rem; opacity:0.7;
+  }
+  .sm-modify-btn.is-open .chev { transform:rotate(180deg); }
+
+  .sm-controls-wrap {
+    display:flex; flex-direction:column; gap:10px;
+    overflow:hidden; max-height:0; opacity:0;
+    transition:max-height 0.22s ease, opacity 0.18s ease, margin 0.22s ease;
+    margin-top:0;
+  }
+  .sm-controls-wrap.is-open {
+    max-height:800px; opacity:1; margin-top:0;
+  }
+
+  /* Demo state switcher — only present in the mock, not in the real app */
+  .sm-mode-btn {
+    background:#16222e; border:1px solid #243646; color:#8aa1b1;
+    font-size:.74rem; font-weight:500; padding:5px 10px;
+    border-radius:6px; min-height:0; cursor:pointer;
+  }
+  .sm-mode-btn:hover { color:#e6edf3; border-color:#4cb6ff; }
+  .sm-mode-btn.is-active {
+    background:#1c2c39; color:#4cb6ff; border-color:#4cb6ff; font-weight:600;
+  }
+
+  /* Standalone-mode hint: shown above the matrix when it's empty */
+  .sm-empty-hint {
+    background:rgba(76,182,255,0.06); border:1px dashed #243646;
+    border-radius:6px; padding:10px 12px; font-size:.82rem;
+    color:#8aa1b1; text-align:center;
+  }
+  .sm-empty-hint b { color:#4cb6ff; font-weight:600; }
+  /* Each input section is its own labeled card */
+  .sm-section {
+    background:#0c1620; border:1px solid #1a2735;
+    border-radius:8px; padding:10px 12px;
+  }
+  .sm-section-label {
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:700; color:#5b6271; margin:0 0 8px;
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .sm-section-label .hint { color:#5b6271; font-weight:400; font-size:10px;
+    letter-spacing:.04em; text-transform:none; font-style:italic; }
+
+  /* Header row: title + clear-all link */
+  .sm-header {
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:6px;
+  }
+  .sm-clear {
+    background:none; border:none; padding:0; min-height:0;
+    color:#8aa1b1; font-size:.74rem; cursor:pointer;
+    text-decoration:underline;
+  }
+  .sm-clear:hover { color:#f87171; background:none; }
+
+  /* Top-% section: slider + jump-to preselects */
+  .sm-slider-row { display:flex; align-items:center; gap:10px; }
+  .sm-slider-row input[type="range"] {
+    flex:1 1 auto; accent-color:#4cb6ff; min-width:0;
+  }
+  .sm-slider-label {
+    font-size:.85rem; color:#cfe6da; font-weight:600;
+    min-width:62px; text-align:right;
+  }
+  .sm-jump {
+    display:flex; gap:4px; align-items:baseline;
+    margin-top:6px; padding-top:6px;
+    border-top:1px dashed #1a2735;
+    font-size:11.5px;
+  }
+  .sm-jump-label { color:#5b6271; margin-right:4px; }
+  .sm-jump button {
+    background:none; border:none; padding:2px 6px; min-height:0;
+    color:#8aa1b1; font-size:11.5px; font-weight:600;
+    cursor:pointer; border-radius:3px;
+  }
+  .sm-jump button:hover { color:#4cb6ff; background:rgba(76,182,255,0.08); }
+  .sm-jump button.is-on { color:#4cb6ff; background:rgba(76,182,255,0.18); }
+
+  /* Category section: rounded chips */
+  .sm-cats { display:flex; flex-wrap:wrap; gap:5px; }
+  .sm-cats button {
+    font-size:.74rem; padding:5px 10px; border-radius:999px;
+    background:#16222e; border:1px solid #243646; color:#cfe6da; min-height:0;
+  }
+  .sm-cats button.is-on { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+
+  /* Filter section: labeled toggle switch */
+  .sm-filter-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .sm-filter-name { font-size:.88rem; color:#e6edf3; font-weight:500; }
+  .sm-filter-sub { font-size:.72rem; color:#8aa1b1; margin-top:1px; }
+  .sm-switch {
+    position:relative; display:inline-block; width:46px; height:26px;
+    flex:0 0 auto; cursor:pointer; padding:0; border:none; background:none;
+    min-height:0;
+  }
+  .sm-switch-track {
+    position:absolute; inset:0; background:#243646;
+    border-radius:14px; transition:background 0.15s;
+  }
+  .sm-switch-thumb {
+    position:absolute; top:2px; left:2px; width:22px; height:22px;
+    background:#fff; border-radius:50%;
+    transition:transform 0.15s; box-shadow:0 1px 2px rgba(0,0,0,0.4);
+  }
+  .sm-switch.is-on .sm-switch-track { background:#e8a93f; }
+  .sm-switch.is-on .sm-switch-thumb { transform:translateX(20px); }
+
+  /* Matrix display */
+  .sm-matrix-wrap {
+    background:#0c1620; padding:6px; border-radius:8px;
+    border:1px solid #1a2735;
+  }
+  .sm-matrix { display:grid; grid-template-columns:repeat(13, 1fr); gap:2px; }
+  .sm-matrix button { aspect-ratio:1; padding:0; font-size:.55rem;
+    font-weight:700; color:#5b6271; border-radius:2px;
+    background:#0c1620; border:1px solid #16222e; }
+  .sm-matrix button.cell-pair    { background:rgba(76,182,255,0.08); }
+  .sm-matrix button.cell-suited  { background:rgba(74,222,128,0.05); }
+  .sm-matrix button.cell-offsuit { background:rgba(248,113,113,0.04); }
+  .sm-matrix button.is-on { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+  .sm-hint { font-size:11px; color:#8aa1b1; margin-top:8px; font-style:italic; line-height:1.3; }
+
+  /* Hero alt — rank-then-suit two-step                                 */
+  .ts { background:#0c1620; border-radius:8px; padding:8px;
+    border:1px solid #1a2735; }
+  .ts-step { font-size:11px; color:#8aa1b1; text-transform:uppercase;
+    letter-spacing:.08em; font-weight:700; margin:0 0 6px; }
+  .ts-ranks { display:grid; grid-template-columns:repeat(7, 1fr);
+    grid-auto-rows:42px; gap:4px; margin-bottom:10px; }
+  .ts-ranks button { font-size:.95rem; font-weight:700; color:#cfe6da; }
+  .ts-ranks button.is-active { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+  .ts-suits { display:grid; grid-template-columns:repeat(4, 1fr);
+    grid-auto-rows:50px; gap:6px; }
+  .ts-suits button { font-size:1.4rem; line-height:1; color:#cfe6da; }
+  .ts-suits .s-r { color:#c0202a; background:#fdfdfb; border-color:#fdfdfb; }
+  .ts-suits .s-b { color:#1a1a1a; background:#fdfdfb; border-color:#fdfdfb; }
+  .ts-suits button:disabled { opacity:0.25; cursor:not-allowed; }
+  .ts-hint { font-size:11.5px; color:#8aa1b1; margin-top:8px; font-style:italic; }
+</style>
+</head>
+<body>
+  <h1>Hand selection grids — mobile alternatives</h1>
+  <p class="deck">Each panel is a working ~375px-wide mockup. Tap around to feel each workflow. Selection state is local to the panel.</p>
+
+  <!-- ============================================================ -->
+  <h2 class="sec">Villain range picker — 13 × 13</h2>
+  <p class="deck"><b>Current (Pass 1):</b> horizontal scroll. Pinpoint precision but small targets and you have to scroll to see all 13 columns.<br />
+    <b>Alternative — Master-detail:</b> tap a rank on the left, the relevant hands appear on the right. Always-visible big buttons; no scrolling required. Two taps per hand class instead of one.</p>
+
+  <div class="compare">
+    <div class="phone">
+      <div class="phone-title"><strong>Villain range</strong><span class="tag tag-cur">Current — scroll</span></div>
+      <div id="v-cur-stats" class="panel-stats">0 hand classes selected</div>
+      <div class="v-scroll-host" id="v-cur-host">
+        <div class="v-scroll-grid" id="v-cur-grid"></div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-title"><strong>Villain range</strong><span class="tag tag-alt">Alt — master-detail</span></div>
+      <div id="v-alt-stats" class="panel-stats">0 hand classes selected</div>
+      <div class="md">
+        <div class="md-ranks" id="v-alt-ranks"></div>
+        <div class="md-detail">
+          <div class="md-detail-title" id="v-alt-title">Tap a rank →</div>
+          <div class="md-cells" id="v-alt-cells"></div>
+        </div>
+      </div>
+      <div class="sm-hint" style="color:#ff5d9e; padding-top:8px;">⚠ Rejected by the UX consult: replacing the matrix breaks the spatial mental model poker players already use ("top-left = premium," etc).</div>
+    </div>
+
+    <div class="phone" style="grid-column: 1 / -1; max-width: 760px;">
+      <div class="phone-title"><strong>Villain range</strong><span class="tag tag-alt">Alt B — matrix-first, controls collapsed</span></div>
+
+      <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+        <span style="font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:#5b6271; font-weight:700; margin-right:6px; align-self:center;">Demo state</span>
+        <button class="sm-mode-btn is-active" data-mode="chip">🎯 Chip click</button>
+        <button class="sm-mode-btn" data-mode="testit">🎲 Test it</button>
+        <button class="sm-mode-btn" data-mode="standalone">🧮 Calculator</button>
+      </div>
+
+      <div class="sm-header">
+        <div id="v-smr-stats" class="panel-stats" style="margin:0; flex:1 1 auto;">…</div>
+        <button id="v-smr-modify" class="sm-modify-btn" aria-expanded="false" title="Show controls to modify the range">
+          <span class="lbl">Customize</span>
+          <span class="chev">▼</span>
+        </button>
+      </div>
+
+      <div class="sm">
+        <div class="sm-empty-hint" id="v-smr-empty-hint" hidden>
+          No villain range yet. Tap <b>Customize</b> to pick a range, or hit a category chip in there to start fast.
+        </div>
+        <div class="sm-matrix-wrap">
+          <div class="sm-matrix" id="v-smr-matrix"></div>
+        </div>
+
+        <div class="sm-controls-wrap" id="v-smr-controls-wrap">
+          <div class="sm-section">
+            <div class="sm-section-label">
+              <span>Top %</span>
+              <button id="v-smr-clear" class="sm-clear" title="Clear all selected hands">⌫ Clear all</button>
+            </div>
+            <div class="sm-slider-row">
+              <input type="range" id="v-smr-slider" min="0" max="100" value="0" step="1" />
+              <span class="sm-slider-label" id="v-smr-pct">0%</span>
+            </div>
+            <div class="sm-jump">
+              <span class="sm-jump-label">Jump to:</span>
+              <div id="v-smr-jumps" style="display:flex; gap:2px;"></div>
+            </div>
+          </div>
+
+          <div class="sm-section">
+            <div class="sm-section-label"><span>Category</span><span class="hint">replaces the current selection</span></div>
+            <div class="sm-cats" id="v-smr-cats"></div>
+          </div>
+
+          <div class="sm-section">
+            <div class="sm-section-label"><span>Filter</span><span class="hint">applies to current selection</span></div>
+            <div class="sm-filter-row">
+              <div>
+                <div class="sm-filter-name">Playable hands only</div>
+                <div class="sm-filter-sub">Intersect with a top-30% reference range</div>
+              </div>
+              <button id="v-smr-playable" class="sm-switch" aria-pressed="false" title="Restrict selection to a 'playable' reference set">
+                <span class="sm-switch-track"></span>
+                <span class="sm-switch-thumb"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sm-hint">Default state mimics a chip-click from the GTO prose: the named range is the answer, the matrix is the canonical display. Tap <b>Modify range</b> only when you want to override.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 class="sec">Hero / board card picker — 4 × 13</h2>
+  <p class="deck"><b>Current (Pass 1):</b> horizontal scroll over a 4-suit × 13-rank card grid. Cards are recognizable but you have to scroll right to reach low ranks.<br />
+    <b>Alternative — Rank → suit two-step:</b> tap a rank, then tap a suit. Big targets at every step; selecting one card is two taps but each one is fat-finger-proof.</p>
+
+  <div class="compare">
+    <div class="phone">
+      <div class="phone-title"><strong>Hero hand</strong><span class="tag tag-cur">Current — scroll</span></div>
+      <div class="h-slots">
+        <span class="lbl">Hero</span>
+        <button class="h-slot" id="hc-slot-0" data-i="0"></button>
+        <button class="h-slot" id="hc-slot-1" data-i="1"></button>
+      </div>
+      <div class="hc-scroll-host">
+        <div class="hc-scroll-grid" id="hc-grid"></div>
+      </div>
+      <div class="panel-stats" id="hc-stats">Pick two cards (scroll right for low ranks)</div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-title"><strong>Hero hand</strong><span class="tag tag-alt">Alt — rank → suit</span></div>
+      <div class="h-slots">
+        <span class="lbl">Hero</span>
+        <button class="h-slot" id="ts-slot-0" data-i="0"></button>
+        <button class="h-slot" id="ts-slot-1" data-i="1"></button>
+      </div>
+      <div class="ts">
+        <div class="ts-step" id="ts-step">Step 1 — pick a rank</div>
+        <div class="ts-ranks" id="ts-ranks"></div>
+        <div class="ts-suits" id="ts-suits"></div>
+        <div class="ts-hint" id="ts-hint">Each card = 2 taps. No scrolling.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---------------- shared data ----------------
+  const RANKS = ["A","K","Q","J","T","9","8","7","6","5","4","3","2"];
+  const SUITS = ["s","h","d","c"]; // top → bottom
+  const SUIT_GLYPH = { s:"♠", h:"♥", d:"♦", c:"♣" };
+  const SUIT_RED = { s:false, h:true, d:true, c:false };
+
+  function classLabel(r, c) {
+    if (r === c) return RANKS[r] + RANKS[c];
+    if (c > r) return RANKS[r] + RANKS[c] + "s";
+    return RANKS[c] + RANKS[r] + "o";
+  }
+
+  // ---------------- VILLAIN — Current (horizontal scroll) ----------------
+  (() => {
+    const grid = document.getElementById("v-cur-grid");
+    const stats = document.getElementById("v-cur-stats");
+    const sel = new Set();
+    for (let r = 0; r < 13; r++) {
+      for (let c = 0; c < 13; c++) {
+        const lbl = classLabel(r, c);
+        const kind = r === c ? "pair" : (c > r ? "suited" : "offsuit");
+        const btn = document.createElement("button");
+        btn.className = "cell-" + kind;
+        btn.textContent = lbl;
+        btn.addEventListener("click", () => {
+          if (sel.has(lbl)) { sel.delete(lbl); btn.classList.remove("is-on"); }
+          else { sel.add(lbl); btn.classList.add("is-on"); }
+          stats.innerHTML = "<b>" + sel.size + "</b> hand class" + (sel.size === 1 ? "" : "es") + " selected";
+        });
+        grid.appendChild(btn);
+      }
+    }
+  })();
+
+  // ---------------- VILLAIN — Alt (master-detail) ----------------
+  (() => {
+    const ranksHost = document.getElementById("v-alt-ranks");
+    const cellsHost = document.getElementById("v-alt-cells");
+    const titleEl = document.getElementById("v-alt-title");
+    const stats = document.getElementById("v-alt-stats");
+    const sel = new Set();
+    let activeRank = -1;
+    const rankBtns = [];
+
+    function renderCells() {
+      cellsHost.innerHTML = "";
+      if (activeRank < 0) return;
+      titleEl.innerHTML = "Hands with <b style=\"color:#fff\">" + RANKS[activeRank] + "</b> as the high rank";
+      // Pair first, then suited variants high→low, then offsuit
+      const items = [];
+      items.push({ lbl: RANKS[activeRank] + RANKS[activeRank], kind: "pair" });
+      for (let k = activeRank + 1; k < 13; k++) {
+        items.push({ lbl: RANKS[activeRank] + RANKS[k] + "s", kind: "suited" });
+      }
+      for (let k = activeRank + 1; k < 13; k++) {
+        items.push({ lbl: RANKS[activeRank] + RANKS[k] + "o", kind: "offsuit" });
+      }
+      for (const item of items) {
+        const btn = document.createElement("button");
+        btn.className = "cell-" + item.kind + (sel.has(item.lbl) ? " is-on" : "");
+        btn.textContent = item.lbl;
+        btn.addEventListener("click", () => {
+          if (sel.has(item.lbl)) { sel.delete(item.lbl); btn.classList.remove("is-on"); }
+          else { sel.add(item.lbl); btn.classList.add("is-on"); }
+          updateStats();
+        });
+        cellsHost.appendChild(btn);
+      }
+    }
+    function updateStats() {
+      stats.innerHTML = "<b>" + sel.size + "</b> hand class" + (sel.size === 1 ? "" : "es") + " selected";
+    }
+    for (let r = 0; r < 13; r++) {
+      const btn = document.createElement("button");
+      btn.textContent = RANKS[r];
+      btn.addEventListener("click", () => {
+        activeRank = r;
+        rankBtns.forEach((b, i) => b.classList.toggle("is-active", i === r));
+        renderCells();
+      });
+      rankBtns.push(btn);
+      ranksHost.appendChild(btn);
+    }
+    updateStats();
+  })();
+
+  // ---------------- VILLAIN — Alt B (slider + presets + matrix) -------------
+  // Approximation of preflop hand strength. Real solvers use PokerStove's
+  // canonical 169-hand ranking; this rough formula puts hands in roughly
+  // the right order for demonstrating the slider UX without 169 lines of data.
+  function handStrength(lbl) {
+    const RANK_IDX = "AKQJT98765432";
+    const r1 = RANK_IDX.indexOf(lbl[0]);
+    const r2 = RANK_IDX.indexOf(lbl[1]);
+    if (lbl.length === 2) {
+      // Pair — heavily weighted, but small pairs are weaker than AKs/AQs.
+      // Use a curve: AA(0)=200, KK(1)=190, ... 22(12)=80.
+      return 200 - r1 * 10;
+    }
+    const high = 13 - r1; // A=13, 2=1
+    const low = 13 - r2;
+    const gap = r2 - r1;
+    const suited = lbl[2] === "s";
+    let score = high * 5 + low * 2.5;
+    if (suited) score += 8;
+    if (gap === 1) score += 5;
+    else if (gap === 2) score += 2;
+    // Ace wheel suited bonus (A5s, A4s, A3s, A2s are stronger than rank alone)
+    if (suited && r1 === 0 && r2 >= 8) score += 4;
+    return score;
+  }
+  function comboCount(lbl) {
+    if (lbl.length === 2) return 6;
+    if (lbl[2] === "s") return 4;
+    return 12;
+  }
+
+  // SLIDER PRESELECTS — percentile jumps that live with the slider.
+  const TOP_PRESELECTS = [5, 10, 20, 30, 50];
+
+  // CATEGORY SELECTORS — each ships the STRICT / maximal version of its
+  // category. The "Playable only" filter (separate UI) handles narrowing.
+  const CATS_SMR = {
+    "Pairs":             ["AA","KK","QQ","JJ","TT","99","88","77","66","55","44","33","22"],
+    "Premium pairs":     ["AA","KK","QQ","JJ"],
+    "Big slick":         ["AKs","AKo"],
+    "Broadways":         ["AA","KK","QQ","JJ","TT","AKs","AKo","AQs","AQo","AJs","AJo","ATs","ATo","KQs","KQo","KJs","KJo","KTs","KTo","QJs","QJo","QTs","QTo","JTs","JTo"],
+    "Suited aces":       ["AKs","AQs","AJs","ATs","A9s","A8s","A7s","A6s","A5s","A4s","A3s","A2s"],
+    "Suited BW":         ["KQs","KJs","KTs","QJs","QTs","JTs"],
+    "Suited connectors": ["AKs","KQs","QJs","JTs","T9s","98s","87s","76s","65s","54s","43s","32s"],
+    "Suited 1-gap":      ["KJs","QTs","J9s","T8s","97s","86s","75s","64s","53s","42s"],
+  };
+
+  // "Playable" reference set ≈ top 30% — any pair, every suited ace,
+  // suited Kings 7+, suited connectors KQs–54s, suited 1-gappers down
+  // to 75s, plus Broadway offsuit (ATo+, KTo+, QTo+, JTo).
+  const PLAYABLE_SET = new Set([
+    "AA","KK","QQ","JJ","TT","99","88","77","66","55","44","33","22",
+    "AKs","AQs","AJs","ATs","A9s","A8s","A7s","A6s","A5s","A4s","A3s","A2s",
+    "KQs","KJs","KTs","K9s","K8s","K7s",
+    "QJs","QTs","Q9s","Q8s",
+    "JTs","J9s","J8s",
+    "T9s","T8s","T7s",
+    "98s","97s",
+    "87s","86s",
+    "76s","75s",
+    "65s","64s",
+    "54s","53s",
+    "AKo","AQo","AJo","ATo",
+    "KQo","KJo","KTo",
+    "QJo","QTo",
+    "JTo",
+  ]);
+
+  (() => {
+    const matrixEl = document.getElementById("v-smr-matrix");
+    const catsEl = document.getElementById("v-smr-cats");
+    const jumpsEl = document.getElementById("v-smr-jumps");
+    const sliderEl = document.getElementById("v-smr-slider");
+    const pctEl = document.getElementById("v-smr-pct");
+    const statsEl = document.getElementById("v-smr-stats");
+    const playableEl = document.getElementById("v-smr-playable");
+    const clearEl = document.getElementById("v-smr-clear");
+    const modifyEl = document.getElementById("v-smr-modify");
+    const controlsWrapEl = document.getElementById("v-smr-controls-wrap");
+
+    // Three open-states the panel could land in, depending on how it was
+    // launched. The mock's "Demo state" buttons toggle between them.
+    const MODES = {
+      // Chip click — a specific named range from the GTO prose.
+      chip: {
+        label: "BB's 3-bet range",
+        hands: ["AA","KK","QQ","JJ","AKs","AKo","A5s","A4s","A3s"],
+        hint: false,
+      },
+      // Test-it button on a scenario — auto-load the LAST chip in the
+      // GTO explanation (per user's call: "pick the last suggested range").
+      testit: {
+        label: "Last chip in GTO: BB's polar 4-bet range",
+        hands: ["AA","KK","QQ","AKs","AKo","A5s"],
+        hint: false,
+      },
+      // Standalone calculator — no scenario context, empty matrix.
+      standalone: {
+        label: null,
+        hands: [],
+        hint: true,
+      },
+    };
+    let loadedLabel = null;
+
+    const ALL_LABELS = [];
+    for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) ALL_LABELS.push(classLabel(r, c));
+    const ORDERED = [...ALL_LABELS].sort((a, b) => handStrength(b) - handStrength(a));
+
+    const sel = new Set();   // current selection AFTER any playable filter
+    const raw = new Set();   // last "wanted" selection BEFORE playable filter
+    const cellBy = {};
+    let playableOnly = false;
+    let activeMode = null;   // "slider" | "category" | "manual" — drives highlight clearing
+
+    function applyPlayableFilter() {
+      sel.clear();
+      for (const lbl of raw) {
+        if (!playableOnly || PLAYABLE_SET.has(lbl)) sel.add(lbl);
+      }
+    }
+
+    function render() {
+      applyPlayableFilter();
+      let combos = 0;
+      for (const lbl of ALL_LABELS) {
+        const on = sel.has(lbl);
+        cellBy[lbl].classList.toggle("is-on", on);
+        if (on) combos += comboCount(lbl);
+      }
+      const emptyHint = document.getElementById("v-smr-empty-hint");
+      const isEmpty = sel.size === 0 && !loadedLabel;
+      emptyHint.hidden = !isEmpty;
+      if (isEmpty) {
+        statsEl.innerHTML = '<span class="muted">No range selected</span>';
+        return;
+      }
+      const prefix = loadedLabel
+        ? '<span class="sm-loaded-label">' + loadedLabel + '</span>'
+        : '';
+      statsEl.innerHTML = prefix +
+        "<b>" + sel.size + "</b> hand class" + (sel.size === 1 ? "" : "es") +
+        " · <b>" + combos + "</b> combo" + (combos === 1 ? "" : "s") +
+        (playableOnly ? " · <span style=\"color:#e8a93f\">playable filter on</span>" : "");
+    }
+
+    function markCustom() {
+      // Any user modification drops the "loaded range" label.
+      loadedLabel = null;
+    }
+
+    function setTopN(pct, source) {
+      const n = Math.round((pct / 100) * 169);
+      raw.clear();
+      for (let i = 0; i < n; i++) raw.add(ORDERED[i]);
+      pctEl.textContent = "Top " + pct + "%";
+      if (source !== "slider") sliderEl.value = pct;
+      activeMode = "slider";
+      Array.from(jumpsEl.children).forEach((b) => b.classList.toggle("is-on", parseInt(b.dataset.pct, 10) === pct));
+      Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+      markCustom();
+      render();
+    }
+
+    function setCategory(name) {
+      const labels = CATS_SMR[name] || [];
+      raw.clear();
+      for (const l of labels) raw.add(l);
+      sliderEl.value = 0;
+      pctEl.textContent = labels.length + " hands";
+      activeMode = "category";
+      Array.from(catsEl.children).forEach((b) => b.classList.toggle("is-on", b.textContent === name));
+      Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+      markCustom();
+      render();
+    }
+
+    function clearAll() {
+      raw.clear();
+      sliderEl.value = 0;
+      pctEl.textContent = "0%";
+      activeMode = null;
+      Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+      Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+      markCustom();
+      render();
+    }
+
+    function loadNamedRange(label, hands) {
+      raw.clear();
+      for (const h of hands) raw.add(h);
+      sliderEl.value = 0;
+      pctEl.textContent = hands.length + " hands";
+      activeMode = "preloaded";
+      loadedLabel = label;
+      Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+      Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+      render();
+    }
+
+    // Build matrix (13×13).
+    for (let r = 0; r < 13; r++) {
+      for (let c = 0; c < 13; c++) {
+        const lbl = classLabel(r, c);
+        const kind = r === c ? "pair" : (c > r ? "suited" : "offsuit");
+        const btn = document.createElement("button");
+        btn.className = "cell-" + kind;
+        btn.textContent = lbl;
+        btn.addEventListener("click", () => {
+          if (raw.has(lbl)) raw.delete(lbl);
+          else raw.add(lbl);
+          sliderEl.value = 0;
+          pctEl.textContent = raw.size + " hands";
+          activeMode = "manual";
+          Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+          Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+          markCustom();
+          render();
+        });
+        cellBy[lbl] = btn;
+        matrixEl.appendChild(btn);
+      }
+    }
+
+    // Slider jump-to preselects.
+    for (const pct of TOP_PRESELECTS) {
+      const btn = document.createElement("button");
+      btn.dataset.pct = pct;
+      btn.textContent = pct + "%";
+      btn.addEventListener("click", () => setTopN(pct, "preselect"));
+      jumpsEl.appendChild(btn);
+    }
+
+    // Category chips.
+    for (const name of Object.keys(CATS_SMR)) {
+      const btn = document.createElement("button");
+      btn.textContent = name;
+      btn.addEventListener("click", () => setCategory(name));
+      catsEl.appendChild(btn);
+    }
+
+    // Playable toggle (switch). Playable is a *filter*, so toggling it
+    // doesn't change the underlying intent — keep the loaded label.
+    playableEl.addEventListener("click", () => {
+      playableOnly = !playableOnly;
+      playableEl.classList.toggle("is-on", playableOnly);
+      playableEl.setAttribute("aria-pressed", playableOnly ? "true" : "false");
+      render();
+    });
+
+    // Clear all (now lives inside the Top % section header).
+    clearEl.addEventListener("click", clearAll);
+
+    // Slider input.
+    sliderEl.addEventListener("input", (ev) => setTopN(parseInt(ev.target.value, 10) || 0, "slider"));
+
+    // Disclosure toggle — controls collapsed by default to keep the
+    // matrix as the visual hero on chip-loaded panels.
+    modifyEl.addEventListener("click", () => {
+      const open = !controlsWrapEl.classList.contains("is-open");
+      controlsWrapEl.classList.toggle("is-open", open);
+      modifyEl.classList.toggle("is-open", open);
+      modifyEl.setAttribute("aria-expanded", open ? "true" : "false");
+      modifyEl.querySelector(".lbl").textContent = open ? "Hide controls" : "Customize";
+    });
+
+    // Apply one of the three open-states (chip / testit / standalone).
+    function applyMode(modeName) {
+      const m = MODES[modeName];
+      if (!m) return;
+      playableOnly = false;
+      playableEl.classList.remove("is-on");
+      playableEl.setAttribute("aria-pressed", "false");
+      // Reset the disclosure to collapsed on every mode switch
+      controlsWrapEl.classList.remove("is-open");
+      modifyEl.classList.remove("is-open");
+      modifyEl.setAttribute("aria-expanded", "false");
+      modifyEl.querySelector(".lbl").textContent = "Customize";
+      if (m.hands.length > 0) {
+        loadNamedRange(m.label, m.hands);
+      } else {
+        raw.clear();
+        loadedLabel = null;
+        sliderEl.value = 0;
+        pctEl.textContent = "0%";
+        Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+        Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+        render();
+      }
+    }
+
+    // Mode switcher (mock only — not part of the real-app UI).
+    document.querySelectorAll(".sm-mode-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".sm-mode-btn").forEach((b) => b.classList.toggle("is-active", b === btn));
+        applyMode(btn.dataset.mode);
+      });
+    });
+
+    // Start in "chip" mode — the most common entry point in the GTO workflow.
+    applyMode("chip");
+  })();
+
+  // ---------------- HERO — Current (horizontal scroll grid) ----------------
+  (() => {
+    const grid = document.getElementById("hc-grid");
+    const slotEls = [document.getElementById("hc-slot-0"), document.getElementById("hc-slot-1")];
+    const stats = document.getElementById("hc-stats");
+    const hero = [];
+    const pickOrder = [];
+    const cellByCode = {};
+
+    function cardHtml(code) {
+      const r = code[0] === "T" ? "10" : code[0];
+      const s = code[1];
+      const red = SUIT_RED[s];
+      return '<div class="pcard' + (red ? " is-red" : "") + '"><span class="rk">' + r + '</span><span class="su">' + SUIT_GLYPH[s] + '</span></div>';
+    }
+    function syncSlots() {
+      for (let i = 0; i < 2; i++) {
+        const el = slotEls[i];
+        el.innerHTML = "";
+        if (hero[i]) { el.classList.add("is-filled"); el.innerHTML = cardHtml(hero[i]); }
+        else { el.classList.remove("is-filled"); el.innerHTML = "<span>?</span>"; }
+      }
+    }
+    function syncGrid() {
+      for (const code in cellByCode) {
+        cellByCode[code].classList.toggle("is-on", hero.includes(code));
+      }
+    }
+    function pick(code) {
+      const idx = hero.indexOf(code);
+      if (idx >= 0) {
+        hero.splice(idx, 1);
+        const po = pickOrder.indexOf(code); if (po >= 0) pickOrder.splice(po, 1);
+      } else if (hero.length < 2) {
+        hero.push(code); pickOrder.push(code);
+      } else {
+        const old = pickOrder.shift();
+        const oi = hero.indexOf(old); if (oi >= 0) hero.splice(oi, 1);
+        hero.push(code); pickOrder.push(code);
+      }
+      syncSlots(); syncGrid();
+      stats.innerHTML = hero.length === 2 ? "<b>Hero hand set</b> — tap a card to change" : "Pick <b>" + (2 - hero.length) + "</b> more card" + (hero.length === 1 ? "" : "s");
+    }
+    slotEls.forEach((el, i) => el.addEventListener("click", () => {
+      if (hero[i]) {
+        const code = hero[i];
+        hero.splice(i, 1);
+        const po = pickOrder.indexOf(code); if (po >= 0) pickOrder.splice(po, 1);
+        syncSlots(); syncGrid();
+        stats.innerHTML = "Pick <b>" + (2 - hero.length) + "</b> more card" + (hero.length === 1 ? "" : "s");
+      }
+    }));
+    for (const s of SUITS) {
+      for (const r of RANKS) {
+        const code = r + s;
+        const btn = document.createElement("button");
+        btn.innerHTML = cardHtml(code);
+        btn.addEventListener("click", () => pick(code));
+        cellByCode[code] = btn;
+        grid.appendChild(btn);
+      }
+    }
+    syncSlots();
+  })();
+
+  // ---------------- HERO — Alt (rank → suit two-step) ----------------
+  (() => {
+    const ranksHost = document.getElementById("ts-ranks");
+    const suitsHost = document.getElementById("ts-suits");
+    const stepEl = document.getElementById("ts-step");
+    const hintEl = document.getElementById("ts-hint");
+    const slotEls = [document.getElementById("ts-slot-0"), document.getElementById("ts-slot-1")];
+    const hero = [];
+    const pickOrder = [];
+    let pickingRank = null; // chosen rank letter, waiting for a suit
+    const rankBtns = {};
+
+    function cardHtml(code) {
+      const r = code[0] === "T" ? "10" : code[0];
+      const s = code[1];
+      const red = SUIT_RED[s];
+      return '<div class="pcard' + (red ? " is-red" : "") + '"><span class="rk">' + r + '</span><span class="su">' + SUIT_GLYPH[s] + '</span></div>';
+    }
+    function syncSlots() {
+      for (let i = 0; i < 2; i++) {
+        const el = slotEls[i];
+        el.innerHTML = "";
+        if (hero[i]) { el.classList.add("is-filled"); el.innerHTML = cardHtml(hero[i]); }
+        else { el.classList.remove("is-filled"); el.innerHTML = "<span>?</span>"; }
+      }
+    }
+    function syncStep() {
+      stepEl.textContent = pickingRank ? "Step 2 — pick a suit for " + pickingRank : "Step 1 — pick a rank";
+      Object.values(rankBtns).forEach((b) => b.classList.remove("is-active"));
+      if (pickingRank && rankBtns[pickingRank]) rankBtns[pickingRank].classList.add("is-active");
+      // Disable suits that would duplicate an already-picked card
+      Array.from(suitsHost.children).forEach((b) => {
+        const code = pickingRank ? (pickingRank + b.dataset.suit) : null;
+        b.disabled = !pickingRank || (code && hero.includes(code));
+      });
+    }
+    function setSuit(suit) {
+      if (!pickingRank) return;
+      const code = pickingRank + suit;
+      if (hero.includes(code)) return;
+      if (hero.length < 2) { hero.push(code); pickOrder.push(code); }
+      else {
+        const old = pickOrder.shift();
+        const oi = hero.indexOf(old); if (oi >= 0) hero.splice(oi, 1);
+        hero.push(code); pickOrder.push(code);
+      }
+      pickingRank = null;
+      syncSlots(); syncStep();
+      hintEl.textContent = hero.length === 2 ? "Hero hand set — tap a slot to remove" : "Pick " + (2 - hero.length) + " more card" + (hero.length === 1 ? "" : "s");
+    }
+    slotEls.forEach((el, i) => el.addEventListener("click", () => {
+      if (hero[i]) {
+        const code = hero[i];
+        hero.splice(i, 1);
+        const po = pickOrder.indexOf(code); if (po >= 0) pickOrder.splice(po, 1);
+        pickingRank = null;
+        syncSlots(); syncStep();
+        hintEl.textContent = "Pick " + (2 - hero.length) + " more card" + (hero.length === 1 ? "" : "s");
+      }
+    }));
+    for (const r of RANKS) {
+      const btn = document.createElement("button");
+      btn.textContent = r === "T" ? "10" : r;
+      btn.addEventListener("click", () => { pickingRank = r; syncStep(); });
+      rankBtns[r] = btn;
+      ranksHost.appendChild(btn);
+    }
+    for (const s of SUITS) {
+      const btn = document.createElement("button");
+      btn.className = SUIT_RED[s] ? "s-r" : "s-b";
+      btn.dataset.suit = s;
+      btn.textContent = SUIT_GLYPH[s];
+      btn.addEventListener("click", () => setSuit(s));
+      suitsHost.appendChild(btn);
+    }
+    syncSlots(); syncStep();
+  })();
+</script>
+</body>
+</html>
