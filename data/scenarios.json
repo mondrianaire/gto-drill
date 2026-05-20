@@ -490,7 +490,7 @@
           "Burns 14bb into a calling range that just range-flipped past Hero"
         ]
       },
-      "Bet 21bb (overbet 150% pot)": {
+      "Bet 21bb (overbet)": {
         "pros": [
           "Folds out everything except the made portion of the range if credible"
         ],
