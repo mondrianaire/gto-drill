@@ -114,6 +114,13 @@
       "Bet 17bb (~75% pot)"
     ],
     "gto_action": "Check back",
+    "framing": [
+      "BB's range is heavily capped — they'd c-bet most KK/AA/AK for value and protection",
+      "BTN has range disadvantage on Kh 7d 2s because BB has more Kx in their 3-bet range",
+      "SPR ~4 with 89bb behind — postflop play is range-vs-range, not stack-deep",
+      "BTN's cold-call range here is mostly Qx/Jx/TT-77 and backdoor draws; very little Kx",
+      "Dry, high-equity flop where the OOP cold-checker has surrendered initiative"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -289,6 +296,13 @@
       "3-bet to 11bb"
     ],
     "gto_action": "3-bet to 11bb",
+    "framing": [
+      "CO's open range is wide — roughly the top 25% of hands at 100bb",
+      "BB closes the action and gets a discounted price to defend with most hands",
+      "A5o is at the very bottom of BB's defending range, not a clean call or fold",
+      "Out of position postflop — BB realizes less than 100% of equity on most flops",
+      "The ace blocker removes a chunk of CO's AA/AK continuing combos"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -463,6 +477,13 @@
       "Bet 21bb (overbet 150% pot)"
     ],
     "gto_action": "Check back",
+    "framing": [
+      "Tc completes the front-door flush draw and is a range-flipping turn card",
+      "SB cold-called preflop with all the small suited clubs that flopped a draw and got there",
+      "BTN's flop c-bet had many one-pair value hands and few flush combos",
+      "Pot 14bb with ~88bb behind — turn sizing dictates the river leverage",
+      "SB's check-call line on the flop is consistent with many made flushes now"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -656,6 +677,13 @@
       "Limp"
     ],
     "gto_action": "Fold",
+    "framing": [
+      "40bb effective is too shallow for standard 100bb opening charts to apply directly",
+      "Small pairs (22-44) rely on set-mining implied odds that collapse at low SPR",
+      "UTG opens face the entire table — ranges that continue are tight and dominant",
+      "At 40bb, stacking off after flopping a set yields ~40bb, not the ~95bb that 100bb math assumes",
+      "22 has no equity advantage vs an opening range — it's a pure implied-odds hand"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -852,6 +880,13 @@
       "Bet 12bb (overbet)"
     ],
     "gto_action": "Bet 3bb (~30%)",
+    "framing": [
+      "BB check-called flop, then went check-check on the turn — range is condensed around weak made hands",
+      "Turn check by both players caps everyone — strong hands (KQ+, sets) would have bet",
+      "River 3h is a brick that changes nothing about hand strengths",
+      "Hero's KQ is top pair top kicker on a Qh-high board — clear showdown value",
+      "Pot 10bb with ~90bb behind — sizing here is about extracting from worse, not leverage"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -1053,6 +1088,13 @@
       "Raise to 16bb"
     ],
     "gto_action": "Call",
+    "framing": [
+      "Paired flops compress everyone's ranges — fewer hands materially change strength",
+      "CO's overbet (~75% pot) is polarizing — value 8x/overpairs and air, thin in the middle",
+      "BTN flatted preflop with no 99-specific advantage — the pair-9 is just one combo",
+      "On 8h 8d 3c the 8 hits CO's range (any small suited connector / pocket pair)",
+      "BTN is in position with 99 — controls the pot on most turn cards"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -1287,6 +1329,13 @@
       "Call"
     ],
     "gto_action": "Fold",
+    "framing": [
+      "UTG triple-barreled — sizing escalated each street into an overbet on a dry river",
+      "Final pot is ~89bb after the overbet; required equity to call is just over 30%",
+      "JTs missed every draw (no flush, no straight) and has only top pair decent kicker",
+      "JT blocks no straights — both 87 and 8-7 suited combos remain in UTG's value range",
+      "UTG's overbet line condenses to sets, two pair, JJ+, and missed flush-draw bluffs"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -1448,6 +1497,13 @@
       "4-bet to 22bb"
     ],
     "gto_action": "Call",
+    "framing": [
+      "100bb deep — set-mining math works when implied odds can pay ~8x the call",
+      "CO is in position vs BTN's 3-bet (closes flop action with positional advantage)",
+      "55 flops a set ~1 in 8.5 — needs to win ~7.5x the call when it hits",
+      "BTN's 3-bet IP range is tight and value-leaning, full of overpair hands",
+      "Pot odds: paying 6.5bb to win 12.5bb immediately, with deep implied behind"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -1657,6 +1713,13 @@
       "Check-raise to 28bb"
     ],
     "gto_action": "Call",
+    "framing": [
+      "HJ has the preflop initiative and BB is OOP on every street",
+      "Kc 5h 4s flop hits HJ's range hard — overpairs, AK, KQ all continuation-bet",
+      "7c turn adds a backdoor flush draw and connects with some middling pairs",
+      "KJs is top pair good kicker — strong showdown value vs HJ's range",
+      "Sizing ~70% pot on the turn — HJ's range is polar between Kx+ value and missed bluffs"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -1842,6 +1905,13 @@
       "Donk lead 4bb (~70%)"
     ],
     "gto_action": "Donk lead 2bb (~35%)",
+    "framing": [
+      "Low connected boards (765, 654) are the canonical donk-lead textures for BB",
+      "BB has all the small suited connectors (87s, 76s, 65s, 54s) that CO opens don't include",
+      "CO's preflop range is broadway-heavy — many overcards that brick this flop",
+      "84o has open-ended draw potential and blocks one of the two key straight cards (87)",
+      "Pot 5.5bb — a small donk sizing leverages range advantage without committing"
+    ],
     "action_analysis": {
       "Check": {
         "pros": [
@@ -1968,6 +2038,13 @@
       "Min-raise to 4bb"
     ],
     "gto_action": "Open shove all-in (12bb)",
+    "framing": [
+      "12bb effective is squarely in push-fold territory — Nash charts replace standard ranges",
+      "Min-raise/fold is structurally broken at this depth — too small to fold to a 3-bet shove",
+      "MTT bubble dynamics matter but Hero is on BTN attacking only two blinds",
+      "A8o has live cards and decent equity vs any non-pair calling range",
+      "The blinds need a tight calling range to call a 12bb shove — fold equity is real"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -2198,6 +2275,13 @@
       "Raise to 25bb"
     ],
     "gto_action": "Call",
+    "framing": [
+      "Three hearts on board by the turn — BB's range now contains many flush combos",
+      "BTN checked back the turn after barreling the flop — caps BTN's range, but BB doesn't know that",
+      "River 4d is a brick that completes no draws and changes no hand classes",
+      "AhKc holds the nut flush blocker — removes a chunk of BB's Ah-flush combos",
+      "BB led river ~80% pot into 9.5bb — bet-sizing fits both value and bluffs"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -2372,6 +2456,13 @@
       "Isolate to 5bb"
     ],
     "gto_action": "Isolate to 5bb",
+    "framing": [
+      "UTG limp signals a capped, weakish range — strong hands typically open",
+      "BTN closes the preflop action — three remaining players (blinds + limper) to push out",
+      "Isolation sizing standard is larger than a normal RFI (≥5bb) to charge the limper",
+      "98s flops well — straights, flushes, and second-pair good kicker combos",
+      "Heads-up postflop, IP, vs a capped limping range is among the highest-EV BTN spots"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -2555,6 +2646,13 @@
       "4-bet to 22bb"
     ],
     "gto_action": "4-bet to 22bb",
+    "framing": [
+      "BTN's 3-bet range vs HJ open is moderately wide — many hands fold to a 4-bet",
+      "100bb deep — 4-bet sizing of ~22bb leaves ~78bb behind for a 5-bet shove decision",
+      "A5s blocks AA, AK and unblocks BTN's pair-bluffs (no broadway interaction)",
+      "Wheel and flush potential mean A5s plays well when called postflop",
+      "Hero is OOP postflop if the 4-bet is called — position consideration matters"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -2764,6 +2862,13 @@
       "Bet 14bb (~75%)"
     ],
     "gto_action": "Check back",
+    "framing": [
+      "Three-street action with the same flatter — CO checked turn, then called Hero's turn bet",
+      "River 2s is a brick that changes no hand classes",
+      "Pot 19bb with ~90bb behind — river decisions are pot-control vs value oriented",
+      "77 is an underpair to the J on board — middle-strength showdown value",
+      "CO's range after check-call on turn is condensed around middling pairs and stubborn Jx"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -2949,6 +3054,13 @@
       "Bet 4bb (~75%)"
     ],
     "gto_action": "Bet 2bb (~35%)",
+    "framing": [
+      "AcQc has the nut flush draw, two overcards, and a backdoor straight on 8c 5c 2h",
+      "About ~50% equity against BB's calling range — semi-bluff with strong fundamentals",
+      "BB's flat range is wide and merged — many low pairs, undercards, and weak draws",
+      "Heads-up SRP, BTN in position — Hero has the preflop initiative",
+      "Pot 5.5bb with ~97bb behind — flop sizing sets up turn and river leverage"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -3200,6 +3312,13 @@
       "Shove all-in"
     ],
     "gto_action": "Fold",
+    "framing": [
+      "Board ran out 7-4-2-5-6 — every card after the flop adds straight texture",
+      "Final board 7-4-2-5-6 has a one-card straight: any 3 or any 8 makes a straight",
+      "QQ blocks no straights and has no spade or diamond blocker either",
+      "BTN flat-called CO's flop and turn bets — then check-raised river to ~3.5x",
+      "BTN's check-call-call-then-raise line on this runout is value-heavy in equilibrium"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -3398,6 +3517,13 @@
       "Re-raise to 22bb"
     ],
     "gto_action": "Re-raise to 22bb",
+    "framing": [
+      "Bottom set on 6h 9c 2s — a relatively dry board with few combo draws",
+      "BB check-raised Hero's small c-bet to 4x — sizing is leveraged and polar",
+      "Pot ~16.5bb with ~92bb behind after the raise — building stacks now is realistic",
+      "BB's check-raise range here typically includes 99 (top set), 22, 96s two pair, and bluffs",
+      "Hero's 66 dominates the entire range except 99 — value-heavy spot"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -3615,6 +3741,13 @@
       "Bet 8bb (~90%)"
     ],
     "gto_action": "Bet 4bb (~45%)",
+    "framing": [
+      "BTN checked back the turn after c-betting flop — Hero's range and BB's range are both capped",
+      "5-high has zero showdown value — checking back gives up the pot for sure",
+      "River 2s is a brick — completes no draws and changes no hand strengths",
+      "BB called flop and checked twice — range is condensed to weak Jx, low pairs, busted draws",
+      "Pot 9bb with deep stacks behind — river sizing controls the bluff frequency"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -3798,6 +3931,13 @@
       "Re-raise to 14bb"
     ],
     "gto_action": "Re-raise to 14bb",
+    "framing": [
+      "UTG limp followed by limp-reraise is the canonical strong-hand line at 100bb",
+      "HJ's iso-raise range is wide and merged — many hands fold to a reraise",
+      "Hero's limping range must contain a few monsters to prevent profitable isolations",
+      "AA is the top of any possible limping range — maximum value preservation matters",
+      "Sizing the limp-reraise targets a number similar to a standard 3-bet (~3.5x the iso)"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -3965,6 +4105,13 @@
       "Bet 22bb (~50% pot)"
     ],
     "gto_action": "Bet 7bb (~16% pot)",
+    "framing": [
+      "4-bet pots have low SPR (~1.8 here) — most lines lead to stacks-in by river",
+      "BTN's 4-bet range crushes SB's flat-call range on Kd 7s 4h — many overpairs and AK",
+      "SB's flat-4-bet range is narrow — JJ-TT, AK, AQ, plus occasional bluffs",
+      "AQo has two overcards plus a backdoor draw — strong equity-denial candidate",
+      "Range advantage so heavy that the entire range can c-bet at a tiny size"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -4180,6 +4327,13 @@
       "Bet 24bb (~100%)"
     ],
     "gto_action": "Bet 24bb (~100%)",
+    "framing": [
+      "BB check-called twice — range is now condensed to one-pair Qx and busted draws",
+      "River 2h is a brick — no flushes complete and no new straights appear",
+      "KsTs missed every draw (no flush, no straight) — zero showdown value",
+      "The Ks blocks Ks-high spade flushes BB could be slow-playing",
+      "Pot ~24bb with ~88bb behind — large river sizing leverages capped range"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -4380,6 +4534,13 @@
       "Check-raise to 9bb"
     ],
     "gto_action": "Check-raise to 9bb",
+    "framing": [
+      "JhTh on 9h 8h 4c is an open-ender plus flush draw — ~55% equity vs c-bet range",
+      "BTN c-bet small (~36% pot) — range is wide and merged, including many hands that fold to pressure",
+      "BB is OOP all postflop — pressure must come from check-raise or check-call lines",
+      "9h 8h 4c connects with BB's flat range (suited connectors) better than BTN's open",
+      "Combo draws prefer to build the pot now while equity is high"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -4583,6 +4744,13 @@
       "Probe bet 6bb (~100%)"
     ],
     "gto_action": "Probe bet 3bb (~50%)",
+    "framing": [
+      "HJ checked back the flop — caps their range to no Kx, no overpairs, no strong hands",
+      "Kc 8d 3s is a high-equity board that HJ would routinely c-bet with most of their range",
+      "Turn 5h is a low blank that changes few hand classes",
+      "BB's flat range (suited connectors, low pairs) connects with 8s and bottom-pair runouts",
+      "87s has middle pair on the flop now — merged value against HJ's capped range"
+    ],
     "action_analysis": {
       "Check": {
         "pros": [
@@ -4780,6 +4948,13 @@
       "Delayed c-bet 6bb (~100%)"
     ],
     "gto_action": "Delayed c-bet 3bb (~50%)",
+    "framing": [
+      "CO checked back flop — its range is now capped, no strong made hands or top pairs",
+      "BTN called flop check — range is full of weak floats, underpairs, and missed equity",
+      "Turn 7d adds a backdoor straight draw on Ts 6s 2c but changes no major classes",
+      "AJs has overcard equity plus a backdoor draw — fits a delayed-cbet bluff range",
+      "Pot 6.5bb with ~96bb behind — moderate sizing has both fold-equity and protection"
+    ],
     "action_analysis": {
       "Check": {
         "pros": [
@@ -4964,6 +5139,13 @@
       "4-bet to 24bb"
     ],
     "gto_action": "Call",
+    "framing": [
+      "BTN is in position vs BB's 3-bet — closes preflop action with a positional edge",
+      "76s flops straights, flushes, and big combo draws — high playability postflop",
+      "Pot odds: paying 8.5bb to win 17bb immediately, with deep implied behind",
+      "BB's 3-bet range vs BTN open is value-leaning but not so tight that 76s is dominated",
+      "Suited connectors realize equity well in 3-bet pots because they flop equity not strength"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -5136,6 +5318,13 @@
       "Squeeze to 13bb"
     ],
     "gto_action": "Squeeze to 13bb",
+    "framing": [
+      "HJ opens 2.5bb, CO cold-calls — squeeze faces two ranges with dead money in the pot",
+      "CO's flat-call range is capped — premiums (QQ+, AK) would usually 3-bet instead",
+      "AJs blocks AA, AK, and AQ — removes many of HJ's continuing combos",
+      "Squeeze sizing larger than a normal 3-bet (~13bb) to charge the second player",
+      "Flatting puts Hero in a multiway pot OOP — poor equity realization"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -5313,6 +5502,13 @@
       "Raise to 3.5bb"
     ],
     "gto_action": "Raise to 3.5bb",
+    "framing": [
+      "SB-vs-BB heads-up is the lowest-postflop-position spot in poker — SB is OOP if called",
+      "BB is the only player left to contest — heads-up dynamics dominate",
+      "Modern SB strategy is predominantly raise-or-fold with a small (often zero) limp range",
+      "K9s is a top-30%-of-hands holding — too strong to fold heads-up",
+      "Larger 3.5x sizing is standard SB-vs-BB to compensate for SB's positional disadvantage"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -5658,6 +5854,13 @@
       "3-bet to 38bb"
     ],
     "gto_action": "Call",
+    "framing": [
+      "Qh Jd 9d is one of the most dynamic textures in poker — straights, flushes, draws everywhere",
+      "BB check-raised ~2.2x Hero's c-bet — sizing is small enough to include semi-bluffs",
+      "Pot ~28.5bb after the raise with ~87bb behind — SPR still allows turn maneuverability",
+      "QJs is top two pair — strong made hand, but vulnerable to KT and any diamond turn",
+      "BB's check-raise range is polar: made straights, sets, two pair, plus draws and combo bluffs"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -5835,6 +6038,13 @@
       "Bet 5bb (~75%)"
     ],
     "gto_action": "Check",
+    "framing": [
+      "Monotone flops (9c 6c 3c) compress everyone's range around the flush-suit holdings",
+      "BTN's flat range is wide and contains many single-club holdings",
+      "KsKh has no club — Hero is drawing dead to a flush card if BTN has two clubs",
+      "Single-club hands in BTN's range have direct equity that can't be folded out cheaply",
+      "Pot 6.5bb with deep stacks behind — clubs runouts will be disasters for OOP overpairs"
+    ],
     "action_analysis": {
       "Check": {
         "pros": [
@@ -6084,6 +6294,13 @@
       "Bet 9bb (~100%)"
     ],
     "gto_action": "Check back",
+    "framing": [
+      "Hero range-bet flop on Kd 8h 3s — BB called with the low-pair / draw portion of their range",
+      "Turn 9h adds heart flush draws and improves some 9x in BB's calling range",
+      "A5s has no pair, no flush draw, and no straight draw on this runout",
+      "BB's flop-call range has many 8x, low pairs, and Kx — sticky against further pressure",
+      "Pot ~9.5bb — turn bet must work often vs a calling range that absorbed flop pressure"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -6323,6 +6540,13 @@
       "Overbet 20bb (~165%)"
     ],
     "gto_action": "Overbet 20bb (~165%)",
+    "framing": [
+      "T9s makes the nut straight (T9-8-7-6) on the river — no possible higher hand",
+      "CO checked back turn — their range is capped to one-pair hands and weak draws",
+      "Hero is OOP but holds the nuts — value extraction is the only objective",
+      "BB's river range here naturally contains busted draws to balance overbets as bluffs",
+      "Pot 12bb with ~92bb behind — overbet sizing is the only way to leverage stack depth"
+    ],
     "action_analysis": {
       "Check": {
         "pros": [
@@ -6537,6 +6761,13 @@
       "3-bet to 24bb"
     ],
     "gto_action": "Call",
+    "framing": [
+      "Ac 8c 5h has a flush draw — BTN's small flop raise often contains flush-draw combos",
+      "Small (~2.25x) IP raises are typically merged: draws, weak Ax, sets, two pair, protection",
+      "AKo is top pair top kicker — ahead of every draw and every worse Ax in BTN's range",
+      "Pot ~16.5bb after the raise with ~92bb behind — SPR allows further street decisions",
+      "BTN's raise range only crushes AK with sets (8x, 5x), which are a small slice"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -6722,6 +6953,13 @@
       "Bet 6bb (~66%)"
     ],
     "gto_action": "Bet 3bb (~33%)",
+    "framing": [
+      "Multiway pots compress ranges — both HJ and BTN flatted UTG's open, so both ranges are tighter",
+      "Jh 6c 3d is a dry board, but two opponents means more Jx and gutshot combos exist somewhere",
+      "QQ is an overpair — strong made hand on this texture, vulnerable to coordinated turns",
+      "Pot ~9bb three-handed, ~93bb behind — sizing controls the multiway pressure",
+      "Multiway c-bet frequencies are lower and sizes smaller than heads-up baselines"
+    ],
     "action_analysis": {
       "Check": {
         "pros": [
@@ -6929,6 +7167,13 @@
       "Check-raise to 20bb"
     ],
     "gto_action": "Check-raise to 20bb",
+    "framing": [
+      "3-bet pot with SPR ~3 — low enough that turn shoves are credible after a check-raise",
+      "AcTc on 8c 7c 5d is the nut flush draw plus a gutshot to the nut straight, plus an overcard",
+      "Ac blocks BTN's Ac-flush draws and AK with the ace of clubs",
+      "BTN flatted Hero's 3-bet OOP — range is mostly broadway and pairs that flat 3-bets",
+      "BB is OOP — pressure must come from check-raise, not check-call lines"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -7091,6 +7336,13 @@
       "Min-raise to 4bb"
     ],
     "gto_action": "Fold",
+    "framing": [
+      "Satellite final table, 4 left and 3 paid — ICM payouts are nearly flat",
+      "20bb effective is short but not all-in-or-fold territory in cash — ICM rewrites the math",
+      "Equal stacks mean every survival decision has equal weight — bust = forfeit a pay jump",
+      "A9s is a comfortable chip-EV shove from BTN at 20bb, but chip-EV is not real-money EV here",
+      "ICM bubble factor inflates the cost of getting called — tighten the shoving range"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -7230,6 +7482,13 @@
       "3-bet to 11bb"
     ],
     "gto_action": "Call",
+    "framing": [
+      "BTN's open range is wide — top 45-50% of hands at 100bb",
+      "BB closes the action with a discounted price — wide defense range applies",
+      "KJo blocks BTN's value (AK, KQ, AJ) and unblocks BTN's continuing-vs-3-bet hands",
+      "Offsuit broadways flop top pair and have straight potential — solid postflop playability",
+      "Out of position postflop — KJo realizes equity moderately, not exceptionally"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -7420,6 +7679,13 @@
       "Bet 13bb (~100%)"
     ],
     "gto_action": "Check",
+    "framing": [
+      "9h 5d 2h flop with Kh turn completes the front-door flush draw",
+      "Kh is also an overcard that hits BTN's range (Kx that floated, KQ, KJ, KT)",
+      "Middle set is a monster but vulnerable to a flush — Hero has no heart",
+      "BTN flatted CO's open IP — wide range with many heart combinations",
+      "Pot ~13bb with ~85bb behind — sizing decisions cascade across two more streets"
+    ],
     "action_analysis": {
       "Check": {
         "pros": [
@@ -7630,6 +7896,13 @@
       "Raise to 10bb"
     ],
     "gto_action": "Fold",
+    "framing": [
+      "6s 5s 4d is a textbook donk-lead board — wet, connected, hits BB's flat range hard",
+      "BB's donk-leading range on these textures is condensed — made straights, two pair, sets, big draws",
+      "AKo has no pair, only backdoor flush, and a runner-runner straight draw (8-7 or 7-3)",
+      "Donk lead size (~50% pot) signals strength and protection — rarely a pure bluff",
+      "Pot ~12bb after the donk — Hero needs strong equity to continue OOP-vs-position"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -7861,6 +8134,13 @@
       "Bet 8bb (~90%)"
     ],
     "gto_action": "Check back",
+    "framing": [
+      "Three hearts on board after the flop — Hero's Ah is the nut flush card",
+      "BTN checked back turn — both ranges are now capped after that line",
+      "River 2d is a brick that completes nothing and changes no hand classes",
+      "Ah5h blocks BB's missed-heart-draw bluff-catchers (Kh-x, Qh-x, hands that fold)",
+      "Ace-high retains real showdown value against BB's busted-draw range"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -8058,6 +8338,13 @@
       "Call all-in"
     ],
     "gto_action": "Call all-in",
+    "framing": [
+      "Stacks all-in if called — final pot ~200bb after the 5-bet jam",
+      "Hero already invested 21bb on the 4-bet — pot odds heavily favor continuing",
+      "A balanced 5-bet shove range at 100bb is QQ+, AK, plus a few A5s-type bluffs",
+      "AKo has ~40%+ equity against that balanced range — clear pot-odds call",
+      "AK sits at the top of any 4-bet value range — folding now is a face-up leak"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -8215,6 +8502,13 @@
       "Bet 4bb (~75%)"
     ],
     "gto_action": "Bet 1.5bb (~27%)",
+    "framing": [
+      "As Kd 7c is a dry, static, range-advantage board for BTN preflop opens",
+      "BB's flat range has very few Ax (most flat in BB's wide defense, but AA/AK are 3-bet)",
+      "KTs has second pair plus a backdoor straight draw — merged value on this texture",
+      "Static texture means small sizing extracts most EV — the whole range can bet",
+      "Pot 5.5bb with ~96bb behind — small flop bets keep SPR manageable for two more streets"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -8441,6 +8735,13 @@
       "Bet 12bb (~100%)"
     ],
     "gto_action": "Check back",
+    "framing": [
+      "Qh turn is an overcard to the Js flop — improves BB's Qx, gutshots, and draws",
+      "AJo has top pair good kicker on the flop — not on the turn anymore",
+      "BB called flop bet, called twice on a Js-high board — sticky range, often with Jx or draws",
+      "Pot ~12bb with ~85bb behind — turn decisions cascade into river bluff-catch spots",
+      "Hero is in position — checking realizes showdown equity vs BB's potential bluffs"
+    ],
     "action_analysis": {
       "Check back": {
         "pros": [
@@ -8622,6 +8923,13 @@
       "4-bet to 24bb"
     ],
     "gto_action": "Call",
+    "framing": [
+      "BTN is in position vs BB's 3-bet — closes preflop action with positional advantage",
+      "JJ is the third-strongest pocket pair — strong but not premium",
+      "BB's 3-bet vs BTN range is value-leaning (QQ+, AK heavy) but contains bluffs",
+      "100bb deep — flatting JJ lets Hero realize equity vs the entire 3-bet range",
+      "4-betting JJ caps Hero's call range and gets it in well only vs QQ+/AK"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
@@ -8872,6 +9180,13 @@
       "Raise to 32bb"
     ],
     "gto_action": "Raise to 32bb",
+    "framing": [
+      "98s makes 6-7-8-9-T on the river — the absolute nut straight, no higher hand possible",
+      "CO triple-barreled (flop, turn, river) — line condenses around sets, two pair, overpairs",
+      "Pot ~39bb after the river bet with ~80bb behind — meaningful raise leverage available",
+      "BB closes the action — no further streets to extract on",
+      "CO's value-heavy three-barrel range pays a raise wide; pure bluffs are a small slice"
+    ],
     "action_analysis": {
       "Fold": {
         "pros": [
