@@ -462,7 +462,10 @@ export function buildVillainRangeBlock({ scen, onRangeClick }) {
   // Range cards — each one a deduced range. The label is the conclusion
   // ("BB's 3-bet range vs BTN open"); the summary is the supporting
   // evidence ("Linear 3-bet range: JJ+, AK, AQs, plus a slice of
-  // suited bluffs"). Clicking pops the equity panel pre-loaded.
+  // suited bluffs"). Both go through richText so K72r becomes
+  // card-glyphs + rainbow modifier, positions become chips, bb amounts
+  // become bb chips — same voice as everywhere else in the app.
+  // Clicking pops the equity panel pre-loaded.
   const list = h("div", { class: "villain-range-list" });
   for (const range of ranges) {
     const card = h(
@@ -472,10 +475,10 @@ export function buildVillainRangeBlock({ scen, onRangeClick }) {
         tabindex: onRangeClick ? "0" : null,
         title: onRangeClick ? "Tap to test equity vs this range" : null },
       h("div", { class: "villain-range-card-header" },
-        h("span", { class: "villain-range-card-label" }, range.label || "Range"),
+        h("span", { class: "villain-range-card-label" }, range.label ? richText(range.label, scen) : "Range"),
         onRangeClick ? h("span", { class: "villain-range-card-icon", "aria-hidden": "true" }, "🎲") : null
       ),
-      range.summary ? h("div", { class: "villain-range-card-summary" }, range.summary) : null
+      range.summary ? h("div", { class: "villain-range-card-summary" }, richText(range.summary, scen)) : null
     );
     if (onRangeClick) {
       card.addEventListener("click", (ev) => { ev.preventDefault(); onRangeClick(range); });
