@@ -181,31 +181,37 @@ form { margin-top: 8px; }
 /* Create / Join */
 .create-game h2, .join-game h2, .waiting h2 { margin-top: 4px; }
 
-/* Lobby list (Join screen) */
-.lobby-list {
+/* Code-entry Join screen (replaced the open-lobby browser). The
+   public lobby browser was removed because the share-link / code
+   flow is the intended way to invite a specific opponent. */
+.join-code-row {
   display: flex;
-  flex-direction: column;
   gap: 10px;
-  margin-top: 6px;
+  margin: 10px 0;
+  align-items: stretch;
 }
-.lobby-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  width: 100%;
-  text-align: left;
-  background: var(--bg-elev);
-  border: 1px solid var(--border);
-}
-.lobby-card:hover { background: var(--bg-elev-2); }
-.lobby-main {
+.join-code-input {
   flex: 1 1 auto;
   min-width: 0;
-  display: flex;
-  flex-direction: column;
+  font-family: monospace;
+  font-size: 1.4rem;
+  letter-spacing: 0.2em;
+  text-align: center;
+  text-transform: uppercase;
+  padding: 10px 12px;
+  background: var(--bg-elev);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
-.lobby-detail { font-size: 0.82rem; }
-.lobby-go { flex: 0 0 auto; color: var(--accent); font-weight: 600; }
+.join-code-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px rgba(76, 182, 255, 0.18);
+}
+.join-submit { flex: 0 0 auto; padding: 0 18px; }
+.join-actions { margin-top: 14px; }
+.join-back { width: 100%; }
 .avatar {
   width: 40px;
   height: 40px;
