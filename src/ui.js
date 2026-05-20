@@ -904,7 +904,8 @@ export function mountInGameView(container, gameId) {
         eqState.open = false;
       }
 
-      // Villain range justification (LEAD) + spot framing (supporting).
+      // Villain range justification (now placed just above Test it) +
+      // spot framing (strategic WHY, sits between verdict and range).
       const villainRangeBlock = buildVillainRangeBlock({ scen, onRangeClick: openEquityWithRange });
       const spotFraming = buildSpotFramingBlock({ scen, onRangeClick: openEquityWithRange });
 
@@ -955,10 +956,10 @@ export function mountInGameView(container, gameId) {
       });
 
       body = h("div", { class: "hand-reveal" },
-        villainRangeBlock,  // LEAD: villain range justification
         gtoRead,            // GTO line: small blurb
         result,             // verdict + compact comparison + opponent
-        spotFraming,        // THE SPOT — situational facts (supporting)
+        spotFraming,        // THE SPOT — strategic WHY (range/board/SPR)
+        villainRangeBlock,  // villain range — leads straight into Test it
         equityHost,         // equity panel mounts here
         h("div", { class: "test-row" }, testBtn)
       );

@@ -235,18 +235,18 @@ export function mountSoloView(container, onExit) {
         eqState.open = false;
       }
 
-      // Villain range justification (NEW LEAD) — replaces the old framing
-      // block at the top. Each villain_range entry shows its label + the
-      // summary that justifies the read (e.g., "Linear 3-bet range: JJ+,
-      // AK, AQs, plus a slice of suited bluffs"). Clickable to pop the
-      // equity panel.
+      // Villain range justification — moved DOWN to sit just above the
+      // equity panel + "Test it" button. The range chips lead the reader
+      // straight into testing equity against that exact range. Each
+      // villain_range entry shows its label + summary; clicking pops
+      // the equity panel pre-loaded with that range's classes.
       const villainRangeBlock = buildVillainRangeBlock({ scen, onRangeClick: openWithRange });
 
       // GTO line — a small one-line blurb naming the solver's choice.
       const gtoRead = buildGtoRead({ scen, gtoAction: gto });
 
-      // Spot framing — situational facts (board / SPR / position), now
-      // moved BELOW the verdict as supporting context.
+      // Spot framing — situational facts (board / SPR / position), the
+      // strategic WHY behind the GTO line.
       const spotFraming = buildSpotFramingBlock({ scen, onRangeClick: openWithRange });
 
       // Test-it fallback — auto-loads the LAST villain range as a quick
@@ -276,10 +276,10 @@ export function mountSoloView(container, onExit) {
       });
 
       body = h("div", { class: "hand-reveal" },
-        villainRangeBlock,  // LEAD: villain range justification
         gtoRead,            // GTO line: small blurb
         result,             // verdict + compact comparison + opponent
-        spotFraming,        // THE SPOT — situational facts (supporting)
+        spotFraming,        // THE SPOT — strategic WHY (range/board/SPR)
+        villainRangeBlock,  // villain range — leads straight into Test it
         equityHost,         // equity panel mounts here
         h("div", { class: "test-row" }, testBtn)
       );
