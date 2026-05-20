@@ -115,7 +115,19 @@
   .sm-presets { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
   .sm-presets button { font-size:.74rem; padding:5px 10px; border-radius:999px;
     background:#16222e; border:1px solid #243646; color:#cfe6da; min-height:0; }
-  .sm-presets button.is-on { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+  .sm-presets button.sm-preset.is-on { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+  /* "Playable only" lives in the same row but reads as a filter toggle,
+     not a preset. Amber when active to echo the villain colour identity. */
+  .sm-presets button.sm-toggle {
+    border-color:#e8a93f; color:#e8a93f;
+    font-weight:600;
+    background:rgba(232,169,63,0.06);
+  }
+  .sm-presets button.sm-toggle.is-on {
+    background:#e8a93f; color:#1a1a1a; border-color:#e8a93f;
+  }
+  .sm-presets button.sm-toggle::before { content:"✓ "; opacity:0; margin-right:-4px; transition:opacity 0.12s; }
+  .sm-presets button.sm-toggle.is-on::before { opacity:1; margin-right:0; }
   .sm-slider-row { display:flex; align-items:center; gap:10px; margin-bottom:10px;
     padding:8px 4px; background:#0c1620; border-radius:6px; }
   .sm-slider-row input[type="range"] { flex:1 1 auto; accent-color:#4cb6ff; }
@@ -353,15 +365,47 @@
     return 12;
   }
 
+  // Every preset chip ships the STRICT / maximal version of its category.
+  // A separate "Playable only" toggle (handled below) intersects the
+  // current selection with PLAYABLE_SET, letting the user narrow without
+  // having to maintain two parallel preset lists.
   const PRESETS_SMR = {
+    "Top 5%":     { type: "topN", pct: 5 },
     "Top 10%":    { type: "topN", pct: 10 },
     "Top 20%":    { type: "topN", pct: 20 },
     "Top 30%":    { type: "topN", pct: 30 },
+    "Top 50%":    { type: "topN", pct: 50 },
     "Pairs":      { type: "list", items: ["AA","KK","QQ","JJ","TT","99","88","77","66","55","44","33","22"] },
+    "Premium pairs": { type: "list", items: ["AA","KK","QQ","JJ"] },
+    "Big slick":  { type: "list", items: ["AKs","AKo"] },
     "Broadways":  { type: "list", items: ["AA","KK","QQ","JJ","TT","AKs","AKo","AQs","AQo","AJs","AJo","ATs","ATo","KQs","KQo","KJs","KJo","KTs","KTo","QJs","QJo","QTs","QTo","JTs","JTo"] },
-    "Suited connectors": { type: "list", items: ["JTs","T9s","98s","87s","76s","65s","54s"] },
+    "Suited aces": { type: "list", items: ["AKs","AQs","AJs","ATs","A9s","A8s","A7s","A6s","A5s","A4s","A3s","A2s"] },
+    "Suited BW":   { type: "list", items: ["KQs","KJs","KTs","QJs","QTs","JTs"] },
+    "Suited connectors": { type: "list", items: ["AKs","KQs","QJs","JTs","T9s","98s","87s","76s","65s","54s","43s","32s"] },
+    "Suited 1-gap": { type: "list", items: ["KJs","QTs","J9s","T8s","97s","86s","75s","64s","53s","42s"] },
     "Clear":      { type: "list", items: [] },
   };
+
+  // "Playable" reference set ≈ top 30% — any pair, every suited ace,
+  // suited Kings 7+, suited connectors KQs–54s, suited 1-gappers down
+  // to 75s, plus Broadway offsuit (ATo+, KTo+, QTo+, JTo).
+  const PLAYABLE_SET = new Set([
+    "AA","KK","QQ","JJ","TT","99","88","77","66","55","44","33","22",
+    "AKs","AQs","AJs","ATs","A9s","A8s","A7s","A6s","A5s","A4s","A3s","A2s",
+    "KQs","KJs","KTs","K9s","K8s","K7s",
+    "QJs","QTs","Q9s","Q8s",
+    "JTs","J9s","J8s",
+    "T9s","T8s","T7s",
+    "98s","97s",
+    "87s","86s",
+    "76s","75s",
+    "65s","64s",
+    "54s","53s",
+    "AKo","AQo","AJo","ATo",
+    "KQo","KJo","KTo",
+    "QJo","QTo",
+    "JTo",
+  ]);
 
   (() => {
     const matrixEl = document.getElementById("v-smr-matrix");
@@ -375,10 +419,20 @@
     for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) ALL_LABELS.push(classLabel(r, c));
     const ORDERED = [...ALL_LABELS].sort((a, b) => handStrength(b) - handStrength(a));
 
-    const sel = new Set();
+    const sel = new Set();   // current selection AFTER any playable filter
+    const raw = new Set();   // last "wanted" selection BEFORE playable filter
     const cellBy = {};
+    let playableOnly = false;
+
+    function applyPlayableFilter() {
+      sel.clear();
+      for (const lbl of raw) {
+        if (!playableOnly || PLAYABLE_SET.has(lbl)) sel.add(lbl);
+      }
+    }
 
     function render() {
+      applyPlayableFilter();
       let combos = 0;
       for (const lbl of ALL_LABELS) {
         const on = sel.has(lbl);
@@ -386,24 +440,25 @@
         if (on) combos += comboCount(lbl);
       }
       statsEl.innerHTML = "<b>" + sel.size + "</b> hand class" + (sel.size === 1 ? "" : "es") +
-        " · <b>" + combos + "</b> combo" + (combos === 1 ? "" : "s");
+        " · <b>" + combos + "</b> combo" + (combos === 1 ? "" : "s") +
+        (playableOnly ? " · <span style=\"color:#e8a93f\">playable filter on</span>" : "");
     }
 
     function setTopN(pct) {
       const n = Math.round((pct / 100) * 169);
-      sel.clear();
-      for (let i = 0; i < n; i++) sel.add(ORDERED[i]);
+      raw.clear();
+      for (let i = 0; i < n; i++) raw.add(ORDERED[i]);
       pctEl.textContent = "Top " + pct + "%";
       sliderEl.value = pct;
       // Clear preset highlight unless it matches a top-N preset
       const matchingPreset = Object.entries(PRESETS_SMR).find(([k, v]) => v.type === "topN" && v.pct === pct);
-      Array.from(presetsEl.children).forEach((b) => b.classList.toggle("is-on", matchingPreset && b.textContent === matchingPreset[0]));
+      Array.from(presetsEl.querySelectorAll(".sm-preset")).forEach((b) => b.classList.toggle("is-on", matchingPreset && b.textContent === matchingPreset[0]));
       render();
     }
 
     function setList(labels) {
-      sel.clear();
-      for (const l of labels) sel.add(l);
+      raw.clear();
+      for (const l of labels) raw.add(l);
       sliderEl.value = 0;
       pctEl.textContent = labels.length ? labels.length + " hands" : "0%";
       render();
@@ -418,12 +473,12 @@
         btn.className = "cell-" + kind;
         btn.textContent = lbl;
         btn.addEventListener("click", () => {
-          if (sel.has(lbl)) sel.delete(lbl);
-          else sel.add(lbl);
+          if (raw.has(lbl)) raw.delete(lbl);
+          else raw.add(lbl);
           // Manual tap clears slider + preset highlights
           sliderEl.value = 0;
-          pctEl.textContent = sel.size + " hands";
-          Array.from(presetsEl.children).forEach((b) => b.classList.remove("is-on"));
+          pctEl.textContent = raw.size + " hands";
+          Array.from(presetsEl.querySelectorAll(".sm-preset")).forEach((b) => b.classList.remove("is-on"));
           render();
         });
         cellBy[lbl] = btn;
@@ -431,13 +486,25 @@
       }
     }
 
-    // Build presets.
+    // "Playable only" toggle — first chip, distinct visual (amber sticky toggle).
+    const playableBtn = document.createElement("button");
+    playableBtn.className = "sm-toggle";
+    playableBtn.textContent = "Playable only";
+    playableBtn.title = "Restrict selection to a top-30% \"playable\" reference set (pairs, suited aces, suited Kings 7+, suited connectors KQs–54s, Broadway offsuit). Click any preset or drag the slider — the filter intersects.";
+    playableBtn.addEventListener("click", () => {
+      playableOnly = !playableOnly;
+      playableBtn.classList.toggle("is-on", playableOnly);
+      render();
+    });
+    presetsEl.appendChild(playableBtn);
+
+    // Build the rest of the preset chips.
     for (const [name, def] of Object.entries(PRESETS_SMR)) {
       const btn = document.createElement("button");
+      btn.className = "sm-preset";
       btn.textContent = name;
       btn.addEventListener("click", () => {
-        // Toggle visual highlight
-        Array.from(presetsEl.children).forEach((b) => b.classList.toggle("is-on", b === btn));
+        Array.from(presetsEl.querySelectorAll(".sm-preset")).forEach((b) => b.classList.toggle("is-on", b === btn));
         if (def.type === "topN") setTopN(def.pct);
         else setList(def.items);
       });
