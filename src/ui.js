@@ -65,7 +65,8 @@ function knownCards(scen) {
 }
 
 // Token patterns:
-//   1 = card run (1+ space-separated codes with explicit suits)
+//   1 = card run (1+ codes with explicit suits — `\s*` between cards so
+//       "Ah Kh Qh", "Ah Kh", and "AhKhQh" all tokenize)
 //   2 = position chip (UTG|HJ|CO|BTN|SB|BB)
 //   3 = Hero/Villain word
 //   4 = "Nbb" / "N.Nbb" → stylized bb chip
@@ -82,7 +83,7 @@ function knownCards(scen) {
 // Group 9's negative lookahead `(?!\s*%)` prevents "(~75% pot)" from
 // rendering "75" as a 2-rank hand class. Percentages share the digit
 // vocabulary with rank shorthand; the % suffix is the distinguishing cue.
-const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(\s+rainbow\b|\s+monotone\b|\s+two-toned?\b|\s*mono\b|\s*tt\b|r\b|m\b)?|\b([2-9TJQKA]{2})\b(?!\s*%)/g;
+const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s*[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(\s+rainbow\b|\s+monotone\b|\s+two-toned?\b|\s*mono\b|\s*tt\b|r\b|m\b)?|\b([2-9TJQKA]{2})\b(?!\s*%)/g;
 
 /** Escape regex meta-characters for safe use inside a constructed RegExp. */
 function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -100,7 +101,10 @@ function tokenizeProse(text, scen) {
   while ((m = RICH_RE.exec(text))) {
     if (m.index > last) frag.appendChild(document.createTextNode(text.slice(last, m.index)));
     if (m[1]) {
-      const codes = m[1].split(/\s+/);
+      // Pull every 2-char card code out of the run. Works for both
+      // space-separated ("Ah Kh Qh") and concatenated ("AhKhQh") forms,
+      // because the regex permits `\s*` between cards.
+      const codes = m[1].match(/[2-9TJQKA][cdhs]/g) || [];
       // Multi-card runs are always iconified; a lone code only if it's a
       // card actually in play (avoids "As"/"Ah" English-word false hits).
       if (codes.length >= 2 || known.has(codes[0])) {
