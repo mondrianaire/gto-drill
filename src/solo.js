@@ -263,13 +263,22 @@ export function mountSoloView(container, onExit) {
         userAction: draft.action,
         gtoAction: gto,
         confidence: draft.confidence,
-        onRangeClick: openWithRange,
       });
 
+      // GTO explanation prose — the legacy single-paragraph analysis.
+      // Inline range anchors in the prose become clickable chips that
+      // pop the equity panel (same `onRangeClick` plumbing as the
+      // villain-range chips in spot-context).
+      const explain = scen && scen.gto_explanation
+        ? h("p", { class: "gto-explanation" },
+            richText(scen.gto_explanation, scen, { onRangeClick: openWithRange }))
+        : null;
+
       body = h("div", { class: "hand-reveal" },
-        spotContext,       // framing + villain range chips (GTO scene-setting)
-        equityHost,        // Monte Carlo panel mounts here when a chip is clicked
-        result,            // verdict + options matrix + opponent panel
+        spotContext,    // framing + villain range chips (GTO scene-setting)
+        equityHost,     // Monte Carlo panel mounts here when a chip is clicked
+        result,         // verdict bar + compact comparison + opponent panel
+        explain,        // single-paragraph gto_explanation (restored from legacy)
         h("div", { class: "test-row" }, testBtn)
       );
 

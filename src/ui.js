@@ -447,153 +447,64 @@ export function buildSpotContext({ scen, onRangeClick }) {
 
 /**
  * Build the reveal-result block — the educational moment of every hand.
- * Renders EVERY available action as its own card so the user can see
- * exactly which option was GTO-optimal, which they chose, and (in
- * multiplayer) which the opponent chose. Per-actor badges identify who
- * picked what; visual state (border tint, badge color) tells the story
- * without prose. Single source of truth: same widget on solo + duel.
+ * Returns a compact comparison: when Hero matched the GTO line, a single
+ * centred tile (the action is the answer). When Hero missed, a two-column
+ * "you played | GTO line" split. Confidence renders as five dots. Same
+ * widget on solo + duel.
  *
- * Each option's card carries 0..N badges:
- *   🏆 GTO            — the solver-optimal line (always exactly one)
- *      You            — what Hero picked, with confidence dots
- *      <avatar>+name  — what the opponent picked, with their confidence dots
- *
- * Border / background:
- *   green border       → the GTO option
- *   solid green tint   → Hero picked the GTO option (happy path)
- *   solid red tint     → Hero picked a non-GTO option
- *   neutral / muted    → an option nobody picked
+ * The per-option pros/cons MATRIX layout was tried (see git history) and
+ * judged too verbose. Per-option analysis lives in `scen.action_analysis`
+ * but is not rendered here — the legacy `gto_explanation` paragraph carries
+ * the analysis instead, rendered by the caller below this block.
  *
  * @param {Object} args
- * @param {Object} args.scen          — full scenario; reads .available_actions + .gto_action + .action_analysis
+ * @param {Object} args.scen
  * @param {string} args.userAction
- * @param {string} args.gtoAction     — typically scen.gto_action, passed in for safety
- * @param {number} args.confidence    — Hero's confidence (1..5)
- * @param {Object} [args.opponent]    — optional opponent identity + submission
- * @param {string} args.opponent.name
- * @param {string|null} [args.opponent.photoURL]
- * @param {string} args.opponent.action
- * @param {number|null} [args.opponent.confidence]
- * @param {string|null} [args.opponent.note]
- * @param {(range:Object)=>void} [args.onRangeClick] — handler for clickable
- *   villain-range chips inside pros/cons bullets (so the equity panel can
- *   pop with that range pre-loaded). Optional; without it the chips just
- *   render as text.
+ * @param {string} args.gtoAction
+ * @param {number} args.confidence
+ * @param {Object} [args.opponent]    — { name, photoURL?, action, confidence?, note? }
  */
-export function buildRevealResult({ scen, userAction, gtoAction, confidence, opponent, onRangeClick }) {
+export function buildRevealResult({ scen, userAction, gtoAction, confidence, opponent }) {
   const correct = userAction === gtoAction;
-  const available = (scen && Array.isArray(scen.available_actions)) ? scen.available_actions.slice() : [];
-  // Guard: if the data is missing the action somehow (legacy / orphaned),
-  // synthesise a one-card list so we still render something coherent.
-  if (!available.length) available.push(gtoAction);
-  if (!available.includes(gtoAction)) available.unshift(gtoAction);
 
-  // Verdict bar — keeps the at-a-glance red/green signal at the top.
+  // Verdict bar — big red/green at-a-glance signal.
   const verdict = h("div", { class: "reveal-verdict" },
     h("span", { class: "reveal-verdict-icon", "aria-hidden": "true" }, correct ? "✓" : "✗"),
     h("span", { class: "reveal-verdict-text" }, correct ? "You matched the GTO line" : "Off the GTO line")
   );
 
-  // (Framing — formerly here — has been lifted to its own component
-  // `buildSpotContext` that lives ABOVE the reveal so the same situational
-  // info is visible during the DECIDE phase too. The verdict block now
-  // focuses on outcome + per-option analysis + opponent.)
+  // Confidence row — five dots filled/empty.
+  const confRow = h("div", { class: "reveal-conf-row" },
+    h("span", { class: "reveal-conf-label" }, "Confidence"),
+    confidenceDots(confidence, "You")
+  );
 
-  // Build one card per available action.
-  const optionsList = h("div", { class: "reveal-options" });
-  for (const action of available) {
-    const isGto = action === gtoAction;
-    const isHero = action === userAction;
-    const isOpp = !!(opponent && opponent.action === action);
-
-    // Compose state classes. Order matters for cascade:
-    //   .is-gto         — green tint baseline for the optimal line
-    //   .is-hero-pick   — Hero chose this; combined with .is-gto = correct
-    //   .is-hero-miss   — Hero chose this and it ISN'T GTO; overrides to red
-    //   .is-opp-pick    — opponent chose this (decorative — color from GTO/hero)
-    const classes = ["reveal-option"];
-    if (isGto) classes.push("is-gto");
-    if (isHero) classes.push(isGto ? "is-hero-pick" : "is-hero-miss");
-    if (isOpp) classes.push("is-opp-pick");
-
-    // Badges row.
-    const badges = h("div", { class: "reveal-badges" });
-    if (isGto) {
-      badges.appendChild(h("span", { class: "reveal-badge reveal-badge-gto", title: "GTO line — solver-optimal" },
-        h("span", { class: "reveal-badge-icon", "aria-hidden": "true" }, "🏆"),
-        h("span", { class: "reveal-badge-label" }, "GTO")));
-    }
-    if (isHero) {
-      badges.appendChild(h("span", {
-        class: "reveal-badge reveal-badge-hero" + (isGto ? " is-correct" : " is-miss"),
-        title: "You picked this · confidence " + confidence + "/5",
-      },
-        h("span", { class: "reveal-badge-label" }, "You"),
-        confidenceDots(confidence, "You")));
-    }
-    if (isOpp) {
-      const oppName = opponent.name || "Opponent";
-      const oppLabel = oppName.split(/\s+/)[0]; // first name, like the header
-      const oppCorrect = action === gtoAction;
-      const avatarEl = buildAvatar(oppName, opponent.photoURL || null);
-      avatarEl.classList.add("reveal-badge-avatar");
-      badges.appendChild(h("span", {
-        class: "reveal-badge reveal-badge-opp" + (oppCorrect ? " is-correct" : " is-miss"),
-        title: oppName + " picked this" + (opponent.confidence ? " · confidence " + opponent.confidence + "/5" : ""),
-      },
-        avatarEl,
-        h("span", { class: "reveal-badge-label" }, oppLabel),
-        opponent.confidence ? confidenceDots(opponent.confidence, oppName) : null));
-    }
-
-    // Pros/cons — the per-option explanation. This is where the learning
-    // happens; each option carries its own steel-manned reasoning, both
-    // sides. Falls back gracefully when action_analysis is missing.
-    const analysis = scen && scen.action_analysis ? scen.action_analysis[action] : null;
-    const pros = (analysis && Array.isArray(analysis.pros)) ? analysis.pros : [];
-    const cons = (analysis && Array.isArray(analysis.cons)) ? analysis.cons : [];
-    const analysisEl = h("div", { class: "reveal-analysis" });
-    const richOpts = onRangeClick ? { onRangeClick } : undefined;
-    if (pros.length) {
-      const list = h("ul", { class: "reveal-pros" });
-      for (const p of pros) {
-        list.appendChild(h("li", null,
-          h("span", { class: "reveal-bullet-icon reveal-bullet-pro", "aria-hidden": "true" }, "✓"),
-          h("span", { class: "reveal-bullet-text" }, richText(p, scen, richOpts))
-        ));
-      }
-      analysisEl.appendChild(list);
-    }
-    if (cons.length) {
-      const list = h("ul", { class: "reveal-cons" });
-      for (const c of cons) {
-        list.appendChild(h("li", null,
-          h("span", { class: "reveal-bullet-icon reveal-bullet-con", "aria-hidden": "true" }, "✗"),
-          h("span", { class: "reveal-bullet-text" }, richText(c, scen, richOpts))
-        ));
-      }
-      analysisEl.appendChild(list);
-    }
-
-    // Top row of the card: action chip on the left, badges on the right.
-    const topRow = h("div", { class: "reveal-option-top" },
-      h("div", { class: "reveal-option-action" }, richText(action, scen, { asAction: true })),
-      badges.childNodes.length ? badges : null
+  // Comparison: single tile when matched, two columns when missed.
+  let comparison;
+  if (correct) {
+    comparison = h("div", { class: "reveal-compare reveal-compare-single" },
+      h("div", { class: "reveal-side reveal-side-correct" },
+        h("div", { class: "reveal-side-action" }, richText(userAction, scen, { asAction: true })),
+        confRow
+      )
     );
-
-    const card = h("div", { class: classes.join(" ") },
-      topRow,
-      analysisEl.childNodes.length ? analysisEl : null
+  } else {
+    comparison = h("div", { class: "reveal-compare reveal-compare-split" },
+      h("div", { class: "reveal-side reveal-side-you reveal-side-miss" },
+        h("div", { class: "reveal-side-label muted" }, "You played"),
+        h("div", { class: "reveal-side-action" }, richText(userAction, scen, { asAction: true })),
+        confRow
+      ),
+      h("div", { class: "reveal-side reveal-side-gto" },
+        h("div", { class: "reveal-side-label muted" }, "GTO line"),
+        h("div", { class: "reveal-side-action" }, richText(gtoAction, scen, { asAction: true }))
+      )
     );
-    optionsList.appendChild(card);
   }
 
-  // Dedicated "Opponent's view" panel — replaces the old agreement banner +
-  // note callout. Lives below the analysis matrix as its own block: their
-  // avatar + name (larger here than the inline badge), the action they
-  // picked rendered as a full chip, their confidence dots, their note,
-  // and a single-line agreement summary vs Hero and vs GTO. The asymmetric
-  // multiplayer angle gets a proper home here, not just a sliver.
+  // Opponent panel — only when an opponent has submitted. Lives below the
+  // comparison; same chrome as before with avatar + name + their action +
+  // confidence dots + their typed note.
   let opponentPanel = null;
   if (opponent && opponent.action) {
     const oppName = opponent.name || "Opponent";
@@ -604,14 +515,10 @@ export function buildRevealResult({ scen, userAction, gtoAction, confidence, opp
     avatarEl.classList.add("reveal-opp-avatar");
 
     const summaryBits = [];
-    summaryBits.push(matchedYou
-      ? "Matched your pick"
-      : "Disagreed with you");
+    summaryBits.push(matchedYou ? "Matched your pick" : "Disagreed with you");
     summaryBits.push(oppCorrect ? "on the GTO line" : "off the GTO line");
 
-    opponentPanel = h("div", {
-      class: "reveal-opp-panel" + (oppCorrect ? " is-ok" : " is-miss"),
-    },
+    opponentPanel = h("div", { class: "reveal-opp-panel" + (oppCorrect ? " is-ok" : " is-miss") },
       h("div", { class: "reveal-opp-panel-header" },
         avatarEl,
         h("div", { class: "reveal-opp-panel-id" },
@@ -636,7 +543,7 @@ export function buildRevealResult({ scen, userAction, gtoAction, confidence, opp
 
   return h("div", { class: "reveal-result" + (correct ? " is-ok" : " is-miss") },
     verdict,
-    optionsList,
+    comparison,
     opponentPanel
   );
 }
@@ -925,8 +832,15 @@ export function mountInGameView(container, gameId) {
         gtoAction: gto,
         confidence: sub.confidence,
         opponent,
-        onRangeClick: openEquityWithRange,
       });
+
+      // GTO explanation prose — the legacy single-paragraph analysis.
+      // Inline range anchors in the prose render as clickable chips that
+      // route into the same equity panel as the spot-context chips.
+      const explain = scen && scen.gto_explanation
+        ? h("p", { class: "gto-explanation" },
+            richText(scen.gto_explanation, scen, { onRangeClick: openEquityWithRange }))
+        : null;
 
       // "Test it" — reveal-only fallback. Auto-loads the LAST villain range.
       const testBtn = h("button", { type: "button", class: "secondary test-it" }, "🎲  Test it — equity vs a range");
@@ -949,7 +863,8 @@ export function mountInGameView(container, gameId) {
       body = h("div", { class: "hand-reveal" },
         spotContext,    // framing + villain range chips (GTO scene-setting)
         equityHost,     // Monte Carlo panel mounts here when a chip is clicked
-        result,         // verdict + options matrix + opponent panel
+        result,         // verdict bar + compact comparison + opponent panel
+        explain,        // single-paragraph gto_explanation (restored)
         h("div", { class: "test-row" }, testBtn)
       );
 
