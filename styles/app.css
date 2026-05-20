@@ -372,6 +372,17 @@ form { margin-top: 8px; }
   align-items: center;
   gap: 6px;
   flex-wrap: wrap;
+  padding: 2px 6px;
+  margin: 0 -6px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+/* The replay's current step drives this — the action whose effects are
+   on the table right now gets a subtle highlight bar so the eye can
+   track the table animation in the mini-display. */
+.spot-sum-action.is-current {
+  background: rgba(120, 180, 255, 0.14);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 .spot-sum-yourturn {
   font-weight: 600;

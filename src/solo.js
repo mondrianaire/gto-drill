@@ -131,12 +131,14 @@ export function mountSoloView(container, onExit) {
     if (scen.replay) {
       const replayHost = h("div", { class: "replay-host" });
       spot.appendChild(replayHost);
-      const r = mountReplay(replayHost, scen.replay);
-      replayCleanup = r && r.unmount ? r.unmount : null;
-      // Compact mini-display of inflection points (replaces the prose
-      // "spot in words"). Shows only meaningful actions grouped by
-      // street, ending with "← your turn" on the decision street.
+      // Build the spot-summary BEFORE mounting the replay so we can pass
+      // its setStep into mountReplay's onStep — the replay then drives
+      // the action highlight in the mini-display as it steps through.
       const summary = buildSpotSummary(scen.replay);
+      const r = mountReplay(replayHost, scen.replay, {
+        onStep: summary ? (s) => summary.setStep(s) : null,
+      });
+      replayCleanup = r && r.unmount ? r.unmount : null;
       if (summary) spot.appendChild(summary);
     } else {
       spot.appendChild(h("p", { class: "scenario-desc" }, richText(scen.description, scen)));
