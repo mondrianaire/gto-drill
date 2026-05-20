@@ -100,7 +100,7 @@
         }
       ]
     },
-    "description": "100bb deep, BTN vs BB. You (BTN) opened to 2.5bb, BB 3-bet to 11bb, you called. Flop is Kh 7d 2s. BB checks to you. The pot is 22.5bb.",
+    "description": "100bb deep. BTN (Hero) opens 2.5bb, BB 3-bets to 11bb, Hero calls. Flop Kh 7d 2s. BB checks. Pot 22.5bb. Action on Hero.",
     "board": "Kh 7d 2s",
     "action_history": [
       "BTN open 2.5bb",
@@ -237,7 +237,7 @@
         }
       ]
     },
-    "description": "100bb deep, full ring, folded to CO. CO opens 2.5bb. Hero is in the BB with A5 offsuit. Action is on Hero.",
+    "description": "100bb deep, full ring. Folds to CO. CO opens 2.5bb. BB (Hero) holds A5o. Action on Hero.",
     "board": null,
     "action_history": [
       "folds to CO",
@@ -367,7 +367,7 @@
         }
       ]
     },
-    "description": "100bb. SRP. SB completed, BTN raised to 3bb, SB called. Flop 9c 6c 2h: SB check, BTN bet 3bb, SB call. Turn 9c 6c 2h Tc (flush completing): SB check. Pot 14bb, stacks 87bb. Action on BTN.",
+    "description": "100bb. SRP. SB completes, BTN (Hero) raises to 3bb, SB calls. Flop 9c 6c 2h: SB checks, BTN bets 3bb, SB calls. Turn Tc (flush completing). SB checks. Pot 14bb. Action on Hero.",
     "board": "9c 6c 2h Tc",
     "action_history": [
       "SB complete",
@@ -517,7 +517,7 @@
         }
       ]
     },
-    "description": "40bb effective. UTG (Hero) at a 6-max table with 22. Action on Hero.",
+    "description": "40bb deep, 6-max. UTG (Hero) holds 22. Action on Hero.",
     "board": null,
     "action_history": [
       "UTG to act"
@@ -656,7 +656,7 @@
         }
       ]
     },
-    "description": "100bb. SB raised to 3bb, BB called. Flop Qh 7s 4d: SB bet 2bb, BB called. Turn Qh 7s 4d 8s: SB check, BB check. River Qh 7s 4d 8s 3h: BB check. Hero (SB) has KQ offsuit. Pot 10bb. Action on Hero.",
+    "description": "100bb. SB (Hero) raises to 3bb, BB calls. Flop Qh 7s 4d: SB bets 2bb, BB calls. Turn 8s: SB checks, BB checks. River 3h: BB checks. Hero holds KQo. Pot 10bb. Action on Hero.",
     "board": "Qh 7s 4d 8s 3h",
     "action_history": [
       "SB raise 3bb",
@@ -813,7 +813,7 @@
         }
       ]
     },
-    "description": "100bb. CO opens 2.5bb, BTN (Hero) calls. Flop 8h 8d 3c: CO bets 5bb (~75% pot) into 6.5bb. Hero has 9d 9s. Action on Hero.",
+    "description": "100bb. CO opens 2.5bb, BTN (Hero) calls with 99. Flop 8h 8d 3c (paired). CO bets 5bb into 6.5bb. Action on Hero.",
     "board": "8h 8d 3c",
     "action_history": [
       "CO open 2.5bb",
@@ -1005,7 +1005,7 @@
         }
       ]
     },
-    "description": "100bb. UTG opens 2.5bb, BTN calls. Flop Tc 9c 5d UTG bet 4bb, BTN call. Turn Tc 9c 5d 2h: UTG bet 11bb, BTN call. River Tc 9c 5d 2h 6s: UTG bets 50bb (~125% pot overbet). Hero (BTN) has Td Jd. Pot was 39bb. Action on Hero.",
+    "description": "100bb. UTG opens 2.5bb, BTN (Hero) calls. Flop Tc 9c 5d: UTG bets 4bb, BTN calls. Turn 2h: UTG bets 11bb, BTN calls. River 6s: UTG bets 50bb (overbet). Hero holds JTs. Pot was 39bb. Action on Hero.",
     "board": "Tc 9c 5d 2h 6s",
     "action_history": [
       "UTG open 2.5bb",
@@ -1142,7 +1142,7 @@
         }
       ]
     },
-    "description": "100bb. Hero opens 2.5bb from CO with 55. BTN 3-bets to 9bb. Action back on Hero.",
+    "description": "100bb. CO (Hero) opens 2.5bb with 55. BTN 3-bets to 9bb. Action on Hero.",
     "board": null,
     "action_history": [
       "CO open 2.5bb",
@@ -1307,7 +1307,7 @@
         }
       ]
     },
-    "description": "100bb. HJ opens 2.5bb. BB (Hero) calls with KdJd. Flop Kc 5h 4s: BB check, HJ bet 3bb, BB call. Turn Kc 5h 4s 7c: BB check, HJ bet 9bb. Hero must decide.",
+    "description": "100bb. HJ opens 2.5bb, BB (Hero) calls with KJs. Flop Kc 5h 4s: BB checks, HJ bets 3bb, BB calls. Turn 7c: BB checks, HJ bets 9bb. Action on Hero.",
     "board": "Kc 5h 4s 7c",
     "action_history": [
       "HJ open 2.5bb",
@@ -1457,7 +1457,7 @@
         }
       ]
     },
-    "description": "100bb. CO opens 2.5bb. BB (Hero) calls. Flop 7c 6c 5d. Pot is 5.5bb. Hero has 8h 4h. Action on Hero.",
+    "description": "100bb. CO opens 2.5bb, BB (Hero) calls with 8h 4h. Flop 7c 6c 5d. Pot 5.5bb. Action on Hero.",
     "board": "7c 6c 5d",
     "action_history": [
       "CO open 2.5bb",
@@ -1545,7 +1545,7 @@
         }
       ]
     },
-    "description": "12bb stack, MTT bubble. Hero (BTN) holds A8 offsuit. Folded to Hero. Blinds 1bb/2bb.",
+    "description": "12bb deep, MTT bubble. Folds to BTN (Hero) with A8o. Action on Hero.",
     "board": null,
     "action_history": [
       "folds to BTN"
@@ -1726,7 +1726,7 @@
         }
       ]
     },
-    "description": "100bb. SRP. BTN (Hero) opens 2.5bb, BB calls. Flop 9h 8h 2c: BB check, BTN bet 2bb, BB call. Turn 9h 8h 2c Jh (third heart): BB check, BTN check. River 9h 8h 2c Jh 4d: BB bets 8bb into a 9.5bb pot (~80%). Hero has AhKc.",
+    "description": "100bb. SRP. BTN (Hero) opens 2.5bb with Ah Kc, BB calls. Flop 9h 8h 2c: BB checks, BTN bets 2bb, BB calls. Turn Jh (third heart): BB checks, BTN checks. River 4d: BB bets 8bb into 9.5bb. Action on Hero.",
     "board": "9h 8h 2c Jh 4d",
     "action_history": [
       "BTN open 2.5bb",
@@ -1867,7 +1867,7 @@
         }
       ]
     },
-    "description": "100bb cash. UTG limps 1bb. Folds to BTN (Hero) with 89 suited.",
+    "description": "100bb. UTG limps. Folds to BTN (Hero) with 98s. Action on Hero.",
     "board": null,
     "action_history": [
       "UTG limp",
@@ -2010,7 +2010,7 @@
         }
       ]
     },
-    "description": "100bb cash. Hero opens HJ to 2.5bb with A5 suited. BTN 3-bets to 9bb. Folds back to Hero.",
+    "description": "100bb. HJ (Hero) opens 2.5bb with A5s. BTN 3-bets to 9bb. Folds back to Hero. Action on Hero.",
     "board": null,
     "action_history": [
       "HJ open 2.5bb",
@@ -2172,7 +2172,7 @@
         }
       ]
     },
-    "description": "100bb. CO opens 2.5bb, BTN (Hero) calls. Flop Js 8c 3d: CO bet 3bb, BTN call. Turn Js 8c 3d 4h: CO check, BTN bet 5bb, CO call. River Js 8c 3d 4h 2s: CO checks. Hero has 7d 7c. Pot is 19bb.",
+    "description": "100bb. CO opens 2.5bb, BTN (Hero) calls with 77. Flop Js 8c 3d: CO bets 3bb, BTN calls. Turn 4h: CO checks, BTN bets 5bb, CO calls. River 2s: CO checks. Pot 19bb. Action on Hero.",
     "board": "Js 8c 3d 4h 2s",
     "action_history": [
       "CO open 2.5bb",
@@ -2323,7 +2323,7 @@
         }
       ]
     },
-    "description": "100bb. BTN (Hero) opens 2.5bb with AcQc. BB calls. Flop 8c 5c 2h. BB checks. Pot 5.5bb.",
+    "description": "100bb. BTN (Hero) opens 2.5bb with Ac Qc. BB calls. Flop 8c 5c 2h. BB checks. Pot 5.5bb. Action on Hero.",
     "board": "8c 5c 2h",
     "action_history": [
       "BTN open 2.5bb",
@@ -2529,7 +2529,7 @@
         }
       ]
     },
-    "description": "100bb. CO (Hero) opens 2.5bb with QQ. BTN calls. Flop 7h 4s 2d: CO bet 2bb, BTN call. Turn 7h 4s 2d 5s: CO bet 6bb, BTN call. River 7h 4s 2d 5s 6c (4-card straight on board): CO bet 10bb, BTN raises to 35bb. Hero must decide. Stacks left ~80bb each.",
+    "description": "100bb. CO (Hero) opens 2.5bb with QQ. BTN calls. Flop 7h 4s 2d: CO bets 2bb, BTN calls. Turn 5s: CO bets 6bb, BTN calls. River 6c (4-card straight on board): CO bets 10bb, BTN raises to 35bb. Pot ~80bb behind. Action on Hero.",
     "board": "7h 4s 2d 5s 6c",
     "action_history": [
       "CO open 2.5bb",
@@ -2690,7 +2690,7 @@
         }
       ]
     },
-    "description": "100bb. Hero opens BTN 2.5bb with 66. BB calls. Flop 6h 9c 2s. BB checks, Hero bets 2bb, BB raises to 8bb. Hero is on the BTN with bottom set.",
+    "description": "100bb. BTN (Hero) opens 2.5bb with 66. BB calls. Flop 6h 9c 2s: BB checks, Hero bets 2bb, BB raises to 8bb. Action on Hero.",
     "board": "6h 9c 2s",
     "action_history": [
       "BTN open 2.5bb",
@@ -2864,7 +2864,7 @@
         }
       ]
     },
-    "description": "100bb. BTN (Hero) opens with 5c 4c. BB calls. Flop Jh 7c 3c: BB check, BTN bet 2bb, BB call. Turn Jh 7c 3c Td: BB check, BTN check. River Jh 7c 3c Td 2s: BB checks. Pot 9bb. Hero has 5c 4c (missed flush, missed straight, busted).",
+    "description": "100bb. BTN (Hero) opens 2.5bb with 5c 4c. BB calls. Flop Jh 7c 3c: BB checks, BTN bets 2bb, BB calls. Turn Td: BB checks, BTN checks. River 2s: BB checks. Pot 9bb. Hero has missed flush and straight draws. Action on Hero.",
     "board": "Jh 7c 3c Td 2s",
     "action_history": [
       "BTN open 2.5bb",
@@ -3013,7 +3013,7 @@
         }
       ]
     },
-    "description": "100bb. UTG limps 1bb. MP raises to 4bb. Folds back to UTG (Hero) who has AA. Action on Hero.",
+    "description": "100bb. UTG (Hero) limps with AA. HJ raises to 4bb. Folds back to Hero. Action on Hero.",
     "board": null,
     "action_history": [
       "UTG limp",
@@ -3138,7 +3138,7 @@
         }
       ]
     },
-    "description": "100bb. SB 3-bets Hero's BTN open, Hero (BTN) 4-bets to 21bb, SB calls. Flop Kd 7s 4h. Pot ~43bb with ~79bb behind (SPR ~1.8). SB checks. Hero holds Ac Qd.",
+    "description": "100bb. BTN (Hero) 4-bets to 21bb vs SB 3-bet, SB calls. Flop Kd 7s 4h. SB checks. Hero holds AQo. Pot ~43bb, SPR ~1.8. Action on Hero.",
     "board": "Kd 7s 4h",
     "action_history": [
       "BTN open 2.5bb",
@@ -3309,7 +3309,7 @@
         }
       ]
     },
-    "description": "100bb. SRP. CO (Hero) opens 2.5bb, BB calls. Flop Qs 9s 4d: BB check, CO bet 2bb, BB call. Turn Qs 9s 4d 6c: BB check, CO bet 7bb, BB call. River Qs 9s 4d 6c 2h: BB checks. Hero has Ks Ts (missed flush and straight draw). Pot ~24bb.",
+    "description": "100bb. SRP. CO (Hero) opens 2.5bb with Ks Ts, BB calls. Flop Qs 9s 4d: BB checks, CO bets 2bb, BB calls. Turn 6c: BB checks, CO bets 7bb, BB calls. River 2h: BB checks. Pot ~24bb. Action on Hero.",
     "board": "Qs 9s 4d 6c 2h",
     "action_history": [
       "CO open 2.5bb",
@@ -3474,7 +3474,7 @@
         }
       ]
     },
-    "description": "100bb. BTN opens 2.5bb, BB (Hero) calls. Flop 9h 8h 4c: BB check, BTN bet 2bb (~35% pot). Hero has Jh Th (open-ended straight draw plus flush draw).",
+    "description": "100bb. BTN opens 2.5bb, BB (Hero) calls with Jh Th. Flop 9h 8h 4c: BB checks, BTN bets 2bb. Action on Hero.",
     "board": "9h 8h 4c",
     "action_history": [
       "BTN open 2.5bb",
@@ -3638,7 +3638,7 @@
         }
       ]
     },
-    "description": "100bb. SRP. HJ opens 2.5bb, BB (Hero) calls. Flop Kc 8d 3s: BB check, HJ check. Turn Kc 8d 3s 5h: action on BB. Hero has 8c 7c (middle pair). Pot 6bb.",
+    "description": "100bb. SRP. HJ opens 2.5bb, BB (Hero) calls with 87s. Flop Kc 8d 3s: BB checks, HJ checks. Turn 5h. Pot 6bb. Action on Hero.",
     "board": "Kc 8d 3s 5h",
     "action_history": [
       "HJ open 2.5bb",
@@ -3795,7 +3795,7 @@
         }
       ]
     },
-    "description": "100bb. CO (Hero) opens 2.5bb, BTN calls. Flop Ts 6s 2c: CO check, BTN check. Turn Ts 6s 2c 7d: action on CO. Hero has Ac Jc. Pot 6.5bb.",
+    "description": "100bb. CO (Hero) opens 2.5bb with AJs, BTN calls. Flop Ts 6s 2c: CO checks, BTN checks. Turn 7d. Pot 6.5bb. Action on Hero.",
     "board": "Ts 6s 2c 7d",
     "action_history": [
       "CO open 2.5bb",
@@ -3942,7 +3942,7 @@
         }
       ]
     },
-    "description": "100bb cash. Hero opens BTN 2.5bb with 7h 6h. BB 3-bets to 11bb. Action back on Hero.",
+    "description": "100bb. BTN (Hero) opens 2.5bb with 76s. BB 3-bets to 11bb. Action on Hero.",
     "board": null,
     "action_history": [
       "BTN open 2.5bb",
@@ -4074,7 +4074,7 @@
         }
       ]
     },
-    "description": "100bb. HJ opens 2.5bb, CO calls. Hero is in the BB with Ah Jh. Action on Hero.",
+    "description": "100bb. HJ opens 2.5bb, CO calls. BB (Hero) holds AJs. Action on Hero.",
     "board": null,
     "action_history": [
       "HJ open 2.5bb",
@@ -4215,7 +4215,7 @@
         }
       ]
     },
-    "description": "100bb cash. Folded around to the SB (Hero), who holds Kd 9d. Only the BB remains. Action on Hero.",
+    "description": "100bb. Folds to SB (Hero) with K9s. Action on Hero.",
     "board": null,
     "action_history": [
       "folds to SB"
@@ -4517,7 +4517,7 @@
         }
       ]
     },
-    "description": "100bb. Hero opens BTN 2.5bb with Qs Js, BB calls. Flop Qh Jd 9d: BB check, BTN bet 4bb, BB raises to 14bb. Hero has top two pair. Pot was 6.5bb.",
+    "description": "100bb. BTN (Hero) opens 2.5bb with QJs, BB calls. Flop Qh Jd 9d: BB checks, BTN bets 4bb, BB raises to 14bb. Pot was 6.5bb. Action on Hero.",
     "board": "Qh Jd 9d",
     "action_history": [
       "BTN open 2.5bb",
@@ -4657,7 +4657,7 @@
         }
       ]
     },
-    "description": "100bb. CO (Hero) opens 2.5bb with Ks Kh, BTN calls. Flop 9c 6c 3c (monotone). Pot 6.5bb. Action on Hero. Hero holds no club.",
+    "description": "100bb. CO (Hero) opens 2.5bb with Ks Kh, BTN calls. Flop 9c 6c 3c (monotone). Hero has no club. Pot 6.5bb. Action on Hero.",
     "board": "9c 6c 3c",
     "action_history": [
       "CO open 2.5bb",
@@ -4863,7 +4863,7 @@
         }
       ]
     },
-    "description": "100bb. Hero opens BTN 2.5bb with Ac 5c, BB calls. Flop Kd 8h 3s: BB check, BTN bet 2bb, BB call. Turn Kd 8h 3s 9h: BB check. Hero has Ac 5c (no pair, no draw).",
+    "description": "100bb. BTN (Hero) opens 2.5bb with A5s, BB calls. Flop Kd 8h 3s: BB checks, BTN bets 2bb, BB calls. Turn 9h: BB checks. Hero has no pair, no draw. Action on Hero.",
     "board": "Kd 8h 3s 9h",
     "action_history": [
       "BTN open 2.5bb",
@@ -5060,7 +5060,7 @@
         }
       ]
     },
-    "description": "100bb. SRP. CO opens 2.5bb, BB (Hero) calls. Flop 7h 6h 2c: BB check, CO bet 2bb, BB call. Turn 7h 6h 2c 5d: BB check, CO check. River 7h 6h 2c 5d 8s: action on BB. Hero has Tc 9c — the nut straight. Pot 12bb.",
+    "description": "100bb. SRP. CO opens 2.5bb, BB (Hero) calls with T9s. Flop 7h 6h 2c: BB checks, CO bets 2bb, BB calls. Turn 5d: BB checks, CO checks. River 8s: Hero holds the nut straight. Pot 12bb. Action on Hero.",
     "board": "7h 6h 2c 5d 8s",
     "action_history": [
       "CO open 2.5bb",
@@ -5229,7 +5229,7 @@
         }
       ]
     },
-    "description": "100bb. Hero opens MP 2.5bb with Ah Kd, BTN calls. Flop Ac 8c 5h: MP bet 4bb, BTN raises to 9bb (a small click-back raise). Hero has top pair top kicker.",
+    "description": "100bb. HJ (Hero) opens 2.5bb with AKo, BTN calls. Flop Ac 8c 5h: HJ bets 4bb, BTN raises to 9bb (small click-back). Action on Hero.",
     "board": "Ac 8c 5h",
     "action_history": [
       "MP open 2.5bb",
@@ -5376,7 +5376,7 @@
         }
       ]
     },
-    "description": "100bb. UTG (Hero) opens 2.5bb with Qh Qd, MP calls, BTN calls. Flop Jh 6c 3d. Pot ~9bb, three-handed. Action on Hero.",
+    "description": "100bb. UTG (Hero) opens 2.5bb with QQ, HJ calls, BTN calls. Flop Jh 6c 3d. Pot ~9bb, three-handed. Action on Hero.",
     "board": "Jh 6c 3d",
     "action_history": [
       "UTG open 2.5bb",
@@ -5542,7 +5542,7 @@
         }
       ]
     },
-    "description": "100bb. Hero 3-bets from the BB over a BTN open; BTN calls. Flop 8c 7c 5d. Pot ~19bb. Hero checks, BTN bets 6bb. Hero has Ac Tc (nut flush draw plus a gutshot).",
+    "description": "100bb. BB (Hero) 3-bets over BTN open with Ac Tc, BTN calls. Flop 8c 7c 5d. Hero checks, BTN bets 6bb. Pot ~19bb. Action on Hero.",
     "board": "8c 7c 5d",
     "action_history": [
       "BTN open 2.5bb",
@@ -5670,7 +5670,7 @@
         }
       ]
     },
-    "description": "Satellite-style final table: 4 players left, 3 seats paid, all stacks roughly equal at ~20bb. Folded to Hero on the BTN with Ah 9h. Action on Hero.",
+    "description": "20bb deep. Satellite final table: 4 left, 3 paid, stacks roughly even. Folds to BTN (Hero) with A9s. Action on Hero.",
     "board": null,
     "action_history": [
       "folds to BTN"
@@ -5767,7 +5767,7 @@
         }
       ]
     },
-    "description": "100bb. Folded to the BTN, who opens 2.5bb. Hero is in the BB with Kc Js (offsuit). Action on Hero.",
+    "description": "100bb. Folds to BTN, who opens 2.5bb. BB (Hero) holds KJo. Action on Hero.",
     "board": null,
     "action_history": [
       "folds to BTN",
@@ -5917,7 +5917,7 @@
         }
       ]
     },
-    "description": "100bb. CO (Hero) opens 2.5bb with 5h 5s, BTN calls. Flop 9h 5d 2h: CO bet 3bb, BTN call. Turn 9h 5d 2h Kh (front-door flush completes). Pot ~13bb. Action on Hero.",
+    "description": "100bb. CO (Hero) opens 2.5bb with 55, BTN calls. Flop 9h 5d 2h: CO bets 3bb, BTN calls. Turn Kh (front-door flush completes). Hero has middle set, no heart. Pot ~13bb. Action on Hero.",
     "board": "9h 5d 2h Kh",
     "action_history": [
       "CO open 2.5bb",
@@ -6090,7 +6090,7 @@
         }
       ]
     },
-    "description": "100bb. Hero opens CO 2.5bb with Ad Kc, BB calls. Flop 6s 5s 4d: BB leads (donks) 3bb into a 6bb pot. Hero has ace-king high with a backdoor flush draw.",
+    "description": "100bb. CO (Hero) opens 2.5bb with AKo, BB calls. Flop 6s 5s 4d: BB donks 3bb into 6bb. Hero has ace-high. Action on Hero.",
     "board": "6s 5s 4d",
     "action_history": [
       "CO open 2.5bb",
@@ -6276,7 +6276,7 @@
         }
       ]
     },
-    "description": "100bb. BTN (Hero) opens 2.5bb with Ah 5h, BB calls. Flop Kh 9h 4c: BB check, BTN bet 2bb, BB call. Turn Kh 9h 4c 7s: BB check, BTN check. River Kh 9h 4c 7s 2d: BB checks. Hero has Ah 5h — a missed flush, ace-high. Pot 9bb.",
+    "description": "100bb. BTN (Hero) opens 2.5bb with Ah 5h, BB calls. Flop Kh 9h 4c: BB checks, BTN bets 2bb, BB calls. Turn 7s: BB checks, BTN checks. River 2d: BB checks. Hero has missed nut flush, ace-high. Pot 9bb. Action on Hero.",
     "board": "Kh 9h 4c 7s 2d",
     "action_history": [
       "BTN open 2.5bb",
@@ -6439,7 +6439,7 @@
         }
       ]
     },
-    "description": "100bb. Hero opens HJ 2.5bb with Ah Ks, BTN 3-bets to 9bb, Hero 4-bets to 21bb, BTN moves all-in for 100bb. Action on Hero.",
+    "description": "100bb. HJ (Hero) opens 2.5bb with AKo, BTN 3-bets to 9bb, Hero 4-bets to 21bb, BTN moves all-in for 100bb. Action on Hero.",
     "board": null,
     "action_history": [
       "HJ open 2.5bb",
@@ -6569,7 +6569,7 @@
         }
       ]
     },
-    "description": "100bb. BTN (Hero) opens 2.5bb, BB calls. Flop As Kd 7c. BB checks. Hero has Kc Tc — second pair. Pot 5.5bb.",
+    "description": "100bb. BTN (Hero) opens 2.5bb with KTs, BB calls. Flop As Kd 7c. BB checks. Hero has second pair. Pot 5.5bb. Action on Hero.",
     "board": "As Kd 7c",
     "action_history": [
       "BTN open 2.5bb",
@@ -6753,7 +6753,7 @@
         }
       ]
     },
-    "description": "100bb. Hero opens CO 2.5bb with Ad Jc, BB calls. Flop Js 8d 3c: BB check, CO bet 3bb, BB call. Turn Js 8d 3c Qh: BB check. Hero has top pair, decent kicker. Pot ~12bb.",
+    "description": "100bb. CO (Hero) opens 2.5bb with AJo, BB calls. Flop Js 8d 3c: BB checks, CO bets 3bb, BB calls. Turn Qh: BB checks. Hero has top pair, decent kicker. Pot ~12bb. Action on Hero.",
     "board": "Js 8d 3c Qh",
     "action_history": [
       "CO open 2.5bb",
@@ -6899,7 +6899,7 @@
         }
       ]
     },
-    "description": "100bb. Hero opens BTN 2.5bb with Js Jd. BB 3-bets to 11bb. Action back on Hero.",
+    "description": "100bb. BTN (Hero) opens 2.5bb with JJ. BB 3-bets to 11bb. Action on Hero.",
     "board": null,
     "action_history": [
       "BTN open 2.5bb",
@@ -7102,7 +7102,7 @@
         }
       ]
     },
-    "description": "100bb. CO opens 2.5bb, BB (Hero) calls. Flop Td 7s 4c: BB check, CO bet 2bb, BB call. Turn Td 7s 4c 5h: BB check, CO bet 6bb, BB call. River Td 7s 4c 5h 6d: BB check, CO bets 10bb. Hero has 9c 8c — the nut straight. Pot was 19bb.",
+    "description": "100bb. CO opens 2.5bb, BB (Hero) calls with 98s. Flop Td 7s 4c: BB checks, CO bets 2bb, BB calls. Turn 5h: BB checks, CO bets 6bb, BB calls. River 6d: BB checks, CO bets 10bb. Hero has the nut straight. Pot was 19bb. Action on Hero.",
     "board": "Td 7s 4c 5h 6d",
     "action_history": [
       "CO open 2.5bb",
