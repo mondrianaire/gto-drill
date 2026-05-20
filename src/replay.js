@@ -221,19 +221,41 @@ export function buildSpotSummary(replay) {
   }
   const singleVillain = villainSeats.size === 1;
 
-  function actorLabel(seat) {
-    if (seat === heroSeat) return "HERO";
-    if (singleVillain) return "VILLAIN";
-    return seat; // disambiguate by position in multi-villain hands
+  // Build the actor identity as a styled chip matching the same
+  // tok-pos.is-hero / tok-pos.is-villain visual idiom the rest of the
+  // app uses (wrap-up cards, reveal, etc.). Done directly (instead of
+  // routing through richText) to avoid a circular import with ui.js.
+  function actorChip(seat) {
+    if (seat === heroSeat) return h("span", { class: "tok-pos is-hero" }, "HERO");
+    if (singleVillain) return h("span", { class: "tok-pos is-villain" }, "VILLAIN");
+    return h("span", { class: "tok-pos is-villain" }, seat); // multi-villain: position
   }
 
-  function actionPhrase(a) {
-    // Short, chip-friendly phrasing. "HERO raises to 2.5bb",
-    // "VILLAIN calls 2.5bb", "VILLAIN checks", "HERO bets 5bb".
-    const actor = actorLabel(a.actor);
-    if (a.type === "check") return actor + " checks";
-    if (a.type === "call") return actor + " calls" + (a.amount_bb ? " " + a.amount_bb + "bb" : "");
-    if (a.type === "bet") return actor + " bets " + (a.amount_bb || 0) + "bb";
+  // bb chip — same DOM shape as the rich-text tokenizer's tok-bb chip
+  // so the existing CSS just applies.
+  function bbChip(amount) {
+    return h("span", { class: "tok-bb" },
+      h("span", { class: "tok-bb-num" }, String(amount)),
+      h("span", { class: "tok-bb-unit" }, "bb")
+    );
+  }
+
+  // Builds the action as an array of mixed DOM nodes + text. Caller
+  // wraps in a .spot-sum-action span.
+  function actionNodes(a) {
+    const actor = actorChip(a.actor);
+    if (a.type === "check") return [actor, document.createTextNode(" checks")];
+    if (a.type === "call") {
+      const out = [actor, document.createTextNode(" calls")];
+      if (a.amount_bb) {
+        out.push(document.createTextNode(" "));
+        out.push(bbChip(a.amount_bb));
+      }
+      return out;
+    }
+    if (a.type === "bet") {
+      return [actor, document.createTextNode(" bets "), bbChip(a.amount_bb || 0)];
+    }
     if (a.type === "raise") {
       // Name the preflop escalation (open / 3-bet / 4-bet / 5-bet)
       if (a.street === "preflop") {
@@ -243,11 +265,11 @@ export function buildSpotSummary(replay) {
           if (p.street === "preflop" && p.type === "raise") n++;
         }
         const verb = n === 0 ? "opens to" : n === 1 ? "3-bets to" : n === 2 ? "4-bets to" : "5-bets to";
-        return actor + " " + verb + " " + (a.amount_bb || 0) + "bb";
+        return [actor, document.createTextNode(" " + verb + " "), bbChip(a.amount_bb || 0)];
       }
-      return actor + " raises to " + (a.amount_bb || 0) + "bb";
+      return [actor, document.createTextNode(" raises to "), bbChip(a.amount_bb || 0)];
     }
-    return actor + " " + a.type;
+    return [actor, document.createTextNode(" " + a.type)];
   }
 
   function streetLabel(s) {
@@ -266,16 +288,12 @@ export function buildSpotSummary(replay) {
       ? h("div", { class: "spot-sum-cards" }, ...cards.map((c) => cardEl(c, "sm")))
       : null;
     const actionsEl = h("div", { class: "spot-sum-actions" });
-    items.forEach((a, idx) => {
-      actionsEl.appendChild(h("span", { class: "spot-sum-action" }, actionPhrase(a)));
-      if (idx < items.length - 1) {
-        actionsEl.appendChild(h("span", { class: "spot-sum-sep" }, " · "));
-      }
+    items.forEach((a) => {
+      actionsEl.appendChild(h("div", { class: "spot-sum-action" }, ...actionNodes(a)));
     });
-    // Hero-turn arrow on the decision street (after the last action)
+    // Hero-turn arrow on the decision street (its own line at the end)
     if (isDecision) {
-      if (items.length > 0) actionsEl.appendChild(h("span", { class: "spot-sum-sep" }, " · "));
-      actionsEl.appendChild(h("span", { class: "spot-sum-yourturn" }, "← your turn"));
+      actionsEl.appendChild(h("div", { class: "spot-sum-yourturn" }, "← your turn"));
     }
     rows.push(h("div", { class: "spot-sum-row" + (isDecision ? " is-decision" : "") },
       h("span", { class: "spot-sum-street" }, streetLabel(street)),
