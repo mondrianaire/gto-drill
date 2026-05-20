@@ -135,6 +135,18 @@ export function liveVillains(replay) {
     .map((s) => s.pos);
 }
 
+/**
+ * Pot size in big blinds at the hero's decision point (after all replay
+ * actions have been applied, including any live bets on the current
+ * street). Returns null if the replay can't yield a usable number — in
+ * which case callers should skip pot-relative computations.
+ */
+export function potAtDecisionBb(replay) {
+  if (!replay) return null;
+  const { displayPot } = deriveState(replay, (replay.actions || []).length);
+  return displayPot > 0 ? displayPot : null;
+}
+
 // -----------------------------------------------------------------------
 // Action-log phrasing
 // -----------------------------------------------------------------------

@@ -11,7 +11,7 @@ import { getScenarioById } from "./scenarios.js";
 import { computePhase } from "./flow.js";
 import { perPlayerAccuracy, interPlayerAgreement, rankedDisagreements } from "./stats.js";
 import { recordGame, writeActiveGameId } from "./history.js";
-import { mountReplay, cardEl, liveVillains } from "./replay.js";
+import { mountReplay, cardEl, liveVillains, potAtDecisionBb } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
 import { buildTermRegex, lookupTerm } from "./dictionary.js";
 import { wireTermTrigger } from "./tooltip.js";
@@ -195,7 +195,56 @@ function tokenizeProse(text, scen) {
     last = m.index + m[0].length;
   }
   if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
+  attachBetPotPct(frag, scen);
   return frag;
+}
+
+/**
+ * After tokenizing, walk the fragment and decorate any bb chip that's
+ * acting as a BET — i.e. preceded by "Bet " / "bet " in the immediately
+ * prior text node. Adds a small "~XX% pot" suffix inside the chip, where
+ * XX is computed from the scenario's pot at the decision point.
+ *
+ * If a literal "(~N% pot)" parenthetical follows the chip in prose, it's
+ * stripped to avoid double-printing. The computed value rounds to the
+ * nearest 5% so it visually matches the prose convention ("~30%", "~75%").
+ *
+ * Heuristic for "this is a bet": preceded by `\bBet\s+` (capital or
+ * lowercase). Past actions ("3-bet to 11bb", "BB bets") are skipped
+ * because their pot context is the pot at THAT point in history, not the
+ * pot at the current decision — computing % against the current pot
+ * would lie. Action buttons + GTO line are where this lands well.
+ */
+function attachBetPotPct(frag, scen) {
+  const potBb = potAtDecisionBb(scen && scen.replay);
+  if (!potBb) return;
+  // Snapshot children before mutating so we don't iterate a moving list.
+  const nodes = Array.prototype.slice.call(frag.childNodes);
+  for (let i = 0; i < nodes.length; i++) {
+    const node = nodes[i];
+    if (!(node && node.nodeType === 1 && node.classList && node.classList.contains("tok-bb"))) continue;
+    const prev = node.previousSibling;
+    if (!prev || prev.nodeType !== 3) continue;
+    if (!/\b[Bb]et\s+$/.test(prev.textContent)) continue;
+    // Extract the bb number from the chip we just rendered.
+    const numEl = node.querySelector(".tok-bb-num");
+    if (!numEl) continue;
+    const num = parseFloat(numEl.textContent);
+    if (!isFinite(num) || num <= 0) continue;
+    const pct = (num / potBb) * 100;
+    const rounded = Math.max(5, Math.round(pct / 5) * 5);
+    const pctSpan = document.createElement("span");
+    pctSpan.className = "tok-bb-pct";
+    pctSpan.textContent = "~" + rounded + "% pot";
+    node.appendChild(pctSpan);
+    // Strip a literal "(~N% pot)" parenthetical that follows so we don't
+    // double-print the same information.
+    const next = node.nextSibling;
+    if (next && next.nodeType === 3) {
+      const stripped = next.textContent.replace(/^\s*\(~?\d+(?:\.\d+)?\s*%\s*pot\)/, "");
+      if (stripped !== next.textContent) next.textContent = stripped;
+    }
+  }
 }
 
 /** A clickable inline range chip: the anchor text + a 🎲 icon. */
