@@ -488,6 +488,24 @@ form { margin-top: 8px; }
 .hand-nav .hand-back { flex: 0 0 auto; min-width: 92px; }
 .hand-nav .hand-fwd { flex: 1 1 auto; }
 
+/* Sticky nav pane — used on the reveal screen so the "Next hand →"
+   button stays anchored to the top of the viewport as the user
+   scrolls through the GTO read, options analysis, villain range.
+   Background pad + subtle bottom border so the nav reads as its own
+   bar separate from the scrolling content below. */
+.hand-nav.hand-nav-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  margin-top: 0;
+  margin-bottom: 12px;
+  padding: 10px 0;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  /* Subtle shadow under the bar when it overlaps content beneath. */
+  box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.5);
+}
+
 /* Lock-in button when it lives INSIDE the decide body (below the note
    toggle) — needs a top margin to separate it from the note details
    row and full width to feel like a "submit the form" action. */
