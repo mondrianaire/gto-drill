@@ -228,7 +228,12 @@ export function mountRangePicker(container, opts = {}) {
 
   const controlsWrap = h("div", { class: "rp-controls-wrap" }, topSection, catSection);
 
-  const root = h("div", { class: "range-picker" }, header, emptyHint, matrixWrap, controlsWrap);
+  // Layout: controls sit in the SAME slot as the empty hint (above the
+  // matrix). Empty hint shows when nothing is selected AND controls are
+  // closed — i.e., the slot is the call-to-action when blank, then
+  // becomes the customization surface when the user taps Customize.
+  // Matrix is always below either of those.
+  const root = h("div", { class: "range-picker" }, header, emptyHint, controlsWrap, matrixWrap);
   container.appendChild(root);
 
   // ----- behavior -----
@@ -254,8 +259,12 @@ export function mountRangePicker(container, opts = {}) {
     for (const lbl of sel) {
       if (!cellBy[lbl]) combos += comboCount(lbl);
     }
+    // Empty hint shows when there's nothing to display AND the controls
+    // are closed (controls live in the same slot — when open, they ARE
+    // the call-to-action so the hint would be redundant).
+    const controlsOpen = controlsWrap.classList.contains("is-open");
     const isEmpty = sel.size === 0 && !loadedLabel;
-    emptyHint.hidden = !isEmpty;
+    emptyHint.hidden = !isEmpty || controlsOpen;
     if (isEmpty) {
       statsEl.innerHTML = '<span class="muted">No range selected</span>';
     } else {
@@ -374,6 +383,9 @@ export function mountRangePicker(container, opts = {}) {
     customizeBtn.classList.toggle("is-open", open);
     customizeBtn.setAttribute("aria-expanded", open ? "true" : "false");
     customizeBtn.querySelector(".lbl").textContent = open ? "Hide controls" : "Customize";
+    // Re-render so the empty-hint visibility recomputes — it lives in
+    // the same slot as the controls and must hide when they open.
+    render();
   });
 
   // ---- public API ----
