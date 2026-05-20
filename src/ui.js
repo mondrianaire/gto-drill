@@ -1341,13 +1341,87 @@ export function mountInGameView(container, gameId) {
   function renderWaiting(round, game, myUid) {
     const oppUid = (game.participantUids || []).find((u) => u !== myUid);
     const oppName = oppUid ? getDisplayName(game, oppUid) : "your opponent";
+    const oppFirst = (oppName || "").split(/\s+/)[0] || oppName;
+
+    // Opponent activity interpretation — does the user have any signal
+    // for whether the opponent is coming back? Uses lastSubmittedAt[opp]
+    // when present, else falls back to the game's lastActivityAt or
+    // createdAt. Threshold mirrors the active-games panel: 7+ days =
+    // stalled.
+    const lastSubMap = game.lastSubmittedAt || {};
+    const oppLastIso = (oppUid && lastSubMap[oppUid]) || null;
+    let activityText = "";
+    let isStalled = false;
+    if (oppLastIso) {
+      activityText = oppFirst + " last submitted " + friendlyAgoStr(oppLastIso) + ".";
+      isStalled = daysAgoFromIso(oppLastIso) >= 7;
+    } else {
+      const fallbackIso = game.lastActivityAt || game.createdAt;
+      const ago = fallbackIso ? friendlyAgoStr(fallbackIso) : "recently";
+      activityText = oppFirst + " hasn't submitted any rounds yet (game " + ago + ").";
+      if (fallbackIso && daysAgoFromIso(fallbackIso) >= 7) isStalled = true;
+    }
+
+    // Back-to-home button — drops the active-game pointer and reloads
+    // the landing page, where the user can resume this game from the
+    // active-games panel anytime, or cancel it if it's gone stale.
+    const homeBtn = h("button", { type: "button", class: "primary waiting-back" }, "← Back to home");
+    homeBtn.addEventListener("click", () => {
+      writeActiveGameId(null);
+      const base = location.origin + location.pathname;
+      location.assign(base);
+    });
+
+    const stalledBadge = isStalled
+      ? h("div", { class: "waiting-stalled-badge" }, "⚠ Stalled — no opponent activity for 7+ days")
+      : null;
+
     container.appendChild(h(
       "section",
-      { class: "in-game waiting" },
+      { class: "in-game waiting" + (isStalled ? " is-stalled" : "") },
       h("h2", null, "Waiting for " + oppName),
-      h("p", { class: "muted" }, "You submitted your handful for this round. We'll show the results once " + oppName + " submits theirs."),
-      h("p", { class: "muted" }, "You can close this page — the game's saved. It'll pick up right here the next time you open the app.")
+      stalledBadge,
+      h("p", { class: "waiting-activity" + (isStalled ? " is-stalled" : " muted") }, activityText),
+      h("p", { class: "muted" }, "You submitted your handful for this round. We'll show the results once " + oppFirst + " submits theirs."),
+      h("p", { class: "muted" }, "You can close this page — the game's saved. It'll pick up right here the next time you open the app."),
+      h("div", { class: "waiting-actions" }, homeBtn)
     ));
+  }
+
+  // Friendly relative-time formatter ("3 hours ago", "5 days ago"). Kept
+  // local to ui.js — the active-games panel has its own copy in
+  // onboarding.js; the two could be promoted to a shared util later.
+  function friendlyAgoStr(iso) {
+    if (!iso) return "recently";
+    const ms = Date.now() - Date.parse(iso);
+    if (Number.isNaN(ms)) return "recently";
+    const minutes = ms / 60000;
+    if (minutes < 60) {
+      const m = Math.max(1, Math.round(minutes));
+      return m === 1 ? "1 minute ago" : m + " minutes ago";
+    }
+    const hours = minutes / 60;
+    if (hours < 24) {
+      const h = Math.round(hours);
+      return h === 1 ? "1 hour ago" : h + " hours ago";
+    }
+    const days = hours / 24;
+    if (days < 30) {
+      const d = Math.round(days);
+      return d === 1 ? "1 day ago" : d + " days ago";
+    }
+    const months = days / 30;
+    if (months < 12) {
+      const mo = Math.round(months);
+      return mo === 1 ? "1 month ago" : mo + " months ago";
+    }
+    return "over a year ago";
+  }
+  function daysAgoFromIso(iso) {
+    if (!iso) return 0;
+    const ms = Date.now() - Date.parse(iso);
+    if (Number.isNaN(ms)) return 0;
+    return ms / 86400000;
   }
 
   function renderReveal(round, game, myUid) {
