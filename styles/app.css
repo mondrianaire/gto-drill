@@ -756,11 +756,88 @@ form { margin-top: 8px; }
    what villain is doing is half the value of the app. */
 .villain-range-block {
   margin-bottom: 12px;
-  padding: 12px 14px;
+  padding: 14px 16px;
   border: 1px solid rgba(232, 169, 63, 0.40);
   border-radius: var(--radius);
   background: rgba(232, 169, 63, 0.06);
 }
+/* Header — bigger section title + a descriptive subtitle framing the
+   block as evidence-based deduction. Subtitle reads like a brief. */
+.villain-range-header {
+  margin-bottom: 12px;
+}
+.villain-range-title {
+  font-size: 0.95rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--villain);
+  font-weight: 700;
+}
+.villain-range-subtitle {
+  font-size: 0.8rem;
+  margin-top: 3px;
+  line-height: 1.4;
+}
+/* Evidence row — the deductive inputs (villain's actions in order) or
+   a predictive note (when villain hasn't acted yet). Sits between the
+   header and the range cards so the reader sees the input → output
+   chain. Compact chip layout. */
+.villain-evidence {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 12px;
+  padding: 8px 10px;
+  background: rgba(0, 0, 0, 0.18);
+  border: 1px solid rgba(232, 169, 63, 0.25);
+  border-radius: 8px;
+  flex-wrap: wrap;
+}
+.villain-evidence-label {
+  font-size: 0.66rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  font-weight: 700;
+  color: var(--villain);
+  flex-shrink: 0;
+}
+.villain-evidence-chips {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+.villain-evidence-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: rgba(232, 169, 63, 0.12);
+  border: 1px solid rgba(232, 169, 63, 0.35);
+  font-size: 0.78rem;
+  color: var(--text);
+  white-space: nowrap;
+}
+.villain-evidence-street {
+  font-size: 0.62rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--villain);
+  background: rgba(232, 169, 63, 0.18);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.villain-evidence-act { font-weight: 500; }
+/* Predictive variant — villain hasn't acted yet, so the row is a
+   single explanatory note rather than a chip list. */
+.villain-evidence-predictive .villain-evidence-text {
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+/* Legacy single-line label support — kept so older callers / tests
+   don't break if they query .villain-range-label. */
 .villain-range-label {
   font-size: 0.78rem;
   text-transform: uppercase;
