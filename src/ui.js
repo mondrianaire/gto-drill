@@ -542,6 +542,35 @@ export function buildHandIntro({ scen }) {
 }
 
 /**
+ * Build the GTO description preamble — paragraph that introduces the
+ * strategic landscape of the spot (range dynamics, board impact, who
+ * has the equity edge) AND telegraphs the impact of the available
+ * options. Sits between the verdict and the per-option pros/cons
+ * matrix: sets up the thinking the user will need to evaluate each
+ * choice.
+ *
+ * Data source: scen.gto_explanation (already populated on every
+ * scenario; was previously rendered as a paragraph, then dropped,
+ * now restored in the right slot — between verdict and matrix).
+ *
+ * Distinct from:
+ *   - buildHandIntro: rehashes positions/board/pot — redundant with
+ *     the replay table + spot-summary action log above.
+ *   - buildGtoRead: one-liner naming the GTO action.
+ *   - buildOptionsAnalysis: per-option For/Against.
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ */
+export function buildGtoExplanation({ scen }) {
+  if (!scen || !scen.gto_explanation) return null;
+  return h("div", { class: "gto-explanation" },
+    h("div", { class: "gto-explanation-label" }, "GTO read"),
+    h("p", { class: "gto-explanation-text" }, richText(scen.gto_explanation, scen))
+  );
+}
+
+/**
  * Build the options-analysis matrix — every available action as a card
  * with pros / cons bullets, GTO pick highlighted with a green ✓ ribbon,
  * the user's pick highlighted with a "Your pick" tag (and red ✗ if it
@@ -1060,9 +1089,11 @@ export function mountInGameView(container, gameId) {
       // equity panel + Test it so clicking flows into verification.
       const villainRangeBlock = buildVillainRangeBlock({ scen, onRangeClick: openEquityWithRange });
 
-      // Hand intro — short narrative setting up the spot. Replaces the
-      // old "The spot" framing-bullets block as the scenario brief.
-      const handIntro = buildHandIntro({ scen });
+      // GTO description preamble — paragraph that introduces the
+      // strategic landscape and telegraphs the impact of each option.
+      // Replaces the redundant "The hand" intro (positions/board/pot
+      // are already on the table and in the spot-summary action log).
+      const gtoExplanation = buildGtoExplanation({ scen });
 
       // Find the opponent's participant record + their submission for this
       // hand (if they've already played). Pass identity (avatar + name) into
@@ -1120,9 +1151,9 @@ export function mountInGameView(container, gameId) {
       const takeaway = buildLessonTakeaway({ scen });
       body = h("div", { class: "hand-reveal" },
         takeaway,           // LEAD: one-line lesson takeaway
-        gtoRead,            // GTO line: small blurb
+        gtoRead,            // GTO line: small blurb (the answer)
         result,             // verdict + compact comparison + opponent
-        handIntro,          // brief: positions + action + board + pot
+        gtoExplanation,     // preamble: strategic landscape + option impacts
         optionsAnalysis,    // matrix: every option's pros/cons
         villainRangeBlock,  // deduced villain range — into Test it
         equityHost,         // equity panel mounts here

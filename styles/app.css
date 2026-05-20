@@ -535,9 +535,9 @@ form { margin-top: 8px; }
 }
 .spot-framing-text { flex: 1 1 auto; min-width: 0; }
 
-/* Hand-intro brief — short narrative framing of the scenario, sits
-   between the verdict and the options-analysis matrix. Reads as the
-   solver's "here's the spot" sentence. */
+/* Hand-intro brief — kept for backwards compat; not currently used
+   in the reveal (replay table + spot-summary action log cover the
+   same ground more compactly). */
 .hand-intro {
   margin: 16px 0 14px 0;
   padding: 10px 14px;
@@ -557,6 +557,34 @@ form { margin-top: 8px; }
   margin: 0;
   font-size: 0.95rem;
   line-height: 1.5;
+  color: var(--text);
+}
+
+/* GTO description preamble — paragraph that introduces the strategic
+   landscape and the impact of each available option. Sits between the
+   verdict and the per-option pros/cons matrix; sets up the thinking
+   the user will need to evaluate the choices below. Cool-blue accent
+   matches the GTO line / GTO read voice elsewhere. */
+.gto-explanation {
+  margin: 16px 0 14px 0;
+  padding: 12px 16px;
+  background: rgba(74, 138, 204, 0.06);
+  border: 1px solid rgba(74, 138, 204, 0.3);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+}
+.gto-explanation-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.gto-explanation-text {
+  margin: 0;
+  font-size: 0.92rem;
+  line-height: 1.55;
   color: var(--text);
 }
 
