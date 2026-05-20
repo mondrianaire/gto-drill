@@ -64,8 +64,10 @@ function knownCards(scen) {
   return set;
 }
 
-// card run (one or more space-separated codes) | position | Hero/Villain word
-const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b/g;
+// card run (1+ space-separated codes) | position | Hero/Villain | bb chip | any-suit
+// Group 4 = "Nbb" or "N.Nbb" — rendered as a stylized chip.
+// Group 5 = "Kx" / "Ax" pattern (rank + literal x) — rendered as an any-suit card.
+const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])x\b/g;
 
 /** Escape regex meta-characters for safe use inside a constructed RegExp. */
 function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -98,6 +100,17 @@ function tokenizeProse(text, scen) {
     } else if (m[3]) {
       const role = /^h/i.test(m[3]) ? " is-hero" : " is-villain";
       frag.appendChild(h("span", { class: "tok-word" + role }, m[3]));
+    } else if (m[4]) {
+      // "Nbb" / "N.Nbb" → stylized big-blind chip
+      frag.appendChild(h("span", { class: "tok-bb" },
+        h("span", { class: "tok-bb-num" }, m[4]),
+        h("span", { class: "tok-bb-unit" }, "bb")));
+    } else if (m[5]) {
+      // "Kx" / "Ax" → any-suit mini-card glyph
+      const rank = m[5];
+      frag.appendChild(h("span", { class: "tok-anysuit", title: "Any suit (" + rank + "-x)" },
+        h("span", { class: "tok-anysuit-rank" }, rank === "T" ? "10" : rank),
+        h("span", { class: "tok-anysuit-suits", "aria-hidden": "true" }, "♠♥♦♣")));
     }
     last = m.index + m[0].length;
   }
@@ -153,7 +166,9 @@ export function richText(text, scen, opts) {
     if (m.index > last) frag.appendChild(wrapDictionaryTerms(tokenizeProse(text.slice(last, m.index), scen)));
     const matched = m[1];
     const range = sorted.find((r) => r.anchor === matched);
-    frag.appendChild(makeRangeChip(matched, range, onRangeClick));
+    // Tokenize the chip's own text too so bb chips / any-suit / etc.
+    // appear consistently INSIDE range chips, not just around them.
+    frag.appendChild(makeRangeChip(tokenizeProse(matched, scen), range, onRangeClick));
     last = m.index + m[0].length;
   }
   if (last < text.length) frag.appendChild(wrapDictionaryTerms(tokenizeProse(text.slice(last), scen)));
@@ -319,7 +334,9 @@ export function mountInGameView(container, gameId) {
       // ===================== DECIDE =====================
       const actionRow = h("div", { class: "actions-row", role: "radiogroup", "aria-label": "Your move" });
       (scen ? scen.available_actions : []).forEach((a) => {
-        const btn = h("button", { type: "button", class: "action-btn" + (sub.action === a ? " selected" : "") }, a);
+        // Run the action label through richText so bb chips / pot-%s /
+        // any token style applies consistently with the prose voice.
+        const btn = h("button", { type: "button", class: "action-btn" + (sub.action === a ? " selected" : "") }, richText(a, scen));
         btn.addEventListener("click", () => {
           sub.action = a;
           actionRow.querySelectorAll(".action-btn").forEach((x) => x.classList.toggle("selected", x === btn));
@@ -376,11 +393,11 @@ export function mountInGameView(container, gameId) {
         h("div", { class: "result-picks" },
           h("div", null,
             h("span", { class: "muted" }, "You played  "),
-            h("strong", { class: correct ? "ok" : "miss" }, sub.action),
+            h("strong", { class: correct ? "ok" : "miss" }, richText(sub.action, scen)),
             h("span", { class: "muted" }, "   ·   confidence " + sub.confidence + "/5")),
           h("div", null,
             h("span", { class: "muted" }, "GTO line  "),
-            h("strong", { class: "gto-action" }, gto))
+            h("strong", { class: "gto-action" }, richText(gto, scen)))
         )
       );
       // "Test it!" — Monte Carlo equity vs a user-picked villain range.

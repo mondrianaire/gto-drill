@@ -210,7 +210,9 @@ export function mountSoloView(container, onExit) {
     if (!draft.revealed) {
       const actionRow = h("div", { class: "actions-row", role: "radiogroup", "aria-label": "Your move" });
       (scen.available_actions || []).forEach((a) => {
-        const btn = h("button", { type: "button", class: "action-btn" + (draft.action === a ? " selected" : "") }, a);
+        // Run action label through richText so bb chips / any-suit / etc.
+        // apply consistently with the prose voice.
+        const btn = h("button", { type: "button", class: "action-btn" + (draft.action === a ? " selected" : "") }, richText(a, scen));
         btn.addEventListener("click", () => {
           draft.action = a;
           actionRow.querySelectorAll(".action-btn").forEach((x) => x.classList.toggle("selected", x === btn));
@@ -269,11 +271,11 @@ export function mountSoloView(container, onExit) {
         h("div", { class: "result-picks" },
           h("div", null,
             h("span", { class: "muted" }, "You played  "),
-            h("strong", { class: correct ? "ok" : "miss" }, draft.action),
+            h("strong", { class: correct ? "ok" : "miss" }, richText(draft.action, scen)),
             h("span", { class: "muted" }, "   ·   confidence " + draft.confidence + "/5")),
           h("div", null,
             h("span", { class: "muted" }, "GTO line  "),
-            h("strong", { class: "gto-action" }, gto))
+            h("strong", { class: "gto-action" }, richText(gto, scen)))
         )
       );
 
