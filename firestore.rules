@@ -47,13 +47,14 @@ service cloud.firestore {
                             && request.auth.uid in request.resource.data.participantUids));
 
       // Any signed-in user may delete a lobby that's still
-      // waiting_for_opponent. This is intentional cleanup for orphan /
-      // bot-created lobbies (test artifacts that nobody is going to
-      // join) — the lobby browser exposes a small "×" button per row.
+      // waiting_for_opponent, OR any doc with no participants (junk
+      // doc, malformed shape — safety-net escape hatch so future
+      // weird-shape orphans don't dead-end the lobby cleanup UI).
       // In-progress and completed games can never be deleted; their
       // participants still own the data.
       allow delete: if request.auth != null
-                    && resource.data.status == 'waiting_for_opponent';
+                    && (resource.data.status == 'waiting_for_opponent'
+                        || resource.data.participantUids.size() < 1);
     }
   }
 }
