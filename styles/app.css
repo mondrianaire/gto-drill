@@ -834,7 +834,13 @@ form { margin-top: 8px; }
   width: 19px;
   height: 23px;
   border-radius: 3px;
-  vertical-align: -5px;
+  /* `middle` centres the card on the parent's text middle. Empirically
+     this aligns much more reliably than a fixed pixel offset, because
+     inline-flex's baseline shifts depending on how many flex children it
+     has (e.g. .pcard-inline has rank+suit, .tok-anysuit has just a rank
+     — they ended up at different vertical positions with the same -Npx
+     value). `middle` sidesteps that entirely. */
+  vertical-align: middle;
   margin: 0 1px;
   background: #fdfdfb;
   color: #1a1a1a;
@@ -859,7 +865,7 @@ form { margin-top: 8px; }
    Sized to read alongside the 19×23 cards without dominating. */
 .tok-modifier {
   display: inline-block;
-  vertical-align: -3px;
+  vertical-align: middle;
   width: 22px;
   height: 14px;
   margin: 0 2px 0 3px;
@@ -897,7 +903,7 @@ form { margin-top: 8px; }
    identical width regardless of which letter shows. */
 .tok-suit-suffix {
   display: inline-block;
-  vertical-align: 0;
+  vertical-align: middle;
   min-width: 14px;
   padding: 1px 4px;
   margin: 0 2px 0 3px;
@@ -1495,13 +1501,17 @@ form { margin-top: 8px; }
 .pcard-suit { font-size: 0.92rem; }
 .pcard-sm .pcard-rank { font-size: 0.68rem; }
 .pcard-sm .pcard-suit { font-size: 0.82rem; }
-/* Inline card — flows inside GTO prose alongside text. */
+/* Inline card — flows inside GTO prose alongside text. Uses
+   `vertical-align: middle` (not a fixed pixel offset) so it stays in
+   sync with .tok-anysuit / .tok-modifier / .tok-suit-suffix — all four
+   centre on the parent's text middle regardless of how many flex
+   children they carry. */
 .pcard-inline {
   display: inline-flex;
   width: 17px;
   height: 23px;
   border-radius: 3px;
-  vertical-align: -5px;
+  vertical-align: middle;
   margin: 0 1px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
 }
