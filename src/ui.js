@@ -15,6 +15,7 @@ import { mountReplay, cardEl, liveVillains } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
 import { buildTermRegex, lookupTerm } from "./dictionary.js";
 import { wireTermTrigger } from "./tooltip.js";
+import { buildShareLinkButton, shareUrlForGame } from "./share.js";
 
 // -----------------------------------------------------------------------
 // Small DOM helpers (duplicated from onboarding.js intentionally to keep
@@ -303,10 +304,21 @@ export function mountInGameView(container, gameId) {
     clear(container);
     const myUid = getCurrentUid();
     const phase = computePhase(game, myUid);
+    // Share-link button (top right of the duel view). Lets either player
+    // hand the opponent a deep-link to this exact game — the missing piece
+    // for inviting someone who isn't watching the lobby. URL is read at
+    // click time so a stale gameId can't sneak through.
+    const { button: shareBtn, fallback: shareFallback } = buildShareLinkButton({
+      buildUrl: () => shareUrlForGame(gameId),
+      title: "Copy share link for this game",
+      className: "game-share",
+    });
     const headerBar = h("div", { class: "game-header" },
-      h("span", null, "Round ", String((phase.currentRoundIndex || 0) + 1), " of ", String(game.rounds.length))
+      h("span", null, "Round ", String((phase.currentRoundIndex || 0) + 1), " of ", String(game.rounds.length)),
+      shareBtn
     );
     container.appendChild(headerBar);
+    container.appendChild(shareFallback);
 
     if (phase.gameComplete) {
       mountWrapUpView(container, gameId, { reuseGame: game });
