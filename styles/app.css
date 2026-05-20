@@ -765,6 +765,39 @@ form { margin-top: 8px; }
   border-radius: var(--radius);
   flex-wrap: wrap;
 }
+
+/* Lesson-takeaway pill — the one-line crystallization of the hand's
+   pattern. Sits at the very top of the reveal so the user carries
+   away a transferable concept before working through detail. Warm
+   highlight color (vs the GTO line's cooler blue) to read as "the
+   thing to remember" rather than "the answer". */
+.lesson-takeaway {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 16px;
+  margin-bottom: 12px;
+  background: linear-gradient(180deg, rgba(255, 213, 138, 0.12) 0%, rgba(255, 213, 138, 0.06) 100%);
+  border: 1px solid rgba(255, 213, 138, 0.45);
+  border-left: 4px solid #ffd58a;
+  border-radius: var(--radius);
+  flex-wrap: wrap;
+}
+.lesson-takeaway-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #ffd58a;
+  font-weight: 700;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+.lesson-takeaway-text {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text);
+  line-height: 1.35;
+}
 .gto-read-label {
   font-size: 0.78rem;
   text-transform: uppercase;

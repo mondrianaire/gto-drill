@@ -544,6 +544,27 @@ export function buildGtoRead({ scen, gtoAction }) {
 }
 
 /**
+ * Build the lesson-takeaway pill — a one-line crystallization of the
+ * pattern this hand teaches ("Range-disadvantage check-back", "MDF and
+ * blockers vs polar river overbet", etc.). Sits at the very top of the
+ * reveal so the user carries away a single transferable concept before
+ * working through the supporting detail.
+ *
+ * Data source: scen.lesson_tag (string). Every scenario in the dataset
+ * has one populated.
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ */
+export function buildLessonTakeaway({ scen }) {
+  if (!scen || !scen.lesson_tag) return null;
+  return h("div", { class: "lesson-takeaway" },
+    h("span", { class: "lesson-takeaway-label" }, "💡 Lesson"),
+    h("span", { class: "lesson-takeaway-text" }, scen.lesson_tag)
+  );
+}
+
+/**
  * Build the reveal-result block — the educational moment of every hand.
  * Returns a compact comparison: when Hero matched the GTO line, a single
  * centred tile (the action is the answer). When Hero missed, a two-column
@@ -981,7 +1002,9 @@ export function mountInGameView(container, gameId) {
         testBtn.textContent = "Hide equity panel";
       });
 
+      const takeaway = buildLessonTakeaway({ scen });
       body = h("div", { class: "hand-reveal" },
+        takeaway,           // LEAD: one-line lesson takeaway
         gtoRead,            // GTO line: small blurb
         result,             // verdict + compact comparison + opponent
         spotFraming,        // THE SPOT — strategic WHY (range/board/SPR)

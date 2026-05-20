@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult, buildVillainRangeBlock, buildSpotFramingBlock, buildGtoRead } from "./ui.js";
+import { richText, buildRevealResult, buildVillainRangeBlock, buildSpotFramingBlock, buildGtoRead, buildLessonTakeaway } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
 
 // -----------------------------------------------------------------------
@@ -302,7 +302,9 @@ export function mountSoloView(container, onExit) {
         confidence: draft.confidence,
       });
 
+      const takeaway = buildLessonTakeaway({ scen });
       body = h("div", { class: "hand-reveal" },
+        takeaway,           // LEAD: one-line lesson takeaway
         gtoRead,            // GTO line: small blurb
         result,             // verdict + compact comparison + opponent
         spotFraming,        // THE SPOT — strategic WHY (range/board/SPR)
