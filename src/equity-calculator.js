@@ -153,8 +153,9 @@ export function mountEquityCalculator(container, onExit) {
   }
 
   // -------- villain range picker --------
+  // Picker owns its own header (stats + Customize). Standalone calculator
+  // opens with no pre-loaded range — the picker shows the empty-hint card.
   const villainHost = h("div", { class: "calc-villain-host" });
-  const countLabel = h("span", { class: "eq-count" }, "0 combos · pick a range below");
   const picker = mountRangePicker(villainHost, {
     initial: [],
     onChange: () => recomputeLive(),
@@ -164,9 +165,6 @@ export function mountEquityCalculator(container, onExit) {
     const sel = picker.getSelection();
     currentCombos = sel.combos;
     if (hero.length !== 2) {
-      countLabel.textContent = sel.classes.length
-        ? sel.classes.length + " hand class" + (sel.classes.length === 1 ? "" : "es") + " · pick a hero hand to enable Run"
-        : "0 combos · pick a range and a hero hand";
       runBtn.disabled = true;
       resetAcc();
       return;
@@ -174,9 +172,6 @@ export function mountEquityCalculator(container, onExit) {
     const live = sel.combos.filter((c) =>
       !c.includes(hero[0]) && !c.includes(hero[1]) &&
       !board.includes(c[0]) && !board.includes(c[1]));
-    countLabel.textContent =
-      sel.classes.length + " hand class" + (sel.classes.length === 1 ? "" : "es") +
-      " · " + live.length + " combos vs this spot";
     runBtn.disabled = live.length === 0;
     resetAcc();
   }
@@ -257,13 +252,7 @@ export function mountEquityCalculator(container, onExit) {
       grid,
       statusEl
     ),
-    h("div", { class: "eq-picker-section calc-villain-section" },
-      h("div", { class: "eq-picker-title" },
-        h("span", null, "Villain range"),
-        countLabel
-      ),
-      villainHost
-    ),
+    villainHost,
     h("div", { class: "eq-run-row" }, trialsSel, runBtn),
     result
   );

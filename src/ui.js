@@ -364,8 +364,20 @@ export function mountInGameView(container, gameId) {
         }
       }
       testBtn.addEventListener("click", () => {
-        if (eqState.open) closeEquityPanel();
-        else openEquityWithRange(null);
+        if (eqState.open) { closeEquityPanel(); return; }
+        // Auto-load the LAST chip in the scenario's GTO explanation, if any.
+        // Scenarios without a named villain range fall through to standalone
+        // mode (empty matrix + "Tap Customize…" hint).
+        const ranges = (scen && scen.villain_ranges) || [];
+        const last = ranges.length ? ranges[ranges.length - 1] : null;
+        if (last) {
+          openEquityWithRange({
+            classes: last.classes,
+            label: "Auto-loaded: " + last.label,
+          });
+        } else {
+          openEquityWithRange(null);
+        }
       });
 
       const explain = h("p", { class: "gto-explanation" }, scen
