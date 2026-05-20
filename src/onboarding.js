@@ -7,6 +7,7 @@
 import {
   createGame,
   joinGame,
+  watchOpenLobbies,
   cancelLobby,
   watchMyActiveGames,
   cancelGame,
@@ -178,7 +179,7 @@ export function mountLandingView(container, onCreate, onJoin) {
       "div",
       { class: "landing-actions" },
       h("button", { class: "primary", onClick: () => onCreate() }, "Start a game"),
-      h("button", { class: "secondary", onClick: () => onJoin() }, "Join with code")
+      h("button", { class: "secondary", onClick: () => onJoin() }, "Join a game")
     ),
     activeGames.el,
     h(
@@ -188,8 +189,8 @@ export function mountLandingView(container, onCreate, onJoin) {
       h(
         "ol",
         null,
-        h("li", null, "One player presses Start and picks the game length. They get a share link and a 6-character game code."),
-        h("li", null, "Send the link (or just the code) to your opponent. They tap the link, or paste the code into Join with code."),
+        h("li", null, "One player presses Start and picks the game length. Their game opens as a lobby."),
+        h("li", null, "The other player presses Join, sees the open game, and taps it — or follows the share link if you sent one."),
         h("li", null, "Each round you both get the same hands. You pick an action, rate your confidence 1-5, and (optionally) drop a note. Neither of you sees the other's answer until you've both submitted."),
         h("li", null, "When all rounds are done, you both see a wrap-up with your individual GTO accuracy, your agreement rate, and the disagreements where you were both most sure.")
       )
@@ -521,102 +522,129 @@ export function buildAvatar(name, photoURL) {
   return h("div", { class: "avatar avatar-fallback" }, initial);
 }
 
-// Note: buildLobbyCard was removed when the open-lobby browser was
-// retired. The Join surface is now a code-entry form (below) because
-// the share-link / code flow is the intended way to invite a
-// specific opponent.
+// Builds a lobby-list card for the Join screen — owner avatar, name,
+// and game shape (rounds × hands).
+function buildLobbyCard(lobby, onJoin) {
+  const card = h(
+    "button",
+    { type: "button", class: "lobby-card" },
+    buildAvatar(lobby.ownerName, lobby.ownerPhoto),
+    h("div", { class: "lobby-main" },
+      h("strong", null, lobby.ownerName),
+      h("span", { class: "muted lobby-detail" },
+        lobby.rounds + (lobby.rounds === 1 ? " round" : " rounds") + " · " +
+        lobby.handfulSize + " hands each")
+    ),
+    h("span", { class: "lobby-go" }, "Join")
+  );
+  card.addEventListener("click", () => onJoin(card));
+  return card;
+}
 
 /**
- * Code-entry join screen. Replaces the old open-lobby browser. The
- * intended flow is: opener creates a game, shares the URL or 6-char
- * code with the specific person they want to play. The opponent
- * either taps the link (auto-loads the game) or pastes the code
- * here. No browsing strangers' lobbies, no exposing your game to
- * randoms / bots.
+ * Open-lobby browser. Lists every waiting_for_opponent game (other
+ * than the viewer's own) and lets the user tap one to join. Stale
+ * lobbies older than the staleness threshold are filtered client-side
+ * so dead test artifacts (deploytest, verifybot, etc.) don't clutter
+ * the list. Includes a Back-to-home button — the previous version was
+ * a dead-end with no way to exit.
  */
 export function mountJoinGameView(container, onJoined, onBack) {
   clear(container);
+  // Lobbies older than this with no opponent activity are considered
+  // stale and filtered out client-side. Mirrors the active-games panel
+  // staleness threshold (7 days).
+  const STALE_DAYS = 7;
+
+  let unsub = null;
   let busy = false;
 
+  const statusEl = h("p", { class: "muted" }, "Looking for open games…");
+  const listEl = h("div", { class: "lobby-list" });
   const errorBox = h("div", { class: "error", role: "alert" });
-
-  // Code input — 6 chars; auto-upper, alphanumeric only. The Join
-  // button enables when the input matches the expected shape.
-  const codeInput = h("input", {
-    type: "text",
-    class: "join-code-input",
-    inputmode: "text",
-    autocomplete: "off",
-    autocapitalize: "characters",
-    spellcheck: "false",
-    maxlength: "6",
-    placeholder: "ABC123",
-    "aria-label": "Game code",
-  });
-
-  const joinBtn = h("button", { type: "button", class: "primary join-submit", disabled: true }, "Join game");
   const backBtn = h("button", { type: "button", class: "secondary join-back" }, "← Back to home");
+  backBtn.addEventListener("click", () => { if (!busy && onBack) onBack(); });
 
-  function normalize(v) {
-    return String(v || "").toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 6);
-  }
-  function refresh() {
-    const code = normalize(codeInput.value);
-    if (code !== codeInput.value) codeInput.value = code;
-    joinBtn.disabled = busy || code.length !== 6;
-  }
-  codeInput.addEventListener("input", () => { errorBox.textContent = ""; refresh(); });
-  codeInput.addEventListener("keydown", (ev) => {
-    if (ev.key === "Enter" && !joinBtn.disabled) { ev.preventDefault(); submit(); }
-  });
-
-  async function submit() {
+  async function joinLobby(lobby, card) {
     if (busy) return;
-    const code = normalize(codeInput.value);
-    if (code.length !== 6) return;
     busy = true;
-    joinBtn.disabled = true;
+    card.disabled = true;
     backBtn.disabled = true;
     errorBox.textContent = "";
     try {
-      const res = await joinGame(code);
+      const res = await joinGame(lobby.gameId);
       if (res && res.error) {
-        if (res.error === "game_full") errorBox.textContent = "That game already has two players.";
-        else if (res.error === "cancelled") errorBox.textContent = "That game was cancelled.";
-        else if (res.error === "not_found") errorBox.textContent = "No game found with that code. Double-check the code with your opponent.";
-        else if (res.error === "not_signed_in") errorBox.textContent = "Sign in first.";
+        if (res.error === "game_full") errorBox.textContent = "Someone else joined that game first — pick another.";
+        else if (res.error === "cancelled" || res.error === "not_found") errorBox.textContent = "That game is no longer open.";
         else errorBox.textContent = "Couldn't join: " + res.error;
         busy = false;
+        card.disabled = false;
         backBtn.disabled = false;
-        refresh();
         return;
       }
+      if (unsub) unsub();
       onJoined(res.gameId);
     } catch (err) {
       console.error(err);
       errorBox.textContent = "Couldn't join. Check your connection and try again.";
       busy = false;
+      card.disabled = false;
       backBtn.disabled = false;
-      refresh();
     }
   }
-  joinBtn.addEventListener("click", submit);
-  backBtn.addEventListener("click", () => { if (!busy && onBack) onBack(); });
+
+  function isStale(lobby) {
+    if (!lobby.createdAt) return false;
+    const ms = Date.now() - Date.parse(lobby.createdAt);
+    if (Number.isNaN(ms)) return false;
+    return ms / 86400000 > STALE_DAYS;
+  }
+
+  function render(lobbies, err) {
+    clear(listEl);
+    if (err) {
+      statusEl.textContent = "";
+      errorBox.textContent =
+        "Couldn't load open games. If the Firestore rules were just updated, make sure they've been published in the Firebase Console.";
+      return;
+    }
+    errorBox.textContent = "";
+    const fresh = (lobbies || []).filter((l) => !isStale(l));
+    const dropped = (lobbies || []).length - fresh.length;
+    if (fresh.length === 0) {
+      statusEl.textContent = dropped > 0
+        ? "No open games right now (" + dropped + " stale lobbies hidden). Ask someone to press Start — or start one yourself."
+        : "No open games right now. Ask someone to press Start — or start one yourself.";
+      return;
+    }
+    const main = fresh.length === 1 ? "1 open game" : fresh.length + " open games";
+    statusEl.textContent = dropped > 0
+      ? main + " · " + dropped + " stale hidden"
+      : main;
+    for (const lobby of fresh) {
+      listEl.appendChild(buildLobbyCard(lobby, (card) => joinLobby(lobby, card)));
+    }
+  }
+
+  unsub = watchOpenLobbies((lobbies, err) => render(lobbies, err));
 
   const root = h(
     "section",
     { class: "join-game" },
-    h("h2", null, "Join with code"),
-    h("p", { class: "muted" },
-      "Paste the 6-character game code your opponent shared. Or tap the share link they sent and you'll land straight in the game."),
-    h("div", { class: "join-code-row" }, codeInput, joinBtn),
+    h("h2", null, "Join a game"),
+    h("p", { class: "muted" }, "Tap an open game to join it. First come, first served."),
+    statusEl,
+    listEl,
     errorBox,
     h("div", { class: "join-actions" }, backBtn)
   );
   container.appendChild(root);
-  // Focus the input so a typed/pasted code works without an extra tap.
-  setTimeout(() => { try { codeInput.focus(); } catch (_) {} }, 0);
-  return { unmount: () => clear(container) };
+  return {
+    unmount: () => {
+      if (unsub) unsub();
+      clear(container);
+    },
+  };
 }
 
 // -----------------------------------------------------------------------
