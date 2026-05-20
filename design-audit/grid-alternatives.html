@@ -109,8 +109,38 @@
   .hc-scroll-grid button.is-on .pcard { box-shadow:0 0 0 2px #4cb6ff; }
   .hc-scroll-grid button.is-dead .pcard { opacity:0.3; filter:grayscale(60%); }
 
-  /* Villain alt B — three distinct input sections + matrix display    */
+  /* Villain alt B — matrix-as-hero, controls collapsible             */
   .sm { display:flex; flex-direction:column; gap:10px; }
+
+  /* The pre-loaded range label sits prominently above the matrix.    */
+  .sm-loaded-label {
+    color:#e8a93f; font-size:.78rem; font-weight:600;
+    margin-right:6px;
+  }
+
+  /* Disclosure toggle for the input controls (collapsed by default). */
+  .sm-modify-btn {
+    background:transparent; border:1px solid #243646;
+    color:#8aa1b1; font-size:.78rem; font-weight:600;
+    padding:5px 11px; border-radius:6px; min-height:0;
+    cursor:pointer; display:inline-flex; align-items:center; gap:5px;
+  }
+  .sm-modify-btn:hover { color:#e6edf3; border-color:#4cb6ff; }
+  .sm-modify-btn .chev {
+    display:inline-block; transition:transform 0.18s;
+    font-size:.7rem; opacity:0.7;
+  }
+  .sm-modify-btn.is-open .chev { transform:rotate(180deg); }
+
+  .sm-controls-wrap {
+    display:flex; flex-direction:column; gap:10px;
+    overflow:hidden; max-height:0; opacity:0;
+    transition:max-height 0.22s ease, opacity 0.18s ease, margin 0.22s ease;
+    margin-top:0;
+  }
+  .sm-controls-wrap.is-open {
+    max-height:800px; opacity:1; margin-top:0;
+  }
   /* Each input section is its own labeled card */
   .sm-section {
     background:#0c1620; border:1px solid #1a2735;
@@ -254,49 +284,58 @@
     </div>
 
     <div class="phone" style="grid-column: 1 / -1; max-width: 760px;">
-      <div class="phone-title"><strong>Villain range</strong><span class="tag tag-alt">Alt B — slider + presets + matrix</span></div>
+      <div class="phone-title"><strong>Villain range</strong><span class="tag tag-alt">Alt B — matrix-first, controls collapsed</span></div>
 
       <div class="sm-header">
-        <div id="v-smr-stats" class="panel-stats" style="margin:0; flex:1 1 auto;">0 hand classes selected</div>
-        <button id="v-smr-clear" class="sm-clear" title="Clear all selected hands">⌫ Clear all</button>
+        <div id="v-smr-stats" class="panel-stats" style="margin:0; flex:1 1 auto;">…</div>
+        <button id="v-smr-modify" class="sm-modify-btn" aria-expanded="false" title="Show controls to modify the range">
+          <span class="lbl">Modify range</span>
+          <span class="chev">▼</span>
+        </button>
       </div>
 
       <div class="sm">
-        <div class="sm-section">
-          <div class="sm-section-label"><span>Top %</span><span class="hint">drag slider or jump to a preselect</span></div>
-          <div class="sm-slider-row">
-            <input type="range" id="v-smr-slider" min="0" max="100" value="0" step="1" />
-            <span class="sm-slider-label" id="v-smr-pct">0%</span>
-          </div>
-          <div class="sm-jump">
-            <span class="sm-jump-label">Jump to:</span>
-            <div id="v-smr-jumps" style="display:flex; gap:2px;"></div>
-          </div>
-        </div>
-
-        <div class="sm-section">
-          <div class="sm-section-label"><span>Category</span><span class="hint">replaces the current selection</span></div>
-          <div class="sm-cats" id="v-smr-cats"></div>
-        </div>
-
-        <div class="sm-section">
-          <div class="sm-section-label"><span>Filter</span><span class="hint">applies to current selection</span></div>
-          <div class="sm-filter-row">
-            <div>
-              <div class="sm-filter-name">Playable hands only</div>
-              <div class="sm-filter-sub">Intersect with a top-30% reference range</div>
-            </div>
-            <button id="v-smr-playable" class="sm-switch" aria-pressed="false" title="Restrict selection to a 'playable' reference set">
-              <span class="sm-switch-track"></span>
-              <span class="sm-switch-thumb"></span>
-            </button>
-          </div>
-        </div>
-
         <div class="sm-matrix-wrap">
           <div class="sm-matrix" id="v-smr-matrix"></div>
         </div>
-        <div class="sm-hint">Matrix is the <b>display</b> of the range. Tap any cell to fine-tune. (Pinch-zoom to enlarge on a real phone.)</div>
+
+        <div class="sm-controls-wrap" id="v-smr-controls-wrap">
+          <div class="sm-section">
+            <div class="sm-section-label">
+              <span>Top %</span>
+              <button id="v-smr-clear" class="sm-clear" title="Clear all selected hands">⌫ Clear all</button>
+            </div>
+            <div class="sm-slider-row">
+              <input type="range" id="v-smr-slider" min="0" max="100" value="0" step="1" />
+              <span class="sm-slider-label" id="v-smr-pct">0%</span>
+            </div>
+            <div class="sm-jump">
+              <span class="sm-jump-label">Jump to:</span>
+              <div id="v-smr-jumps" style="display:flex; gap:2px;"></div>
+            </div>
+          </div>
+
+          <div class="sm-section">
+            <div class="sm-section-label"><span>Category</span><span class="hint">replaces the current selection</span></div>
+            <div class="sm-cats" id="v-smr-cats"></div>
+          </div>
+
+          <div class="sm-section">
+            <div class="sm-section-label"><span>Filter</span><span class="hint">applies to current selection</span></div>
+            <div class="sm-filter-row">
+              <div>
+                <div class="sm-filter-name">Playable hands only</div>
+                <div class="sm-filter-sub">Intersect with a top-30% reference range</div>
+              </div>
+              <button id="v-smr-playable" class="sm-switch" aria-pressed="false" title="Restrict selection to a 'playable' reference set">
+                <span class="sm-switch-track"></span>
+                <span class="sm-switch-thumb"></span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="sm-hint">Default state mimics a chip-click from the GTO prose: the named range is the answer, the matrix is the canonical display. Tap <b>Modify range</b> only when you want to override.</div>
       </div>
     </div>
   </div>
@@ -500,6 +539,17 @@
     const statsEl = document.getElementById("v-smr-stats");
     const playableEl = document.getElementById("v-smr-playable");
     const clearEl = document.getElementById("v-smr-clear");
+    const modifyEl = document.getElementById("v-smr-modify");
+    const controlsWrapEl = document.getElementById("v-smr-controls-wrap");
+
+    // Mimic a chip-click from the GTO prose: the panel opens with the
+    // named villain range pre-loaded. The "loaded label" stays visible
+    // until the user modifies, at which point it switches to "Custom".
+    const PRELOADED_RANGE = {
+      label: "BB's 3-bet range",
+      hands: ["AA","KK","QQ","JJ","AKs","AKo","A5s","A4s","A3s"],
+    };
+    let loadedLabel = PRELOADED_RANGE.label;
 
     const ALL_LABELS = [];
     for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) ALL_LABELS.push(classLabel(r, c));
@@ -526,9 +576,18 @@
         cellBy[lbl].classList.toggle("is-on", on);
         if (on) combos += comboCount(lbl);
       }
-      statsEl.innerHTML = "<b>" + sel.size + "</b> hand class" + (sel.size === 1 ? "" : "es") +
+      const prefix = loadedLabel
+        ? '<span class="sm-loaded-label">' + loadedLabel + '</span>'
+        : '';
+      statsEl.innerHTML = prefix +
+        "<b>" + sel.size + "</b> hand class" + (sel.size === 1 ? "" : "es") +
         " · <b>" + combos + "</b> combo" + (combos === 1 ? "" : "s") +
         (playableOnly ? " · <span style=\"color:#e8a93f\">playable filter on</span>" : "");
+    }
+
+    function markCustom() {
+      // Any user modification drops the "loaded range" label.
+      loadedLabel = null;
     }
 
     function setTopN(pct, source) {
@@ -538,10 +597,9 @@
       pctEl.textContent = "Top " + pct + "%";
       if (source !== "slider") sliderEl.value = pct;
       activeMode = "slider";
-      // Jump-to highlight if pct matches one of the preselects
       Array.from(jumpsEl.children).forEach((b) => b.classList.toggle("is-on", parseInt(b.dataset.pct, 10) === pct));
-      // Clear category highlight
       Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+      markCustom();
       render();
     }
 
@@ -554,6 +612,7 @@
       activeMode = "category";
       Array.from(catsEl.children).forEach((b) => b.classList.toggle("is-on", b.textContent === name));
       Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+      markCustom();
       render();
     }
 
@@ -562,6 +621,19 @@
       sliderEl.value = 0;
       pctEl.textContent = "0%";
       activeMode = null;
+      Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+      Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+      markCustom();
+      render();
+    }
+
+    function loadNamedRange(label, hands) {
+      raw.clear();
+      for (const h of hands) raw.add(h);
+      sliderEl.value = 0;
+      pctEl.textContent = hands.length + " hands";
+      activeMode = "preloaded";
+      loadedLabel = label;
       Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
       Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
       render();
@@ -578,12 +650,12 @@
         btn.addEventListener("click", () => {
           if (raw.has(lbl)) raw.delete(lbl);
           else raw.add(lbl);
-          // Manual tap drops slider + category highlights
           sliderEl.value = 0;
           pctEl.textContent = raw.size + " hands";
           activeMode = "manual";
           Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
           Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+          markCustom();
           render();
         });
         cellBy[lbl] = btn;
@@ -608,7 +680,8 @@
       catsEl.appendChild(btn);
     }
 
-    // Playable toggle (switch).
+    // Playable toggle (switch). Playable is a *filter*, so toggling it
+    // doesn't change the underlying intent — keep the loaded label.
     playableEl.addEventListener("click", () => {
       playableOnly = !playableOnly;
       playableEl.classList.toggle("is-on", playableOnly);
@@ -616,13 +689,24 @@
       render();
     });
 
-    // Clear all (header action).
+    // Clear all (now lives inside the Top % section header).
     clearEl.addEventListener("click", clearAll);
 
     // Slider input.
     sliderEl.addEventListener("input", (ev) => setTopN(parseInt(ev.target.value, 10) || 0, "slider"));
 
-    render();
+    // Disclosure toggle — controls collapsed by default to keep the
+    // matrix as the visual hero on chip-loaded panels.
+    modifyEl.addEventListener("click", () => {
+      const open = !controlsWrapEl.classList.contains("is-open");
+      controlsWrapEl.classList.toggle("is-open", open);
+      modifyEl.classList.toggle("is-open", open);
+      modifyEl.setAttribute("aria-expanded", open ? "true" : "false");
+      modifyEl.querySelector(".lbl").textContent = open ? "Hide controls" : "Modify range";
+    });
+
+    // Pre-load a sample named range to mimic a GTO chip-click flow.
+    loadNamedRange(PRELOADED_RANGE.label, PRELOADED_RANGE.hands);
   })();
 
   // ---------------- HERO — Current (horizontal scroll grid) ----------------
