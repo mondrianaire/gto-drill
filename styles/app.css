@@ -455,6 +455,16 @@ form { margin-top: 8px; }
 .hand-nav .hand-back { flex: 0 0 auto; min-width: 92px; }
 .hand-nav .hand-fwd { flex: 1 1 auto; }
 
+/* Lock-in button when it lives INSIDE the decide body (below the note
+   toggle) — needs a top margin to separate it from the note details
+   row and full width to feel like a "submit the form" action. */
+.decide .lock-in-btn {
+  display: block;
+  width: 100%;
+  margin-top: 16px;
+}
+.decide .lock-in-btn[hidden] { display: none; }
+
 /* Per-hand reveal — the educational moment of every hand. Replaces the
    old cramped text-block layout with a "matrix" of every selectable
    option, each carrying badges identifying who picked it:

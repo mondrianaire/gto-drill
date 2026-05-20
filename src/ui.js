@@ -827,6 +827,16 @@ export function mountInGameView(container, gameId) {
 
     if (!sub.revealed) {
       // ===================== DECIDE =====================
+      // Lock-in button is built first so the action/confidence click
+      // handlers below can reveal it once both are picked. It lives
+      // INSIDE the decide body (below the note), not in the hand-nav
+      // row at the bottom — so the call-to-action visually belongs to
+      // the form it's submitting. Back stays in hand-nav.
+      const lockInBtn = h("button", { type: "button", class: "primary hand-fwd lock-in-btn", hidden: true }, "Lock in & see GTO →");
+      function refreshLockBtn() {
+        lockInBtn.hidden = !(sub.action && sub.confidence);
+      }
+
       const actionRow = h("div", { class: "actions-row", role: "radiogroup", "aria-label": "Your move" });
       (scen ? scen.available_actions : []).forEach((a) => {
         // Run the action label through richText so bb chips / pot-%s /
@@ -836,6 +846,7 @@ export function mountInGameView(container, gameId) {
           sub.action = a;
           actionRow.querySelectorAll(".action-btn").forEach((x) => x.classList.toggle("selected", x === btn));
           errorBox.textContent = "";
+          refreshLockBtn();
         });
         actionRow.appendChild(btn);
       });
@@ -847,6 +858,7 @@ export function mountInGameView(container, gameId) {
           sub.confidence = c;
           confRow.querySelectorAll(".conf-btn").forEach((x) => x.classList.toggle("selected", x === btn));
           errorBox.textContent = "";
+          refreshLockBtn();
         });
         confRow.appendChild(btn);
       }
@@ -863,21 +875,28 @@ export function mountInGameView(container, gameId) {
       );
       if (sub.note) noteToggle.open = true;
 
-      body = h("div", { class: "decide" },
-        h("span", { class: "decide-label" }, "Your move"),
-        actionRow,
-        h("span", { class: "decide-label decide-label-sub" }, "How sure?  (1 = guess, 5 = certain)"),
-        confRow,
-        noteToggle
-      );
-
-      fwdBtn = h("button", { type: "button", class: "primary hand-fwd" }, "Lock in & see GTO →");
-      fwdBtn.addEventListener("click", () => {
+      lockInBtn.addEventListener("click", () => {
         if (!sub.action) { errorBox.textContent = "Pick your move for this hand."; return; }
         if (!sub.confidence) { errorBox.textContent = "Rate how sure you are (1–5)."; return; }
         sub.revealed = true;
         render(lastGame);
       });
+
+      body = h("div", { class: "decide" },
+        h("span", { class: "decide-label" }, "Your move"),
+        actionRow,
+        h("span", { class: "decide-label decide-label-sub" }, "How sure?  (1 = guess, 5 = certain)"),
+        confRow,
+        noteToggle,
+        lockInBtn
+      );
+
+      // Set initial visibility (handles the case where the user came
+      // back to a hand that already has action+confidence on the draft).
+      refreshLockBtn();
+      // No fwdBtn during decide — the lock-in lives inside the body.
+      // Back still appears alone in hand-nav so the user can navigate.
+      fwdBtn = null;
     } else {
       // ===================== REVEAL (the GTO screen) =====================
       // EVERYTHING below this line is GTO content — only appears AFTER the
@@ -1012,7 +1031,7 @@ export function mountInGameView(container, gameId) {
       progress,
       h("div", { class: "hand-card" }, spot, body),
       errorBox,
-      h("div", { class: "hand-nav" }, backBtn, fwdBtn)
+      h("div", { class: "hand-nav" }, backBtn, fwdBtn || null)
     ));
   }
 
