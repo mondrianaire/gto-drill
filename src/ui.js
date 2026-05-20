@@ -13,7 +13,7 @@ import { perPlayerAccuracy, interPlayerAgreement, rankedDisagreements } from "./
 import { recordGame, writeActiveGameId } from "./history.js";
 import { mountReplay, cardEl, liveVillains, potAtDecisionBb } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { buildTermRegex, lookupTerm } from "./dictionary.js";
+import { buildTermRegex, lookupTerm, getTooltipThreshold } from "./dictionary.js";
 import { wireTermTrigger } from "./tooltip.js";
 import { buildShareLinkButton, shareUrlForGame } from "./share.js";
 
@@ -314,7 +314,7 @@ export function richText(text, scen, opts) {
  * residue.
  */
 function wrapDictionaryTerms(fragOrEl) {
-  const termRe = buildTermRegex();
+  const termRe = buildTermRegex({ minComplexity: getTooltipThreshold() });
   if (!termRe) return fragOrEl;
   const out = document.createDocumentFragment();
   for (const node of Array.from(fragOrEl.childNodes)) {

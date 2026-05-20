@@ -1229,6 +1229,17 @@ form { margin-top: 8px; }
 }
 .dict-header h2 { margin: 0; font-size: 1.2rem; }
 .dict-count { font-size: 0.85rem; flex: 1 1 auto; }
+.dict-threshold {
+  font-size: 0.82rem;
+  padding: 4px 8px;
+  background: var(--bg-elev);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  cursor: pointer;
+  flex: 0 0 auto;
+}
+.dict-threshold:hover { border-color: var(--accent); }
 .dict-search {
   width: 100%; margin-bottom: 0;
   padding: 10px 14px;
