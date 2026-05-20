@@ -236,6 +236,39 @@ form { margin-top: 8px; }
   flex-wrap: wrap;
   gap: 8px;
 }
+
+/* "No opponent yet" invite banner — informational strip shown inside
+   the in-game view when the second seat hasn't been filled. Lets the
+   creator know they can play their batch right now and the opponent
+   will catch up on their own time. Cool-blue accent so it reads as
+   info, not a warning. */
+.invite-banner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 10px 14px;
+  margin-bottom: 14px;
+  background: rgba(74, 138, 204, 0.08);
+  border: 1px solid rgba(74, 138, 204, 0.35);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius);
+}
+.invite-banner-icon {
+  font-size: 1.15rem;
+  line-height: 1.4;
+  flex-shrink: 0;
+}
+.invite-banner-body { flex: 1 1 auto; min-width: 0; }
+.invite-banner-title {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+.invite-banner-text {
+  font-size: 0.85rem;
+  line-height: 1.4;
+  margin-top: 2px;
+}
 .scenario-list {
   display: flex;
   flex-direction: column;

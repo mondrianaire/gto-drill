@@ -983,6 +983,26 @@ export function mountInGameView(container, gameId) {
     container.appendChild(headerBar);
     container.appendChild(shareFallback);
 
+    // "No opponent yet" banner — appears as soon as the game has only
+    // one participant. Lets the creator know they can play freely now
+    // and the opponent will catch up whenever they join. The header's
+    // share button is the action; this banner explains why they'd use
+    // it. Disappears the moment a second player joins.
+    const participantCount = (game.participantUids || []).length;
+    if (participantCount < 2 && game.status !== "complete" && game.status !== "cancelled") {
+      const inviteBanner = h("div", { class: "invite-banner" },
+        h("span", { class: "invite-banner-icon", "aria-hidden": "true" }, "🔗"),
+        h("div", { class: "invite-banner-body" },
+          h("div", { class: "invite-banner-title" }, "Opponent hasn't joined yet"),
+          h("div", { class: "invite-banner-text muted" },
+            "Play your batch now — they'll catch up when they open the share link. ",
+            "Tap the link icon above to copy the invite."
+          )
+        )
+      );
+      container.appendChild(inviteBanner);
+    }
+
     if (phase.gameComplete) {
       mountWrapUpView(container, gameId, { reuseGame: game });
       return;

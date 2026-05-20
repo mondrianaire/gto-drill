@@ -237,15 +237,17 @@ function mountRouter(root) {
   }
 
   function goWaitingOrGame(gameId) {
-    // After Start, show the waiting screen until an opponent joins
-    // (status flips to in_progress), or jump straight to the in-game /
-    // wrap-up view if the game is already further along.
+    // Async-by-design: the creator doesn't need to wait for an opponent
+    // to connect before starting their first batch. Route directly to
+    // the in-game view in every active-game state. The in-game view
+    // already shows a Copy-share-link button in the header AND a
+    // dedicated "no opponent yet" banner inside the play area so the
+    // creator can invite the opponent at any moment while they play.
+    // The waiting view (mountWaitingForOpponentView) is no longer the
+    // default landing but stays available for explicit cancel flows.
     clearRoot();
-    let mounted = null;
-    let firstRender = true;
     const bail = () => {
       if (unsub) unsub();
-      if (mounted) mounted.unmount();
       writeActiveGameId(null);
       goLanding();
     };
@@ -253,20 +255,18 @@ function mountRouter(root) {
       gameId,
       (game) => {
         if (!game) { bail(); return; } // game document is gone
-        if (game.status === "waiting_for_opponent" && firstRender) {
-          firstRender = false;
-          if (mounted) mounted.unmount();
-          mounted = mountWaitingForOpponentView(root, gameId);
-        } else if (game.status === "in_progress" || game.status === "complete") {
+        if (game.status === "cancelled") {
           unsub();
-          if (mounted) mounted.unmount();
-          if (game.status === "complete") goWrapUp(gameId);
-          else goInGame(gameId);
-        } else if (game.status === "cancelled") {
-          unsub();
-          if (mounted) mounted.unmount();
           goLanding();
+          return;
         }
+        // waiting_for_opponent, in_progress, complete — all land in the
+        // appropriate downstream view. Status flipping later (opponent
+        // joins, opponent submits) is handled by the in-game view's
+        // own snapshot listener via readGame.
+        unsub();
+        if (game.status === "complete") goWrapUp(gameId);
+        else goInGame(gameId);
       },
       () => bail() // can't read the game — drop it and go home
     );
