@@ -71,12 +71,18 @@ function knownCards(scen) {
 //   4 = "Nbb" / "N.Nbb" → stylized bb chip
 //   5 = "K?" → unknown-suit card (suit not yet determined)
 //   6 = "Kx" → doesn't-matter-suit card (analyst says suit irrelevant)
-//   7 = "K72" / "K72r" / "K72 rainbow" → multi-card rainbow board (3-5 ranks)
-//   8 = "KK" / "AA" / "AK" / "JT" → 2-rank hand-class shorthand (pair or non-pair)
+//   7 = "K72" board run (3-5 ranks) — rendered as N default doesn't-matter
+//       cards; the OPTIONAL group-8 modifier appends a board-modifier glyph.
+//   8 = board modifier suffix: "r" / " rainbow" / "m" / "mono" / " monotone"
+//       / "tt" / " two-tone" / " two-toned". Group 7's ranks render as
+//       cards, then group 8 (if present) renders the appropriate modifier
+//       glyph alongside, so the math composes: (K72) + (rainbow) glyph.
+//   9 = "KK" / "AA" / "AK" / "JT" → 2-rank hand-class shorthand
 // Order matters for regex alternation: longer/more-specific patterns first.
-// Group 7 (3-5 ranks) is listed before group 8 (2 ranks) so multi-card
-// boards aren't truncated to a 2-rank hand class.
-const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(?:r\b|\s+rainbow\b)?|\b([2-9TJQKA]{2})\b/g;
+// Group 9's negative lookahead `(?!\s*%)` prevents "(~75% pot)" from
+// rendering "75" as a 2-rank hand class. Percentages share the digit
+// vocabulary with rank shorthand; the % suffix is the distinguishing cue.
+const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(\s+rainbow\b|\s+monotone\b|\s+two-toned?\b|\s*mono\b|\s*tt\b|r\b|m\b)?|\b([2-9TJQKA]{2})\b(?!\s*%)/g;
 
 /** Escape regex meta-characters for safe use inside a constructed RegExp. */
 function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -128,21 +134,36 @@ function tokenizeProse(text, scen) {
       frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: rank + " — any suit" },
         h("span", { class: "tok-anysuit-rank" }, rank === "T" ? "10" : rank)));
     } else if (m[7]) {
-      // "K72" / "K72r" / "K72 rainbow" → multi-card rainbow board.
-      // Render each rank as a card with a rainbow-stripe suit indicator.
+      // 3-5 rank board run — render as N default doesn't-matter cards,
+      // then append a board-modifier glyph if a suffix was captured.
+      // Composition: (K72)(rainbow) = three default cards + rainbow bar.
       const ranks = m[7];
       for (let i = 0; i < ranks.length; i++) {
         const r = ranks[i];
-        frag.appendChild(h("span", { class: "tok-rainbow", title: r + " — rainbow board (any of 4 suits, all different)" },
-          h("span", { class: "tok-rainbow-rank" }, r === "T" ? "10" : r),
-          h("span", { class: "tok-rainbow-suit", "aria-hidden": "true" })));
+        frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
+          h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r)));
       }
-    } else if (m[8]) {
+      const modRaw = m[8];
+      if (modRaw) {
+        const mod = modRaw.trim().toLowerCase();
+        let kind = null;
+        let label = null;
+        if (mod === "rainbow" || mod === "r") { kind = "rainbow"; label = "Rainbow — all suits different"; }
+        else if (mod === "monotone" || mod === "m" || mod === "mono") { kind = "monotone"; label = "Monotone — all one suit"; }
+        else if (mod === "two-tone" || mod === "two-toned" || mod === "tt") { kind = "twotone"; label = "Two-tone — two suits"; }
+        if (kind) {
+          frag.appendChild(h("span", {
+            class: "tok-modifier tok-modifier-" + kind,
+            title: label,
+            "aria-label": label,
+          }));
+        }
+      }
+    } else if (m[9]) {
       // 2-rank hand-class shorthand ("KK", "AA", "AK", "JT", etc.) — render
-      // as two doesn't-matter cards. Each card is just a big rank — the
-      // empty suit slot conveys "any suit". Reads as "any K + any K" or
+      // as two doesn't-matter cards each. Reads as "any K + any K" or
       // "any A + any K" — which is what the shorthand means.
-      const ranks = m[8];
+      const ranks = m[9];
       for (let i = 0; i < ranks.length; i++) {
         const r = ranks[i];
         frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },

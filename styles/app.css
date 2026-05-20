@@ -794,14 +794,16 @@ form { margin-top: 8px; }
   opacity: 0.78;
 }
 
-/* Three distinct "non-specific" card glyphs:
+/* Two "non-specific" single-card glyphs:
      .tok-anysuit-doesntmatter — "Kx" (analyst says suit irrelevant)
      .tok-anysuit-unknown      — "K?" (suit not determined yet)
-     .tok-rainbow              — "K72" / "K72 rainbow" (multi-card board, different suits)
 
-   The first two share .tok-anysuit chrome (single card, mark in suit
-   slot); the rainbow card uses its own visual because it appears in
-   multi-card runs that need to read collectively as "different suits". */
+   Board-texture modifiers (rainbow / monotone / two-tone) are NOT a per-
+   card concern — they describe how the suits of a multi-card board relate
+   to each other. They're rendered separately as .tok-modifier glyphs that
+   sit next to a run of default doesn't-matter cards. So "K72 rainbow"
+   composes as three default cards + one rainbow modifier glyph, which
+   matches the math: K72 (ranks) × rainbow (suit pattern). */
 .tok-anysuit {
   display: inline-flex;
   flex-direction: column;
@@ -830,36 +832,38 @@ form { margin-top: 8px; }
   letter-spacing: -0.04em;
 }
 
-/* Rainbow board card — same chrome but suit slot is a small rainbow
-   gradient bar (black-red-red-black) so reading three of them together
-   conveys "three different suits". */
-.tok-rainbow {
-  display: inline-flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 19px;
-  height: 23px;
+/* Board-texture modifier glyph — a small pill that sits beside a run of
+   doesn't-matter cards to convey the suit relationship of the board.
+   Sized to read alongside the 19×23 cards without dominating. */
+.tok-modifier {
+  display: inline-block;
+  vertical-align: -3px;
+  width: 22px;
+  height: 14px;
+  margin: 0 2px 0 3px;
   border-radius: 3px;
-  vertical-align: -5px;
-  margin: 0 1px;
-  background: #fdfdfb;
-  color: #1a1a1a;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
-  line-height: 1;
   cursor: help;
 }
-.tok-rainbow-rank { font-weight: 700; font-size: 0.58rem; }
-.tok-rainbow-suit {
-  width: 12px;
-  height: 4px;
-  margin-top: 1px;
-  border-radius: 1px;
+/* Rainbow — four-stripe gradient (♠ ♥ ♦ ♣) reads as "all four suits". */
+.tok-modifier-rainbow {
   background: linear-gradient(90deg,
     #1a1a1a 0 25%,
     #c0202a 25% 50%,
     #c0202a 50% 75%,
     #1a1a1a 75% 100%);
+}
+/* Monotone — single solid block in a generic red (the most visually
+   distinct from rainbow). Carries the "all one suit" signal. */
+.tok-modifier-monotone {
+  background: #c0202a;
+}
+/* Two-tone — split block: half black, half red. "Two of these, two of
+   those." Different enough from monotone at a glance. */
+.tok-modifier-twotone {
+  background: linear-gradient(90deg,
+    #1a1a1a 0 50%,
+    #c0202a 50% 100%);
 }
 
 /* Inline range chip — clickable anchor that pre-loads the equity panel. */
