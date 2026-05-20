@@ -474,6 +474,37 @@ export function buildSpotContext({ scen, onRangeClick }) {
 }
 
 /**
+ * Build the "GTO Read" lead block — the top of the reveal screen.
+ * Headline: "GTO line: [action chip]" prominently. Body: the
+ * gto_explanation paragraph that walks through WHY the solver chose
+ * that line and HOW villain's range got narrowed to what it is.
+ *
+ * Lives ABOVE the verdict bar so the user sees the GTO read first, the
+ * verdict ("you matched / off") second, the comparison third. The
+ * supporting spot-context (framing facts + range chips) sits below.
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ * @param {string} args.gtoAction
+ * @param {(range:Object)=>void} [args.onRangeClick] — for inline range
+ *   chips inside the explanation paragraph
+ */
+export function buildGtoRead({ scen, gtoAction, onRangeClick }) {
+  if (!scen) return null;
+  const richOpts = onRangeClick ? { onRangeClick } : undefined;
+  const body = scen.gto_explanation
+    ? h("p", { class: "gto-read-body" }, richText(scen.gto_explanation, scen, richOpts))
+    : null;
+  return h("div", { class: "gto-read" },
+    h("div", { class: "gto-read-header" },
+      h("span", { class: "gto-read-label muted" }, "GTO line"),
+      h("span", { class: "gto-read-action" }, richText(gtoAction, scen, { asAction: true }))
+    ),
+    body
+  );
+}
+
+/**
  * Build the reveal-result block — the educational moment of every hand.
  * Returns a compact comparison: when Hero matched the GTO line, a single
  * centred tile (the action is the answer). When Hero missed, a two-column
@@ -862,13 +893,8 @@ export function mountInGameView(container, gameId) {
         opponent,
       });
 
-      // GTO explanation prose — the legacy single-paragraph analysis.
-      // Inline range anchors in the prose render as clickable chips that
-      // route into the same equity panel as the spot-context chips.
-      const explain = scen && scen.gto_explanation
-        ? h("p", { class: "gto-explanation" },
-            richText(scen.gto_explanation, scen, { onRangeClick: openEquityWithRange }))
-        : null;
+      // GTO Read lead — top of the reveal: GTO line headline + reasoning.
+      const gtoRead = buildGtoRead({ scen, gtoAction: gto, onRangeClick: openEquityWithRange });
 
       // "Test it" — reveal-only fallback. Auto-loads the LAST villain range.
       const testBtn = h("button", { type: "button", class: "secondary test-it" }, "🎲  Test it — equity vs a range");
@@ -889,10 +915,10 @@ export function mountInGameView(container, gameId) {
       });
 
       body = h("div", { class: "hand-reveal" },
-        spotContext,    // framing + villain range chips (GTO scene-setting)
+        gtoRead,        // NEW LEAD: GTO line + reasoning paragraph
+        result,         // verdict bar + comparison + opponent panel
+        spotContext,    // THE SPOT framing + villain range chips (supporting)
         equityHost,     // Monte Carlo panel mounts here when a chip is clicked
-        result,         // verdict bar + compact comparison + opponent panel
-        explain,        // single-paragraph gto_explanation (restored)
         h("div", { class: "test-row" }, testBtn)
       );
 

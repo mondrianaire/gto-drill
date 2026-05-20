@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult, buildSpotContext } from "./ui.js";
+import { richText, buildRevealResult, buildSpotContext, buildGtoRead } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
 
 // -----------------------------------------------------------------------
@@ -265,20 +265,17 @@ export function mountSoloView(container, onExit) {
         confidence: draft.confidence,
       });
 
-      // GTO explanation prose — the legacy single-paragraph analysis.
-      // Inline range anchors in the prose become clickable chips that
-      // pop the equity panel (same `onRangeClick` plumbing as the
-      // villain-range chips in spot-context).
-      const explain = scen && scen.gto_explanation
-        ? h("p", { class: "gto-explanation" },
-            richText(scen.gto_explanation, scen, { onRangeClick: openWithRange }))
-        : null;
+      // GTO Read lead — the new top section: "GTO line: [chip]" headline
+      // plus the gto_explanation paragraph. The user sees the GTO answer
+      // + reasoning FIRST, then the verdict, then comparison, then the
+      // supporting spot-context (framing + range chips) beneath.
+      const gtoRead = buildGtoRead({ scen, gtoAction: gto, onRangeClick: openWithRange });
 
       body = h("div", { class: "hand-reveal" },
-        spotContext,    // framing + villain range chips (GTO scene-setting)
+        gtoRead,        // NEW LEAD: GTO line + reasoning paragraph
+        result,         // verdict bar + comparison + opponent panel
+        spotContext,    // THE SPOT framing + villain range chips (supporting)
         equityHost,     // Monte Carlo panel mounts here when a chip is clicked
-        result,         // verdict bar + compact comparison + opponent panel
-        explain,        // single-paragraph gto_explanation (restored from legacy)
         h("div", { class: "test-row" }, testBtn)
       );
 

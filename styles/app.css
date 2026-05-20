@@ -558,12 +558,51 @@ form { margin-top: 8px; }
 .reveal-side-correct .reveal-conf-dot         { border-color: var(--ok); opacity: 0.55; }
 .reveal-side-correct .reveal-conf-dot.is-filled { background: var(--ok); border-color: var(--ok); opacity: 1; }
 
-/* Restored: single-paragraph GTO explanation. Lives below the
-   comparison + opponent panel. Inline range chips inside this prose
-   stay clickable and pop the equity panel. */
+/* Single-paragraph GTO explanation — used by the wrap-up's
+   disagreement cards (and potentially other future surfaces). The
+   in-game reveal now uses .gto-read (the lead box) instead, but this
+   class stays for the wrap-up paragraph rendering. */
 .gto-explanation {
   color: var(--text-dim);
   margin: 12px 16px 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+/* GTO Read lead box — top of the reveal screen.
+   Headline: "GTO line" label + the action chip (large, prominent).
+   Body: the gto_explanation paragraph walking through WHY GTO chose
+   this line and HOW villain's range got narrowed. The user reads the
+   GTO answer + reasoning FIRST, then the verdict, then the comparison.
+   THE SPOT (framing + range chips) lives below as supporting facts. */
+.gto-read {
+  background: rgba(74, 138, 204, 0.08);
+  border: 1px solid rgba(74, 138, 204, 0.35);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+}
+.gto-read-header {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  margin-bottom: 8px;
+  flex-wrap: wrap;
+}
+.gto-read-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.gto-read-action {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--ok);
+  line-height: 1.2;
+}
+.gto-read-body {
+  color: var(--text);
+  margin: 0;
   font-size: 0.95rem;
   line-height: 1.5;
 }
@@ -1003,8 +1042,6 @@ form { margin-top: 8px; }
 }
 .gto-line strong { color: var(--accent); }
 .gto-action { font-weight: 600; }
-/* .gto-explanation removed — the free-form paragraph is no longer rendered;
-   per-option pros/cons inside each reveal-option carry the explanation now. */
 
 /* Rich-text tokens — position chips & Hero/Villain identity in GTO prose. */
 .tok-pos {
