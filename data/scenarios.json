@@ -454,7 +454,7 @@
       "Check back",
       "Bet 7bb (50% pot)",
       "Bet 14bb (100% pot)",
-      "Bet 21bb (overbet 150% pot)"
+      "Bet 21bb (overbet)"
     ],
     "gto_action": "Check back",
     "framing": [
