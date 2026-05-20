@@ -11,7 +11,7 @@ import { getScenarioById } from "./scenarios.js";
 import { computePhase } from "./flow.js";
 import { perPlayerAccuracy, interPlayerAgreement, rankedDisagreements } from "./stats.js";
 import { recordGame, writeActiveGameId } from "./history.js";
-import { mountReplay, cardEl, liveVillains, potAtDecisionBb } from "./replay.js";
+import { mountReplay, cardEl, liveVillains, potAtDecisionBb, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
 import { buildTermRegex, lookupTerm, getTooltipThreshold } from "./dictionary.js";
 import { wireTermTrigger } from "./tooltip.js";
@@ -85,10 +85,14 @@ function knownCards(scen) {
 //       bound (no space) per poker convention ("AKs", not "AK s"). When
 //       present, a small suited/offsuit marker pill sits next to the cards.
 // Order matters for regex alternation: longer/more-specific patterns first.
-// Group 9's negative lookahead `(?!\s*%)` prevents "(~75% pot)" from
-// rendering "75" as a 2-rank hand class. Percentages share the digit
-// vocabulary with rank shorthand; the % suffix is the distinguishing cue.
-const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s*[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(\s+rainbow\b|\s+monotone\b|\s+two-toned?\b|\s*mono\b|\s*tt\b|r\b|m\b)?|\b([2-9TJQKA]{2})(s|o)?\b(?!\s*%)/g;
+// Group 9's negative lookahead prevents "75% pot" / "25-40% frequency" /
+// "25/40% mix" from rendering "75" or "25" as a 2-rank hand class:
+//   - `\s*%`           → "75%"
+//   - `\s*-\d+\s*%`    → "25-40%"
+//   - `\s*[/—]\d+\s*%` → "25/40%"
+// Percentages share digit vocab with rank shorthand; the trailing %
+// (possibly via a range) is the distinguishing cue.
+const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s*[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(\s+rainbow\b|\s+monotone\b|\s+two-toned?\b|\s*mono\b|\s*tt\b|r\b|m\b)?|\b([2-9TJQKA]{2})(s|o)?\b(?!\s*(?:[-/–—]\s*\d+)?\s*%)/g;
 
 /** Escape regex meta-characters for safe use inside a constructed RegExp. */
 function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -786,10 +790,11 @@ export function mountInGameView(container, gameId) {
       spot.appendChild(replayHost);
       const r = mountReplay(replayHost, scen.replay);
       replayCleanup = r && r.unmount ? r.unmount : null;
-      spot.appendChild(h("details", { class: "hand-words" },
-        h("summary", null, "The spot in words"),
-        h("p", null, richText(scen.description, scen))
-      ));
+      // Compact mini-display of inflection points (replaces the prose
+      // "spot in words"). Shows only meaningful actions grouped by
+      // street, ending with "← your turn" on the decision street.
+      const summary = buildSpotSummary(scen.replay);
+      if (summary) spot.appendChild(summary);
     } else if (scen) {
       spot.appendChild(h("p", { class: "scenario-desc" }, richText(scen.description, scen)));
       if (scen.board) {

@@ -168,6 +168,109 @@ export function potAtDecisionBb(replay) {
   return displayPot > 0 ? displayPot : null;
 }
 
+/**
+ * Build a compact mini-display of the hand's INFLECTION points up to the
+ * decision — replaces the verbose "spot in words" prose. Groups by
+ * street and shows only the actions that meaningfully change state:
+ *   - bet / raise / call (chips move)
+ *   - check (initiative passes — useful context)
+ * Skips: posts (defaults), folds (noise).
+ *
+ * Each street row shows: street label + board cards dealt this street
+ * + the inflection actions. The row for the current decision street
+ * ends with a "← Hero's turn" arrow so the reader knows where they are.
+ *
+ * @param {Object} replay
+ * @returns {HTMLElement|null}
+ */
+export function buildSpotSummary(replay) {
+  if (!replay) return null;
+  const actions = replay.actions || [];
+  const heroSeat = replay.hero_seat;
+  const board = replay.board || {};
+
+  // Group inflection actions by street
+  const bystreet = { preflop: [], flop: [], turn: [], river: [] };
+  for (const a of actions) {
+    if (a.type === "post" || a.type === "fold") continue;
+    if (bystreet[a.street]) bystreet[a.street].push(a);
+  }
+
+  // Decision street: latest street with board data (or preflop if no flop).
+  let decisionStreet = "preflop";
+  if (board.river && board.river.length) decisionStreet = "river";
+  else if (board.turn && board.turn.length) decisionStreet = "turn";
+  else if (board.flop && board.flop.length) decisionStreet = "flop";
+
+  const STREETS = ["preflop", "flop", "turn", "river"];
+  const streetCards = {
+    preflop: [],
+    flop: board.flop || [],
+    turn: board.turn || [],
+    river: board.river || [],
+  };
+
+  function actionPhrase(a) {
+    // Short, chip-friendly phrasing. "BTN raises to 2.5bb", "BB calls",
+    // "BB checks", "CO bets 5bb".
+    const actor = a.actor + (a.actor === heroSeat ? " (you)" : "");
+    if (a.type === "check") return actor + " checks";
+    if (a.type === "call") return actor + " calls" + (a.amount_bb ? " " + a.amount_bb + "bb" : "");
+    if (a.type === "bet") return actor + " bets " + (a.amount_bb || 0) + "bb";
+    if (a.type === "raise") {
+      // Name the preflop escalation (open / 3-bet / 4-bet / 5-bet)
+      if (a.street === "preflop") {
+        let n = 0;
+        for (const p of actions) {
+          if (p === a) break;
+          if (p.street === "preflop" && p.type === "raise") n++;
+        }
+        const verb = n === 0 ? "opens to" : n === 1 ? "3-bets to" : n === 2 ? "4-bets to" : "5-bets to";
+        return actor + " " + verb + " " + (a.amount_bb || 0) + "bb";
+      }
+      return actor + " raises to " + (a.amount_bb || 0) + "bb";
+    }
+    return actor + " " + a.type;
+  }
+
+  function streetLabel(s) {
+    return { preflop: "PRE", flop: "FLOP", turn: "TURN", river: "RIVER" }[s] || s.toUpperCase();
+  }
+
+  const rows = [];
+  for (const street of STREETS) {
+    const items = bystreet[street];
+    const cards = streetCards[street];
+    const isDecision = street === decisionStreet;
+    // Skip streets that have no actions AND no cards (e.g., turn/river
+    // before they're dealt).
+    if (!isDecision && items.length === 0 && cards.length === 0) continue;
+    const cardsEl = cards.length
+      ? h("div", { class: "spot-sum-cards" }, ...cards.map((c) => cardEl(c, "sm")))
+      : null;
+    const actionsEl = h("div", { class: "spot-sum-actions" });
+    items.forEach((a, idx) => {
+      actionsEl.appendChild(h("span", { class: "spot-sum-action" }, actionPhrase(a)));
+      if (idx < items.length - 1) {
+        actionsEl.appendChild(h("span", { class: "spot-sum-sep" }, " · "));
+      }
+    });
+    // Hero-turn arrow on the decision street (after the last action)
+    if (isDecision) {
+      if (items.length > 0) actionsEl.appendChild(h("span", { class: "spot-sum-sep" }, " · "));
+      actionsEl.appendChild(h("span", { class: "spot-sum-yourturn" }, "← your turn"));
+    }
+    rows.push(h("div", { class: "spot-sum-row" + (isDecision ? " is-decision" : "") },
+      h("span", { class: "spot-sum-street" }, streetLabel(street)),
+      cardsEl,
+      actionsEl
+    ));
+  }
+
+  if (rows.length === 0) return null;
+  return h("div", { class: "spot-summary" }, ...rows);
+}
+
 // -----------------------------------------------------------------------
 // Action-log phrasing
 // -----------------------------------------------------------------------
