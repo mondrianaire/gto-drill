@@ -373,9 +373,14 @@ export function mountReplay(container, replay) {
 
   const table = h("div", { class: "replay-table" });
   const stepLabel = h("span", { class: "replay-steplabel" });
+  // Fast-rewind to the start of the hand (right after SB/BB posts —
+  // posts are baked into `minStep` so this is the cleanest "from the
+  // top" state). Sits at the leftmost position.
+  const rewindBtn = h("button", { type: "button", class: "replay-ctl" }, "⏮");
   const prevBtn = h("button", { type: "button", class: "replay-ctl" }, "◀");
   const playBtn = h("button", { type: "button", class: "replay-ctl" }, "▶");
   const nextBtn = h("button", { type: "button", class: "replay-ctl" }, "▶");
+  rewindBtn.setAttribute("aria-label", "Rewind to start of hand");
   prevBtn.setAttribute("aria-label", "Previous action");
   nextBtn.setAttribute("aria-label", "Next action");
   playBtn.setAttribute("aria-label", "Play / pause replay");
@@ -474,6 +479,7 @@ export function mountReplay(container, replay) {
       const a = actions[step - 1];
       stepLabel.textContent = capitalize(a.street) + " — " + describeAction(replay, step - 1);
     }
+    rewindBtn.disabled = step <= minStep;
     prevBtn.disabled = step <= minStep;
     nextBtn.disabled = step === decisionStep;
     playBtn.textContent = (playTimer || autoplayTimer) ? "❚❚" : "▶";
@@ -565,6 +571,7 @@ export function mountReplay(container, replay) {
       fn();
     };
   }
+  rewindBtn.addEventListener("click", step_user(() => setStep(minStep)));
   prevBtn.addEventListener("click", step_user(() => setStep(snapBackward(step - 1))));
   nextBtn.addEventListener("click", step_user(() => setStep(snapForward(step + 1))));
   playBtn.addEventListener("click", () => {
@@ -579,7 +586,7 @@ export function mountReplay(container, replay) {
     { class: "replay" },
     h("div", { class: "replay-gameinfo" }, gameInfoPrefix, bbChip(replay.stack_depth_bb), " deep"),
     table,
-    h("div", { class: "replay-controls" }, prevBtn, playBtn, nextBtn, stepLabel)
+    h("div", { class: "replay-controls" }, rewindBtn, prevBtn, playBtn, nextBtn, stepLabel)
   );
   container.appendChild(root);
   // Render baseline first (so the table is on screen instantly), THEN
