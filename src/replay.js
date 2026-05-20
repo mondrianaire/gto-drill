@@ -181,9 +181,15 @@ export function potAtDecisionBb(replay) {
  * ends with a "← Hero's turn" arrow so the reader knows where they are.
  *
  * @param {Object} replay
+ * @param {Object} [opts]
+ * @param {(step:number)=>void} [opts.onJumpToStep]  Wired to a click
+ *   handler on every action chip and the "← your turn" marker. The
+ *   caller forwards this to the replay's `jumpTo` so clicking in the
+ *   mini-display drives the table to the same point.
  * @returns {HTMLElement|null}
  */
-export function buildSpotSummary(replay) {
+export function buildSpotSummary(replay, opts) {
+  const onJumpToStep = opts && typeof opts.onJumpToStep === "function" ? opts.onJumpToStep : null;
   if (!replay) return null;
   const actions = replay.actions || [];
   const heroSeat = replay.hero_seat;
@@ -297,9 +303,13 @@ export function buildSpotSummary(replay) {
       actionEl.setAttribute("data-step", String(stepValue));
       actionsEl.appendChild(actionEl);
     });
-    // Hero-turn arrow on the decision street (its own line at the end)
+    // Hero-turn arrow on the decision street (its own line at the end).
+    // data-step = decisionStep so clicking it jumps the replay to the
+    // decision point.
     if (isDecision) {
-      actionsEl.appendChild(h("div", { class: "spot-sum-yourturn" }, "← your turn"));
+      const yourTurnEl = h("div", { class: "spot-sum-yourturn" }, "← your turn");
+      yourTurnEl.setAttribute("data-step", String(actions.length));
+      actionsEl.appendChild(yourTurnEl);
     }
     rows.push(h("div", { class: "spot-sum-row" + (isDecision ? " is-decision" : "") },
       h("span", { class: "spot-sum-street" }, streetLabel(street)),
@@ -309,7 +319,20 @@ export function buildSpotSummary(replay) {
   }
 
   if (rows.length === 0) return null;
-  const el = h("div", { class: "spot-summary" }, ...rows);
+  const el = h("div", { class: "spot-summary" + (onJumpToStep ? " is-clickable" : "") }, ...rows);
+
+  // Click → drive the replay table to that action's state. Delegated
+  // off the root so we don't need to wire per-element listeners. Reads
+  // data-step from the clicked .spot-sum-action or .spot-sum-yourturn.
+  if (onJumpToStep) {
+    el.addEventListener("click", (ev) => {
+      const target = ev.target.closest(".spot-sum-action, .spot-sum-yourturn");
+      if (!target || !el.contains(target)) return;
+      const s = parseInt(target.getAttribute("data-step"), 10);
+      if (Number.isNaN(s)) return;
+      onJumpToStep(s);
+    });
+  }
   // setStep(step) — driven by mountReplay's onStep callback. Highlights
   // the action with the largest data-step ≤ step (the most recent
   // action applied at the current replay position). At minStep (before
@@ -628,6 +651,19 @@ export function mountReplay(container, replay, opts) {
       stopPlay();
       userInteracted = true;
       if (root.parentNode) root.parentNode.removeChild(root);
+    },
+    // Jump the table to a specific step. Used by the spot-summary
+    // mini-display click handler so clicking an action drives the
+    // replay to that state. Behaves like a manual nav (cancels
+    // autoplay, snaps to inflection if necessary).
+    jumpTo: (s) => {
+      userInteracted = true;
+      stopPlay();
+      // Snap toward the user's intent: if they clicked a non-inflection
+      // step (a check), we still land exactly on that step. If they
+      // clicked an inflection step, that's where we land too. Use
+      // setStep directly — no snap rounding for explicit clicks.
+      setStep(s);
     },
   };
 }

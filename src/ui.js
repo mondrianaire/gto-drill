@@ -788,14 +788,19 @@ export function mountInGameView(container, gameId) {
     if (scen && scen.replay) {
       const replayHost = h("div", { class: "replay-host" });
       spot.appendChild(replayHost);
-      // Build the spot-summary BEFORE mounting the replay so we can pass
-      // its setStep into mountReplay's onStep — the replay then drives
-      // the action highlight in the mini-display as it steps through.
-      const summary = buildSpotSummary(scen.replay);
-      const r = mountReplay(replayHost, scen.replay, {
+      // Build the spot-summary BEFORE mounting the replay. Two-way sync:
+      //   replay → summary: mountReplay's onStep drives summary.setStep
+      //   summary → replay: summary's onJumpToStep drives replay.jumpTo
+      // The replay handle is captured in a closure ref because the
+      // summary references it before mountReplay returns.
+      let replayHandle = null;
+      const summary = buildSpotSummary(scen.replay, {
+        onJumpToStep: (s) => { if (replayHandle) replayHandle.jumpTo(s); },
+      });
+      replayHandle = mountReplay(replayHost, scen.replay, {
         onStep: summary ? (s) => summary.setStep(s) : null,
       });
-      replayCleanup = r && r.unmount ? r.unmount : null;
+      replayCleanup = replayHandle && replayHandle.unmount ? replayHandle.unmount : null;
       if (summary) spot.appendChild(summary);
     } else if (scen) {
       spot.appendChild(h("p", { class: "scenario-desc" }, richText(scen.description, scen)));

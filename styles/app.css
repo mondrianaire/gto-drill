@@ -384,6 +384,22 @@ form { margin-top: 8px; }
   background: rgba(120, 180, 255, 0.14);
   box-shadow: inset 3px 0 0 var(--accent);
 }
+/* Two-way sync: when onJumpToStep is wired the summary is clickable.
+   Cursor + hover state signal it; pressing rewinds/fast-forwards the
+   table view to that action's state. */
+.spot-summary.is-clickable .spot-sum-action,
+.spot-summary.is-clickable .spot-sum-yourturn {
+  cursor: pointer;
+}
+.spot-summary.is-clickable .spot-sum-action:hover {
+  background: rgba(120, 180, 255, 0.08);
+}
+.spot-summary.is-clickable .spot-sum-action.is-current:hover {
+  background: rgba(120, 180, 255, 0.2);
+}
+.spot-summary.is-clickable .spot-sum-yourturn:hover {
+  text-decoration: underline;
+}
 .spot-sum-yourturn {
   font-weight: 600;
   color: var(--accent);
