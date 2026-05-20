@@ -1126,33 +1126,9 @@ form { margin-top: 8px; }
   }
   .solo-share.is-copied { color: var(--ok); border-color: var(--ok); }
 
-  /* H-3: 13x13 villain picker becomes horizontally scrollable with bigger
-     cells (36x32 px). Right-edge fade hints at the scroll affordance. */
-  .eq-picker-host {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 -2px;
-    padding: 2px;
-  }
-  .rp-grid {
-    grid-template-columns: repeat(13, 36px);
-    gap: 3px;
-    min-width: 507px;
-  }
-  .rp-cell { height: 32px; }
-
-  /* M-1: 4x13 hero/board card picker also becomes horizontally scrollable,
-     so cells can keep meaningful touch sizing on narrow phones. */
-  .hero-pick-grid-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-    margin: 0 -2px;
-    padding: 2px;
-  }
-  .hero-pick-grid {
-    grid-template-columns: repeat(13, 36px);
-    gap: 3px;
-    min-width: 507px;
-  }
-  .hero-pick-cell { height: 44px; }
+  /* H-3 / M-1 (grid touch targets) intentionally NOT enforced here.
+     The original fluid 13x13 villain grid and 4x13 hero/board grid
+     stay as-is on mobile. On the audience's devices (iPhone 15 /
+     iPhone 17 Pro Max), the original cells are tight but tappable;
+     the horizontal-scroll workaround was worse than the problem. */
 }

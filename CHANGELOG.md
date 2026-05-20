@@ -20,13 +20,13 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
     buttons (Share / Exit) on row 1, running stats on row 2. At &lt;480 px
     the action buttons collapse to icon-only (🔗 / ←) so the row never
     overflows and the Exit label can't clip.
-  - **H-3.** The 13×13 villain-range grid (per-scenario equity panel +
-    standalone calculator) becomes horizontally scrollable at &lt;480 px,
-    with fixed 36×32 px cells. Up from the cramped ~22×18 px cells that
-    were below iOS HIG touch-target minimums.
-  - **M-1.** The 4×13 hero/board card grid follows the same pattern:
-    horizontally scrollable at &lt;480 px, with 36×44 px cells (meets the
-    iOS HIG 44 px height minimum).
+  - ~~**H-3** / **M-1**~~ (grid horizontal scroll + bigger cells) —
+    initially shipped, then reverted. On the audience's actual phones
+    (iPhone 15 / iPhone 17 Pro Max), the original cells were tight but
+    tappable, and the horizontal-scroll workaround was a worse user
+    experience than the problem it solved. Reverted in
+    `2026-05-19.12-mobile-relax`. The original fluid grids stay on
+    mobile.
 
 ### Added
 - **🔗 Copy share link** button in the solo-practice header. Click to
