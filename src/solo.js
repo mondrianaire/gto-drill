@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildHandIntro, buildOptionsAnalysis } from "./ui.js";
+import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
 
 // -----------------------------------------------------------------------
@@ -270,10 +270,11 @@ export function mountSoloView(container, onExit) {
       // GTO line — a small one-line blurb naming the solver's choice.
       const gtoRead = buildGtoRead({ scen, gtoAction: gto });
 
-      // Hand intro — short narrative setting up the spot (positions,
-      // action to here, board, pot). Replaces the old "The spot"
-      // framing-bullets block as the scenario brief.
-      const handIntro = buildHandIntro({ scen });
+      // GTO description preamble — paragraph that introduces the
+      // strategic landscape and telegraphs the impact of each option.
+      // Replaces the redundant "The hand" intro (positions/board/pot
+      // are already on the table and in the spot-summary action log).
+      const gtoExplanation = buildGtoExplanation({ scen });
 
       // Options analysis matrix — every available action as a card with
       // pros/cons, GTO pick highlighted, user pick tagged. Lets the
@@ -311,9 +312,9 @@ export function mountSoloView(container, onExit) {
       const takeaway = buildLessonTakeaway({ scen });
       body = h("div", { class: "hand-reveal" },
         takeaway,           // LEAD: one-line lesson takeaway
-        gtoRead,            // GTO line: small blurb
+        gtoRead,            // GTO line: small blurb (the answer)
         result,             // verdict + compact comparison + opponent
-        handIntro,          // brief: positions + action + board + pot
+        gtoExplanation,     // preamble: strategic landscape + option impacts
         optionsAnalysis,    // matrix: every option's pros/cons
         villainRangeBlock,  // deduced villain range — into Test it
         equityHost,         // equity panel mounts here
