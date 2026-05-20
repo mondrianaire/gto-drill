@@ -28,6 +28,8 @@ import {
 import { mountInGameView, mountWrapUpView } from "./ui.js";
 import { mountSoloView } from "./solo.js";
 import { mountEquityCalculator } from "./equity-calculator.js";
+import { loadDictionary, mountDictionaryView } from "./dictionary.js";
+import { setOpenCallback as setTooltipOpenCallback } from "./tooltip.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { readActiveGameId, writeActiveGameId } from "./history.js";
 import { APP_VERSION } from "./version.js";
@@ -47,7 +49,7 @@ async function boot() {
   const root = document.getElementById("app-root");
   try {
     setBootState("Loading scenarios…");
-    await loadScenarios();
+    await Promise.all([loadScenarios(), loadDictionary()]);
     if (listScenarios().length === 0) throw new Error("Scenario library is empty.");
 
     setBootState("Connecting…");
@@ -60,30 +62,55 @@ async function boot() {
     setBootState("Checking sign-in…");
     const user = await initAuth();
 
+    const params = new URLSearchParams(location.search);
+
     // `?scenario=<id>` deep-link → go straight to solo mode pinned on that
     // scenario, regardless of sign-in state. Lets us share specific spots
     // by URL ("look at this hand → live.url/?scenario=…").
-    const params = new URLSearchParams(location.search);
     if (params.get("scenario")) {
       const goSignIn = () => mountSignInView(root, () => mountRouter(root), () => goSolo());
+      const goDict = (termId) => mountDictionaryView(root, () => goSolo(), { initialTermId: termId });
       const goSolo = () => mountSoloView(root, () => {
         // On exit from a pinned solo session, drop the param and go home.
         history.replaceState({}, "", location.origin + location.pathname);
         if (user) mountRouter(root);
         else goSignIn();
       });
+      // Tooltip "Open in dictionary →" routes to dict; exit from dict
+      // returns to the pinned scenario.
+      setTooltipOpenCallback((id) => goDict(id));
       goSolo();
+      return;
+    }
+
+    // `?dictionary[=term-id]` deep-link → opens the dictionary, optionally
+    // scrolled to a specific entry. Tooltips also navigate here via the
+    // shared `setTooltipOpenCallback`.
+    const dictParam = params.get("dictionary");
+    if (dictParam !== null) {
+      const goSignIn = () => mountSignInView(root, () => mountRouter(root));
+      const goDict = (termId) => {
+        mountDictionaryView(root, () => {
+          history.replaceState({}, "", location.origin + location.pathname);
+          if (user) mountRouter(root); else goSignIn();
+        }, { initialTermId: termId || (dictParam !== "1" ? dictParam : null) });
+      };
+      setTooltipOpenCallback((id) => goDict(id));
+      goDict();
       return;
     }
 
     if (!user) {
       // Not signed in — show the Google sign-in gate. Once signed in, the
       // callback mounts the router. There's also a "Practice solo" escape
-      // hatch and a standalone equity calculator that bypass Firebase
-      // entirely for anonymous use.
-      const goSignIn = () => mountSignInView(root, () => mountRouter(root), () => goSolo(), () => goCalc());
+      // hatch, a standalone equity calculator, and a poker dictionary that
+      // bypass Firebase entirely for anonymous use.
+      const goSignIn = () => mountSignInView(root, () => mountRouter(root), () => goSolo(), () => goCalc(), () => goDict());
       const goSolo = () => mountSoloView(root, () => goSignIn());
       const goCalc = () => mountEquityCalculator(root, () => goSignIn());
+      const goDict = (termId) => mountDictionaryView(root, () => goSignIn(), { initialTermId: termId });
+      // Tooltip "Open in dictionary →" link routes here too.
+      setTooltipOpenCallback((id) => goDict(id));
       goSignIn();
       return;
     }
@@ -141,6 +168,15 @@ function mountRouter(root) {
       () => goJoin()
     );
   }
+
+  function goDict(termId) {
+    clearRoot();
+    mountDictionaryView(root, () => goLanding(), { initialTermId: termId });
+  }
+
+  // Tooltip "Open in dictionary →" routes back to the dictionary view from
+  // any signed-in surface.
+  setTooltipOpenCallback((id) => goDict(id));
 
   function goCreate() {
     clearRoot();

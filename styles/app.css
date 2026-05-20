@@ -986,6 +986,131 @@ form { margin-top: 8px; }
 .calc-status { font-size: 0.82rem; }
 .calc-villain-section { margin-top: 0; }
 .calc-btn { /* third main-menu button; same look as solo-btn */ }
+.dict-btn { /* fourth main-menu button; same look as solo-btn */ }
+
+/* ----- Poker dictionary + term tooltips -------------------------------- */
+.term-trigger {
+  display: inline;
+  color: var(--accent);
+  border-bottom: 1px dotted var(--accent);
+  cursor: help;
+  padding: 0 1px;
+  border-radius: 3px;
+  transition: background 0.12s ease;
+}
+.term-trigger:hover,
+.term-trigger:focus,
+.term-trigger.term-tip-active {
+  background: rgba(76, 182, 255, 0.12);
+  outline: none;
+}
+
+.term-tip {
+  position: absolute;
+  z-index: 1000;
+  background: var(--bg-elev-2);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 12px 14px;
+  max-width: 320px;
+  min-width: 220px;
+  box-shadow: 0 6px 22px rgba(0, 0, 0, 0.55);
+  color: var(--text);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+.term-tip-head {
+  font-size: 0.92rem;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 6px;
+  letter-spacing: 0.02em;
+}
+.term-tip-body { margin: 0 0 8px; color: var(--text); }
+.term-tip-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  color: var(--accent);
+  font-size: 0.82rem;
+  font-weight: 600;
+  text-decoration: underline;
+  cursor: pointer;
+}
+.term-tip-link:hover { color: #6cc4ff; background: none; }
+
+/* Dictionary view */
+.dict-view {
+  display: flex; flex-direction: column; gap: 12px;
+}
+.dict-header {
+  display: flex; align-items: baseline; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 4px;
+}
+.dict-header h2 { margin: 0; font-size: 1.2rem; }
+.dict-count { font-size: 0.85rem; flex: 1 1 auto; }
+.dict-search {
+  width: 100%; margin-bottom: 0;
+  padding: 10px 14px;
+  font-size: 0.95rem;
+}
+.dict-list {
+  display: flex; flex-direction: column; gap: 12px;
+}
+.dict-entry {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  scroll-margin-top: 16px;
+}
+.dict-entry-flash {
+  animation: dict-flash 1.4s ease-out;
+}
+@keyframes dict-flash {
+  0%, 40% { background: rgba(76, 182, 255, 0.18); border-color: var(--accent); }
+  100% { background: var(--bg-elev); border-color: var(--border); }
+}
+.dict-term {
+  margin: 0 0 4px;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.01em;
+}
+.dict-aliases {
+  margin: 0 0 8px;
+  font-size: 0.78rem;
+  font-style: italic;
+}
+.dict-short {
+  margin: 0 0 10px;
+  font-size: 0.95rem;
+  color: var(--text);
+}
+.dict-long {
+  margin: 0 0 10px;
+  font-size: 0.9rem;
+  color: var(--text-dim);
+}
+.dict-see-also {
+  margin: 8px 0 0;
+  font-size: 0.85rem;
+}
+.dict-term-link {
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  min-height: 0;
+  color: var(--accent);
+  cursor: pointer;
+  font: inherit;
+  text-decoration: underline;
+}
+.dict-term-link:hover { color: #6cc4ff; background: none; }
 
 /* ----- Solo practice view ---------------------------------------------- */
 /* H-1: two-row header — title + action buttons on row 1, stats on row 2.
