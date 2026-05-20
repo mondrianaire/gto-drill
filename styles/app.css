@@ -1950,6 +1950,82 @@ form { margin-top: 8px; }
   color: #d5ece0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
+
+/* Action badge — floats above the seat naming the action that JUST
+   landed there ("raises to 2.5bb", "calls 2.5bb", "checks", "bets 3bb",
+   "folds"). Each render creates a fresh element so the entry animation
+   re-fires on every step. Critical visual cue for checks (no chip
+   moves) and reinforces bets/raises/calls beyond just the chip
+   appearing. */
+.rseat-acted-badge {
+  position: absolute;
+  top: -22px;
+  left: 50%;
+  transform: translateX(-50%);
+  white-space: nowrap;
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #2b3849 0%, #1d2734 100%);
+  color: #e8f4ff;
+  border: 1px solid rgba(120, 180, 255, 0.45);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+  pointer-events: none;
+  z-index: 4;
+  animation: rseat-badge-in 320ms cubic-bezier(0.16, 0.84, 0.44, 1) both;
+}
+/* Bottom-row seats (hero centre + flanks) need the badge BELOW the
+   seat instead of above — there's nothing above them, but plenty of
+   table behind. */
+.rslot-0 .rseat-acted-badge,
+.rslot-1 .rseat-acted-badge,
+.rslot-5 .rseat-acted-badge {
+  top: auto;
+  bottom: -22px;
+}
+@keyframes rseat-badge-in {
+  0%   { opacity: 0; transform: translateX(-50%) translateY(-4px) scale(0.7); }
+  60%  { opacity: 1; transform: translateX(-50%) translateY(0) scale(1.08); }
+  100% { opacity: 1; transform: translateX(-50%) translateY(0) scale(1); }
+}
+/* Per-action color cues — subtle hue shift so a glance distinguishes
+   aggression (raise/bet) from passive (call/check) from fold. */
+.rseat-acted-raise,
+.rseat-acted-bet {
+  border-color: rgba(255, 184, 90, 0.7);
+  color: #ffe7c4;
+}
+.rseat-acted-call {
+  border-color: rgba(120, 200, 255, 0.6);
+}
+.rseat-acted-check {
+  border-color: rgba(200, 215, 230, 0.55);
+  color: #d8e5f1;
+  background: linear-gradient(180deg, #354150 0%, #232c39 100%);
+}
+.rseat-acted-fold {
+  border-color: rgba(200, 90, 90, 0.55);
+  color: #f3c0c0;
+}
+
+/* Just-acted seat ring pulse — the seat that performed the latest
+   action briefly glows. Re-runs on each render (each step) because
+   the seat element is freshly built. */
+.rseat-just-acted {
+  animation: rseat-just-acted-pulse 700ms ease-out both;
+}
+@keyframes rseat-just-acted-pulse {
+  0%   { box-shadow: 0 0 0 2px var(--accent), 0 0 0 0 rgba(120, 180, 255, 0.55); }
+  60%  { box-shadow: 0 0 0 2px var(--accent), 0 0 0 10px rgba(120, 180, 255, 0); }
+  100% { box-shadow: 0 0 0 2px var(--accent), 0 0 0 0 rgba(120, 180, 255, 0); }
+}
+/* Already-current-turn seats keep the steady ring AFTER the pulse —
+   so .rseat-turn's box-shadow re-applies once the animation ends.
+   (animation: both retains end state, but rseat-turn's static
+   box-shadow takes over via CSS cascade since it's defined after.) */
+
 /* Bet bubble — chip-like gradient pill positioned BETWEEN the seat and
    the pot center (not above/below the seat). Reads as "chips pushed
    forward" toward the pot instead of a label attached to the player.

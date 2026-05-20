@@ -436,7 +436,7 @@ export function mountReplay(container, replay, opts) {
 
   function streetIdx(s) { return STREETS.indexOf(s); }
 
-  function renderTable(state) {
+  function renderTable(state, justActed) {
     while (table.firstChild) table.removeChild(table.firstChild);
     const turn = nextActor(replay, step);
 
@@ -450,9 +450,12 @@ export function mountReplay(container, replay, opts) {
     ordered.forEach((pos, slot) => {
       const seatDef = replay.seats.find((s) => s.pos === pos);
       const isHero = pos === replay.hero_seat;
+      const justActedHere = justActed && justActed.actor === pos ? justActed : null;
       table.appendChild(seatEl(
         seatDef, state.seats[pos], isHero, turn === pos,
-        "rseat rslot-" + slot + (isHero ? " rseat-hero" : "")
+        "rseat rslot-" + slot + (isHero ? " rseat-hero" : "") +
+          (justActedHere ? " rseat-just-acted" : ""),
+        justActedHere
       ));
     });
 
@@ -487,7 +490,7 @@ export function mountReplay(container, replay, opts) {
     });
   }
 
-  function seatEl(seatDef, st, isHero, isTurn, cls) {
+  function seatEl(seatDef, st, isHero, isTurn, cls, justActed) {
     let cardRow;
     if (st.folded && !isHero) {
       // Folded players' cards are mucked — show that, not face-down cards.
@@ -505,6 +508,16 @@ export function mountReplay(container, replay, opts) {
     const dealerBtn = isDealer
       ? h("div", { class: "rseat-dealer", title: "Dealer button" }, "D")
       : null;
+    // Just-acted badge: small floating chip naming the action that just
+    // landed at this seat. CSS animates it in on each render, so when
+    // the replay steps forward the badge "pops" briefly. Critical for
+    // checks (no bet bubble) and adds visual confirmation for
+    // bets/raises/calls beyond just the chip appearing.
+    const actedBadge = justActed ? h(
+      "div",
+      { class: "rseat-acted-badge rseat-acted-" + justActed.type },
+      actionVerb(justActed)
+    ) : null;
     return h(
       "div",
       { class: cls + (isTurn ? " rseat-turn" : "") + (st.folded ? " rseat-folded" : "") +
@@ -512,13 +525,31 @@ export function mountReplay(container, replay, opts) {
       cardRow,
       h("div", { class: "rseat-pos" }, seatDef.pos + (isHero ? " (you)" : "")),
       h("div", { class: "rseat-stack" }, bbChip(round1(st.stack))),
-      dealerBtn
+      dealerBtn,
+      actedBadge
     );
+  }
+
+  // Short action verb for the just-acted badge. "raises to 2.5bb",
+  // "calls 2.5bb", "checks", "bets 3bb", "folds" — chip-style label.
+  function actionVerb(a) {
+    if (a.type === "check") return "checks";
+    if (a.type === "fold") return "folds";
+    if (a.type === "call") return "calls" + (a.amount_bb ? " " + round1(a.amount_bb) + "bb" : "");
+    if (a.type === "bet") return "bets " + round1(a.amount_bb || 0) + "bb";
+    if (a.type === "raise") return "raises to " + round1(a.amount_bb || 0) + "bb";
+    return a.type;
   }
 
   function render() {
     const state = deriveState(replay, step);
-    renderTable(state);
+    // Identify the action that JUST landed (if any). Posts are baseline
+    // state — never flag a post as just-acted. At minStep no action has
+    // landed yet, so suppress the badge.
+    const justActed = (step > minStep && actions[step - 1] && actions[step - 1].type !== "post")
+      ? actions[step - 1]
+      : null;
+    renderTable(state, justActed);
     if (step === decisionStep) {
       stepLabel.textContent = "Decision point";
     } else if (step === minStep) {
