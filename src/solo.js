@@ -156,6 +156,16 @@ export function mountSoloView(container, onExit) {
     // read of the spot; they live ONLY in the post-submission GTO screen.
     let body, primaryBtn;
     if (!draft.revealed) {
+      // Lock-in button is built first so the action/confidence click
+      // handlers below can reveal it once both are picked. It lives
+      // INSIDE the decide body (below the note), not in the separate
+      // hand-nav row at the bottom — so the call-to-action visually
+      // belongs to the form it's submitting.
+      const lockInBtn = h("button", { type: "button", class: "primary hand-fwd lock-in-btn", hidden: true }, "Lock in & see GTO →");
+      function refreshLockBtn() {
+        lockInBtn.hidden = !(draft.action && draft.confidence);
+      }
+
       const actionRow = h("div", { class: "actions-row", role: "radiogroup", "aria-label": "Your move" });
       (scen.available_actions || []).forEach((a) => {
         // Run action label through richText so bb chips / any-suit / etc.
@@ -165,6 +175,7 @@ export function mountSoloView(container, onExit) {
           draft.action = a;
           actionRow.querySelectorAll(".action-btn").forEach((x) => x.classList.toggle("selected", x === btn));
           errorBox.textContent = "";
+          refreshLockBtn();
         });
         actionRow.appendChild(btn);
       });
@@ -176,6 +187,7 @@ export function mountSoloView(container, onExit) {
           draft.confidence = c;
           confRow.querySelectorAll(".conf-btn").forEach((x) => x.classList.toggle("selected", x === btn));
           errorBox.textContent = "";
+          refreshLockBtn();
         });
         confRow.appendChild(btn);
       }
@@ -192,16 +204,7 @@ export function mountSoloView(container, onExit) {
       );
       if (draft.note) noteToggle.open = true;
 
-      body = h("div", { class: "decide" },
-        h("span", { class: "decide-label" }, "Your move"),
-        actionRow,
-        h("span", { class: "decide-label decide-label-sub" }, "How sure?  (1 = guess, 5 = certain)"),
-        confRow,
-        noteToggle
-      );
-
-      primaryBtn = h("button", { type: "button", class: "primary hand-fwd" }, "Lock in & see GTO →");
-      primaryBtn.addEventListener("click", () => {
+      lockInBtn.addEventListener("click", () => {
         if (!draft.action) { errorBox.textContent = "Pick your move."; return; }
         if (!draft.confidence) { errorBox.textContent = "Rate how sure you are (1–5)."; return; }
         draft.revealed = true;
@@ -209,6 +212,23 @@ export function mountSoloView(container, onExit) {
         if (draft.action === scen.gto_action) correctSoFar += 1;
         render();
       });
+
+      body = h("div", { class: "decide" },
+        h("span", { class: "decide-label" }, "Your move"),
+        actionRow,
+        h("span", { class: "decide-label decide-label-sub" }, "How sure?  (1 = guess, 5 = certain)"),
+        confRow,
+        noteToggle,
+        lockInBtn
+      );
+
+      // Set initial visibility for the case where draft already had an
+      // action+confidence from a prior render (e.g. user navigated away
+      // and back without locking in).
+      refreshLockBtn();
+      // No primaryBtn during decide — the lock-in button lives inside
+      // the body. hand-nav stays empty until reveal.
+      primaryBtn = null;
     } else {
       // ===================== REVEAL (the GTO screen) =====================
       // EVERYTHING below this line is GTO content and only appears AFTER
@@ -302,7 +322,7 @@ export function mountSoloView(container, onExit) {
       shareFallback,
       h("div", { class: "hand-card" }, spot, body),
       errorBox,
-      h("div", { class: "hand-nav" }, primaryBtn)
+      primaryBtn ? h("div", { class: "hand-nav" }, primaryBtn) : null
     ));
   }
 
