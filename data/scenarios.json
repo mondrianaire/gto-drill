@@ -630,7 +630,8 @@
           "type": "post",
           "amount_bb": 1
         }
-      ]
+      ],
+      "context_tag": "Short cash · low SPR"
     },
     "description": "40bb deep, 6-max. UTG (Hero) holds 22. Action on Hero.",
     "board": null,
@@ -1913,7 +1914,8 @@
           "actor": "CO",
           "type": "fold"
         }
-      ]
+      ],
+      "context_tag": "MTT bubble · push/fold"
     },
     "description": "12bb deep, MTT bubble. Folds to BTN (Hero) with A8o. Action on Hero.",
     "board": null,
@@ -6946,7 +6948,8 @@
           "actor": "CO",
           "type": "fold"
         }
-      ]
+      ],
+      "context_tag": "Satellite FT · ICM · 4 left / 3 paid"
     },
     "description": "20bb deep. Satellite final table: 4 left, 3 paid, stacks roughly even. Folds to BTN (Hero) with A9s. Action on Hero.",
     "board": null,
