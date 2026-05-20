@@ -263,9 +263,16 @@ function buildActiveGamesSection() {
           activityLine = oppFirst + " last submitted " + friendlyAgo(oppLast);
           if (days >= 7) isStalled = true;
         } else {
-          // Opponent joined but never submitted.
-          const days = daysBetween(g.lastActivityAt || g.createdAt, new Date().toISOString());
-          activityLine = oppFirst + " joined but hasn't played a hand yet";
+          // Opponent joined but never submitted. If we have their
+          // joinedAt timestamp, lead with it ("Mom joined 2 hours
+          // ago") — better signal than the generic "hasn't played"
+          // line because it shows arrival as a positive event.
+          const joinedIso = g.opponentJoinedAt;
+          const referenceIso = joinedIso || g.lastActivityAt || g.createdAt;
+          const days = daysBetween(referenceIso, new Date().toISOString());
+          activityLine = joinedIso
+            ? oppFirst + " joined " + friendlyAgo(joinedIso) + " · hasn't played a hand yet"
+            : oppFirst + " joined but hasn't played a hand yet";
           if (days >= 7) isStalled = true;
         }
       }

@@ -1356,10 +1356,18 @@ export function mountInGameView(container, gameId) {
       activityText = oppFirst + " last submitted " + friendlyAgoStr(oppLastIso) + ".";
       isStalled = daysAgoFromIso(oppLastIso) >= 7;
     } else {
-      const fallbackIso = game.lastActivityAt || game.createdAt;
-      const ago = fallbackIso ? friendlyAgoStr(fallbackIso) : "recently";
-      activityText = oppFirst + " hasn't submitted any rounds yet (game " + ago + ").";
-      if (fallbackIso && daysAgoFromIso(fallbackIso) >= 7) isStalled = true;
+      // Opponent joined but never submitted. Prefer the joinedAt
+      // timestamp from participants[] so the user can see exactly
+      // when she arrived ("Mom joined 2 hours ago"); fall back to
+      // the game's last-activity timestamp if for some reason the
+      // join time isn't recorded.
+      const oppParticipant = (game.participants || []).find((p) => p.uid === oppUid);
+      const joinedIso = oppParticipant ? oppParticipant.joinedAt : null;
+      const referenceIso = joinedIso || game.lastActivityAt || game.createdAt;
+      activityText = joinedIso
+        ? oppFirst + " joined " + friendlyAgoStr(joinedIso) + " — hasn't submitted any rounds yet."
+        : oppFirst + " hasn't submitted any rounds yet (game " + (referenceIso ? friendlyAgoStr(referenceIso) : "recently") + ").";
+      if (referenceIso && daysAgoFromIso(referenceIso) >= 7) isStalled = true;
     }
 
     // Back-to-home button — drops the active-game pointer and reloads
