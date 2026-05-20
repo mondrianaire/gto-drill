@@ -616,11 +616,14 @@ form { margin-top: 8px; }
 }
 
 .rp-clear-btn {
-  background: none; border: none; padding: 0; min-height: 0;
-  color: var(--text-dim); font-size: 0.74rem; cursor: pointer;
-  text-decoration: underline; font-weight: 500;
+  background: transparent; border: 1px solid var(--border);
+  color: var(--text-dim); font-size: 0.78rem; font-weight: 500;
+  padding: 6px 10px; border-radius: 8px; min-height: 0;
+  cursor: pointer; flex: 0 0 auto;
 }
-.rp-clear-btn:hover { color: var(--miss); background: none; }
+.rp-clear-btn:hover {
+  color: var(--miss); border-color: var(--miss); background: rgba(248, 113, 113, 0.06);
+}
 
 /* Top % slider + jump-to preselects */
 .rp-slider-row {
@@ -656,9 +659,16 @@ form { margin-top: 8px; }
   background: var(--accent); color: #061018; border-color: var(--accent);
 }
 
-/* Filter section — labeled toggle switch */
-.rp-filter-row {
+/* Filter subsection — lives INSIDE the Category section, separated by a
+   dashed divider so it reads as a related-but-distinct sub-control. */
+.rp-filter-sub-row {
   display: flex; align-items: center; justify-content: space-between; gap: 12px;
+  margin-top: 4px; padding-top: 10px;
+  border-top: 1px dashed var(--border);
+}
+.rp-filter-sublabel {
+  font-size: 10px; letter-spacing: .12em; text-transform: uppercase;
+  font-weight: 700; color: var(--text-dim); margin-bottom: 3px;
 }
 .rp-filter-name { font-size: 0.88rem; color: var(--text); font-weight: 500; }
 .rp-filter-sub { font-size: 0.72rem; color: var(--text-dim); margin-top: 1px; }

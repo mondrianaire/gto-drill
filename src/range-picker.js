@@ -153,12 +153,18 @@ export function mountRangePicker(container, opts = {}) {
 
   // ----- DOM -----
   const statsEl = h("div", { class: "rp-stats" });
+  // Clear all lives in the main header — it's a view-level reset, not
+  // specific to any one input section, and stays accessible even with
+  // the controls collapsed.
+  const clearBtn = h("button",
+    { type: "button", class: "rp-clear-btn", title: "Clear all selected hands" },
+    "⌫ Clear");
   const customizeBtn = h("button",
     { type: "button", class: "rp-customize-btn", "aria-expanded": "false", title: "Show controls to customize the range" },
     h("span", { class: "lbl" }, "Customize"),
     h("span", { class: "chev" }, "▼"));
 
-  const header = h("div", { class: "rp-header" }, statsEl, customizeBtn);
+  const header = h("div", { class: "rp-header" }, statsEl, clearBtn, customizeBtn);
 
   const emptyHint = h("div", { class: "rp-empty-hint", hidden: true });
   emptyHint.innerHTML = "No villain range yet. Tap <b>Customize</b> to pick a range, or hit a category chip in there to start fast.";
@@ -174,7 +180,8 @@ export function mountRangePicker(container, opts = {}) {
         if (raw.has(lbl)) raw.delete(lbl);
         else raw.add(lbl);
         markCustom();
-        clearActiveHighlights();
+        clearJumpHighlights();
+        refreshCategoryChips();
         render();
         emit();
       });
@@ -188,7 +195,6 @@ export function mountRangePicker(container, opts = {}) {
   const sliderEl = h("input", { type: "range", min: "0", max: "100", value: "0", step: "1", class: "rp-slider" });
   const pctEl = h("span", { class: "rp-slider-label" }, "0%");
   const jumpsEl = h("div", { class: "rp-jumps-row" });
-  const clearBtn = h("button", { type: "button", class: "rp-clear-btn", title: "Clear all selected hands" }, "⌫ Clear all");
   const catsEl = h("div", { class: "rp-cats" });
   const playableSwitch = h("button",
     { type: "button", class: "rp-switch", "aria-pressed": "false", title: "Restrict to a 'playable' top-30% reference set" },
@@ -198,29 +204,29 @@ export function mountRangePicker(container, opts = {}) {
   const topSection = h("div", { class: "rp-section" },
     h("div", { class: "rp-section-label" },
       h("span", null, "Top %"),
-      clearBtn),
+      h("span", { class: "rp-section-hint" }, "drag slider or jump to a preselect")),
     h("div", { class: "rp-slider-row" }, sliderEl, pctEl),
     h("div", { class: "rp-jumps" },
       h("span", { class: "rp-jumps-label" }, "Jump to:"),
       jumpsEl));
 
+  // Category section now contains the chips PLUS a Filter sub-row at the
+  // bottom (Playable toggle). Categories are additive — tap a chip to
+  // add its hands to the selection, tap again to remove them. Multiple
+  // chips can be active simultaneously.
   const catSection = h("div", { class: "rp-section" },
     h("div", { class: "rp-section-label" },
       h("span", null, "Category"),
-      h("span", { class: "rp-section-hint" }, "replaces the current selection")),
-    catsEl);
-
-  const filterSection = h("div", { class: "rp-section" },
-    h("div", { class: "rp-section-label" },
-      h("span", null, "Filter"),
-      h("span", { class: "rp-section-hint" }, "applies to current selection")),
-    h("div", { class: "rp-filter-row" },
+      h("span", { class: "rp-section-hint" }, "tap to add · tap again to remove")),
+    catsEl,
+    h("div", { class: "rp-filter-sub-row" },
       h("div", null,
+        h("div", { class: "rp-filter-sublabel" }, "Filter"),
         h("div", { class: "rp-filter-name" }, "Playable hands only"),
         h("div", { class: "rp-filter-sub" }, "Intersect with a top-30% reference range")),
       playableSwitch));
 
-  const controlsWrap = h("div", { class: "rp-controls-wrap" }, topSection, catSection, filterSection);
+  const controlsWrap = h("div", { class: "rp-controls-wrap" }, topSection, catSection);
 
   const root = h("div", { class: "range-picker" }, header, emptyHint, matrixWrap, controlsWrap);
   container.appendChild(root);
@@ -272,9 +278,25 @@ export function mountRangePicker(container, opts = {}) {
     loadedLabel = null;
   }
 
-  function clearActiveHighlights() {
-    Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+  function clearJumpHighlights() {
     Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+  }
+
+  // A category chip is "active" iff every hand in its set is present in
+  // the current raw selection. Derived state, recomputed after every
+  // change — lets categories combine cleanly with sliders, manual taps,
+  // and each other.
+  function isCategoryActive(name) {
+    const hands = CATEGORIES[name];
+    for (const h of hands) if (!raw.has(h)) return false;
+    return hands.length > 0;
+  }
+
+  function refreshCategoryChips() {
+    Array.from(catsEl.children).forEach((b) => {
+      const name = b.textContent;
+      b.classList.toggle("is-on", isCategoryActive(name));
+    });
   }
 
   function setTopN(pct, source) {
@@ -283,23 +305,28 @@ export function mountRangePicker(container, opts = {}) {
     for (let i = 0; i < n; i++) raw.add(ORDERED[i]);
     pctEl.textContent = "Top " + pct + "%";
     if (source !== "slider") sliderEl.value = pct;
-    clearActiveHighlights();
+    clearJumpHighlights();
     Array.from(jumpsEl.children).forEach((b) =>
       b.classList.toggle("is-on", parseInt(b.dataset.pct, 10) === pct));
+    refreshCategoryChips();
     markCustom();
     render();
     emit();
   }
 
-  function setCategory(name) {
+  function toggleCategory(name) {
     const labels = CATEGORIES[name] || [];
-    raw.clear();
-    for (const l of labels) raw.add(l);
+    if (isCategoryActive(name)) {
+      // Active → remove this category's hands from the selection.
+      for (const l of labels) raw.delete(l);
+    } else {
+      // Inactive → add this category's hands (union with existing).
+      for (const l of labels) raw.add(l);
+    }
     sliderEl.value = 0;
-    pctEl.textContent = labels.length + " hands";
-    clearActiveHighlights();
-    Array.from(catsEl.children).forEach((b) =>
-      b.classList.toggle("is-on", b.textContent === name));
+    pctEl.textContent = raw.size + " hands";
+    clearJumpHighlights();
+    refreshCategoryChips();
     markCustom();
     render();
     emit();
@@ -309,7 +336,8 @@ export function mountRangePicker(container, opts = {}) {
     raw.clear();
     sliderEl.value = 0;
     pctEl.textContent = "0%";
-    clearActiveHighlights();
+    clearJumpHighlights();
+    refreshCategoryChips();
     markCustom();
     render();
     emit();
@@ -325,7 +353,7 @@ export function mountRangePicker(container, opts = {}) {
 
   for (const name of Object.keys(CATEGORIES)) {
     const btn = h("button", { type: "button", class: "rp-cat" }, name);
-    btn.addEventListener("click", () => setCategory(name));
+    btn.addEventListener("click", () => toggleCategory(name));
     catsEl.appendChild(btn);
   }
 
@@ -361,7 +389,8 @@ export function mountRangePicker(container, opts = {}) {
     for (const l of labels || []) raw.add(l);
     sliderEl.value = 0;
     pctEl.textContent = (labels && labels.length) ? labels.length + " hands" : "0%";
-    clearActiveHighlights();
+    clearJumpHighlights();
+    refreshCategoryChips();
     loadedLabel = label || null;
     render();
     emit();
@@ -369,6 +398,7 @@ export function mountRangePicker(container, opts = {}) {
 
   // Initial paint — visual only, no onChange (the caller hasn't finished
   // initializing yet, so any onChange callback would fire too early).
+  refreshCategoryChips();
   render();
 
   return { getSelection, setSelection, clear: clearAll, root };
