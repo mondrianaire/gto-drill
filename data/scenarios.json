@@ -124,20 +124,20 @@
     "action_analysis": {
       "Check back": {
         "pros": [
-          "Realizes equity cheaply with weak pairs, backdoor draws, and gutshots",
-          "Keeps BB's air in for a bluff-catch on later streets"
+          "Realizes equity cheaply with the weakest part of Hero's range",
+          "Keeps BB's bluff-catch candidates in for a bluff-catch on later streets"
         ],
         "cons": [
-          "Loses thin value from Qx/Jx that would call a small bet",
+          "Loses thin value from the part of BB's range that would call a small bet",
           "Gives BB a free card on most turns"
         ]
       },
       "Bet 7bb (~30% pot)": {
         "pros": [
-          "Charges weak underpairs and overcards a small price to continue"
+          "Charges the part of BB's range that needs to keep equity"
         ],
         "cons": [
-          "Mostly folds out hands Hero already beat, value-bet target is mostly better"
+          "Mostly folds out hands Hero already beat; value-bet target is mostly better than the calling range"
         ]
       },
       "Bet 17bb (~75% pot)": {
@@ -146,7 +146,7 @@
         ],
         "cons": [
           "Bloats the pot in a spot where check-back was already +EV",
-          "Burns chips when called only by hands that beat Hero"
+          "Burns chips when called only by the part of BB's range that beats Hero"
         ]
       }
     },
@@ -308,12 +308,12 @@
         ],
         "cons": [
           "Wastes the A blocker that should be applying preflop pressure",
-          "Dominated postflop by the Ax that flats CO opens"
+          "Dominated postflop by the part of CO's range that flats opens"
         ]
       },
       "3-bet to 11bb": {
         "pros": [
-          "Ace blocker removes a chunk of AA/AK/AQ from CO's continue range",
+          "Ace blocker removes a chunk of the strongest part of CO's continue range",
           "Recovers fold equity that calling OOP can't capture"
         ],
         "cons": [
@@ -467,8 +467,8 @@
     "action_analysis": {
       "Check back": {
         "pros": [
-          "Avoids being check-raised by SB's many made flushes",
-          "Keeps SB's bluffs and weak pairs in for a river bluff-catch"
+          "Avoids being check-raised by the made portion of SB's range",
+          "Keeps SB's bluffs and bluff-catchers in for a river bluff-catch"
         ],
         "cons": [
           "Gives up the betting initiative — turns the river into a guess"
@@ -476,15 +476,15 @@
       },
       "Bet 7bb (50% pot)": {
         "pros": [
-          "Charges weak Qx and underpairs that just picked up a draw"
+          "Charges the part of SB's range that just picked up equity"
         ],
         "cons": [
-          "Gets called by every flush and raised by the strongest"
+          "Gets called by the made portion of the range and raised by the strongest"
         ]
       },
       "Bet 14bb (100% pot)": {
         "pros": [
-          "Maximum pressure on SB's one-pair hands that brick the flush"
+          "Maximum pressure on the one-pair portion of SB's range that bricked"
         ],
         "cons": [
           "Burns 14bb into a calling range that just range-flipped past Hero"
@@ -492,10 +492,10 @@
       },
       "Bet 21bb (overbet 150% pot)": {
         "pros": [
-          "Folds out everything except the made flushes if credible"
+          "Folds out everything except the made portion of the range if credible"
         ],
         "cons": [
-          "Pure value-burn — only called by hands that beat Hero",
+          "Pure value-burn — only called by the part of the range that beats Hero",
           "A check-raise here is a disaster for stack preservation"
         ]
       }
@@ -657,7 +657,7 @@
           "Preserves stack for higher-equity spots in later position"
         ],
         "cons": [
-          "Concedes the rare set that stacks an overpair"
+          "Concedes the rare set that stacks a strong made hand"
         ]
       },
       "Open to 2.2bb": {
@@ -842,27 +842,27 @@
     "action_analysis": {
       "Check back": {
         "pros": [
-          "Avoids being check-raised by the rare slow-played two pair or set"
+          "Avoids being check-raised by the rare slow-played part of BB's range"
         ],
         "cons": [
-          "Misses thin value from worse Qx (Q9, QT, QJ) that pay one bet"
+          "Misses thin value from the part of BB's range that pays one bet"
         ]
       },
       "Bet 3bb (~30%)": {
         "pros": [
-          "Extracts thin value from worse Qx and middle pairs that pay a small bet",
+          "Extracts thin value from the worse portion of BB's calling range",
           "Folds out almost nothing Hero beats — pure value capture"
         ],
         "cons": [
-          "Can get check-raised on a board where 65/55/44 are credible"
+          "Can get check-raised on a board where the bottom of BB's range makes credible bluff-raises"
         ]
       },
       "Bet 7bb (~70%)": {
         "pros": [
-          "Bigger value if BB has a sticky Qx that won't fold"
+          "Bigger value if BB has a sticky bluff-catcher that won't fold"
         ],
         "cons": [
-          "Worse Qx folds at this size — turns thin value into thin air"
+          "The worse portion of the calling range folds at this size — turns thin value into thin air"
         ]
       },
       "Bet 12bb (overbet)": {
@@ -870,7 +870,7 @@
           "Maximum value if BB has slow-played a monster"
         ],
         "cons": [
-          "Every Qx with worse kicker folds — value range can't get paid",
+          "Every worse hand folds — value range can't get paid",
           "Bluff-to-value ratio collapses without nut combos to balance"
         ]
       }
@@ -1037,15 +1037,15 @@
     "action_analysis": {
       "Fold": {
         "pros": [
-          "Sidesteps the rare slow-played 8x or overpair"
+          "Sidesteps the rare slow-played value in CO's range"
         ],
         "cons": [
-          "Folds well ahead of CO's bluffs and middling pairs"
+          "Folds well ahead of the bluffing portion of CO's range"
         ]
       },
       "Call": {
         "pros": [
-          "Beats CO's entire bluff range and most middling pairs",
+          "Beats the bluffing portion of CO's range and most of the calling range",
           "Re-evaluates on the turn with position"
         ],
         "cons": [
@@ -1054,11 +1054,11 @@
       },
       "Raise to 16bb": {
         "pros": [
-          "Builds the pot vs CO's middling pairs that might pay off"
+          "Builds the pot vs the part of CO's range that might pay off"
         ],
         "cons": [
-          "Folds out CO's polar bluffs — only better continues",
-          "Gets it in vs AA/KK/QQ/JJ/TT that have 99 crushed"
+          "Folds out the bluffing portion — only better hands continue",
+          "Stacks off behind the value portion of CO's range"
         ]
       }
     },
@@ -1276,7 +1276,7 @@
       },
       "Call": {
         "pros": [
-          "Catches the missed clubs/gutshots that turned hopeless on the river"
+          "Catches the missed-draw portion of UTG's barreling range"
         ],
         "cons": [
           "JT blocks none of UTG's value — bluff-catch ratio is awful",
@@ -1448,7 +1448,7 @@
         ],
         "cons": [
           "Turns a set-mine candidate into a face-up bluff that must fold to a shove",
-          "55 has poor equity vs the 4-bet-call range (QQ+, AK)"
+          "55 has poor equity vs BTN's 4-bet-call range"
         ]
       }
     },
@@ -1636,12 +1636,12 @@
         ],
         "cons": [
           "Folds top pair good kicker to a standard double-barrel size",
-          "Beats every bluff and most thin value HJ can have"
+          "Beats the bluffs and most of the thin value in HJ's range"
         ]
       },
       "Call": {
         "pros": [
-          "Beats every bluff and most thin value HJ can barrel",
+          "Beats the bluffing portion and most of the thin value HJ can barrel",
           "Keeps HJ's bluffs in for a river bluff-catch"
         ],
         "cons": [
@@ -1650,11 +1650,11 @@
       },
       "Check-raise to 28bb": {
         "pros": [
-          "Folds out HJ's overcard bluffs immediately"
+          "Folds out the bluffing portion of HJ's range immediately"
         ],
         "cons": [
           "Turns KJ into a bluff — removes the bluffs Hero currently beats",
-          "Gets it in vs sets and AK that have KJ crushed"
+          "Stacks off behind the value portion of HJ's range that has KJ crushed"
         ]
       }
     },
@@ -1814,7 +1814,7 @@
     "action_analysis": {
       "Check": {
         "pros": [
-          "Lets CO c-bet and lose with their air"
+          "Lets CO c-bet and lose with the bluffing portion of their range"
         ],
         "cons": [
           "Misses the EV gain from leading with nutted + equity combos"
@@ -1822,8 +1822,8 @@
       },
       "Donk lead 2bb (~35%)": {
         "pros": [
-          "84-type combos block 87 and barrel cleanly on most turns",
-          "Folds out CO's overcards that would otherwise see a free turn"
+          "Hero's 84 combos block the nut straight and barrel cleanly on most turns",
+          "Folds out the part of CO's range that would otherwise see a free turn"
         ],
         "cons": [
           "Off-meta line — exploitable opponents won't fold enough",
@@ -1948,13 +1948,13 @@
           "Avoids the awful min-raise-then-face-shove decision at this depth"
         ],
         "cons": [
-          "Called only by hands that crush A8 (AK, AQ, AJ, AT, TT+)",
+          "Called only by the part of the blinds' range that crushes A8",
           "Losing the flip ends the tournament"
         ]
       },
       "Min-raise to 4bb": {
         "pros": [
-          "Could induce a fold from the absolute bottom of blinds' range"
+          "Could induce a fold from the absolute bottom of the blinds' range"
         ],
         "cons": [
           "Can't fold to a 3-bet shove — risks chips with no fold equity gain",
@@ -2168,8 +2168,8 @@
       },
       "Call": {
         "pros": [
-          "Ah removes a meaningful share of BB's flush combos",
-          "Beats every busted gutshot and missed straight draw"
+          "Ah removes a meaningful share of the nut-flush combos in BB's range",
+          "Beats the missed-draw portion of BB's range"
         ],
         "cons": [
           "Beats nothing else BB might bet for value — pure bluff-catcher"
@@ -2177,11 +2177,11 @@
       },
       "Raise to 25bb": {
         "pros": [
-          "Sells the maximum Ah blocker story if BB folds one-pair value"
+          "Sells the maximum Ah blocker story if BB folds the bluff-catching portion"
         ],
         "cons": [
           "Folds out the bluffs Hero was beating with a simple call",
-          "Loses to every flush — turning a profitable call into a hopeless 4-street bluff"
+          "Loses to BB's value — turning a profitable call into a hopeless 4-street bluff"
         ]
       }
     },
@@ -2521,12 +2521,12 @@
         ],
         "cons": [
           "OOP with a hand that realizes equity poorly",
-          "Dominated by every Ax in BTN's continue range"
+          "Dominated by the Ax in BTN's continue range"
         ]
       },
       "4-bet to 22bb": {
         "pros": [
-          "A5s blocks AA/AK and unblocks BTN's pair-bluffs",
+          "A5s blocks the top of BTN's value range and unblocks their pair-bluffs",
           "Recovers fold equity that flatting OOP can't capture"
         ],
         "cons": [
@@ -2713,28 +2713,28 @@
     "action_analysis": {
       "Check back": {
         "pros": [
-          "77 wins at showdown vs busted draws and weaker underpairs",
-          "Avoids being check-raised by a Jx that finally wakes up"
+          "77 wins at showdown vs the missed-draw and worse-pair portion of CO's range",
+          "Avoids being check-raised by the part of CO's range that finally wakes up"
         ],
         "cons": [
-          "Misses thin value from the rare 66/55 that pays one bet"
+          "Misses thin value from the rare worse pair that pays one bet"
         ]
       },
       "Bet 5bb (~25%)": {
         "pros": [
-          "Charges Jx that might fold for a small price"
+          "Charges the part of CO's range that might fold for a small price"
         ],
         "cons": [
-          "Jx mostly calls — and beats Hero",
-          "Folds out the busted draws Hero was already winning vs"
+          "The calling range mostly beats Hero",
+          "Folds out the missed draws Hero was already winning vs"
         ]
       },
       "Bet 14bb (~75%)": {
         "pros": [
-          "Maximum value if CO has a sticky underpair"
+          "Maximum value if CO has a sticky bluff-catcher"
         ],
         "cons": [
-          "Folds out everything 77 beats; called only by Jx+ that beats Hero",
+          "Folds out everything 77 beats; called only by the part of CO's range that beats Hero",
           "Highest -EV size — pure overbluffing a non-bluff hand"
         ]
       }
@@ -2899,7 +2899,7 @@
         ],
         "cons": [
           "Wastes ~50% equity that wants to build the pot",
-          "Misses fold equity from underpairs and low-card air"
+          "Misses fold equity from the weakest part of BB's range"
         ]
       },
       "Bet 2bb (~35%)": {
@@ -2908,7 +2908,7 @@
           "Captures BB's missed-equity hands at the smallest investment"
         ],
         "cons": [
-          "Tiny size lets BB float with backdoor equity and outdraw"
+          "Tiny size lets BB float wide and outdraw"
         ]
       },
       "Bet 4bb (~75%)": {
@@ -3142,7 +3142,7 @@
     "action_analysis": {
       "Fold": {
         "pros": [
-          "Saves stack on a board where every value combo just made a straight",
+          "Saves stack on a board where the value portion of BB's range just made a straight",
           "Refuses to bluff-catch with zero straight blockers"
         ],
         "cons": [
@@ -3151,7 +3151,7 @@
       },
       "Call": {
         "pros": [
-          "Beats the rare overpair that decided to bluff-raise"
+          "Beats the rare worse hand that decided to bluff-raise"
         ],
         "cons": [
           "QQ has no straight blocker — bluff-catch ratio is the worst possible",
@@ -3160,10 +3160,10 @@
       },
       "Shove all-in": {
         "pros": [
-          "Max value vs the rare worse overpair that bluff-raised"
+          "Max value vs the rare worse hand that bluff-raised"
         ],
         "cons": [
-          "Calls come only from straights — builds a maximum pot drawing dead",
+          "Calls come only from BB's value — builds a maximum pot drawing dead",
           "Worst possible read — every value combo snap-calls"
         ]
       }
@@ -3339,7 +3339,7 @@
           "None — folding bottom set on a dry board is indefensible"
         ],
         "cons": [
-          "Surrenders to a check-raise range that includes 22, 96s, draws, and bluffs"
+          "Surrenders to a check-raise range loaded with worse value and bluffs"
         ]
       },
       "Call": {
@@ -3348,7 +3348,7 @@
         ],
         "cons": [
           "Caps Hero's range — BB can take a free turn with bluffs",
-          "Misses immediate value from 96/22/draws that 3-bet here"
+          "Misses immediate value from the part of BB's c/r range that wants to 3-bet"
         ]
       },
       "Re-raise to 22bb": {
@@ -3358,7 +3358,7 @@
         ],
         "cons": [
           "Folds out the pure bluffs that would have barreled off",
-          "Gets it in behind vs the rare 99 cooler"
+          "Stacks off behind the rare cooler in BB's range"
         ]
       }
     },
@@ -3562,7 +3562,7 @@
           "Picks up the pot with a hand that wins ~0% otherwise"
         ],
         "cons": [
-          "Half-pot leaves room for sticky calls from weak Jx"
+          "Half-pot leaves room for sticky calls from the bluff-catching portion of BB's range"
         ]
       },
       "Bet 8bb (~90%)": {
@@ -3571,7 +3571,7 @@
         ],
         "cons": [
           "Risks more chips than fold-equity gain warrants",
-          "Tightens BB's call threshold around hands that beat Hero"
+          "Tightens BB's call threshold around the part of the range that beats Hero"
         ]
       }
     },
@@ -3749,8 +3749,8 @@
           "Sets up a stacks-in postflop SPR while AA is best"
         ],
         "cons": [
-          "Telegraphs strength — most opponents only limp-reraise with AA/KK",
-          "Folds out HJ's bluff isos that would have paid a flat"
+          "Telegraphs strength — most opponents only limp-reraise with the very top of their range",
+          "Folds out the bluff isos that would have paid a flat"
         ]
       }
     },
@@ -3892,10 +3892,10 @@
     "action_analysis": {
       "Check back": {
         "pros": [
-          "Pot-controls AQ on a king-high board where Hero is behind every Kx"
+          "Pot-controls AQ on a king-high board where Hero is behind the made portion of SB's range"
         ],
         "cons": [
-          "Lets SB's air see free turns that AQ has overcard equity against",
+          "Lets the weakest part of SB's range see free turns that AQ has overcard equity against",
           "Wastes the cheapest, highest-EV c-bet spot in poker"
         ]
       },
@@ -3905,12 +3905,12 @@
           "AQ's two overcards + backdoors benefit from equity denial"
         ],
         "cons": [
-          "Can be check-raised by the slow-played AA/KK"
+          "Can be check-raised by the slow-played top of SB's range"
         ]
       },
       "Bet 22bb (~50% pot)": {
         "pros": [
-          "More fold equity vs SB's marginal flats"
+          "More fold equity vs the marginal portion of SB's flatting range"
         ],
         "cons": [
           "Burns chips when the entire range could bet the smallest size",
@@ -4112,21 +4112,21 @@
       },
       "Bet 11bb (~45%)": {
         "pros": [
-          "Folds out some Qx at a meaningful frequency"
+          "Folds out the bottom of BB's range at a meaningful frequency"
         ],
         "cons": [
-          "Underprices BB's bluff-catch threshold — Qx calls wide",
+          "Underprices BB's bluff-catch threshold — the calling range stays wide",
           "Leaves money on the table when Hero's range is genuinely polarized"
         ]
       },
       "Bet 24bb (~100%)": {
         "pros": [
           "Polarized sizing matches the bet-bet line — credible value story",
-          "Ks blocks Ks-high spade flush combos BB could slow-play"
+          "Ks blocks the slow-played part of BB's range"
         ],
         "cons": [
           "Risks the most chips on a pure bluff",
-          "Gets snapped by the rare 99/QQ slow-played to the river"
+          "Gets snapped by the rare slow-played monster in BB's range"
         ]
       }
     },
@@ -4303,7 +4303,7 @@
           "None — JhTh on 9h8h4c is one of poker's premier semi-bluff combos"
         ],
         "cons": [
-          "Folds an open-ender + flush draw + straight-flush card — often a coin flip vs the c-bet range"
+          "Folds a draw-heavy combo with massive equity — often a coin flip vs the c-bet range"
         ]
       },
       "Call": {
@@ -4312,7 +4312,7 @@
         ],
         "cons": [
           "Under-realizes equity OOP — needs to build the pot now",
-          "Misses fold equity from BTN's air that would fold to a c/r"
+          "Misses fold equity from the bluffing portion of BTN's range"
         ]
       },
       "Check-raise to 9bb": {
@@ -4321,8 +4321,8 @@
           "Sets up credible turn barrels on most cards"
         ],
         "cons": [
-          "Bloats the pot OOP when BTN 3-bets with overpairs/sets",
-          "Variance is high — sometimes you brick all draws and lose big"
+          "Bloats the pot OOP if BTN 3-bets the value portion of their range",
+          "Variance is high — sometimes the draws brick and Hero loses big"
         ]
       }
     },
@@ -4501,20 +4501,20 @@
     "action_analysis": {
       "Check": {
         "pros": [
-          "Avoids being check-raised by the rare slow-played Kx"
+          "Avoids being check-raised by the rare slow-played top of HJ's range"
         ],
         "cons": [
-          "Lets HJ realize equity with overcards for free",
-          "Misses thin value from underpairs and weak Kx"
+          "Lets HJ realize equity for free with the weakest part of their range",
+          "Misses thin value from the part of HJ's range that calls a small bet"
         ]
       },
       "Probe bet 3bb (~50%)": {
         "pros": [
-          "Middle pair 87 gets called by worse pairs and gutshots",
+          "Middle pair 87 gets called by the worse-pair portion of HJ's range",
           "Medium size matches a merged value-and-protection range"
         ],
         "cons": [
-          "Vulnerable to a turn raise from a rare floated Kx",
+          "Vulnerable to a turn raise from the rare floated top of HJ's range",
           "OOP on the river with bigger spot decisions still to come"
         ]
       },
@@ -4524,7 +4524,7 @@
         ],
         "cons": [
           "Polarizes too hard for a one-pair hand",
-          "Folds out the worse pairs Hero wanted to bet for value"
+          "Folds out the worse part of HJ's range Hero wanted to bet for value"
         ]
       }
     },
@@ -4699,16 +4699,16 @@
         ],
         "cons": [
           "Misses the textbook delayed-c-bet spot — turn is exactly when to attack",
-          "Lets the many weak floats see a free river"
+          "Lets the weakest floats see a free river"
         ]
       },
       "Delayed c-bet 3bb (~50%)": {
         "pros": [
-          "AJ has overcard equity, backdoor club draw, and blocker value",
-          "Folds out the weak floats and underpairs BTN kept in"
+          "AJ has overcard equity, a backdoor club draw, and blocker value",
+          "Folds out the weakest portion of BTN's flatting range"
         ],
         "cons": [
-          "Vulnerable to a slow-played flop check from 88+"
+          "Vulnerable to a slow-played flop check from the top of BTN's range"
         ]
       },
       "Delayed c-bet 6bb (~100%)": {
@@ -4717,7 +4717,7 @@
         ],
         "cons": [
           "Polarizes too hard for a one-pair-equity hand",
-          "Folds out the overcard floats AJ has an equity edge over"
+          "Folds out the part of BTN's range AJ has an equity edge over"
         ]
       }
     },
@@ -4878,7 +4878,7 @@
           "Avoids the bloated 3-bet pot variance"
         ],
         "cons": [
-          "Surrenders the playability EV — 76s flops straights, flushes, and big draws"
+          "Surrenders the playability EV — 76s flops nutted equity often"
         ]
       },
       "Call": {
@@ -4888,7 +4888,7 @@
         ],
         "cons": [
           "Often whiffs and check-folds the flop",
-          "Reverse-implied losses when 76s flops second pair OOP-equivalents"
+          "Reverse-implied losses when 76s flops second pair"
         ]
       },
       "4-bet to 24bb": {
@@ -4897,7 +4897,7 @@
         ],
         "cons": [
           "Burns the playability EV by treating 76s as a bluff candidate",
-          "76 unblocks AA/KK/AK — wrong blockers for a 4-bet bluff"
+          "76 has the wrong blockers for a 4-bet bluff — unblocks BB's value"
         ]
       }
     },
@@ -5045,7 +5045,7 @@
     "action_analysis": {
       "Fold": {
         "pros": [
-          "Sidesteps domination by HJ's offsuit aces"
+          "Sidesteps domination by the offsuit-ace portion of HJ's range"
         ],
         "cons": [
           "AJs is a premium squeeze candidate — folding leaks the dead-money EV"
@@ -5062,12 +5062,12 @@
       },
       "Squeeze to 13bb": {
         "pros": [
-          "AJs blocks AA/AK/AQ — exactly the combos villains continue with",
+          "AJs blocks the top of villain's continue range",
           "Picks up dead money immediately when HJ + caller fold"
         ],
         "cons": [
           "OOP postflop in a 3-bet pot if called",
-          "Must fold to a 4-bet shove from HJ's QQ+/AK"
+          "Must fold to a 4-bet shove from the top of HJ's range"
         ]
       }
     },
@@ -5236,7 +5236,7 @@
       },
       "Raise to 3.5bb": {
         "pros": [
-          "Captures fold equity from BB's weakest defends",
+          "Captures fold equity from the weakest part of BB's defending range",
           "Charges BB to play postflop with position"
         ],
         "cons": [
@@ -5569,7 +5569,7 @@
       },
       "Call": {
         "pros": [
-          "Beats every semi-bluff and bluff in BB's c/r range",
+          "Beats the bluffing and semi-bluffing portion of BB's c/r range",
           "Keeps BB's draws in for Hero to fold on bad runouts"
         ],
         "cons": [
@@ -5578,7 +5578,7 @@
       },
       "3-bet to 38bb": {
         "pros": [
-          "Denies equity to the many combo draws"
+          "Denies equity to the many combo draws in BB's range"
         ],
         "cons": [
           "Folds out the semi-bluffs Hero currently beats — only better continues",
@@ -5738,24 +5738,24 @@
           "Avoids being raised off equity by single-club holdings"
         ],
         "cons": [
-          "Concedes thin value from underpairs and air"
+          "Concedes thin value from the weakest part of BTN's range"
         ]
       },
       "Bet 2bb (~30%)": {
         "pros": [
-          "Charges underpairs and weak floats a small price"
+          "Charges the bottom of BTN's range a small price"
         ],
         "cons": [
-          "Even small bets get raised by single-club hands aggressively",
+          "Even small bets get raised by the single-club portion of BTN's range",
           "Sets up a tough turn when any club lands"
         ]
       },
       "Bet 5bb (~75%)": {
         "pros": [
-          "Maximum denial vs floats and underpairs"
+          "Maximum denial vs the weakest part of BTN's range"
         ],
         "cons": [
-          "Gets check-raised by every made flush BTN has",
+          "Gets check-raised by the made-flush portion of BTN's range",
           "Bloats the pot OOP when any club turn is a disaster"
         ]
       }
@@ -5988,7 +5988,7 @@
       },
       "Bet 5bb (~55%)": {
         "pros": [
-          "Captures fold equity from BB's weakest underpairs"
+          "Captures fold equity from the weakest part of BB's range"
         ],
         "cons": [
           "A5s has no draw equity — pure bluff vs a sticky range",
@@ -6215,10 +6215,10 @@
     "action_analysis": {
       "Check": {
         "pros": [
-          "Induces a stab from CO's weakest hands"
+          "Induces a stab from the weakest part of CO's range"
         ],
         "cons": [
-          "Slow-plays the nuts on a river that just made every two-pair-and-set lose"
+          "Slow-plays the nuts on a river where most of CO's range just got there but lost"
         ]
       },
       "Bet 6bb (~50%)": {
@@ -6241,11 +6241,11 @@
       },
       "Overbet 20bb (~165%)": {
         "pros": [
-          "Captures max value from CO's sets, two pair, and worse straights",
+          "Captures max value from the second-best portion of CO's range",
           "Sets up Hero's overbet bluff frequency for future spots"
         ],
         "cons": [
-          "Folds out the bottom of CO's two-pair range that calls smaller",
+          "Folds out the bottom of CO's calling range that pays smaller",
           "Pool-dependent — some opponents call smaller bets but not overbets"
         ]
       }
@@ -6424,7 +6424,7 @@
     "action_analysis": {
       "Fold": {
         "pros": [
-          "Sidesteps the rare set in BTN's small-raise range"
+          "Sidesteps the rare top of BTN's small-raise range"
         ],
         "cons": [
           "Folds well ahead of the draws and worse aces in the raise range"
@@ -6432,7 +6432,7 @@
       },
       "Call": {
         "pros": [
-          "Pot-controls vs the rare set/two pair while letting draws stay in",
+          "Pot-controls vs the rare top of BTN's range while letting draws stay in",
           "Sets up clean fold spots on flush/straight rivers"
         ],
         "cons": [
@@ -6606,11 +6606,11 @@
     "action_analysis": {
       "Check": {
         "pros": [
-          "Avoids being raised by Jx in two ranges"
+          "Avoids being raised by the top-pair portion of either range"
         ],
         "cons": [
           "Gives two ranges a free card",
-          "Misses denial vs the many draws and underpairs in each opponent"
+          "Misses denial vs the weakest part of each opponent's range"
         ]
       },
       "Bet 3bb (~33%)": {
@@ -6619,7 +6619,7 @@
           "Sets up clean turn decisions on most cards"
         ],
         "cons": [
-          "Vulnerable to a raise from a Jx in either range"
+          "Vulnerable to a raise from a top-pair holding in either range"
         ]
       },
       "Bet 6bb (~66%)": {
@@ -6628,7 +6628,7 @@
         ],
         "cons": [
           "Over-commits a one-pair hand multiway",
-          "Gets check-raised by Jx more credibly at this size"
+          "Gets check-raised by the top-pair portion of either range more credibly at this size"
         ]
       }
     },
@@ -6826,12 +6826,12 @@
       },
       "Check-raise to 20bb": {
         "pros": [
-          "Ac blocker removes a chunk of BTN's made flushes and Ac-flush draws",
+          "Ac blocker removes a chunk of the made-flush and nut-flush-draw portion of BTN's range",
           "Sets up a profitable stacks-in turn shove with massive equity"
         ],
         "cons": [
-          "Bloats the pot OOP when BTN 3-bets with sets",
-          "Sometimes bricks all draws and loses a huge pot"
+          "Bloats the pot OOP when BTN 3-bets the value portion of their range",
+          "Sometimes the draws brick and Hero loses a huge pot"
         ]
       }
     },
@@ -6982,12 +6982,12 @@
         ],
         "cons": [
           "Busting before a guaranteed pay jump is the biggest ICM mistake",
-          "Called only by dominating AT+/TT+ where A9s has poor equity"
+          "Called only by the dominating portion of the blinds' range where A9s has poor equity"
         ]
       },
       "Min-raise to 4bb": {
         "pros": [
-          "Could induce a fold from the bottom of blinds' range"
+          "Could induce a fold from the bottom of the blinds' range"
         ],
         "cons": [
           "Can't fold to a 3-bet shove at 20bb — commits Hero anyway",
@@ -7116,7 +7116,7 @@
           "Keeps BTN's entire opening range in for KJ to outflop"
         ],
         "cons": [
-          "Dominated by the value hands (AK, AJ, KQ) that continue"
+          "Dominated by the value portion of BTN's continue range"
         ]
       },
       "3-bet to 11bb": {
@@ -7291,19 +7291,19 @@
     "action_analysis": {
       "Check": {
         "pros": [
-          "Induces bluffs and thin value from BTN's now-confident hands",
-          "Avoids check-raises from the flushes that just got there"
+          "Induces bluffs and thin value from BTN's now-confident range",
+          "Avoids check-raises from the made portion of BTN's range"
         ],
         "cons": [
-          "Gives a free card to combo draws that improve to better hands"
+          "Gives a free card to draws that improve to better hands"
         ]
       },
       "Bet 5bb (~40%)": {
         "pros": [
-          "Builds the pot vs the rare weaker Kx that calls"
+          "Builds the pot vs the rare worse made hand that calls"
         ],
         "cons": [
-          "Still gets check-raised by every flush at this size",
+          "Still gets check-raised by the made portion of BTN's range at this size",
           "Folds out the bluffs middle set wants to keep in"
         ]
       },
@@ -7312,7 +7312,7 @@
           "Max value extraction if Hero is still ahead"
         ],
         "cons": [
-          "Gets check-raised by every flush — Hero must fold or get it in behind",
+          "Gets check-raised by the made portion of BTN's range — Hero must fold or get it in behind",
           "Maximum -EV size on a range-flipping turn"
         ]
       }
@@ -7509,7 +7509,7 @@
           "Realizes overcard equity passively"
         ],
         "cons": [
-          "Ace-high realizes poorly against straights and made hands",
+          "Ace-high realizes poorly against the made portion of BB's range",
           "Builds reverse-implied losses on the many bad turns"
         ]
       },
@@ -7724,7 +7724,7 @@
     "action_analysis": {
       "Check back": {
         "pros": [
-          "Ace-high wins at showdown vs BB's busted-draw range",
+          "Ace-high wins at showdown vs the missed-draw portion of BB's range",
           "Solvers explicitly bluff the no-blocker combos and check the Ah ones"
         ],
         "cons": [
@@ -7742,7 +7742,7 @@
       },
       "Bet 8bb (~90%)": {
         "pros": [
-          "Maximum fold equity if BB does fold the catches"
+          "Maximum fold equity if BB does fold the bluff-catchers"
         ],
         "cons": [
           "Wrong card structure — Ah blocks the bluff-catchers, not the value",
@@ -7928,10 +7928,10 @@
       "Call all-in": {
         "pros": [
           "AK is priced in — ~40%+ equity vs a balanced shoving range",
-          "Realizes AK's flip equity vs JJ-TT and edge vs A5s-type bluffs"
+          "Realizes AK's flip equity vs the pair portion of the shoving range plus edge vs the bluffs"
         ],
         "cons": [
-          "Vs an exploitatively tight QQ+ only range, AK is closer to break-even",
+          "Vs an exploitatively tight value-only range, AK is closer to break-even",
           "Losing the flip ends the tournament/big pot"
         ]
       }
@@ -8079,13 +8079,13 @@
           "Realizes KT's showdown value passively"
         ],
         "cons": [
-          "KT belongs in the small-bet range — wants thin value from worse Kx",
-          "Concedes denial vs overcards and gutshot combos"
+          "KT belongs in the small-bet range — wants thin value from the worse part of BB's range",
+          "Concedes denial vs the equity-having part of BB's range"
         ]
       },
       "Bet 1.5bb (~27%)": {
         "pros": [
-          "Gets thin value from worse Kx and underpairs",
+          "Gets thin value from the worse part of BB's calling range",
           "Keeps Hero's bluffs cheap and the range balanced"
         ],
         "cons": [
@@ -8097,7 +8097,7 @@
           "Bigger value when BB calls with a worse hand"
         ],
         "cons": [
-          "Folds out worse Kx and underpairs — turns thin value into thin air",
+          "Folds out the worse part of BB's range — turns thin value into thin air",
           "Wrong size for second pair on a range-bet board"
         ]
       }
@@ -8308,10 +8308,10 @@
       },
       "Bet 6bb (~50%)": {
         "pros": [
-          "Half-pot charges draws and weaker pairs"
+          "Half-pot charges the part of BB's range that continues"
         ],
         "cons": [
-          "Value-bet target is mostly better now — called by Qx, two pair, sets",
+          "Value-bet target is mostly worse than BB's calling range now",
           "Vulnerable to a check-raise that turns AJ into a tough fold"
         ]
       },
@@ -8321,7 +8321,7 @@
         ],
         "cons": [
           "Loses to everything that calls a pot bet on this turn",
-          "Check-raise from QJ/Qx leaves Hero with a hopeless decision"
+          "Vulnerable to a check-raise that puts Hero in a hopeless spot"
         ]
       }
     },
@@ -8486,7 +8486,7 @@
       "Call": {
         "pros": [
           "Keeps BB's bluffs and worse pairs in for JJ to dominate IP",
-          "Pot-controls vs the narrow QQ+/AK value range"
+          "Pot-controls vs the value portion of BB's range"
         ],
         "cons": [
           "Overcard turns (A/K/Q) demote JJ to a bluff-catcher"
@@ -8497,7 +8497,7 @@
           "Picks up dead money when BB folds the bottom of their range"
         ],
         "cons": [
-          "Folds out everything JJ dominates while getting it in vs QQ+/AK",
+          "Folds out everything JJ dominates while getting it in vs the value portion of BB's range",
           "Must fold to a 5-bet shove, surrendering 24bb of value"
         ]
       }
