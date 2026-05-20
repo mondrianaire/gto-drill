@@ -35,6 +35,7 @@ import {
   doc,
   setDoc,
   updateDoc,
+  deleteDoc,
   onSnapshot,
   serverTimestamp,
   runTransaction,
@@ -350,6 +351,20 @@ export async function cancelLobby(gameId) {
 export async function cancelGame(gameId) {
   if (!_db) throw new Error("initFirebase() must be called first");
   await updateDoc(doc(_db, "games", gameId), { status: "cancelled" });
+}
+
+/**
+ * Permanently delete a lobby that's still waiting_for_opponent.
+ * Used by the Join-screen × button to nuke orphan / bot-created
+ * lobbies that nobody's going to join.
+ *
+ * Firestore rules only allow this on docs with
+ * status == 'waiting_for_opponent'; in-progress and completed games
+ * cannot be deleted (their participants still own the data).
+ */
+export async function deleteLobby(gameId) {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  await deleteDoc(doc(_db, "games", gameId));
 }
 
 /**

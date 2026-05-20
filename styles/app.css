@@ -188,16 +188,43 @@ form { margin-top: 8px; }
   gap: 10px;
   margin-top: 6px;
 }
+/* Each lobby row = the big join-target card + a small delete (×)
+   button on the right. Wrapping the two in a flex row keeps the card
+   clickable for "join" without nesting buttons (invalid HTML). */
+.lobby-row {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
 .lobby-card {
+  flex: 1 1 auto;
   display: flex;
   align-items: center;
   gap: 12px;
-  width: 100%;
   text-align: left;
   background: var(--bg-elev);
   border: 1px solid var(--border);
 }
 .lobby-card:hover { background: var(--bg-elev-2); }
+.lobby-delete {
+  flex: 0 0 auto;
+  width: 38px;
+  align-self: stretch;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  font-size: 1.2rem;
+  line-height: 1;
+  cursor: pointer;
+  border-radius: var(--radius);
+  transition: background 0.12s, color 0.12s, border-color 0.12s;
+}
+.lobby-delete:hover {
+  background: rgba(240, 100, 100, 0.12);
+  border-color: rgba(240, 100, 100, 0.5);
+  color: #f3c0c0;
+}
+.lobby-delete:disabled { opacity: 0.5; cursor: not-allowed; }
 .lobby-main {
   flex: 1 1 auto;
   min-width: 0;
