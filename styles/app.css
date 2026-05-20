@@ -1695,17 +1695,21 @@ form { margin-top: 8px; }
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
   cursor: help;
 }
-/* Rainbow — four hard-stop stripes using the 4-color deck palette
-   (♠ black, ♥ red, ♦ blue, ♣ green). Each quarter is a distinct
-   color so the glyph unambiguously reads "all four suits". The
-   previous gradient repeated colors and looked indistinguishable
-   from two-tone. */
+/* Rainbow — uses the 🌈 emoji rather than a colored pane. The emoji
+   reads instantly as "rainbow" (all four suits) and removes any
+   ambiguity with the two-tone gradient. Strip the base modifier
+   chrome (background, box-shadow, fixed dimensions) and let the
+   emoji size itself. */
 .tok-modifier-rainbow {
-  background: linear-gradient(90deg,
-    #1a1a1a 0%, #1a1a1a 25%,
-    #c0202a 25%, #c0202a 50%,
-    #2563eb 50%, #2563eb 75%,
-    #16a34a 75%, #16a34a 100%);
+  background: none;
+  box-shadow: none;
+  width: auto;
+  height: auto;
+  font-size: 1em;
+  line-height: 1;
+}
+.tok-modifier-rainbow::before {
+  content: "🌈";
 }
 /* Monotone — single solid block in a generic red (the most visually
    distinct from rainbow). Carries the "all one suit" signal. */
