@@ -121,11 +121,12 @@ function tokenizeProse(text, scen) {
         h("span", { class: "tok-anysuit-rank" }, rank === "T" ? "10" : rank),
         h("span", { class: "tok-anysuit-mark" }, "?")));
     } else if (m[6]) {
-      // "Kx" / "Ax" → doesn't-matter-suit card (analyst marker)
+      // "Kx" / "Ax" → doesn't-matter-suit card. The absence of a suit
+      // mark IS the signal: rank fills the card by itself, so the card
+      // reads as "any K" with no suit indicator at all.
       const rank = m[6];
       frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: rank + " — any suit" },
-        h("span", { class: "tok-anysuit-rank" }, rank === "T" ? "10" : rank),
-        h("span", { class: "tok-anysuit-mark" }, "x")));
+        h("span", { class: "tok-anysuit-rank" }, rank === "T" ? "10" : rank)));
     } else if (m[7]) {
       // "K72" / "K72r" / "K72 rainbow" → multi-card rainbow board.
       // Render each rank as a card with a rainbow-stripe suit indicator.
@@ -138,14 +139,14 @@ function tokenizeProse(text, scen) {
       }
     } else if (m[8]) {
       // 2-rank hand-class shorthand ("KK", "AA", "AK", "JT", etc.) — render
-      // as two cards each with a "doesn't matter" suit mark. Reads as "any
-      // K + any K" or "any A + any K" — which is what the shorthand means.
+      // as two doesn't-matter cards. Each card is just a big rank — the
+      // empty suit slot conveys "any suit". Reads as "any K + any K" or
+      // "any A + any K" — which is what the shorthand means.
       const ranks = m[8];
       for (let i = 0; i < ranks.length; i++) {
         const r = ranks[i];
         frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
-          h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r),
-          h("span", { class: "tok-anysuit-mark" }, "x")));
+          h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r)));
       }
     }
     last = m.index + m[0].length;
