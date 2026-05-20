@@ -367,6 +367,85 @@ function confidenceDots(confidence, who) {
 }
 
 /**
+ * Build the "spot context" block — situational info that frames the
+ * decision in GTO terms, visible DURING the decide phase AND the reveal
+ * phase (it doesn't change based on what the user picks). Two parts:
+ *
+ *   - "THE SPOT" — bulleted framing (range advantages, board texture,
+ *     SPR, capped vs uncapped). Pulled from scen.framing.
+ *   - "VILLAIN'S RANGE" — clickable chips for each entry in
+ *     scen.villain_ranges. Clicking a chip pops the Monte Carlo equity
+ *     panel pre-loaded with that range (via onRangeClick) so the user
+ *     can explore equity BEFORE committing to an action.
+ *
+ * Lives above the action buttons / reveal verdict, OUTSIDE the
+ * "you matched / off the line" outcome block — because this info is
+ * about the spot, not the outcome.
+ *
+ * Returns null if both sections are empty (no framing, no ranges).
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ * @param {(range:Object)=>void} [args.onRangeClick] — handler for
+ *   clickable villain-range chips. When omitted, ranges aren't clickable
+ *   (still render as labelled chips for context).
+ */
+export function buildSpotContext({ scen, onRangeClick }) {
+  if (!scen) return null;
+  const sections = [];
+
+  // Framing
+  const framing = Array.isArray(scen.framing) ? scen.framing : [];
+  if (framing.length) {
+    const list = h("ul", { class: "spot-framing-list" });
+    const richOpts = onRangeClick ? { onRangeClick } : undefined;
+    for (const b of framing) {
+      list.appendChild(h("li", { class: "spot-framing-item" },
+        h("span", { class: "spot-framing-marker", "aria-hidden": "true" }, "·"),
+        h("span", { class: "spot-framing-text" }, richText(b, scen, richOpts))
+      ));
+    }
+    sections.push(h("div", { class: "spot-framing" },
+      h("div", { class: "spot-context-label" }, "The spot"),
+      list
+    ));
+  }
+
+  // Villain ranges — clickable chips (when onRangeClick is provided).
+  const ranges = Array.isArray(scen.villain_ranges) ? scen.villain_ranges : [];
+  if (ranges.length) {
+    const chipsRow = h("div", { class: "spot-ranges-chips" });
+    for (const range of ranges) {
+      const summary = range.summary ? range.summary : "";
+      const title = summary ? (range.label + " — " + summary) : range.label || "";
+      const chip = h(
+        "span",
+        { class: "spot-range-chip" + (onRangeClick ? " is-clickable" : ""), title, role: onRangeClick ? "button" : null, tabindex: onRangeClick ? "0" : null },
+        h("span", { class: "spot-range-chip-label" }, range.label || "Range"),
+        onRangeClick ? h("span", { class: "spot-range-chip-icon", "aria-hidden": "true" }, "🎲") : null
+      );
+      if (onRangeClick) {
+        chip.addEventListener("click", (ev) => { ev.preventDefault(); onRangeClick(range); });
+        chip.addEventListener("keydown", (ev) => {
+          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); onRangeClick(range); }
+        });
+      }
+      chipsRow.appendChild(chip);
+    }
+    sections.push(h("div", { class: "spot-ranges" },
+      h("div", { class: "spot-context-label" },
+        h("span", null, "Villain's range"),
+        onRangeClick ? h("span", { class: "spot-context-hint muted" }, " — tap a chip to test equity") : null
+      ),
+      chipsRow
+    ));
+  }
+
+  if (sections.length === 0) return null;
+  return h("div", { class: "spot-context" }, ...sections);
+}
+
+/**
  * Build the reveal-result block — the educational moment of every hand.
  * Renders EVERY available action as its own card so the user can see
  * exactly which option was GTO-optimal, which they chose, and (in
@@ -415,27 +494,10 @@ export function buildRevealResult({ scen, userAction, gtoAction, confidence, opp
     h("span", { class: "reveal-verdict-text" }, correct ? "You matched the GTO line" : "Off the GTO line")
   );
 
-  // Framing section — universal facts about the spot that apply to every
-  // option. Sits BETWEEN the verdict and the option matrix so the reader
-  // gets situational context (range advantages, board texture, SPR, ...)
-  // before drilling into per-option pros/cons. Each bullet runs through
-  // richText so voice tokens fire naturally.
-  const framing = (scen && Array.isArray(scen.framing)) ? scen.framing : [];
-  let framingEl = null;
-  if (framing.length) {
-    const list = h("ul", { class: "reveal-framing-list" });
-    const richOptsFraming = onRangeClick ? { onRangeClick } : undefined;
-    for (const b of framing) {
-      list.appendChild(h("li", { class: "reveal-framing-item" },
-        h("span", { class: "reveal-framing-marker", "aria-hidden": "true" }, "·"),
-        h("span", { class: "reveal-framing-text" }, richText(b, scen, richOptsFraming))
-      ));
-    }
-    framingEl = h("div", { class: "reveal-framing" },
-      h("div", { class: "reveal-framing-label" }, "The spot"),
-      list
-    );
-  }
+  // (Framing — formerly here — has been lifted to its own component
+  // `buildSpotContext` that lives ABOVE the reveal so the same situational
+  // info is visible during the DECIDE phase too. The verdict block now
+  // focuses on outcome + per-option analysis + opponent.)
 
   // Build one card per available action.
   const optionsList = h("div", { class: "reveal-options" });
@@ -574,7 +636,6 @@ export function buildRevealResult({ scen, userAction, gtoAction, confidence, opp
 
   return h("div", { class: "reveal-result" + (correct ? " is-ok" : " is-miss") },
     verdict,
-    framingEl,
     optionsList,
     opponentPanel
   );
@@ -744,6 +805,34 @@ export function mountInGameView(container, gameId) {
     backBtn.disabled = handIdx === 0;
     backBtn.addEventListener("click", () => { handIdx -= 1; render(lastGame); });
 
+    // --- spot context (framing + villain range chips) + equity panel host ---
+    // Lifted ABOVE the decide/reveal branch so framing + range chips appear
+    // in BOTH phases. Clicking a range chip pops the equity panel — usable
+    // BEFORE the user locks in, so they can think through the spot with the
+    // villain's range information.
+    const equityHost = h("div", { class: "equity-host" });
+    const eqState = { open: false, handle: null };
+    function openEquityWithRange(range) {
+      if (!scen) return;
+      const classes = (range && range.classes) || [];
+      const label = (range && range.label) || "";
+      if (eqState.open && eqState.handle) {
+        eqState.handle.setRange(classes, label);
+      } else {
+        eqState.handle = mountEquityPanel(equityHost, scen, { initialRange: classes, initialRangeLabel: label });
+        eqState.open = true;
+      }
+      if (eqState.handle && eqState.handle.root && eqState.handle.root.scrollIntoView) {
+        eqState.handle.root.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
+    function closeEquityPanel() {
+      if (eqState.handle) try { eqState.handle.unmount(); } catch (_) {}
+      eqState.handle = null;
+      eqState.open = false;
+    }
+    const spotContext = buildSpotContext({ scen, onRangeClick: openEquityWithRange });
+
     let body, fwdBtn;
 
     if (!sub.revealed) {
@@ -820,72 +909,39 @@ export function mountInGameView(container, gameId) {
         note: oppSub.note,
       } : null;
 
-      // We declare openEquityWithRange a bit further down, but the matrix
-      // needs a reference to it NOW so pros/cons range chips can route
-      // there too. Capture as a forwarding wrapper.
-      const onRangeClick = (range) => openEquityWithRange(range);
-
       const result = buildRevealResult({
         scen,
         userAction: sub.action,
         gtoAction: gto,
         confidence: sub.confidence,
         opponent,
-        onRangeClick,
+        onRangeClick: openEquityWithRange,
       });
-      // "Test it!" — Monte Carlo equity vs a user-picked villain range.
-      // (Declared up here so inline range chips in the explanation prose can
-      // call into the same panel.)
-      const testHost = h("div", { class: "test-host" });
-      const eqState = { open: false, handle: null };
+
+      // "Test it" — reveal-only fallback. Auto-loads the LAST villain range
+      // as a quick entry into the equity panel. The villain-range chips
+      // in spot-context above ALSO open the same panel; this button is
+      // for one-click "just show me equity" without scrolling up.
       const testBtn = h("button", { type: "button", class: "secondary test-it" }, "🎲  Test it — equity vs a range");
-      function closeEquityPanel() {
-        if (eqState.handle) eqState.handle.unmount();
-        eqState.handle = null;
-        eqState.open = false;
-        testBtn.textContent = "🎲  Test it — equity vs a range";
-      }
-      function openEquityWithRange(range) {
-        const classes = (range && range.classes) || [];
-        const label = (range && range.label) || "";
-        if (eqState.open && eqState.handle) {
-          eqState.handle.setRange(classes, label);
-        } else {
-          eqState.handle = mountEquityPanel(testHost, scen, { initialRange: classes, initialRangeLabel: label });
-          eqState.open = true;
-          testBtn.textContent = "Hide equity panel";
-        }
-        if (eqState.handle && eqState.handle.root && eqState.handle.root.scrollIntoView) {
-          eqState.handle.root.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
-      }
       testBtn.addEventListener("click", () => {
-        if (eqState.open) { closeEquityPanel(); return; }
-        // Auto-load the LAST chip in the scenario's GTO explanation, if any.
-        // Scenarios without a named villain range fall through to standalone
-        // mode (empty matrix + "Tap Customize…" hint).
+        if (eqState.open) {
+          closeEquityPanel();
+          testBtn.textContent = "🎲  Test it — equity vs a range";
+          return;
+        }
         const ranges = (scen && scen.villain_ranges) || [];
         const last = ranges.length ? ranges[ranges.length - 1] : null;
         if (last) {
-          openEquityWithRange({
-            classes: last.classes,
-            label: "Auto-loaded: " + last.label,
-          });
+          openEquityWithRange({ classes: last.classes, label: "Auto-loaded: " + last.label });
         } else {
           openEquityWithRange(null);
         }
+        testBtn.textContent = "Hide equity panel";
       });
-
-      // The old free-form gto_explanation paragraph is no longer rendered —
-      // its content is folded into per-option action_analysis bullets inside
-      // each option card (via buildRevealResult above). The "Test it" button
-      // still gives users a one-click into the equity panel; clickable range
-      // chips inside pros/cons bullets ALSO route here via onRangeClick.
 
       body = h("div", { class: "hand-reveal" },
         result,
-        h("div", { class: "test-row" }, testBtn),
-        testHost
+        h("div", { class: "test-row" }, testBtn)
       );
 
       fwdBtn = h("button", { type: "button", class: "primary hand-fwd" },
@@ -927,7 +983,7 @@ export function mountInGameView(container, gameId) {
       "section",
       { class: "in-game my-turn" },
       progress,
-      h("div", { class: "hand-card" }, spot, body),
+      h("div", { class: "hand-card" }, spot, spotContext, equityHost, body),
       errorBox,
       h("div", { class: "hand-nav" }, backBtn, fwdBtn)
     ));

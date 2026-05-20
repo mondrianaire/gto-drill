@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult } from "./ui.js";
+import { richText, buildRevealResult, buildSpotContext } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
 
 // -----------------------------------------------------------------------
@@ -141,6 +141,33 @@ export function mountSoloView(container, onExit) {
       spot.appendChild(h("p", { class: "scenario-desc" }, richText(scen.description, scen)));
     }
 
+    // --- spot context (framing + villain range chips) + equity panel host ---
+    // Lifted ABOVE the decide/reveal branch so the framing and range chips
+    // appear in BOTH phases. The range chips pop the equity panel — which
+    // is now reachable BEFORE the user locks in (helps them think about
+    // the spot before guessing).
+    const equityHost = h("div", { class: "equity-host" });
+    const eqState = { open: false, handle: null };
+    function openWithRange(range) {
+      const classes = (range && range.classes) || [];
+      const label = (range && range.label) || "";
+      if (eqState.open && eqState.handle) {
+        eqState.handle.setRange(classes, label);
+      } else {
+        eqState.handle = mountEquityPanel(equityHost, scen, { initialRange: classes, initialRangeLabel: label });
+        eqState.open = true;
+      }
+      if (eqState.handle && eqState.handle.root && eqState.handle.root.scrollIntoView) {
+        eqState.handle.root.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }
+    }
+    function closeEquityPanel() {
+      if (eqState.handle) try { eqState.handle.unmount(); } catch {}
+      eqState.handle = null;
+      eqState.open = false;
+    }
+    const spotContext = buildSpotContext({ scen, onRangeClick: openWithRange });
+
     // --- body: decide or reveal ---------------------------------------------
     let body, primaryBtn;
     if (!draft.revealed) {
@@ -201,47 +228,28 @@ export function mountSoloView(container, onExit) {
       // ===================== REVEAL =====================
       const gto = scen.gto_action;
 
-      // Equity panel + range chips — same wiring as multiplayer reveal.
-      const testHost = h("div", { class: "test-host" });
-      const eqState = { open: false, handle: null };
+      // Equity panel + Test-it fallback button. The state machinery
+      // (openWithRange, eqState) is lifted above this branch so the
+      // spot-context's villain-range chips can pop the same panel during
+      // decide. The Test-it button is reveal-only — it auto-loads the
+      // last scenario range as a quick entry into the equity calc.
       const testBtn = h("button", { type: "button", class: "secondary test-it" }, "🎲  Test it — equity vs a range");
-      function closePanel() {
-        if (eqState.handle) eqState.handle.unmount();
-        eqState.handle = null;
-        eqState.open = false;
-        testBtn.textContent = "🎲  Test it — equity vs a range";
-      }
-      function openWithRange(range) {
-        const classes = (range && range.classes) || [];
-        const label = (range && range.label) || "";
-        if (eqState.open && eqState.handle) {
-          eqState.handle.setRange(classes, label);
-        } else {
-          eqState.handle = mountEquityPanel(testHost, scen, { initialRange: classes, initialRangeLabel: label });
-          eqState.open = true;
-          testBtn.textContent = "Hide equity panel";
-        }
-        if (eqState.handle && eqState.handle.root && eqState.handle.root.scrollIntoView) {
-          eqState.handle.root.scrollIntoView({ behavior: "smooth", block: "nearest" });
-        }
-      }
       testBtn.addEventListener("click", () => {
-        if (eqState.open) { closePanel(); return; }
-        // Auto-load the LAST chip in the scenario's GTO explanation, if any.
+        if (eqState.open) {
+          closeEquityPanel();
+          testBtn.textContent = "🎲  Test it — equity vs a range";
+          return;
+        }
         const ranges = (scen && scen.villain_ranges) || [];
         const last = ranges.length ? ranges[ranges.length - 1] : null;
         if (last) {
-          openWithRange({
-            classes: last.classes,
-            label: "Auto-loaded: " + last.label,
-          });
+          openWithRange({ classes: last.classes, label: "Auto-loaded: " + last.label });
         } else {
           openWithRange(null);
         }
+        testBtn.textContent = "Hide equity panel";
       });
 
-      // Build the reveal AFTER openWithRange is defined so the matrix's
-      // pros/cons range chips can call into it.
       const result = buildRevealResult({
         scen,
         userAction: draft.action,
@@ -250,12 +258,9 @@ export function mountSoloView(container, onExit) {
         onRangeClick: openWithRange,
       });
 
-      // The legacy free-form gto_explanation paragraph is no longer rendered
-      // — its content lives inside per-option action_analysis pros/cons.
       body = h("div", { class: "hand-reveal" },
         result,
-        h("div", { class: "test-row" }, testBtn),
-        testHost
+        h("div", { class: "test-row" }, testBtn)
       );
 
       primaryBtn = h("button", { type: "button", class: "primary hand-fwd" }, "Next hand →");
@@ -267,7 +272,7 @@ export function mountSoloView(container, onExit) {
       { class: "in-game my-turn solo-view" },
       header,
       shareFallback,
-      h("div", { class: "hand-card" }, spot, body),
+      h("div", { class: "hand-card" }, spot, spotContext, equityHost, body),
       errorBox,
       h("div", { class: "hand-nav" }, primaryBtn)
     ));
