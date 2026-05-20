@@ -418,89 +418,124 @@ function confidenceDots(confidence, who) {
  *   clickable villain-range chips. When omitted, ranges aren't clickable
  *   (still render as labelled chips for context).
  */
-export function buildSpotContext({ scen, onRangeClick }) {
+/**
+ * Build the VILLAIN RANGE JUSTIFICATION block — the LEAD of the reveal.
+ * For each entry in `scen.villain_ranges`, renders a card with the range
+ * LABEL + the SUMMARY (which says WHY the analyst narrowed villain to
+ * this range — e.g., "Linear 3-bet range: JJ+, AK, AQs, plus a slice of
+ * suited bluffs"). Each card is clickable to pop the Monte Carlo equity
+ * panel pre-loaded with that range.
+ *
+ * Lives at the TOP of the reveal so the asymmetric multiplayer angle
+ * (what's villain doing here) is the primary signal, not buried below
+ * the verdict. Returns null when no villain ranges are defined.
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ * @param {(range:Object)=>void} [args.onRangeClick]
+ */
+export function buildVillainRangeBlock({ scen, onRangeClick }) {
   if (!scen) return null;
-  const sections = [];
-
-  // Framing
-  const framing = Array.isArray(scen.framing) ? scen.framing : [];
-  if (framing.length) {
-    const list = h("ul", { class: "spot-framing-list" });
-    const richOpts = onRangeClick ? { onRangeClick } : undefined;
-    for (const b of framing) {
-      list.appendChild(h("li", { class: "spot-framing-item" },
-        h("span", { class: "spot-framing-marker", "aria-hidden": "true" }, "·"),
-        h("span", { class: "spot-framing-text" }, richText(b, scen, richOpts))
-      ));
-    }
-    sections.push(h("div", { class: "spot-framing" },
-      h("div", { class: "spot-context-label" }, "The spot"),
-      list
-    ));
-  }
-
-  // Villain ranges — clickable chips (when onRangeClick is provided).
   const ranges = Array.isArray(scen.villain_ranges) ? scen.villain_ranges : [];
-  if (ranges.length) {
-    const chipsRow = h("div", { class: "spot-ranges-chips" });
-    for (const range of ranges) {
-      const summary = range.summary ? range.summary : "";
-      const title = summary ? (range.label + " — " + summary) : range.label || "";
-      const chip = h(
-        "span",
-        { class: "spot-range-chip" + (onRangeClick ? " is-clickable" : ""), title, role: onRangeClick ? "button" : null, tabindex: onRangeClick ? "0" : null },
-        h("span", { class: "spot-range-chip-label" }, range.label || "Range"),
-        onRangeClick ? h("span", { class: "spot-range-chip-icon", "aria-hidden": "true" }, "🎲") : null
-      );
-      if (onRangeClick) {
-        chip.addEventListener("click", (ev) => { ev.preventDefault(); onRangeClick(range); });
-        chip.addEventListener("keydown", (ev) => {
-          if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); onRangeClick(range); }
-        });
-      }
-      chipsRow.appendChild(chip);
-    }
-    sections.push(h("div", { class: "spot-ranges" },
-      h("div", { class: "spot-context-label" },
-        h("span", null, "Villain's range"),
-        onRangeClick ? h("span", { class: "spot-context-hint muted" }, " — tap a chip to test equity") : null
+  if (ranges.length === 0) return null;
+  const list = h("div", { class: "villain-range-list" });
+  for (const range of ranges) {
+    const card = h(
+      "div",
+      { class: "villain-range-card" + (onRangeClick ? " is-clickable" : ""),
+        role: onRangeClick ? "button" : null,
+        tabindex: onRangeClick ? "0" : null,
+        title: onRangeClick ? "Tap to test equity vs this range" : null },
+      h("div", { class: "villain-range-card-header" },
+        h("span", { class: "villain-range-card-label" }, range.label || "Range"),
+        onRangeClick ? h("span", { class: "villain-range-card-icon", "aria-hidden": "true" }, "🎲") : null
       ),
-      chipsRow
-    ));
+      range.summary ? h("div", { class: "villain-range-card-summary" }, range.summary) : null
+    );
+    if (onRangeClick) {
+      card.addEventListener("click", (ev) => { ev.preventDefault(); onRangeClick(range); });
+      card.addEventListener("keydown", (ev) => {
+        if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); onRangeClick(range); }
+      });
+    }
+    list.appendChild(card);
   }
-
-  if (sections.length === 0) return null;
-  return h("div", { class: "spot-context" }, ...sections);
+  return h("div", { class: "villain-range-block" },
+    h("div", { class: "villain-range-label" },
+      h("span", null, "Villain's range"),
+      onRangeClick ? h("span", { class: "spot-context-hint muted" }, " — tap to test equity") : null
+    ),
+    list
+  );
 }
 
 /**
- * Build the "GTO Read" lead block — the top of the reveal screen.
- * Headline: "GTO line: [action chip]" prominently. Body: the
- * gto_explanation paragraph that walks through WHY the solver chose
- * that line and HOW villain's range got narrowed to what it is.
+ * Build the FRAMING block — situational facts about the spot (board
+ * texture, SPR, position dynamics, range advantages NOT specific to
+ * villain-range-narrowing). Sits BELOW the verdict in the new layout
+ * as supporting context. Returns null if framing data is empty.
  *
- * Lives ABOVE the verdict bar so the user sees the GTO read first, the
- * verdict ("you matched / off") second, the comparison third. The
- * supporting spot-context (framing facts + range chips) sits below.
+ * Replaces the earlier `buildSpotContext` which combined framing AND
+ * range chips into one block — those concerns are now separated:
+ * villain range (the lead, top) vs spot framing (supporting, below).
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ * @param {(range:Object)=>void} [args.onRangeClick]
+ */
+export function buildSpotFramingBlock({ scen, onRangeClick }) {
+  if (!scen) return null;
+  const framing = Array.isArray(scen.framing) ? scen.framing : [];
+  if (framing.length === 0) return null;
+  const list = h("ul", { class: "spot-framing-list" });
+  const richOpts = onRangeClick ? { onRangeClick } : undefined;
+  for (const b of framing) {
+    list.appendChild(h("li", { class: "spot-framing-item" },
+      h("span", { class: "spot-framing-marker", "aria-hidden": "true" }, "·"),
+      h("span", { class: "spot-framing-text" }, richText(b, scen, richOpts))
+    ));
+  }
+  return h("div", { class: "spot-framing" },
+    h("div", { class: "spot-context-label" }, "The spot"),
+    list
+  );
+}
+
+/**
+ * Backwards-compatible wrapper — keeps the old `buildSpotContext` export
+ * working for any callers I haven't migrated. New callers should use
+ * `buildVillainRangeBlock` and `buildSpotFramingBlock` directly.
+ */
+export function buildSpotContext({ scen, onRangeClick }) {
+  const villain = buildVillainRangeBlock({ scen, onRangeClick });
+  const framing = buildSpotFramingBlock({ scen, onRangeClick });
+  if (!villain && !framing) return null;
+  return h("div", { class: "spot-context" }, villain, framing);
+}
+
+/**
+ * Build the "GTO line" blurb — a small one-line block that names the
+ * solver's preferred action. Per user: "GTO line is a small blurb about
+ * the best option."
+ *
+ * Just the headline: "GTO line: [action chip]". No body paragraph.
+ * The villain-range justification ABOVE this block already covers the
+ * "why we read villain on that range", and the spot framing BELOW the
+ * verdict covers the situational facts. The blurb itself is just the
+ * recommendation, kept tight.
+ *
+ * Note: `onRangeClick` is accepted for API compatibility but no longer
+ * threaded through any prose (the body paragraph is gone).
  *
  * @param {Object} args
  * @param {Object} args.scen
  * @param {string} args.gtoAction
- * @param {(range:Object)=>void} [args.onRangeClick] — for inline range
- *   chips inside the explanation paragraph
  */
-export function buildGtoRead({ scen, gtoAction, onRangeClick }) {
+export function buildGtoRead({ scen, gtoAction }) {
   if (!scen) return null;
-  const richOpts = onRangeClick ? { onRangeClick } : undefined;
-  const body = scen.gto_explanation
-    ? h("p", { class: "gto-read-body" }, richText(scen.gto_explanation, scen, richOpts))
-    : null;
-  return h("div", { class: "gto-read" },
-    h("div", { class: "gto-read-header" },
-      h("span", { class: "gto-read-label muted" }, "GTO line"),
-      h("span", { class: "gto-read-action" }, richText(gtoAction, scen, { asAction: true }))
-    ),
-    body
+  return h("div", { class: "gto-read gto-read-blurb" },
+    h("span", { class: "gto-read-label muted" }, "GTO line"),
+    h("span", { class: "gto-read-action" }, richText(gtoAction, scen, { asAction: true }))
   );
 }
 
@@ -864,9 +899,9 @@ export function mountInGameView(container, gameId) {
         eqState.open = false;
       }
 
-      // Spot context — framing + clickable villain ranges. Sits at the TOP
-      // of the GTO screen, ABOVE the verdict.
-      const spotContext = buildSpotContext({ scen, onRangeClick: openEquityWithRange });
+      // Villain range justification (LEAD) + spot framing (supporting).
+      const villainRangeBlock = buildVillainRangeBlock({ scen, onRangeClick: openEquityWithRange });
+      const spotFraming = buildSpotFramingBlock({ scen, onRangeClick: openEquityWithRange });
 
       // Find the opponent's participant record + their submission for this
       // hand (if they've already played). Pass identity (avatar + name) into
@@ -915,10 +950,11 @@ export function mountInGameView(container, gameId) {
       });
 
       body = h("div", { class: "hand-reveal" },
-        gtoRead,        // NEW LEAD: GTO line + reasoning paragraph
-        result,         // verdict bar + comparison + opponent panel
-        spotContext,    // THE SPOT framing + villain range chips (supporting)
-        equityHost,     // Monte Carlo panel mounts here when a chip is clicked
+        villainRangeBlock,  // LEAD: villain range justification
+        gtoRead,            // GTO line: small blurb
+        result,             // verdict + compact comparison + opponent
+        spotFraming,        // THE SPOT — situational facts (supporting)
+        equityHost,         // equity panel mounts here
         h("div", { class: "test-row" }, testBtn)
       );
 
