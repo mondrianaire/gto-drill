@@ -1319,13 +1319,22 @@ export function mountInGameView(container, gameId) {
       });
     }
 
+    // On reveal (fwdBtn = Next hand → / Submit handful) we anchor the
+    // nav row to the top of the viewport as a sticky pane, so the user
+    // can advance from any scroll position. During decide (fwdBtn is
+    // null because lock-in lives inside the form), the nav row stays
+    // at the bottom with just the Back button.
+    const isReveal = !!fwdBtn;
+    const navRow = h("div", { class: "hand-nav" + (isReveal ? " hand-nav-sticky" : "") }, backBtn, fwdBtn || null);
+
     container.appendChild(h(
       "section",
       { class: "in-game my-turn" },
       progress,
+      isReveal ? navRow : null,
       h("div", { class: "hand-card" }, spot, body),
       errorBox,
-      h("div", { class: "hand-nav" }, backBtn, fwdBtn || null)
+      !isReveal ? navRow : null
     ));
   }
 

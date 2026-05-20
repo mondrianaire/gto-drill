@@ -325,14 +325,23 @@ export function mountSoloView(container, onExit) {
       primaryBtn.addEventListener("click", () => { nextHand(); });
     }
 
+    // On REVEAL, the Next-hand button gets a sticky pane anchored to
+    // the top of the viewport so the user can advance from any scroll
+    // position in the reveal content. During decide there's no
+    // primaryBtn (lock-in lives inside the form), so the sticky pane
+    // simply doesn't render.
+    const stickyNav = primaryBtn
+      ? h("div", { class: "hand-nav hand-nav-sticky" }, primaryBtn)
+      : null;
+
     container.appendChild(h(
       "section",
       { class: "in-game my-turn solo-view" },
       header,
       shareFallback,
+      stickyNav,          // sticky "Next hand →" on reveal
       h("div", { class: "hand-card" }, spot, body),
-      errorBox,
-      primaryBtn ? h("div", { class: "hand-nav" }, primaryBtn) : null
+      errorBox
     ));
   }
 
