@@ -1704,13 +1704,28 @@ form { margin-top: 8px; }
   letter-spacing: 0.07em;
   margin-bottom: 8px;
 }
+/* Poker felt — radial gradient base + a fine dot grain to break up the
+   flat-color look. The grain dots are tiny + low opacity so it reads as
+   "felt texture" not "polka dots". The rail is a dark-green outer border
+   that mimics a table edge, plus an outer drop shadow so the table sits
+   "on" the page instead of being a flat panel. The inner shadow keeps
+   the edges of the felt slightly darker — adds depth without distracting. */
 .replay-table {
   position: relative;
   height: 300px;
-  background: radial-gradient(ellipse at center, #2c6e52 0%, #1b4736 100%);
-  border: 4px solid #14342780;
-  border-radius: 120px;
-  box-shadow: inset 0 0 30px rgba(0, 0, 0, 0.35);
+  background:
+    /* Felt grain: tiny radial dots at low opacity over the base gradient */
+    radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.025) 1px, transparent 1.5px) 0 0 / 5px 5px,
+    radial-gradient(ellipse at center, #2c6e52 0%, #1b4736 100%);
+  border: 6px solid #0e2a1d;
+  border-radius: 140px;
+  box-shadow:
+    /* Inner shadow — darkens the felt edge */
+    inset 0 0 40px rgba(0, 0, 0, 0.45),
+    /* Subtle highlight on the top inner edge — fakes a slight bevel */
+    inset 0 1px 0 rgba(255, 255, 255, 0.05),
+    /* Outer drop shadow — lifts the table off the page */
+    0 6px 18px rgba(0, 0, 0, 0.45);
 }
 
 .rseat {
@@ -1719,6 +1734,29 @@ form { margin-top: 8px; }
   padding: 4px;
   border-radius: 8px;
   text-align: center;
+}
+
+/* Dealer button — small white "D" disc sitting on the BTN seat. Cues
+   the table's button position regardless of who's hero. Placed in the
+   top-right of the seat so it doesn't overlap the card row or stack. */
+.rseat-dealer {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: linear-gradient(180deg, #fafafa 0%, #d8d8d8 100%);
+  color: #1a1a1a;
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid rgba(0, 0, 0, 0.4);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  letter-spacing: 0;
+  line-height: 1;
 }
 .rslot-0 { bottom: 6px; left: 50%; transform: translateX(-50%); }
 .rslot-1 { bottom: 6px; left: 4px; }
@@ -1752,17 +1790,24 @@ form { margin-top: 8px; }
   color: #d5ece0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
+/* Bet bubble — chip-like gradient pill that appears above or below a
+   seat when they've put chips in. Looks more like a physical bet than
+   a flat coloured tag. */
 .rseat-bet {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
-  background: var(--accent);
+  background: linear-gradient(180deg, #5cb7ff 0%, #3a98e0 100%);
   color: #061018;
-  font-size: 0.68rem;
+  font-size: 0.7rem;
   font-weight: 700;
-  padding: 1px 7px;
+  padding: 2px 9px;
   border-radius: 999px;
   white-space: nowrap;
+  box-shadow:
+    0 2px 3px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.35),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.2);
 }
 .rslot-0 .rseat-bet, .rslot-1 .rseat-bet, .rslot-5 .rseat-bet { top: -19px; }
 .rslot-2 .rseat-bet, .rslot-3 .rseat-bet, .rslot-4 .rseat-bet { bottom: -19px; }
@@ -1784,13 +1829,20 @@ form { margin-top: 8px; }
   font-style: italic;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
+/* Pot pill — sits below the board cards. More prominent than before:
+   slightly larger, softer dark fill, subtle ring + drop shadow so it
+   reads as a chip stack rather than just a label. */
 .replay-pot {
-  background: rgba(0, 0, 0, 0.45);
+  background: rgba(0, 0, 0, 0.55);
   color: #fff;
-  font-size: 0.8rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  padding: 2px 12px;
+  padding: 3px 14px;
   border-radius: 999px;
+  box-shadow:
+    0 2px 4px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.10),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 /* Playing cards (CSS-drawn — no assets) */
