@@ -92,7 +92,14 @@ function knownCards(scen) {
 //   - `\s*[/—]\d+\s*%` → "25/40%"
 // Percentages share digit vocab with rank shorthand; the trailing %
 // (possibly via a range) is the distinguishing cue.
-const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s*[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(\s+rainbow\b|\s+monotone\b|\s+two-toned?\b|\s*mono\b|\s*tt\b|r\b|m\b)?|\b([2-9TJQKA]{2})(s|o)?\b(?!\s*(?:[-/–—]\s*\d+)?\s*%)/g;
+//
+// Group 11 (`X-Y-Z` etc.) handles dash-separated rank boards like
+// "6-7-8-9-T" or "7-4-2-5-6" — each rank renders as a card. Requires
+// 3+ ranks separated by single dashes. Word boundaries on both ends
+// exclude pair-range notation ("TT-77" — the second T has no \b since
+// it's preceded by a word char), and the {2,4} repetition excludes
+// 2-rank hand notation like "9-6 two pair".
+const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s*[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(\s+rainbow\b|\s+monotone\b|\s+two-toned?\b|\s*mono\b|\s*tt\b|r\b|m\b)?|\b([2-9TJQKA]{2})(s|o)?\b(?!\s*(?:[-/–—]\s*\d+)?\s*%)|\b([2-9TJQKA](?:-[2-9TJQKA]){2,4})\b/g;
 
 /** Escape regex meta-characters for safe use inside a constructed RegExp. */
 function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -232,6 +239,15 @@ function tokenizeProse(text, scen, opts) {
           title: label,
           "aria-label": label,
         }));
+      }
+    } else if (m[11]) {
+      // Dash-separated rank board ("6-7-8-9-T", "7-4-2-5-6"). Same
+      // rendering as the concatenated form (group 7): each rank as a
+      // doesn't-matter-suit card.
+      const ranks = m[11].split("-");
+      for (const r of ranks) {
+        frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
+          h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r)));
       }
     }
     last = m.index + m[0].length;
