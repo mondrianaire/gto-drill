@@ -212,18 +212,35 @@ export function mountReplay(container, replay) {
   // and the previous-action button never steps before them.
   let minStep = 0;
   while (minStep < actions.length && actions[minStep].type === "post") minStep += 1;
+  // Inflection points: action indices we WANT to dwell on in the replay.
+  // Folds and checks are noise — they don't move money or change the
+  // visual state meaningfully. Bets / raises / calls are the inflection
+  // moments where chips move. We auto-play through THESE on load and
+  // skip over the noise; user can still step through one-by-one with
+  // prev/next if they want the full history.
+  function isInflection(a) {
+    return a && (a.type === "bet" || a.type === "raise" || a.type === "call");
+  }
+  // Step at which each inflection action ENDS (i.e., the state AFTER it).
+  // setStep(N) applies actions[0..N-1] inclusive.
+  const inflectionSteps = [];
+  for (let i = minStep; i < decisionStep; i++) {
+    if (isInflection(actions[i])) inflectionSteps.push(i + 1);
+  }
+
   let step = decisionStep; // start showing the full pre-decision state
   let playTimer = null;
+  let autoplayTimer = null;
+  let userInteracted = false;
 
   const table = h("div", { class: "replay-table" });
-  const log = h("ol", { class: "replay-log" });
   const stepLabel = h("span", { class: "replay-steplabel" });
   const prevBtn = h("button", { type: "button", class: "replay-ctl" }, "◀");
   const playBtn = h("button", { type: "button", class: "replay-ctl" }, "▶");
-  const nextBtn = h("button", { type: "button", class: "replay-ctl" }, "▶▌");
-  nextBtn.textContent = "▶";
+  const nextBtn = h("button", { type: "button", class: "replay-ctl" }, "▶");
   prevBtn.setAttribute("aria-label", "Previous action");
   nextBtn.setAttribute("aria-label", "Next action");
+  playBtn.setAttribute("aria-label", "Play / pause replay");
 
   function streetIdx(s) { return STREETS.indexOf(s); }
 
@@ -307,30 +324,9 @@ export function mountReplay(container, replay) {
     );
   }
 
-  function renderLog() {
-    while (log.firstChild) log.removeChild(log.firstChild);
-    // Skip the SB/BB blind posts — they're default forced bets that exist
-    // in every hand, not part of the action history. Real "action" starts
-    // at UTG (or whoever's first to voluntarily act).
-    actions.forEach((a, i) => {
-      if (a.type === "post") return;
-      const li = h("li", {
-        class: "replay-logitem" + (i < step ? " is-done" : "") + (i === step - 1 ? " is-current" : ""),
-        onClick: () => setStep(i + 1),
-      }, describeAction(replay, i));
-      log.appendChild(li);
-    });
-    const dec = h("li", {
-      class: "replay-logitem replay-logdecision" + (step === decisionStep ? " is-current" : ""),
-      onClick: () => setStep(decisionStep),
-    }, replay.hero_seat + " to act — your decision");
-    log.appendChild(dec);
-  }
-
   function render() {
     const state = deriveState(replay, step);
     renderTable(state);
-    renderLog();
     if (step === decisionStep) {
       stepLabel.textContent = "Decision point";
     } else if (step === minStep) {
@@ -342,7 +338,7 @@ export function mountReplay(container, replay) {
     }
     prevBtn.disabled = step <= minStep;
     nextBtn.disabled = step === decisionStep;
-    playBtn.textContent = playTimer ? "❚❚" : "▶";
+    playBtn.textContent = (playTimer || autoplayTimer) ? "❚❚" : "▶";
   }
 
   function setStep(s) {
@@ -353,25 +349,90 @@ export function mountReplay(container, replay) {
 
   function stopPlay() {
     if (playTimer) { clearInterval(playTimer); playTimer = null; }
+    if (autoplayTimer) { clearTimeout(autoplayTimer); autoplayTimer = null; }
     render();
   }
 
+  // Skip past "noise" actions (fold / check / post) when stepping with
+  // prev/next or playing. Returns the next inflection step at or beyond
+  // `s` (going forwards) or at or before `s` (going backwards). If no
+  // inflection step exists in that direction, returns the appropriate
+  // endpoint (minStep or decisionStep).
+  function snapForward(s) {
+    while (s < decisionStep) {
+      const a = actions[s - 1];
+      if (s === decisionStep || s === minStep || isInflection(a)) return s;
+      s += 1;
+    }
+    return decisionStep;
+  }
+  function snapBackward(s) {
+    while (s > minStep) {
+      const a = actions[s - 1];
+      if (s === minStep || isInflection(a)) return s;
+      s -= 1;
+    }
+    return minStep;
+  }
+
   function togglePlay() {
-    if (playTimer) { stopPlay(); return; }
+    if (playTimer || autoplayTimer) { stopPlay(); return; }
     // Restart from the post-blinds baseline if we're at the end already.
     if (step === decisionStep) step = minStep;
     render();
     playTimer = setInterval(() => {
       if (step >= decisionStep) { stopPlay(); return; }
-      step += 1;
+      step = snapForward(step + 1);
       render();
-    }, 1100);
+    }, 900);
     render();
   }
 
-  prevBtn.addEventListener("click", () => { stopPlay(); setStep(step - 1); });
-  nextBtn.addEventListener("click", () => { stopPlay(); setStep(step + 1); });
-  playBtn.addEventListener("click", togglePlay);
+  // Auto-play the buildup on load — step through INFLECTION actions only
+  // (bets / raises / calls), skipping the noise (folds / checks / posts).
+  // Each step has a brief dwell so the user sees the bet bubble appear
+  // and chips animate forward. Stops if the user interacts.
+  function startAutoplayOnLoad() {
+    if (inflectionSteps.length === 0) return;  // nothing to animate
+    step = minStep;
+    render();
+    let i = 0;
+    function tick() {
+      if (userInteracted) return;
+      if (i >= inflectionSteps.length) {
+        autoplayTimer = setTimeout(() => {
+          if (userInteracted) return;
+          step = decisionStep;
+          autoplayTimer = null;
+          render();
+        }, 700);
+        return;
+      }
+      step = inflectionSteps[i];
+      i += 1;
+      render();
+      autoplayTimer = setTimeout(tick, 800);
+    }
+    autoplayTimer = setTimeout(tick, 500);
+  }
+
+  // prev/next mark user as interacting AND stop any in-flight playback —
+  // they want to land on a specific step, not be carried past it. The
+  // play button uses togglePlay directly so it correctly toggles
+  // start/stop instead of being forced into "start fresh".
+  function step_user(fn) {
+    return () => {
+      userInteracted = true;
+      stopPlay();
+      fn();
+    };
+  }
+  prevBtn.addEventListener("click", step_user(() => setStep(snapBackward(step - 1))));
+  nextBtn.addEventListener("click", step_user(() => setStep(snapForward(step + 1))));
+  playBtn.addEventListener("click", () => {
+    userInteracted = true;
+    togglePlay();
+  });
 
   const gameInfoPrefix = (replay.format === "tournament" ? "Tournament" : "Cash") + " · ";
 
@@ -380,17 +441,18 @@ export function mountReplay(container, replay) {
     { class: "replay" },
     h("div", { class: "replay-gameinfo" }, gameInfoPrefix, bbChip(replay.stack_depth_bb), " deep"),
     table,
-    h("div", { class: "replay-controls" }, prevBtn, playBtn, nextBtn, stepLabel),
-    h("details", { class: "replay-history" },
-      h("summary", null, "Action history"),
-      log
-    )
+    h("div", { class: "replay-controls" }, prevBtn, playBtn, nextBtn, stepLabel)
   );
   container.appendChild(root);
+  // Render baseline first (so the table is on screen instantly), THEN
+  // start auto-playing the buildup. The user sees the hand built up
+  // action-by-action with each bet/raise/call animating in.
   render();
+  startAutoplayOnLoad();
   return {
     unmount: () => {
       stopPlay();
+      userInteracted = true;
       if (root.parentNode) root.parentNode.removeChild(root);
     },
   };
