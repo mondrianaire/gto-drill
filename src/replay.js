@@ -210,10 +210,27 @@ export function buildSpotSummary(replay) {
     river: board.river || [],
   };
 
+  // Actor naming — match the wrap-up convention: hero → "HERO", the
+  // single non-hero actor → "VILLAIN". For the rare multi-villain
+  // scenarios (2 of 45) keep positions so the reader can tell which
+  // opponent is acting.
+  const villainSeats = new Set();
+  for (const a of actions) {
+    if (a.type === "post" || a.type === "fold") continue;
+    if (a.actor !== heroSeat) villainSeats.add(a.actor);
+  }
+  const singleVillain = villainSeats.size === 1;
+
+  function actorLabel(seat) {
+    if (seat === heroSeat) return "HERO";
+    if (singleVillain) return "VILLAIN";
+    return seat; // disambiguate by position in multi-villain hands
+  }
+
   function actionPhrase(a) {
-    // Short, chip-friendly phrasing. "BTN raises to 2.5bb", "BB calls",
-    // "BB checks", "CO bets 5bb".
-    const actor = a.actor + (a.actor === heroSeat ? " (you)" : "");
+    // Short, chip-friendly phrasing. "HERO raises to 2.5bb",
+    // "VILLAIN calls 2.5bb", "VILLAIN checks", "HERO bets 5bb".
+    const actor = actorLabel(a.actor);
     if (a.type === "check") return actor + " checks";
     if (a.type === "call") return actor + " calls" + (a.amount_bb ? " " + a.amount_bb + "bb" : "");
     if (a.type === "bet") return actor + " bets " + (a.amount_bb || 0) + "bb";
