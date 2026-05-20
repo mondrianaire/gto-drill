@@ -341,7 +341,7 @@ function confidenceDots(confidence, who) {
  *   neutral / muted    → an option nobody picked
  *
  * @param {Object} args
- * @param {Object} args.scen          — full scenario; reads .available_actions + .gto_action
+ * @param {Object} args.scen          — full scenario; reads .available_actions + .gto_action + .action_analysis
  * @param {string} args.userAction
  * @param {string} args.gtoAction     — typically scen.gto_action, passed in for safety
  * @param {number} args.confidence    — Hero's confidence (1..5)
@@ -351,8 +351,12 @@ function confidenceDots(confidence, who) {
  * @param {string} args.opponent.action
  * @param {number|null} [args.opponent.confidence]
  * @param {string|null} [args.opponent.note]
+ * @param {(range:Object)=>void} [args.onRangeClick] — handler for clickable
+ *   villain-range chips inside pros/cons bullets (so the equity panel can
+ *   pop with that range pre-loaded). Optional; without it the chips just
+ *   render as text.
  */
-export function buildRevealResult({ scen, userAction, gtoAction, confidence, opponent }) {
+export function buildRevealResult({ scen, userAction, gtoAction, confidence, opponent, onRangeClick }) {
   const correct = userAction === gtoAction;
   const available = (scen && Array.isArray(scen.available_actions)) ? scen.available_actions.slice() : [];
   // Guard: if the data is missing the action somehow (legacy / orphaned),
@@ -413,43 +417,98 @@ export function buildRevealResult({ scen, userAction, gtoAction, confidence, opp
         opponent.confidence ? confidenceDots(opponent.confidence, oppName) : null));
     }
 
-    const card = h("div", { class: classes.join(" ") },
+    // Pros/cons — the per-option explanation. This is where the learning
+    // happens; each option carries its own steel-manned reasoning, both
+    // sides. Falls back gracefully when action_analysis is missing.
+    const analysis = scen && scen.action_analysis ? scen.action_analysis[action] : null;
+    const pros = (analysis && Array.isArray(analysis.pros)) ? analysis.pros : [];
+    const cons = (analysis && Array.isArray(analysis.cons)) ? analysis.cons : [];
+    const analysisEl = h("div", { class: "reveal-analysis" });
+    const richOpts = onRangeClick ? { onRangeClick } : undefined;
+    if (pros.length) {
+      const list = h("ul", { class: "reveal-pros" });
+      for (const p of pros) {
+        list.appendChild(h("li", null,
+          h("span", { class: "reveal-bullet-icon reveal-bullet-pro", "aria-hidden": "true" }, "✓"),
+          h("span", { class: "reveal-bullet-text" }, richText(p, scen, richOpts))
+        ));
+      }
+      analysisEl.appendChild(list);
+    }
+    if (cons.length) {
+      const list = h("ul", { class: "reveal-cons" });
+      for (const c of cons) {
+        list.appendChild(h("li", null,
+          h("span", { class: "reveal-bullet-icon reveal-bullet-con", "aria-hidden": "true" }, "✗"),
+          h("span", { class: "reveal-bullet-text" }, richText(c, scen, richOpts))
+        ));
+      }
+      analysisEl.appendChild(list);
+    }
+
+    // Top row of the card: action chip on the left, badges on the right.
+    const topRow = h("div", { class: "reveal-option-top" },
       h("div", { class: "reveal-option-action" }, richText(action, scen)),
-      // Only render the badges row if at least one badge fired — leaves
-      // un-picked, non-GTO options as quiet "this was also an option" cards.
       badges.childNodes.length ? badges : null
+    );
+
+    const card = h("div", { class: classes.join(" ") },
+      topRow,
+      analysisEl.childNodes.length ? analysisEl : null
     );
     optionsList.appendChild(card);
   }
 
-  // Opponent note (if they left one) sits under the matrix as a quote — it's
-  // personal commentary about the spot, not a per-option signal.
-  let oppNoteEl = null;
-  if (opponent && opponent.note) {
-    const oppName = (opponent.name || "Opponent").split(/\s+/)[0];
-    oppNoteEl = h("div", { class: "reveal-opp-note-row" },
-      h("span", { class: "reveal-opp-note-label muted" }, oppName + "'s note:"),
-      h("p", { class: "reveal-opp-note" }, "“" + opponent.note + "”")
-    );
-  }
-
-  // Optional disagreement / agreement summary when opponent has played.
-  let oppAgreeEl = null;
+  // Dedicated "Opponent's view" panel — replaces the old agreement banner +
+  // note callout. Lives below the analysis matrix as its own block: their
+  // avatar + name (larger here than the inline badge), the action they
+  // picked rendered as a full chip, their confidence dots, their note,
+  // and a single-line agreement summary vs Hero and vs GTO. The asymmetric
+  // multiplayer angle gets a proper home here, not just a sliver.
+  let opponentPanel = null;
   if (opponent && opponent.action) {
+    const oppName = opponent.name || "Opponent";
+    const oppFirstName = oppName.split(/\s+/)[0];
+    const oppCorrect = opponent.action === gtoAction;
     const matchedYou = opponent.action === userAction;
-    const oppFirstName = (opponent.name || "Opponent").split(/\s+/)[0];
-    oppAgreeEl = h("div", { class: "reveal-agree " + (matchedYou ? "is-agree" : "is-disagree") },
-      matchedYou
-        ? "You and " + oppFirstName + " made the same call."
-        : "You and " + oppFirstName + " disagreed here."
+    const avatarEl = buildAvatar(oppName, opponent.photoURL || null);
+    avatarEl.classList.add("reveal-opp-avatar");
+
+    const summaryBits = [];
+    summaryBits.push(matchedYou
+      ? "Matched your pick"
+      : "Disagreed with you");
+    summaryBits.push(oppCorrect ? "on the GTO line" : "off the GTO line");
+
+    opponentPanel = h("div", {
+      class: "reveal-opp-panel" + (oppCorrect ? " is-ok" : " is-miss"),
+    },
+      h("div", { class: "reveal-opp-panel-header" },
+        avatarEl,
+        h("div", { class: "reveal-opp-panel-id" },
+          h("span", { class: "reveal-opp-panel-name" }, oppFirstName),
+          h("span", { class: "reveal-opp-panel-summary muted" }, summaryBits.join(", "))
+        )
+      ),
+      h("div", { class: "reveal-opp-panel-pick" },
+        h("span", { class: "reveal-opp-panel-label muted" }, "Picked"),
+        h("span", { class: "reveal-opp-panel-action" }, richText(opponent.action, scen))
+      ),
+      opponent.confidence ? h("div", { class: "reveal-opp-panel-conf" },
+        h("span", { class: "reveal-opp-panel-label muted" }, "Confidence"),
+        confidenceDots(opponent.confidence, oppFirstName)
+      ) : null,
+      opponent.note ? h("div", { class: "reveal-opp-panel-note-row" },
+        h("span", { class: "reveal-opp-panel-label muted" }, oppFirstName + "'s note"),
+        h("p", { class: "reveal-opp-panel-note" }, "“" + opponent.note + "”")
+      ) : null
     );
   }
 
   return h("div", { class: "reveal-result" + (correct ? " is-ok" : " is-miss") },
     verdict,
     optionsList,
-    oppAgreeEl,
-    oppNoteEl
+    opponentPanel
   );
 }
 
@@ -693,12 +752,18 @@ export function mountInGameView(container, gameId) {
         note: oppSub.note,
       } : null;
 
+      // We declare openEquityWithRange a bit further down, but the matrix
+      // needs a reference to it NOW so pros/cons range chips can route
+      // there too. Capture as a forwarding wrapper.
+      const onRangeClick = (range) => openEquityWithRange(range);
+
       const result = buildRevealResult({
         scen,
         userAction: sub.action,
         gtoAction: gto,
         confidence: sub.confidence,
         opponent,
+        onRangeClick,
       });
       // "Test it!" — Monte Carlo equity vs a user-picked villain range.
       // (Declared up here so inline range chips in the explanation prose can
@@ -743,13 +808,14 @@ export function mountInGameView(container, gameId) {
         }
       });
 
-      const explain = h("p", { class: "gto-explanation" }, scen
-        ? richText(scen.gto_explanation, scen, { onRangeClick: openEquityWithRange })
-        : "");
+      // The old free-form gto_explanation paragraph is no longer rendered —
+      // its content is folded into per-option action_analysis bullets inside
+      // each option card (via buildRevealResult above). The "Test it" button
+      // still gives users a one-click into the equity panel; clickable range
+      // chips inside pros/cons bullets ALSO route here via onRangeClick.
 
       body = h("div", { class: "hand-reveal" },
         result,
-        explain,
         h("div", { class: "test-row" }, testBtn),
         testHost
       );
