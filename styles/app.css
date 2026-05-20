@@ -794,8 +794,14 @@ form { margin-top: 8px; }
   opacity: 0.78;
 }
 
-/* Any-suit card — "Kx" / "Ax" / "Qx" renders as a card-shaped pill with
-   the rank + a tiny 4-suit rainbow row indicating "any suit". */
+/* Three distinct "non-specific" card glyphs:
+     .tok-anysuit-doesntmatter — "Kx" (analyst says suit irrelevant)
+     .tok-anysuit-unknown      — "K?" (suit not determined yet)
+     .tok-rainbow              — "K72" / "K72 rainbow" (multi-card board, different suits)
+
+   The first two share .tok-anysuit chrome (single card, mark in suit
+   slot); the rainbow card uses its own visual because it appears in
+   multi-card runs that need to read collectively as "different suits". */
 .tok-anysuit {
   display: inline-flex;
   flex-direction: column;
@@ -813,13 +819,42 @@ form { margin-top: 8px; }
   cursor: help;
 }
 .tok-anysuit-rank { font-weight: 700; font-size: 0.58rem; }
-.tok-anysuit-suits {
-  font-size: 0.46rem;
-  letter-spacing: -0.3px;
-  background: linear-gradient(90deg, #1a1a1a 0 50%, #c0202a 50% 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
+.tok-anysuit-mark { font-weight: 700; font-size: 0.58rem; line-height: 1; }
+/* "K?" — yellow-amber question mark suggesting "TBD". */
+.tok-anysuit-unknown .tok-anysuit-mark { color: #b08a3a; }
+/* "Kx" — neutral grey x suggesting "don't care". */
+.tok-anysuit-doesntmatter .tok-anysuit-mark { color: #888; }
+
+/* Rainbow board card — same chrome but suit slot is a small rainbow
+   gradient bar (black-red-red-black) so reading three of them together
+   conveys "three different suits". */
+.tok-rainbow {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 23px;
+  border-radius: 3px;
+  vertical-align: -5px;
+  margin: 0 1px;
+  background: #fdfdfb;
+  color: #1a1a1a;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+  line-height: 1;
+  cursor: help;
+}
+.tok-rainbow-rank { font-weight: 700; font-size: 0.58rem; }
+.tok-rainbow-suit {
+  width: 12px;
+  height: 4px;
+  margin-top: 1px;
+  border-radius: 1px;
+  background: linear-gradient(90deg,
+    #1a1a1a 0 25%,
+    #c0202a 25% 50%,
+    #c0202a 50% 75%,
+    #1a1a1a 75% 100%);
 }
 
 /* Inline range chip — clickable anchor that pre-loads the equity panel. */

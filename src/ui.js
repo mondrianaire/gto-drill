@@ -64,10 +64,16 @@ function knownCards(scen) {
   return set;
 }
 
-// card run (1+ space-separated codes) | position | Hero/Villain | bb chip | any-suit
-// Group 4 = "Nbb" or "N.Nbb" — rendered as a stylized chip.
-// Group 5 = "Kx" / "Ax" pattern (rank + literal x) — rendered as an any-suit card.
-const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])x\b/g;
+// Token patterns:
+//   1 = card run (1+ space-separated codes with explicit suits)
+//   2 = position chip (UTG|HJ|CO|BTN|SB|BB)
+//   3 = Hero/Villain word
+//   4 = "Nbb" / "N.Nbb" → stylized bb chip
+//   5 = "K?" → unknown-suit card (suit not yet determined)
+//   6 = "Kx" → doesn't-matter-suit card (analyst says suit irrelevant)
+//   7 = "K72" / "K72r" / "K72 rainbow" → multi-card rainbow board
+// Order matters for regex alternation: more-specific patterns first.
+const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(?:r\b|\s+rainbow\b)?/g;
 
 /** Escape regex meta-characters for safe use inside a constructed RegExp. */
 function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -106,11 +112,27 @@ function tokenizeProse(text, scen) {
         h("span", { class: "tok-bb-num" }, m[4]),
         h("span", { class: "tok-bb-unit" }, "bb")));
     } else if (m[5]) {
-      // "Kx" / "Ax" → any-suit mini-card glyph
+      // "K?" → unknown-suit card (suit not yet determined)
       const rank = m[5];
-      frag.appendChild(h("span", { class: "tok-anysuit", title: "Any suit (" + rank + "-x)" },
+      frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-unknown", title: rank + " — suit unknown" },
         h("span", { class: "tok-anysuit-rank" }, rank === "T" ? "10" : rank),
-        h("span", { class: "tok-anysuit-suits", "aria-hidden": "true" }, "♠♥♦♣")));
+        h("span", { class: "tok-anysuit-mark" }, "?")));
+    } else if (m[6]) {
+      // "Kx" / "Ax" → doesn't-matter-suit card (analyst marker)
+      const rank = m[6];
+      frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: rank + " — any suit" },
+        h("span", { class: "tok-anysuit-rank" }, rank === "T" ? "10" : rank),
+        h("span", { class: "tok-anysuit-mark" }, "x")));
+    } else if (m[7]) {
+      // "K72" / "K72r" / "K72 rainbow" → multi-card rainbow board.
+      // Render each rank as a card with a rainbow-stripe suit indicator.
+      const ranks = m[7];
+      for (let i = 0; i < ranks.length; i++) {
+        const r = ranks[i];
+        frag.appendChild(h("span", { class: "tok-rainbow", title: r + " — rainbow board (any of 4 suits, all different)" },
+          h("span", { class: "tok-rainbow-rank" }, r === "T" ? "10" : r),
+          h("span", { class: "tok-rainbow-suit", "aria-hidden": "true" })));
+      }
     }
     last = m.index + m[0].length;
   }
