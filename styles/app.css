@@ -820,10 +820,15 @@ form { margin-top: 8px; }
 }
 .tok-anysuit-rank { font-weight: 700; font-size: 0.58rem; }
 .tok-anysuit-mark { font-weight: 700; font-size: 0.58rem; line-height: 1; }
-/* "K?" — yellow-amber question mark suggesting "TBD". */
+/* "K?" — small rank + yellow-amber ? in suit slot, suggesting "TBD". */
 .tok-anysuit-unknown .tok-anysuit-mark { color: #b08a3a; }
-/* "Kx" — neutral grey x suggesting "don't care". */
-.tok-anysuit-doesntmatter .tok-anysuit-mark { color: #888; }
+/* "Kx" / hand-class shorthand — the DEFAULT non-specific card. No
+   suit indicator at all; the rank fills the card so the absence of a
+   suit IS the "any suit" signal. Cleaner than a literal x mark. */
+.tok-anysuit-doesntmatter .tok-anysuit-rank {
+  font-size: 0.95rem;
+  letter-spacing: -0.04em;
+}
 
 /* Rainbow board card — same chrome but suit slot is a small rainbow
    gradient bar (black-red-red-black) so reading three of them together
