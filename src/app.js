@@ -16,6 +16,7 @@ import {
   initAuth,
   getCurrentUser,
   readGame,
+  joinGame,
 } from "./state.js";
 import {
   mountSignInView,
@@ -80,6 +81,47 @@ async function boot() {
       // returns to the pinned scenario.
       setTooltipOpenCallback((id) => goDict(id));
       goSolo();
+      return;
+    }
+
+    // `?game=<id>` deep-link → join (idempotent) and route straight into
+    // the duel view. This is the URL the in-game "Copy share link" button
+    // writes, so anyone the opponent sends it to lands directly in the
+    // game without having to scroll the public lobby list. If the visitor
+    // isn't signed in yet, we route through sign-in first and then call
+    // joinGame on success.
+    const gameParam = params.get("game");
+    if (gameParam) {
+      const id = String(gameParam).trim().toUpperCase();
+      const clearGameParam = () => history.replaceState({}, "", location.origin + location.pathname);
+      const tryJoinAndRoute = async () => {
+        const res = await joinGame(id);
+        if (res && res.error) {
+          // Couldn't join (cancelled, full, not found, permission). Fall
+          // through to the normal landing flow rather than getting stuck.
+          console.warn("?game= deep-link join failed:", res.error);
+          clearGameParam();
+          mountRouter(root);
+          return;
+        }
+        writeActiveGameId(res.gameId);
+        clearGameParam();
+        mountRouter(root);
+      };
+      if (user) {
+        await tryJoinAndRoute();
+        return;
+      }
+      // Not signed in — show the sign-in gate, then auto-join + route.
+      const goSignIn = () => mountSignInView(
+        root,
+        async () => { await tryJoinAndRoute(); },
+        () => mountSoloView(root, () => goSignIn()),
+        () => mountEquityCalculator(root, () => goSignIn()),
+        (termId) => mountDictionaryView(root, () => goSignIn(), { initialTermId: termId })
+      );
+      setTooltipOpenCallback((id) => mountDictionaryView(root, () => goSignIn(), { initialTermId: id }));
+      goSignIn();
       return;
     }
 

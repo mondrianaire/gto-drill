@@ -10,6 +10,7 @@ import { listScenarios } from "./scenarios.js";
 import { mountReplay } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
 import { richText } from "./ui.js";
+import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
 
 // -----------------------------------------------------------------------
 // Tiny DOM helper (local; intentionally duplicated to keep this module
@@ -36,40 +37,6 @@ function h(tag, attrs, ...children) {
 
 function clear(container) {
   while (container.firstChild) container.removeChild(container.firstChild);
-}
-
-/**
- * Copy a string to the OS clipboard. Returns a promise resolving to true on
- * success, false on failure. Tries the modern Clipboard API first; falls
- * back to a hidden-textarea + execCommand("copy") for older browsers and
- * insecure contexts (since `navigator.clipboard` needs HTTPS).
- */
-async function copyToClipboard(text) {
-  try {
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      await navigator.clipboard.writeText(text);
-      return true;
-    }
-  } catch {}
-  try {
-    const ta = document.createElement("textarea");
-    ta.value = text;
-    ta.style.position = "fixed";
-    ta.style.opacity = "0";
-    ta.style.left = "-9999px";
-    document.body.appendChild(ta);
-    ta.focus();
-    ta.select();
-    const ok = document.execCommand("copy");
-    document.body.removeChild(ta);
-    return !!ok;
-  } catch {}
-  return false;
-}
-
-/** Build the deep-link URL for a given scenario id. */
-function shareUrlForScenario(scenarioId) {
-  return location.origin + location.pathname + "?scenario=" + encodeURIComponent(scenarioId);
 }
 
 // -----------------------------------------------------------------------
@@ -129,14 +96,12 @@ export function mountSoloView(container, onExit) {
     const errorBox = h("div", { class: "error", role: "alert" });
 
     // --- header strip --------------------------------------------------------
-    // Two-row header: title + action buttons on row 1, stats on row 2. The
-    // action buttons (Share + Exit) are icon-only at <480px so the row never
-    // overflows on narrow phones.
-    const exitIcon = h("span", { "aria-hidden": "true" }, "←");
-    const exitLabel = h("span", { class: "solo-exit-label" }, " Exit solo");
+    // Two-row header: title + action buttons on row 1, stats on row 2. Both
+    // action buttons are icon-only (with `title` tooltips); the labels would
+    // be redundant given how visually distinct 🔗 / ← are.
     const exitBtn = h("button",
-      { type: "button", class: "link-btn solo-exit", title: "Exit solo practice" },
-      exitIcon, exitLabel);
+      { type: "button", class: "link-btn solo-exit icon-btn", title: "Exit solo practice", "aria-label": "Exit solo practice" },
+      h("span", { "aria-hidden": "true" }, "←"));
     exitBtn.addEventListener("click", () => {
       if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
       if (onExit) onExit();
@@ -146,41 +111,12 @@ export function mountSoloView(container, onExit) {
           "Hands " + handsCompleted + " · GTO accuracy " +
           Math.round((correctSoFar / handsCompleted) * 100) + "%")
       : h("span", { class: "muted solo-stats" }, "Hands 0");
-    // "Copy share link" — writes the deep-link URL for the current scenario
-    // to the clipboard. Brief "Copied!" confirmation; falls back to showing
-    // the URL inline if clipboard access is blocked.
-    const shareIcon = h("span", { "aria-hidden": "true" }, "🔗");
-    const shareLabel = h("span", { class: "solo-share-label" }, " Copy share link");
-    const shareBtn = h("button",
-      { type: "button", class: "link-btn solo-share", title: "Copy a permalink for this hand to the clipboard" },
-      shareIcon, shareLabel);
-    const shareFallback = h("div", { class: "solo-share-fallback", hidden: true });
-    shareBtn.addEventListener("click", async () => {
-      const url = shareUrlForScenario(scen.scenario_id);
-      const ok = await copyToClipboard(url);
-      if (ok) {
-        const prevIcon = shareIcon.textContent;
-        const prevLabel = shareLabel.textContent;
-        shareBtn.classList.add("is-copied");
-        shareIcon.textContent = "✓";
-        shareLabel.textContent = " Copied!";
-        setTimeout(() => {
-          shareBtn.classList.remove("is-copied");
-          shareIcon.textContent = prevIcon;
-          shareLabel.textContent = prevLabel;
-        }, 1800);
-      } else {
-        // Clipboard failed — surface the URL inline so the user can copy by hand.
-        shareFallback.hidden = false;
-        clear(shareFallback);
-        const input = h("input", { type: "text", readonly: true, value: url, class: "solo-share-input" });
-        const close = h("button", { type: "button", class: "link-btn" }, "✕");
-        close.addEventListener("click", () => { shareFallback.hidden = true; clear(shareFallback); });
-        shareFallback.appendChild(h("span", { class: "muted" }, "Copy this link:"));
-        shareFallback.appendChild(input);
-        shareFallback.appendChild(close);
-        setTimeout(() => { input.focus(); input.select(); }, 0);
-      }
+    // Icon-only share link button. buildUrl is evaluated at click time so
+    // the URL always points at the scenario currently on screen.
+    const { button: shareBtn, fallback: shareFallback } = buildShareLinkButton({
+      buildUrl: () => shareUrlForScenario(scen.scenario_id),
+      title: "Copy share link for this hand",
+      className: "solo-share",
     });
     const header = h("div", { class: "solo-header" },
       h("div", { class: "solo-header-top" },
