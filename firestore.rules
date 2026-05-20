@@ -19,13 +19,21 @@ service cloud.firestore {
                  && (resource == null
                      || request.auth.uid in resource.data.participantUids
                      || resource.data.participantUids.size() < 2);
-      // Signed-in users may list OPEN lobbies only. Because this rule
-      // references resource.data.status, Firestore requires every query to
-      // be constrained to status == 'waiting_for_opponent' — so in-progress
-      // and completed games (which hold both players' answers) can never be
-      // enumerated. This is what powers the lobby list on the Join screen.
+      // Signed-in users may list:
+      //   (a) OPEN lobbies (status == 'waiting_for_opponent') — powers the
+      //       Join screen lobby list. Reachable by anyone signed in.
+      //   (b) Games they're a PARTICIPANT in — powers the "Your active
+      //       games" panel on the landing screen, so users can resume or
+      //       cancel stale async games.
+      // Either branch must hold for every document the query returns, so
+      // queries must be constrained to one of these shapes:
+      //   where("status", "==", "waiting_for_opponent")
+      //   where("participantUids", "array-contains", request.auth.uid)
+      // In-progress and completed games belonging to OTHER players still
+      // can never be enumerated.
       allow list: if request.auth != null
-                  && resource.data.status == 'waiting_for_opponent';
+                  && (resource.data.status == 'waiting_for_opponent'
+                      || request.auth.uid in resource.data.participantUids);
 
       allow create: if request.auth != null
                     && request.resource.data.participantUids.size() == 1

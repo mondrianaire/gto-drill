@@ -5,6 +5,15 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 
 ## [Unreleased]
 
+### ⚠ Firestore rules update required (v2026-05-20.63)
+
+The "Your active games" panel introduces a new query
+(`where("participantUids", "array-contains", uid)`). The shipped
+`firestore.rules` has been updated to allow this list query for the
+participant. **Re-publish the updated `firestore.rules` in the Firebase
+Console** (Firestore Database → Rules → Publish) — otherwise the new
+panel will silently show empty and log a permission-denied warning.
+
 ### Changed
 - **Mobile pass 1 fixes** (from `design-audit/mobile-audit.html`).
   Five of the six audit findings, sequenced before the deeper table
