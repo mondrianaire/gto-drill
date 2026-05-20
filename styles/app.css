@@ -773,6 +773,28 @@ form { margin-top: 8px; }
   color: var(--text-dim);
   margin-left: 1px;
 }
+/* Pot-% suffix that appears INSIDE a bb chip when it's been recognised
+   as a bet (preceded by "Bet "). The number is auto-computed from the
+   scenario's pot at the decision point and rounded to the nearest 5% so
+   the visual matches poker's usual "~30% / ~50% / ~75%" granularity.
+   Separator dot sits between the bb number and the percent. */
+.tok-bb-pct {
+  font-size: 0.62em;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-dim);
+  margin-left: 5px;
+  padding-left: 5px;
+  border-left: 1px solid rgba(76, 182, 255, 0.35);
+}
+/* In already-tinted chrome (action button, GTO reveal), match the
+   container's color so the suffix doesn't read as a separate element. */
+.action-btn .tok-bb-pct,
+.replay-pot .tok-bb-pct,
+.rseat-bet .tok-bb-pct {
+  color: inherit;
+  opacity: 0.78;
+}
 
 /* When the bb chip is nested inside an already-colored container (poker
    table chrome — pot pill, bet bubble, stack label, info bar), strip
