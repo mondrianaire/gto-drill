@@ -1,0 +1,427 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Grid picker alternatives — mobile</title>
+<style>
+  :root {
+    --bg:#0c0e12; --panel:#14171d; --panel2:#1b1f27;
+    --text:#e6e9ef; --dim:#8b93a2; --faint:#5b6271;
+    --border:#262b34; --accent:#4cb6ff; --anno:#ff5d9e;
+    --ok:#4ade80; --villain:#e8a93f;
+    --sans:'Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',system-ui,sans-serif;
+  }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:var(--bg); color:var(--text);
+    font-family:var(--sans); font-size:15px; line-height:1.5; }
+  body { max-width:1080px; margin:0 auto; padding:32px 24px 96px; }
+  h1 { font-size:24px; margin:0 0 8px; }
+  h2.sec { font-size:13px; text-transform:uppercase; letter-spacing:.14em;
+    color:var(--dim); font-weight:600; margin:40px 0 14px;
+    border-top:1px solid var(--border); padding-top:18px; }
+  p.deck { color:var(--dim); margin:0 0 20px; font-size:15px; }
+
+  /* Each panel emulates a 375px-wide phone viewport */
+  .compare { display:grid; grid-template-columns:1fr 1fr; gap:24px; }
+  @media (max-width: 860px) { .compare { grid-template-columns:1fr; } }
+  .phone {
+    width:375px; max-width:100%; margin:0 auto;
+    border:1px solid var(--border); border-radius:18px;
+    background:#0f1a24; padding:14px 12px; overflow:hidden;
+  }
+  .phone-title { display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:10px; }
+  .phone-title strong { font-size:13px; color:var(--text); letter-spacing:.04em; }
+  .phone-title .tag { font-size:10.5px; letter-spacing:.1em; text-transform:uppercase;
+    font-weight:700; padding:2px 8px; border-radius:999px; }
+  .tag-cur { background:rgba(255,93,158,0.15); color:var(--anno); border:1px solid rgba(255,93,158,0.35); }
+  .tag-alt { background:rgba(74,222,128,0.12); color:var(--ok); border:1px solid rgba(74,222,128,0.3); }
+
+  /* ------------------------------------------------------------------ */
+  /* Shared poker-style cell aesthetics                                  */
+  button {
+    font:inherit; cursor:pointer; background:#16222e; color:#e6edf3;
+    border:1px solid #243646; border-radius:6px;
+    padding:0; min-height:0;
+  }
+  button:hover { background:#1c2c39; }
+  .cell-pair    { background:rgba(76,182,255,0.10); border-color:#1e3a52; }
+  .cell-suited  { background:rgba(74,222,128,0.08); border-color:#1c3a26; }
+  .cell-offsuit { background:rgba(248,113,113,0.06); border-color:#3a1c1c; }
+  .is-on        { background:#4cb6ff !important; color:#061018 !important; border-color:#4cb6ff !important; font-weight:700; }
+
+  .panel-stats { font-size:12px; color:var(--dim); margin-top:10px; padding:6px 8px;
+    background:#16222e; border:1px solid #243646; border-radius:6px; }
+  .panel-stats b { color:#fff; font-weight:600; }
+
+  /* ------------------------------------------------------------------ */
+  /* CURRENT — Pass 1 horizontal scroll                                  */
+  .v-scroll-host { overflow-x:auto; -webkit-overflow-scrolling:touch;
+    padding:2px; margin:0 -2px; }
+  .v-scroll-grid { display:grid; grid-template-columns:repeat(13, 36px);
+    gap:3px; min-width:507px; }
+  .v-scroll-grid button { height:32px; font-size:.62rem; font-weight:700; color:#8aa1b1; }
+
+  /* ------------------------------------------------------------------ */
+  /* ALT A — Master-detail (tap rank on left, hands appear on right)    */
+  .md { display:grid; grid-template-columns:64px 1fr; gap:8px;
+    background:#0c1620; border-radius:8px; padding:6px; border:1px solid #1a2735; }
+  .md-ranks { display:flex; flex-direction:column; gap:4px; }
+  .md-ranks button { height:32px; font-size:.78rem; font-weight:700;
+    color:#cfe6da; padding:0 6px; }
+  .md-ranks button.is-active { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+  .md-detail { display:flex; flex-direction:column; gap:6px; min-width:0; }
+  .md-detail-title { font-size:11px; color:#8aa1b1; text-transform:uppercase;
+    letter-spacing:.08em; padding:0 4px; }
+  .md-cells { display:grid; grid-template-columns:repeat(2, 1fr); gap:4px; }
+  .md-cells button { min-height:38px; font-size:.78rem; font-weight:600;
+    color:#cfe6da; padding:6px 4px; }
+
+  /* ------------------------------------------------------------------ */
+  /* HERO PICKERS                                                        */
+  .h-slots { display:flex; gap:8px; margin-bottom:10px; align-items:center; }
+  .h-slots .lbl { font-size:11px; color:#8aa1b1; text-transform:uppercase;
+    letter-spacing:.08em; font-weight:700; min-width:46px; }
+  .h-slot { width:38px; height:50px; border:1px dashed #243646;
+    border-radius:5px; display:inline-flex; align-items:center; justify-content:center;
+    color:#5b6271; background:transparent; cursor:pointer; }
+  .h-slot.is-filled { border:1px solid #4cb6ff; padding:1px; color:#fff;
+    background:#fdfdfb; }
+  .h-slot.is-filled .pcard { display:flex; flex-direction:column; align-items:center;
+    justify-content:center; line-height:1; width:34px; height:46px; color:#1a1a1a; }
+  .h-slot.is-filled .pcard.is-red { color:#c0202a; }
+  .h-slot.is-filled .pcard .rk { font-weight:700; font-size:.74rem; }
+  .h-slot.is-filled .pcard .su { font-size:.78rem; }
+
+  /* Hero current — horizontal scroll grid                              */
+  .hc-scroll-host { overflow-x:auto; -webkit-overflow-scrolling:touch;
+    padding:2px; margin:0 -2px; }
+  .hc-scroll-grid { display:grid; grid-template-columns:repeat(13, 36px);
+    grid-template-rows:repeat(4, 44px); gap:3px; min-width:507px; }
+  .hc-scroll-grid button { padding:0; }
+  .hc-scroll-grid .pcard { width:32px; height:40px; display:flex;
+    flex-direction:column; align-items:center; justify-content:center;
+    background:#fdfdfb; border-radius:3px; color:#1a1a1a; line-height:1; }
+  .hc-scroll-grid .pcard.is-red { color:#c0202a; }
+  .hc-scroll-grid .pcard .rk { font-weight:700; font-size:.62rem; }
+  .hc-scroll-grid .pcard .su { font-size:.66rem; }
+  .hc-scroll-grid button.is-on .pcard { box-shadow:0 0 0 2px #4cb6ff; }
+  .hc-scroll-grid button.is-dead .pcard { opacity:0.3; filter:grayscale(60%); }
+
+  /* Hero alt — rank-then-suit two-step                                 */
+  .ts { background:#0c1620; border-radius:8px; padding:8px;
+    border:1px solid #1a2735; }
+  .ts-step { font-size:11px; color:#8aa1b1; text-transform:uppercase;
+    letter-spacing:.08em; font-weight:700; margin:0 0 6px; }
+  .ts-ranks { display:grid; grid-template-columns:repeat(7, 1fr);
+    grid-auto-rows:42px; gap:4px; margin-bottom:10px; }
+  .ts-ranks button { font-size:.95rem; font-weight:700; color:#cfe6da; }
+  .ts-ranks button.is-active { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+  .ts-suits { display:grid; grid-template-columns:repeat(4, 1fr);
+    grid-auto-rows:50px; gap:6px; }
+  .ts-suits button { font-size:1.4rem; line-height:1; color:#cfe6da; }
+  .ts-suits .s-r { color:#c0202a; background:#fdfdfb; border-color:#fdfdfb; }
+  .ts-suits .s-b { color:#1a1a1a; background:#fdfdfb; border-color:#fdfdfb; }
+  .ts-suits button:disabled { opacity:0.25; cursor:not-allowed; }
+  .ts-hint { font-size:11.5px; color:#8aa1b1; margin-top:8px; font-style:italic; }
+</style>
+</head>
+<body>
+  <h1>Hand selection grids — mobile alternatives</h1>
+  <p class="deck">Each panel is a working ~375px-wide mockup. Tap around to feel each workflow. Selection state is local to the panel.</p>
+
+  <!-- ============================================================ -->
+  <h2 class="sec">Villain range picker — 13 × 13</h2>
+  <p class="deck"><b>Current (Pass 1):</b> horizontal scroll. Pinpoint precision but small targets and you have to scroll to see all 13 columns.<br />
+    <b>Alternative — Master-detail:</b> tap a rank on the left, the relevant hands appear on the right. Always-visible big buttons; no scrolling required. Two taps per hand class instead of one.</p>
+
+  <div class="compare">
+    <div class="phone">
+      <div class="phone-title"><strong>Villain range</strong><span class="tag tag-cur">Current — scroll</span></div>
+      <div id="v-cur-stats" class="panel-stats">0 hand classes selected</div>
+      <div class="v-scroll-host" id="v-cur-host">
+        <div class="v-scroll-grid" id="v-cur-grid"></div>
+      </div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-title"><strong>Villain range</strong><span class="tag tag-alt">Alt — master-detail</span></div>
+      <div id="v-alt-stats" class="panel-stats">0 hand classes selected</div>
+      <div class="md">
+        <div class="md-ranks" id="v-alt-ranks"></div>
+        <div class="md-detail">
+          <div class="md-detail-title" id="v-alt-title">Tap a rank →</div>
+          <div class="md-cells" id="v-alt-cells"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================ -->
+  <h2 class="sec">Hero / board card picker — 4 × 13</h2>
+  <p class="deck"><b>Current (Pass 1):</b> horizontal scroll over a 4-suit × 13-rank card grid. Cards are recognizable but you have to scroll right to reach low ranks.<br />
+    <b>Alternative — Rank → suit two-step:</b> tap a rank, then tap a suit. Big targets at every step; selecting one card is two taps but each one is fat-finger-proof.</p>
+
+  <div class="compare">
+    <div class="phone">
+      <div class="phone-title"><strong>Hero hand</strong><span class="tag tag-cur">Current — scroll</span></div>
+      <div class="h-slots">
+        <span class="lbl">Hero</span>
+        <button class="h-slot" id="hc-slot-0" data-i="0"></button>
+        <button class="h-slot" id="hc-slot-1" data-i="1"></button>
+      </div>
+      <div class="hc-scroll-host">
+        <div class="hc-scroll-grid" id="hc-grid"></div>
+      </div>
+      <div class="panel-stats" id="hc-stats">Pick two cards (scroll right for low ranks)</div>
+    </div>
+
+    <div class="phone">
+      <div class="phone-title"><strong>Hero hand</strong><span class="tag tag-alt">Alt — rank → suit</span></div>
+      <div class="h-slots">
+        <span class="lbl">Hero</span>
+        <button class="h-slot" id="ts-slot-0" data-i="0"></button>
+        <button class="h-slot" id="ts-slot-1" data-i="1"></button>
+      </div>
+      <div class="ts">
+        <div class="ts-step" id="ts-step">Step 1 — pick a rank</div>
+        <div class="ts-ranks" id="ts-ranks"></div>
+        <div class="ts-suits" id="ts-suits"></div>
+        <div class="ts-hint" id="ts-hint">Each card = 2 taps. No scrolling.</div>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // ---------------- shared data ----------------
+  const RANKS = ["A","K","Q","J","T","9","8","7","6","5","4","3","2"];
+  const SUITS = ["s","h","d","c"]; // top → bottom
+  const SUIT_GLYPH = { s:"♠", h:"♥", d:"♦", c:"♣" };
+  const SUIT_RED = { s:false, h:true, d:true, c:false };
+
+  function classLabel(r, c) {
+    if (r === c) return RANKS[r] + RANKS[c];
+    if (c > r) return RANKS[r] + RANKS[c] + "s";
+    return RANKS[c] + RANKS[r] + "o";
+  }
+
+  // ---------------- VILLAIN — Current (horizontal scroll) ----------------
+  (() => {
+    const grid = document.getElementById("v-cur-grid");
+    const stats = document.getElementById("v-cur-stats");
+    const sel = new Set();
+    for (let r = 0; r < 13; r++) {
+      for (let c = 0; c < 13; c++) {
+        const lbl = classLabel(r, c);
+        const kind = r === c ? "pair" : (c > r ? "suited" : "offsuit");
+        const btn = document.createElement("button");
+        btn.className = "cell-" + kind;
+        btn.textContent = lbl;
+        btn.addEventListener("click", () => {
+          if (sel.has(lbl)) { sel.delete(lbl); btn.classList.remove("is-on"); }
+          else { sel.add(lbl); btn.classList.add("is-on"); }
+          stats.innerHTML = "<b>" + sel.size + "</b> hand class" + (sel.size === 1 ? "" : "es") + " selected";
+        });
+        grid.appendChild(btn);
+      }
+    }
+  })();
+
+  // ---------------- VILLAIN — Alt (master-detail) ----------------
+  (() => {
+    const ranksHost = document.getElementById("v-alt-ranks");
+    const cellsHost = document.getElementById("v-alt-cells");
+    const titleEl = document.getElementById("v-alt-title");
+    const stats = document.getElementById("v-alt-stats");
+    const sel = new Set();
+    let activeRank = -1;
+    const rankBtns = [];
+
+    function renderCells() {
+      cellsHost.innerHTML = "";
+      if (activeRank < 0) return;
+      titleEl.innerHTML = "Hands with <b style=\"color:#fff\">" + RANKS[activeRank] + "</b> as the high rank";
+      // Pair first, then suited variants high→low, then offsuit
+      const items = [];
+      items.push({ lbl: RANKS[activeRank] + RANKS[activeRank], kind: "pair" });
+      for (let k = activeRank + 1; k < 13; k++) {
+        items.push({ lbl: RANKS[activeRank] + RANKS[k] + "s", kind: "suited" });
+      }
+      for (let k = activeRank + 1; k < 13; k++) {
+        items.push({ lbl: RANKS[activeRank] + RANKS[k] + "o", kind: "offsuit" });
+      }
+      for (const item of items) {
+        const btn = document.createElement("button");
+        btn.className = "cell-" + item.kind + (sel.has(item.lbl) ? " is-on" : "");
+        btn.textContent = item.lbl;
+        btn.addEventListener("click", () => {
+          if (sel.has(item.lbl)) { sel.delete(item.lbl); btn.classList.remove("is-on"); }
+          else { sel.add(item.lbl); btn.classList.add("is-on"); }
+          updateStats();
+        });
+        cellsHost.appendChild(btn);
+      }
+    }
+    function updateStats() {
+      stats.innerHTML = "<b>" + sel.size + "</b> hand class" + (sel.size === 1 ? "" : "es") + " selected";
+    }
+    for (let r = 0; r < 13; r++) {
+      const btn = document.createElement("button");
+      btn.textContent = RANKS[r];
+      btn.addEventListener("click", () => {
+        activeRank = r;
+        rankBtns.forEach((b, i) => b.classList.toggle("is-active", i === r));
+        renderCells();
+      });
+      rankBtns.push(btn);
+      ranksHost.appendChild(btn);
+    }
+    updateStats();
+  })();
+
+  // ---------------- HERO — Current (horizontal scroll grid) ----------------
+  (() => {
+    const grid = document.getElementById("hc-grid");
+    const slotEls = [document.getElementById("hc-slot-0"), document.getElementById("hc-slot-1")];
+    const stats = document.getElementById("hc-stats");
+    const hero = [];
+    const pickOrder = [];
+    const cellByCode = {};
+
+    function cardHtml(code) {
+      const r = code[0] === "T" ? "10" : code[0];
+      const s = code[1];
+      const red = SUIT_RED[s];
+      return '<div class="pcard' + (red ? " is-red" : "") + '"><span class="rk">' + r + '</span><span class="su">' + SUIT_GLYPH[s] + '</span></div>';
+    }
+    function syncSlots() {
+      for (let i = 0; i < 2; i++) {
+        const el = slotEls[i];
+        el.innerHTML = "";
+        if (hero[i]) { el.classList.add("is-filled"); el.innerHTML = cardHtml(hero[i]); }
+        else { el.classList.remove("is-filled"); el.innerHTML = "<span>?</span>"; }
+      }
+    }
+    function syncGrid() {
+      for (const code in cellByCode) {
+        cellByCode[code].classList.toggle("is-on", hero.includes(code));
+      }
+    }
+    function pick(code) {
+      const idx = hero.indexOf(code);
+      if (idx >= 0) {
+        hero.splice(idx, 1);
+        const po = pickOrder.indexOf(code); if (po >= 0) pickOrder.splice(po, 1);
+      } else if (hero.length < 2) {
+        hero.push(code); pickOrder.push(code);
+      } else {
+        const old = pickOrder.shift();
+        const oi = hero.indexOf(old); if (oi >= 0) hero.splice(oi, 1);
+        hero.push(code); pickOrder.push(code);
+      }
+      syncSlots(); syncGrid();
+      stats.innerHTML = hero.length === 2 ? "<b>Hero hand set</b> — tap a card to change" : "Pick <b>" + (2 - hero.length) + "</b> more card" + (hero.length === 1 ? "" : "s");
+    }
+    slotEls.forEach((el, i) => el.addEventListener("click", () => {
+      if (hero[i]) {
+        const code = hero[i];
+        hero.splice(i, 1);
+        const po = pickOrder.indexOf(code); if (po >= 0) pickOrder.splice(po, 1);
+        syncSlots(); syncGrid();
+        stats.innerHTML = "Pick <b>" + (2 - hero.length) + "</b> more card" + (hero.length === 1 ? "" : "s");
+      }
+    }));
+    for (const s of SUITS) {
+      for (const r of RANKS) {
+        const code = r + s;
+        const btn = document.createElement("button");
+        btn.innerHTML = cardHtml(code);
+        btn.addEventListener("click", () => pick(code));
+        cellByCode[code] = btn;
+        grid.appendChild(btn);
+      }
+    }
+    syncSlots();
+  })();
+
+  // ---------------- HERO — Alt (rank → suit two-step) ----------------
+  (() => {
+    const ranksHost = document.getElementById("ts-ranks");
+    const suitsHost = document.getElementById("ts-suits");
+    const stepEl = document.getElementById("ts-step");
+    const hintEl = document.getElementById("ts-hint");
+    const slotEls = [document.getElementById("ts-slot-0"), document.getElementById("ts-slot-1")];
+    const hero = [];
+    const pickOrder = [];
+    let pickingRank = null; // chosen rank letter, waiting for a suit
+    const rankBtns = {};
+
+    function cardHtml(code) {
+      const r = code[0] === "T" ? "10" : code[0];
+      const s = code[1];
+      const red = SUIT_RED[s];
+      return '<div class="pcard' + (red ? " is-red" : "") + '"><span class="rk">' + r + '</span><span class="su">' + SUIT_GLYPH[s] + '</span></div>';
+    }
+    function syncSlots() {
+      for (let i = 0; i < 2; i++) {
+        const el = slotEls[i];
+        el.innerHTML = "";
+        if (hero[i]) { el.classList.add("is-filled"); el.innerHTML = cardHtml(hero[i]); }
+        else { el.classList.remove("is-filled"); el.innerHTML = "<span>?</span>"; }
+      }
+    }
+    function syncStep() {
+      stepEl.textContent = pickingRank ? "Step 2 — pick a suit for " + pickingRank : "Step 1 — pick a rank";
+      Object.values(rankBtns).forEach((b) => b.classList.remove("is-active"));
+      if (pickingRank && rankBtns[pickingRank]) rankBtns[pickingRank].classList.add("is-active");
+      // Disable suits that would duplicate an already-picked card
+      Array.from(suitsHost.children).forEach((b) => {
+        const code = pickingRank ? (pickingRank + b.dataset.suit) : null;
+        b.disabled = !pickingRank || (code && hero.includes(code));
+      });
+    }
+    function setSuit(suit) {
+      if (!pickingRank) return;
+      const code = pickingRank + suit;
+      if (hero.includes(code)) return;
+      if (hero.length < 2) { hero.push(code); pickOrder.push(code); }
+      else {
+        const old = pickOrder.shift();
+        const oi = hero.indexOf(old); if (oi >= 0) hero.splice(oi, 1);
+        hero.push(code); pickOrder.push(code);
+      }
+      pickingRank = null;
+      syncSlots(); syncStep();
+      hintEl.textContent = hero.length === 2 ? "Hero hand set — tap a slot to remove" : "Pick " + (2 - hero.length) + " more card" + (hero.length === 1 ? "" : "s");
+    }
+    slotEls.forEach((el, i) => el.addEventListener("click", () => {
+      if (hero[i]) {
+        const code = hero[i];
+        hero.splice(i, 1);
+        const po = pickOrder.indexOf(code); if (po >= 0) pickOrder.splice(po, 1);
+        pickingRank = null;
+        syncSlots(); syncStep();
+        hintEl.textContent = "Pick " + (2 - hero.length) + " more card" + (hero.length === 1 ? "" : "s");
+      }
+    }));
+    for (const r of RANKS) {
+      const btn = document.createElement("button");
+      btn.textContent = r === "T" ? "10" : r;
+      btn.addEventListener("click", () => { pickingRank = r; syncStep(); });
+      rankBtns[r] = btn;
+      ranksHost.appendChild(btn);
+    }
+    for (const s of SUITS) {
+      const btn = document.createElement("button");
+      btn.className = SUIT_RED[s] ? "s-r" : "s-b";
+      btn.dataset.suit = s;
+      btn.textContent = SUIT_GLYPH[s];
+      btn.addEventListener("click", () => setSuit(s));
+      suitsHost.appendChild(btn);
+    }
+    syncSlots(); syncStep();
+  })();
+</script>
+</body>
+</html>
