@@ -201,13 +201,6 @@ export function mountSoloView(container, onExit) {
       // ===================== REVEAL =====================
       const gto = scen.gto_action;
 
-      const result = buildRevealResult({
-        scen,
-        userAction: draft.action,
-        gtoAction: gto,
-        confidence: draft.confidence,
-      });
-
       // Equity panel + range chips — same wiring as multiplayer reveal.
       const testHost = h("div", { class: "test-host" });
       const eqState = { open: false, handle: null };
@@ -247,12 +240,20 @@ export function mountSoloView(container, onExit) {
         }
       });
 
-      const explain = h("p", { class: "gto-explanation" },
-        richText(scen.gto_explanation, scen, { onRangeClick: openWithRange }));
+      // Build the reveal AFTER openWithRange is defined so the matrix's
+      // pros/cons range chips can call into it.
+      const result = buildRevealResult({
+        scen,
+        userAction: draft.action,
+        gtoAction: gto,
+        confidence: draft.confidence,
+        onRangeClick: openWithRange,
+      });
 
+      // The legacy free-form gto_explanation paragraph is no longer rendered
+      // — its content lives inside per-option action_analysis pros/cons.
       body = h("div", { class: "hand-reveal" },
         result,
-        explain,
         h("div", { class: "test-row" }, testBtn),
         testHost
       );

@@ -390,14 +390,14 @@ form { margin-top: 8px; }
 }
 .reveal-option {
   display: flex;
-  align-items: center;
-  gap: 12px;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
   padding: 10px 14px;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.02);
   min-height: 44px;
-  flex-wrap: wrap;
 }
 .reveal-option-action {
   font-size: 1.05rem;
@@ -500,34 +500,113 @@ form { margin-top: 8px; }
   opacity: 1;
 }
 
-/* Opponent agreement summary (below the option matrix). */
-.reveal-agree {
-  padding: 8px 16px;
-  font-size: 0.88rem;
-  border-top: 1px solid var(--border);
+/* Top row of an option card: the action chip on the left, badges on the
+   right. Below this sits the pros/cons analysis. */
+.reveal-option-top {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+  width: 100%;
 }
-.reveal-agree.is-agree    { color: var(--ok); background: rgba(74, 222, 128, 0.06); }
-.reveal-agree.is-disagree { color: var(--text-dim); background: rgba(255,255,255,0.02); }
-
-/* Opponent's typed note (when they left one) — italic quote under the matrix. */
-.reveal-opp-note-row {
-  padding: 10px 16px 14px;
-  border-top: 1px solid var(--border);
+/* Per-option pros/cons — the educational core of every option card.
+   Two short bullet lists with ✓ / ✗ markers. Tight typography. */
+.reveal-analysis {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px dashed rgba(255, 255, 255, 0.10);
+}
+.reveal-pros, .reveal-cons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 4px;
 }
-.reveal-opp-note-label {
+.reveal-pros li, .reveal-cons li {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.90rem;
+  line-height: 1.4;
+}
+.reveal-bullet-icon {
+  flex: 0 0 auto;
+  width: 14px;
+  text-align: center;
+  font-weight: 700;
+  line-height: 1.4;
+}
+.reveal-bullet-pro { color: var(--ok); }
+.reveal-bullet-con { color: var(--miss); opacity: 0.85; }
+.reveal-bullet-text { flex: 1 1 auto; min-width: 0; color: var(--text); }
+/* Cons sit slightly muted vs pros — both are useful but cons are the
+   "why not this" voice, less emphasized. */
+.reveal-cons .reveal-bullet-text { color: var(--text-dim); }
+
+/* Dedicated opponent's view panel — appears below the option matrix when
+   the opponent has submitted. Their identity (avatar + name) is the
+   header; below sit their pick, confidence, and note. This is THE
+   surface where the asymmetric multiplayer story lives. */
+.reveal-opp-panel {
+  margin: 14px 12px 12px;
+  padding: 14px;
+  border-radius: 10px;
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.025);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.reveal-opp-panel.is-ok   { border-color: rgba(74, 222, 128, 0.45); background: rgba(74, 222, 128, 0.05); }
+.reveal-opp-panel.is-miss { border-color: rgba(248, 113, 113, 0.45); background: rgba(248, 113, 113, 0.05); }
+
+.reveal-opp-panel-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.reveal-opp-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  font-size: 0.9rem;
+}
+.reveal-opp-panel-id { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.reveal-opp-panel-name { font-weight: 700; font-size: 1.0rem; }
+.reveal-opp-panel-summary { font-size: 0.85rem; }
+
+.reveal-opp-panel-pick,
+.reveal-opp-panel-conf,
+.reveal-opp-panel-note-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.reveal-opp-panel-note-row { align-items: flex-start; flex-direction: column; gap: 4px; }
+.reveal-opp-panel-label {
   font-size: 0.78rem;
   text-transform: uppercase;
   letter-spacing: 0.06em;
+  flex: 0 0 auto;
 }
-.reveal-opp-note {
+.reveal-opp-panel-action { font-weight: 700; font-size: 1.0rem; }
+.reveal-opp-panel.is-ok   .reveal-opp-panel-action { color: var(--ok); }
+.reveal-opp-panel.is-miss .reveal-opp-panel-action { color: var(--miss); }
+.reveal-opp-panel-note {
   font-style: italic;
   color: var(--text-dim);
   margin: 0;
-  border-left: 2px solid var(--border);
+  border-left: 2px solid rgba(255, 255, 255, 0.15);
   padding-left: 10px;
+  font-size: 0.92rem;
+  line-height: 1.4;
 }
 
 .test-row { margin-top: 16px; }
@@ -537,9 +616,10 @@ form { margin-top: 8px; }
 /* Narrow widths: badges drop below the action so a long bet chip doesn't
    compete with three actor pills on one line. */
 @media (max-width: 560px) {
-  .reveal-option { align-items: flex-start; }
+  .reveal-option-top { align-items: flex-start; }
   .reveal-option-action { flex: 1 1 100%; }
   .reveal-badges { flex: 1 1 100%; }
+  .reveal-opp-panel { margin: 14px 8px 8px; }
 }
 
 /* ----- Equity (Monte Carlo) panel ------------------------------------- */
@@ -901,7 +981,8 @@ form { margin-top: 8px; }
 }
 .gto-line strong { color: var(--accent); }
 .gto-action { font-weight: 600; }
-.gto-explanation { color: var(--text-dim); margin-top: 8px; font-size: 0.95rem; }
+/* .gto-explanation removed — the free-form paragraph is no longer rendered;
+   per-option pros/cons inside each reveal-option carry the explanation now. */
 
 /* Rich-text tokens — position chips & Hero/Villain identity in GTO prose. */
 .tok-pos {
