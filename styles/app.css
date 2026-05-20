@@ -1908,8 +1908,21 @@ form { margin-top: 8px; }
   background: rgba(76, 200, 130, 0.10);
   border-color: rgba(76, 200, 130, 0.45);
 }
+/* Stalled badge — opponent hasn't acted in 7+ days. Warm-amber tone
+   to read as "attention" without alarming-red. */
+.active-games-status.is-stalled {
+  color: #ffd58a;
+  background: rgba(255, 213, 138, 0.10);
+  border-color: rgba(255, 213, 138, 0.45);
+}
+.active-games-item.is-stalled {
+  border-color: rgba(255, 213, 138, 0.4);
+  background: rgba(255, 213, 138, 0.04);
+}
 .active-games-vs { font-size: 0.85rem; }
 .active-games-progress { font-size: 0.84rem; margin-top: 2px; }
+.active-games-activity { font-size: 0.82rem; margin-top: 2px; }
+.active-games-item.is-stalled .active-games-activity { color: #ffd58a; }
 .active-games-actions {
   display: flex;
   gap: 8px;
