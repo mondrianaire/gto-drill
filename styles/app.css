@@ -305,6 +305,77 @@ form { margin-top: 8px; }
 .hand-words summary { cursor: pointer; color: var(--accent); }
 .hand-words p { margin: 8px 0 0 0; color: var(--text-dim); }
 
+/* Compact mini-display of hand inflection points (replaces the prose
+   "spot in words"). One row per street with: street label chip, board
+   cards dealt this street, and the inflection actions; the row for the
+   current decision street is highlighted and ends with "← your turn". */
+.spot-summary {
+  margin-top: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 0.88rem;
+}
+.spot-sum-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.02);
+  flex-wrap: wrap;
+}
+.spot-sum-row.is-decision {
+  background: rgba(120, 180, 255, 0.06);
+  border-color: rgba(120, 180, 255, 0.3);
+}
+.spot-sum-street {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 2px 6px;
+  border-radius: 4px;
+  flex-shrink: 0;
+  min-width: 44px;
+  text-align: center;
+}
+.spot-sum-row.is-decision .spot-sum-street {
+  color: var(--accent);
+  background: rgba(120, 180, 255, 0.12);
+}
+.spot-sum-cards {
+  display: inline-flex;
+  gap: 3px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.spot-sum-actions {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0;
+  color: var(--text);
+  line-height: 1.5;
+}
+.spot-sum-action {
+  white-space: nowrap;
+}
+.spot-sum-sep {
+  color: var(--text-dim);
+  opacity: 0.6;
+  user-select: none;
+}
+.spot-sum-yourturn {
+  font-weight: 600;
+  color: var(--accent);
+  white-space: nowrap;
+  margin-left: 2px;
+}
+
 .decide {
   margin-top: 16px;
   border-top: 1px solid var(--border);

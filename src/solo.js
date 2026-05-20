@@ -7,7 +7,7 @@
 // a fresh hand on "Next hand".
 
 import { listScenarios } from "./scenarios.js";
-import { mountReplay } from "./replay.js";
+import { mountReplay, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
 import { richText, buildRevealResult, buildVillainRangeBlock, buildSpotFramingBlock, buildGtoRead } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
@@ -133,10 +133,11 @@ export function mountSoloView(container, onExit) {
       spot.appendChild(replayHost);
       const r = mountReplay(replayHost, scen.replay);
       replayCleanup = r && r.unmount ? r.unmount : null;
-      spot.appendChild(h("details", { class: "hand-words" },
-        h("summary", null, "The spot in words"),
-        h("p", null, richText(scen.description, scen))
-      ));
+      // Compact mini-display of inflection points (replaces the prose
+      // "spot in words"). Shows only meaningful actions grouped by
+      // street, ending with "← your turn" on the decision street.
+      const summary = buildSpotSummary(scen.replay);
+      if (summary) spot.appendChild(summary);
     } else {
       spot.appendChild(h("p", { class: "scenario-desc" }, richText(scen.description, scen)));
     }
