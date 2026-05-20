@@ -2250,6 +2250,11 @@ form { margin-top: 8px; }
   margin: 0 0 12px;
   font-size: 0.85rem;
 }
+/* `display: flex` above overrides the HTML `hidden` attribute (CSS
+   display wins over the default `[hidden] { display: none }` user-
+   agent rule), so without this the empty fallback container shows
+   as an empty bubble between the header and the table. */
+.share-fallback[hidden] { display: none; }
 .share-fallback-input {
   flex: 1 1 auto;
   margin: 0;
