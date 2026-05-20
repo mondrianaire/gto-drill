@@ -805,34 +805,11 @@ export function mountInGameView(container, gameId) {
     backBtn.disabled = handIdx === 0;
     backBtn.addEventListener("click", () => { handIdx -= 1; render(lastGame); });
 
-    // --- spot context (framing + villain range chips) + equity panel host ---
-    // Lifted ABOVE the decide/reveal branch so framing + range chips appear
-    // in BOTH phases. Clicking a range chip pops the equity panel — usable
-    // BEFORE the user locks in, so they can think through the spot with the
-    // villain's range information.
-    const equityHost = h("div", { class: "equity-host" });
-    const eqState = { open: false, handle: null };
-    function openEquityWithRange(range) {
-      if (!scen) return;
-      const classes = (range && range.classes) || [];
-      const label = (range && range.label) || "";
-      if (eqState.open && eqState.handle) {
-        eqState.handle.setRange(classes, label);
-      } else {
-        eqState.handle = mountEquityPanel(equityHost, scen, { initialRange: classes, initialRangeLabel: label });
-        eqState.open = true;
-      }
-      if (eqState.handle && eqState.handle.root && eqState.handle.root.scrollIntoView) {
-        eqState.handle.root.scrollIntoView({ behavior: "smooth", block: "nearest" });
-      }
-    }
-    function closeEquityPanel() {
-      if (eqState.handle) try { eqState.handle.unmount(); } catch (_) {}
-      eqState.handle = null;
-      eqState.open = false;
-    }
-    const spotContext = buildSpotContext({ scen, onRangeClick: openEquityWithRange });
-
+    // IMPORTANT: spot-context (framing + villain range chips) is GTO content
+    // and MUST NOT appear during decide. Both the framing bullets and the
+    // named villain ranges encode the solver's read of the spot — showing
+    // them before lock-in would give away the answer. They live ONLY in
+    // the post-submission GTO screen below.
     let body, fwdBtn;
 
     if (!sub.revealed) {
@@ -889,8 +866,41 @@ export function mountInGameView(container, gameId) {
         render(lastGame);
       });
     } else {
-      // ===================== REVEAL =====================
+      // ===================== REVEAL (the GTO screen) =====================
+      // EVERYTHING below this line is GTO content — only appears AFTER the
+      // user locks in their answer:
+      //   - spot context (framing + villain range chips)
+      //   - equity host (Monte Carlo panel mounts here)
+      //   - verdict + per-option pros/cons matrix + opponent panel
+      //   - "Test it" fallback button
       const gto = scen ? scen.gto_action : "";
+
+      // Equity panel state — local to the reveal branch.
+      const equityHost = h("div", { class: "equity-host" });
+      const eqState = { open: false, handle: null };
+      function openEquityWithRange(range) {
+        if (!scen) return;
+        const classes = (range && range.classes) || [];
+        const label = (range && range.label) || "";
+        if (eqState.open && eqState.handle) {
+          eqState.handle.setRange(classes, label);
+        } else {
+          eqState.handle = mountEquityPanel(equityHost, scen, { initialRange: classes, initialRangeLabel: label });
+          eqState.open = true;
+        }
+        if (eqState.handle && eqState.handle.root && eqState.handle.root.scrollIntoView) {
+          eqState.handle.root.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        }
+      }
+      function closeEquityPanel() {
+        if (eqState.handle) try { eqState.handle.unmount(); } catch (_) {}
+        eqState.handle = null;
+        eqState.open = false;
+      }
+
+      // Spot context — framing + clickable villain ranges. Sits at the TOP
+      // of the GTO screen, ABOVE the verdict.
+      const spotContext = buildSpotContext({ scen, onRangeClick: openEquityWithRange });
 
       // Find the opponent's participant record + their submission for this
       // hand (if they've already played). Pass identity (avatar + name) into
@@ -918,10 +928,7 @@ export function mountInGameView(container, gameId) {
         onRangeClick: openEquityWithRange,
       });
 
-      // "Test it" — reveal-only fallback. Auto-loads the LAST villain range
-      // as a quick entry into the equity panel. The villain-range chips
-      // in spot-context above ALSO open the same panel; this button is
-      // for one-click "just show me equity" without scrolling up.
+      // "Test it" — reveal-only fallback. Auto-loads the LAST villain range.
       const testBtn = h("button", { type: "button", class: "secondary test-it" }, "🎲  Test it — equity vs a range");
       testBtn.addEventListener("click", () => {
         if (eqState.open) {
@@ -940,7 +947,9 @@ export function mountInGameView(container, gameId) {
       });
 
       body = h("div", { class: "hand-reveal" },
-        result,
+        spotContext,    // framing + villain range chips (GTO scene-setting)
+        equityHost,     // Monte Carlo panel mounts here when a chip is clicked
+        result,         // verdict + options matrix + opponent panel
         h("div", { class: "test-row" }, testBtn)
       );
 
@@ -983,7 +992,7 @@ export function mountInGameView(container, gameId) {
       "section",
       { class: "in-game my-turn" },
       progress,
-      h("div", { class: "hand-card" }, spot, spotContext, equityHost, body),
+      h("div", { class: "hand-card" }, spot, body),
       errorBox,
       h("div", { class: "hand-nav" }, backBtn, fwdBtn)
     ));
