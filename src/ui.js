@@ -80,11 +80,14 @@ function knownCards(scen) {
 //       cards, then group 8 (if present) renders the appropriate modifier
 //       glyph alongside, so the math composes: (K72) + (rainbow) glyph.
 //   9 = "KK" / "AA" / "AK" / "JT" → 2-rank hand-class shorthand
+//  10 = optional suited/offsuit suffix on group 9: "s" or "o" — tightly
+//       bound (no space) per poker convention ("AKs", not "AK s"). When
+//       present, a small suited/offsuit marker pill sits next to the cards.
 // Order matters for regex alternation: longer/more-specific patterns first.
 // Group 9's negative lookahead `(?!\s*%)` prevents "(~75% pot)" from
 // rendering "75" as a 2-rank hand class. Percentages share the digit
 // vocabulary with rank shorthand; the % suffix is the distinguishing cue.
-const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s*[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(\s+rainbow\b|\s+monotone\b|\s+two-toned?\b|\s*mono\b|\s*tt\b|r\b|m\b)?|\b([2-9TJQKA]{2})\b(?!\s*%)/g;
+const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s*[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(\s+rainbow\b|\s+monotone\b|\s+two-toned?\b|\s*mono\b|\s*tt\b|r\b|m\b)?|\b([2-9TJQKA]{2})(s|o)?\b(?!\s*%)/g;
 
 /** Escape regex meta-characters for safe use inside a constructed RegExp. */
 function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -167,12 +170,26 @@ function tokenizeProse(text, scen) {
     } else if (m[9]) {
       // 2-rank hand-class shorthand ("KK", "AA", "AK", "JT", etc.) — render
       // as two doesn't-matter cards each. Reads as "any K + any K" or
-      // "any A + any K" — which is what the shorthand means.
+      // "any A + any K" — which is what the shorthand means. The OPTIONAL
+      // group-10 suffix ("s" suited or "o" offsuit) appends a small
+      // marker pill so AKs reads as cards + suited badge, AKo as cards +
+      // offsuit badge. (Pairs can't be suited; if someone writes "KKs"
+      // we silently drop the suffix — the pair already implies offsuit.)
       const ranks = m[9];
       for (let i = 0; i < ranks.length; i++) {
         const r = ranks[i];
         frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
           h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r)));
+      }
+      const suffix = m[10];
+      if (suffix && ranks[0] !== ranks[1]) {
+        const isSuited = suffix === "s";
+        const label = isSuited ? "Suited — same suit" : "Offsuit — different suits";
+        frag.appendChild(h("span", {
+          class: "tok-suit-suffix tok-suit-suffix-" + (isSuited ? "s" : "o"),
+          title: label,
+          "aria-label": label,
+        }));
       }
     }
     last = m.index + m[0].length;
