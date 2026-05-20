@@ -19,22 +19,28 @@ let INDEX  = null;     // Map<lowercased term/alias, entry>
 //
 // The threshold controls what gets a tooltip in tokenized prose. A
 // threshold of N means: only entries with complexity >= N tokenize.
-// Default = 1 (everything tokenizes — today's behavior).
+// Default = 3 (advanced only) — the app's audience is intimately
+// familiar with basic and intermediate poker vocabulary, so showing
+// tooltips for "fold" / "gutshot" / "c-bet" is noise. We let the
+// solver-era terms (SPR, MDF, alpha, EV, blocker effects, etc.)
+// surface tooltips by default and let users opt INTO showing more if
+// they want a denser experience.
 // User-configurable from the dictionary view; persisted in localStorage.
 
 const TOOLTIP_THRESHOLD_KEY = "gto-duel.tooltipThreshold";
+const TOOLTIP_THRESHOLD_DEFAULT = 3;
 
 export function getTooltipThreshold() {
   try {
     const raw = localStorage.getItem(TOOLTIP_THRESHOLD_KEY);
-    if (raw == null) return 1;
+    if (raw == null) return TOOLTIP_THRESHOLD_DEFAULT;
     const n = parseInt(raw, 10);
-    return n >= 1 && n <= 3 ? n : 1;
-  } catch { return 1; }
+    return n >= 1 && n <= 3 ? n : TOOLTIP_THRESHOLD_DEFAULT;
+  } catch { return TOOLTIP_THRESHOLD_DEFAULT; }
 }
 
 export function setTooltipThreshold(n) {
-  const clamped = Math.max(1, Math.min(3, parseInt(n, 10) || 1));
+  const clamped = Math.max(1, Math.min(3, parseInt(n, 10) || TOOLTIP_THRESHOLD_DEFAULT));
   try { localStorage.setItem(TOOLTIP_THRESHOLD_KEY, String(clamped)); } catch {}
   return clamped;
 }
