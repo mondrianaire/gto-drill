@@ -109,32 +109,91 @@
   .hc-scroll-grid button.is-on .pcard { box-shadow:0 0 0 2px #4cb6ff; }
   .hc-scroll-grid button.is-dead .pcard { opacity:0.3; filter:grayscale(60%); }
 
-  /* Villain alt B — slider + presets + matrix-as-display              */
-  .sm { background:#0c1620; border-radius:8px; padding:8px;
-    border:1px solid #1a2735; }
-  .sm-presets { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
-  .sm-presets button { font-size:.74rem; padding:5px 10px; border-radius:999px;
-    background:#16222e; border:1px solid #243646; color:#cfe6da; min-height:0; }
-  .sm-presets button.sm-preset.is-on { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
-  /* "Playable only" lives in the same row but reads as a filter toggle,
-     not a preset. Amber when active to echo the villain colour identity. */
-  .sm-presets button.sm-toggle {
-    border-color:#e8a93f; color:#e8a93f;
-    font-weight:600;
-    background:rgba(232,169,63,0.06);
+  /* Villain alt B — three distinct input sections + matrix display    */
+  .sm { display:flex; flex-direction:column; gap:10px; }
+  /* Each input section is its own labeled card */
+  .sm-section {
+    background:#0c1620; border:1px solid #1a2735;
+    border-radius:8px; padding:10px 12px;
   }
-  .sm-presets button.sm-toggle.is-on {
-    background:#e8a93f; color:#1a1a1a; border-color:#e8a93f;
+  .sm-section-label {
+    font-size:10px; letter-spacing:.12em; text-transform:uppercase;
+    font-weight:700; color:#5b6271; margin:0 0 8px;
+    display:flex; justify-content:space-between; align-items:baseline;
   }
-  .sm-presets button.sm-toggle::before { content:"✓ "; opacity:0; margin-right:-4px; transition:opacity 0.12s; }
-  .sm-presets button.sm-toggle.is-on::before { opacity:1; margin-right:0; }
-  .sm-slider-row { display:flex; align-items:center; gap:10px; margin-bottom:10px;
-    padding:8px 4px; background:#0c1620; border-radius:6px; }
-  .sm-slider-row input[type="range"] { flex:1 1 auto; accent-color:#4cb6ff; }
-  .sm-slider-label { font-size:.78rem; color:#cfe6da; font-weight:600;
-    min-width:60px; text-align:right; }
-  .sm-matrix-wrap { background:#0c1620; padding:6px; border-radius:6px;
-    border:1px solid #1a2735; }
+  .sm-section-label .hint { color:#5b6271; font-weight:400; font-size:10px;
+    letter-spacing:.04em; text-transform:none; font-style:italic; }
+
+  /* Header row: title + clear-all link */
+  .sm-header {
+    display:flex; justify-content:space-between; align-items:baseline;
+    margin-bottom:6px;
+  }
+  .sm-clear {
+    background:none; border:none; padding:0; min-height:0;
+    color:#8aa1b1; font-size:.74rem; cursor:pointer;
+    text-decoration:underline;
+  }
+  .sm-clear:hover { color:#f87171; background:none; }
+
+  /* Top-% section: slider + jump-to preselects */
+  .sm-slider-row { display:flex; align-items:center; gap:10px; }
+  .sm-slider-row input[type="range"] {
+    flex:1 1 auto; accent-color:#4cb6ff; min-width:0;
+  }
+  .sm-slider-label {
+    font-size:.85rem; color:#cfe6da; font-weight:600;
+    min-width:62px; text-align:right;
+  }
+  .sm-jump {
+    display:flex; gap:4px; align-items:baseline;
+    margin-top:6px; padding-top:6px;
+    border-top:1px dashed #1a2735;
+    font-size:11.5px;
+  }
+  .sm-jump-label { color:#5b6271; margin-right:4px; }
+  .sm-jump button {
+    background:none; border:none; padding:2px 6px; min-height:0;
+    color:#8aa1b1; font-size:11.5px; font-weight:600;
+    cursor:pointer; border-radius:3px;
+  }
+  .sm-jump button:hover { color:#4cb6ff; background:rgba(76,182,255,0.08); }
+  .sm-jump button.is-on { color:#4cb6ff; background:rgba(76,182,255,0.18); }
+
+  /* Category section: rounded chips */
+  .sm-cats { display:flex; flex-wrap:wrap; gap:5px; }
+  .sm-cats button {
+    font-size:.74rem; padding:5px 10px; border-radius:999px;
+    background:#16222e; border:1px solid #243646; color:#cfe6da; min-height:0;
+  }
+  .sm-cats button.is-on { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+
+  /* Filter section: labeled toggle switch */
+  .sm-filter-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+  .sm-filter-name { font-size:.88rem; color:#e6edf3; font-weight:500; }
+  .sm-filter-sub { font-size:.72rem; color:#8aa1b1; margin-top:1px; }
+  .sm-switch {
+    position:relative; display:inline-block; width:46px; height:26px;
+    flex:0 0 auto; cursor:pointer; padding:0; border:none; background:none;
+    min-height:0;
+  }
+  .sm-switch-track {
+    position:absolute; inset:0; background:#243646;
+    border-radius:14px; transition:background 0.15s;
+  }
+  .sm-switch-thumb {
+    position:absolute; top:2px; left:2px; width:22px; height:22px;
+    background:#fff; border-radius:50%;
+    transition:transform 0.15s; box-shadow:0 1px 2px rgba(0,0,0,0.4);
+  }
+  .sm-switch.is-on .sm-switch-track { background:#e8a93f; }
+  .sm-switch.is-on .sm-switch-thumb { transform:translateX(20px); }
+
+  /* Matrix display */
+  .sm-matrix-wrap {
+    background:#0c1620; padding:6px; border-radius:8px;
+    border:1px solid #1a2735;
+  }
   .sm-matrix { display:grid; grid-template-columns:repeat(13, 1fr); gap:2px; }
   .sm-matrix button { aspect-ratio:1; padding:0; font-size:.55rem;
     font-weight:700; color:#5b6271; border-radius:2px;
@@ -196,18 +255,48 @@
 
     <div class="phone" style="grid-column: 1 / -1; max-width: 760px;">
       <div class="phone-title"><strong>Villain range</strong><span class="tag tag-alt">Alt B — slider + presets + matrix</span></div>
-      <div id="v-smr-stats" class="panel-stats">0 hand classes selected</div>
+
+      <div class="sm-header">
+        <div id="v-smr-stats" class="panel-stats" style="margin:0; flex:1 1 auto;">0 hand classes selected</div>
+        <button id="v-smr-clear" class="sm-clear" title="Clear all selected hands">⌫ Clear all</button>
+      </div>
+
       <div class="sm">
-        <div class="sm-presets" id="v-smr-presets"></div>
-        <div class="sm-slider-row">
-          <span style="font-size:.7rem; color:#8aa1b1; letter-spacing:.08em; text-transform:uppercase; font-weight:700;">Top</span>
-          <input type="range" id="v-smr-slider" min="0" max="100" value="0" step="1" />
-          <span class="sm-slider-label" id="v-smr-pct">0%</span>
+        <div class="sm-section">
+          <div class="sm-section-label"><span>Top %</span><span class="hint">drag slider or jump to a preselect</span></div>
+          <div class="sm-slider-row">
+            <input type="range" id="v-smr-slider" min="0" max="100" value="0" step="1" />
+            <span class="sm-slider-label" id="v-smr-pct">0%</span>
+          </div>
+          <div class="sm-jump">
+            <span class="sm-jump-label">Jump to:</span>
+            <div id="v-smr-jumps" style="display:flex; gap:2px;"></div>
+          </div>
         </div>
+
+        <div class="sm-section">
+          <div class="sm-section-label"><span>Category</span><span class="hint">replaces the current selection</span></div>
+          <div class="sm-cats" id="v-smr-cats"></div>
+        </div>
+
+        <div class="sm-section">
+          <div class="sm-section-label"><span>Filter</span><span class="hint">applies to current selection</span></div>
+          <div class="sm-filter-row">
+            <div>
+              <div class="sm-filter-name">Playable hands only</div>
+              <div class="sm-filter-sub">Intersect with a top-30% reference range</div>
+            </div>
+            <button id="v-smr-playable" class="sm-switch" aria-pressed="false" title="Restrict selection to a 'playable' reference set">
+              <span class="sm-switch-track"></span>
+              <span class="sm-switch-thumb"></span>
+            </button>
+          </div>
+        </div>
+
         <div class="sm-matrix-wrap">
           <div class="sm-matrix" id="v-smr-matrix"></div>
         </div>
-        <div class="sm-hint">Matrix is the <b>display</b> of the range. Slider + presets are the <b>input</b>. Tap any cell to fine-tune. (Pinch-zoom to enlarge on a real phone.)</div>
+        <div class="sm-hint">Matrix is the <b>display</b> of the range. Tap any cell to fine-tune. (Pinch-zoom to enlarge on a real phone.)</div>
       </div>
     </div>
   </div>
@@ -365,25 +454,20 @@
     return 12;
   }
 
-  // Every preset chip ships the STRICT / maximal version of its category.
-  // A separate "Playable only" toggle (handled below) intersects the
-  // current selection with PLAYABLE_SET, letting the user narrow without
-  // having to maintain two parallel preset lists.
-  const PRESETS_SMR = {
-    "Top 5%":     { type: "topN", pct: 5 },
-    "Top 10%":    { type: "topN", pct: 10 },
-    "Top 20%":    { type: "topN", pct: 20 },
-    "Top 30%":    { type: "topN", pct: 30 },
-    "Top 50%":    { type: "topN", pct: 50 },
-    "Pairs":      { type: "list", items: ["AA","KK","QQ","JJ","TT","99","88","77","66","55","44","33","22"] },
-    "Premium pairs": { type: "list", items: ["AA","KK","QQ","JJ"] },
-    "Big slick":  { type: "list", items: ["AKs","AKo"] },
-    "Broadways":  { type: "list", items: ["AA","KK","QQ","JJ","TT","AKs","AKo","AQs","AQo","AJs","AJo","ATs","ATo","KQs","KQo","KJs","KJo","KTs","KTo","QJs","QJo","QTs","QTo","JTs","JTo"] },
-    "Suited aces": { type: "list", items: ["AKs","AQs","AJs","ATs","A9s","A8s","A7s","A6s","A5s","A4s","A3s","A2s"] },
-    "Suited BW":   { type: "list", items: ["KQs","KJs","KTs","QJs","QTs","JTs"] },
-    "Suited connectors": { type: "list", items: ["AKs","KQs","QJs","JTs","T9s","98s","87s","76s","65s","54s","43s","32s"] },
-    "Suited 1-gap": { type: "list", items: ["KJs","QTs","J9s","T8s","97s","86s","75s","64s","53s","42s"] },
-    "Clear":      { type: "list", items: [] },
+  // SLIDER PRESELECTS — percentile jumps that live with the slider.
+  const TOP_PRESELECTS = [5, 10, 20, 30, 50];
+
+  // CATEGORY SELECTORS — each ships the STRICT / maximal version of its
+  // category. The "Playable only" filter (separate UI) handles narrowing.
+  const CATS_SMR = {
+    "Pairs":             ["AA","KK","QQ","JJ","TT","99","88","77","66","55","44","33","22"],
+    "Premium pairs":     ["AA","KK","QQ","JJ"],
+    "Big slick":         ["AKs","AKo"],
+    "Broadways":         ["AA","KK","QQ","JJ","TT","AKs","AKo","AQs","AQo","AJs","AJo","ATs","ATo","KQs","KQo","KJs","KJo","KTs","KTo","QJs","QJo","QTs","QTo","JTs","JTo"],
+    "Suited aces":       ["AKs","AQs","AJs","ATs","A9s","A8s","A7s","A6s","A5s","A4s","A3s","A2s"],
+    "Suited BW":         ["KQs","KJs","KTs","QJs","QTs","JTs"],
+    "Suited connectors": ["AKs","KQs","QJs","JTs","T9s","98s","87s","76s","65s","54s","43s","32s"],
+    "Suited 1-gap":      ["KJs","QTs","J9s","T8s","97s","86s","75s","64s","53s","42s"],
   };
 
   // "Playable" reference set ≈ top 30% — any pair, every suited ace,
@@ -409,12 +493,14 @@
 
   (() => {
     const matrixEl = document.getElementById("v-smr-matrix");
-    const presetsEl = document.getElementById("v-smr-presets");
+    const catsEl = document.getElementById("v-smr-cats");
+    const jumpsEl = document.getElementById("v-smr-jumps");
     const sliderEl = document.getElementById("v-smr-slider");
     const pctEl = document.getElementById("v-smr-pct");
     const statsEl = document.getElementById("v-smr-stats");
+    const playableEl = document.getElementById("v-smr-playable");
+    const clearEl = document.getElementById("v-smr-clear");
 
-    // Build all 169 labels and sort by handStrength descending (canonical order for slider).
     const ALL_LABELS = [];
     for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) ALL_LABELS.push(classLabel(r, c));
     const ORDERED = [...ALL_LABELS].sort((a, b) => handStrength(b) - handStrength(a));
@@ -423,6 +509,7 @@
     const raw = new Set();   // last "wanted" selection BEFORE playable filter
     const cellBy = {};
     let playableOnly = false;
+    let activeMode = null;   // "slider" | "category" | "manual" — drives highlight clearing
 
     function applyPlayableFilter() {
       sel.clear();
@@ -444,23 +531,39 @@
         (playableOnly ? " · <span style=\"color:#e8a93f\">playable filter on</span>" : "");
     }
 
-    function setTopN(pct) {
+    function setTopN(pct, source) {
       const n = Math.round((pct / 100) * 169);
       raw.clear();
       for (let i = 0; i < n; i++) raw.add(ORDERED[i]);
       pctEl.textContent = "Top " + pct + "%";
-      sliderEl.value = pct;
-      // Clear preset highlight unless it matches a top-N preset
-      const matchingPreset = Object.entries(PRESETS_SMR).find(([k, v]) => v.type === "topN" && v.pct === pct);
-      Array.from(presetsEl.querySelectorAll(".sm-preset")).forEach((b) => b.classList.toggle("is-on", matchingPreset && b.textContent === matchingPreset[0]));
+      if (source !== "slider") sliderEl.value = pct;
+      activeMode = "slider";
+      // Jump-to highlight if pct matches one of the preselects
+      Array.from(jumpsEl.children).forEach((b) => b.classList.toggle("is-on", parseInt(b.dataset.pct, 10) === pct));
+      // Clear category highlight
+      Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
       render();
     }
 
-    function setList(labels) {
+    function setCategory(name) {
+      const labels = CATS_SMR[name] || [];
       raw.clear();
       for (const l of labels) raw.add(l);
       sliderEl.value = 0;
-      pctEl.textContent = labels.length ? labels.length + " hands" : "0%";
+      pctEl.textContent = labels.length + " hands";
+      activeMode = "category";
+      Array.from(catsEl.children).forEach((b) => b.classList.toggle("is-on", b.textContent === name));
+      Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+      render();
+    }
+
+    function clearAll() {
+      raw.clear();
+      sliderEl.value = 0;
+      pctEl.textContent = "0%";
+      activeMode = null;
+      Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+      Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
       render();
     }
 
@@ -475,10 +578,12 @@
         btn.addEventListener("click", () => {
           if (raw.has(lbl)) raw.delete(lbl);
           else raw.add(lbl);
-          // Manual tap clears slider + preset highlights
+          // Manual tap drops slider + category highlights
           sliderEl.value = 0;
           pctEl.textContent = raw.size + " hands";
-          Array.from(presetsEl.querySelectorAll(".sm-preset")).forEach((b) => b.classList.remove("is-on"));
+          activeMode = "manual";
+          Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+          Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
           render();
         });
         cellBy[lbl] = btn;
@@ -486,32 +591,36 @@
       }
     }
 
-    // "Playable only" toggle — first chip, distinct visual (amber sticky toggle).
-    const playableBtn = document.createElement("button");
-    playableBtn.className = "sm-toggle";
-    playableBtn.textContent = "Playable only";
-    playableBtn.title = "Restrict selection to a top-30% \"playable\" reference set (pairs, suited aces, suited Kings 7+, suited connectors KQs–54s, Broadway offsuit). Click any preset or drag the slider — the filter intersects.";
-    playableBtn.addEventListener("click", () => {
-      playableOnly = !playableOnly;
-      playableBtn.classList.toggle("is-on", playableOnly);
-      render();
-    });
-    presetsEl.appendChild(playableBtn);
-
-    // Build the rest of the preset chips.
-    for (const [name, def] of Object.entries(PRESETS_SMR)) {
+    // Slider jump-to preselects.
+    for (const pct of TOP_PRESELECTS) {
       const btn = document.createElement("button");
-      btn.className = "sm-preset";
-      btn.textContent = name;
-      btn.addEventListener("click", () => {
-        Array.from(presetsEl.querySelectorAll(".sm-preset")).forEach((b) => b.classList.toggle("is-on", b === btn));
-        if (def.type === "topN") setTopN(def.pct);
-        else setList(def.items);
-      });
-      presetsEl.appendChild(btn);
+      btn.dataset.pct = pct;
+      btn.textContent = pct + "%";
+      btn.addEventListener("click", () => setTopN(pct, "preselect"));
+      jumpsEl.appendChild(btn);
     }
 
-    sliderEl.addEventListener("input", (ev) => setTopN(parseInt(ev.target.value, 10) || 0));
+    // Category chips.
+    for (const name of Object.keys(CATS_SMR)) {
+      const btn = document.createElement("button");
+      btn.textContent = name;
+      btn.addEventListener("click", () => setCategory(name));
+      catsEl.appendChild(btn);
+    }
+
+    // Playable toggle (switch).
+    playableEl.addEventListener("click", () => {
+      playableOnly = !playableOnly;
+      playableEl.classList.toggle("is-on", playableOnly);
+      playableEl.setAttribute("aria-pressed", playableOnly ? "true" : "false");
+      render();
+    });
+
+    // Clear all (header action).
+    clearEl.addEventListener("click", clearAll);
+
+    // Slider input.
+    sliderEl.addEventListener("input", (ev) => setTopN(parseInt(ev.target.value, 10) || 0, "slider"));
 
     render();
   })();
