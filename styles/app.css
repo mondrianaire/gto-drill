@@ -33,9 +33,17 @@ html, body {
   line-height: 1.45;
   min-height: 100vh;
   -webkit-text-size-adjust: 100%;
-  /* Kill iOS Safari's double-tap-to-zoom on UI elements. Pinch-zoom
-     (the accessibility one) still works because we don't set
-     user-scalable=no on the viewport meta. */
+  /* Kill iOS Safari's double-tap-to-zoom. Pinch-zoom (the accessibility
+     one) still works because we don't set user-scalable=no on the
+     viewport meta. The * selector below is needed because iOS Safari
+     checks `touch-action` on the EVENT TARGET, not its ancestors —
+     so html/body alone isn't enough to suppress double-tap on a
+     button or other interactive element. */
+  touch-action: manipulation;
+}
+/* Apply touch-action: manipulation to EVERY element so double-tap-zoom
+   is suppressed no matter what gets tapped. Pinch-zoom unaffected. */
+*, *::before, *::after {
   touch-action: manipulation;
 }
 
