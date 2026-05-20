@@ -1104,7 +1104,7 @@ form { margin-top: 8px; }
    container's color so the suffix doesn't read as a separate element. */
 .action-btn .tok-bb-pct,
 .replay-pot .tok-bb-pct,
-.rseat-bet .tok-bb-pct {
+.rbet .tok-bb-pct {
   color: inherit;
   opacity: 0.78;
 }
@@ -1115,14 +1115,14 @@ form { margin-top: 8px; }
    container's text color. The chip still reads as "Nbb" with the unit
    styled smaller, but it no longer fights the chrome's contrast. */
 .replay-pot .tok-bb,
-.rseat-bet .tok-bb,
+.rbet .tok-bb,
 .rseat-stack .tok-bb,
 .replay-gameinfo .tok-bb {
   background: transparent;
   padding: 0;
 }
 .replay-pot .tok-bb-unit,
-.rseat-bet .tok-bb-unit,
+.rbet .tok-bb-unit,
 .rseat-stack .tok-bb-unit,
 .replay-gameinfo .tok-bb-unit {
   color: inherit;
@@ -1790,13 +1790,12 @@ form { margin-top: 8px; }
   color: #d5ece0;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 }
-/* Bet bubble — chip-like gradient pill that appears above or below a
-   seat when they've put chips in. Looks more like a physical bet than
-   a flat coloured tag. */
-.rseat-bet {
+/* Bet bubble — chip-like gradient pill positioned BETWEEN the seat and
+   the pot center (not above/below the seat). Reads as "chips pushed
+   forward" toward the pot instead of a label attached to the player.
+   Sits in the .replay-table directly, addressed by slot for placement. */
+.rbet {
   position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
   background: linear-gradient(180deg, #5cb7ff 0%, #3a98e0 100%);
   color: #061018;
   font-size: 0.7rem;
@@ -1808,9 +1807,18 @@ form { margin-top: 8px; }
     0 2px 3px rgba(0, 0, 0, 0.5),
     inset 0 1px 0 rgba(255, 255, 255, 0.35),
     inset 0 -1px 0 rgba(0, 0, 0, 0.2);
+  z-index: 2; /* above the felt, below the pot pill which sits at center */
 }
-.rslot-0 .rseat-bet, .rslot-1 .rseat-bet, .rslot-5 .rseat-bet { top: -19px; }
-.rslot-2 .rseat-bet, .rslot-3 .rseat-bet, .rslot-4 .rseat-bet { bottom: -19px; }
+/* Per-slot positioning — placed roughly halfway between the seat's
+   centre and the pot's centre. The table is 300px tall with seats at
+   the top/bottom edge and pot in the middle, so midpoints sit ~80-100px
+   from the corresponding edge. */
+.rbet-slot-0 { bottom: 76px;  left: 50%;  transform: translateX(-50%); }
+.rbet-slot-1 { bottom: 60px;  left: 20%;  }
+.rbet-slot-2 { top: 60px;     left: 20%;  }
+.rbet-slot-3 { top: 76px;     left: 50%;  transform: translateX(-50%); }
+.rbet-slot-4 { top: 60px;     right: 20%; }
+.rbet-slot-5 { bottom: 60px;  right: 20%; }
 
 .replay-center {
   position: absolute;
