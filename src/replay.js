@@ -400,13 +400,14 @@ export function mountReplay(container, replay, opts) {
   let minStep = 0;
   while (minStep < actions.length && actions[minStep].type === "post") minStep += 1;
   // Inflection points: action indices we WANT to dwell on in the replay.
-  // Folds and checks are noise — they don't move money or change the
-  // visual state meaningfully. Bets / raises / calls are the inflection
-  // moments where chips move. We auto-play through THESE on load and
-  // skip over the noise; user can still step through one-by-one with
-  // prev/next if they want the full history.
+  // Folds are noise — once mucked, the seat dims and there's nothing
+  // strategically useful to show. Bets / raises / calls move chips.
+  // Checks change initiative: who acts next, who showed weakness, what
+  // line the betting tree just branched into — important context to
+  // see animate in, even though no chips move. Now that checks have a
+  // visual badge + ring pulse, they're worth dwelling on.
   function isInflection(a) {
-    return a && (a.type === "bet" || a.type === "raise" || a.type === "call");
+    return a && (a.type === "bet" || a.type === "raise" || a.type === "call" || a.type === "check");
   }
   // Step at which each inflection action ENDS (i.e., the state AFTER it).
   // setStep(N) applies actions[0..N-1] inclusive.
