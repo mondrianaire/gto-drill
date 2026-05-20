@@ -866,6 +866,34 @@ form { margin-top: 8px; }
     #c0202a 50% 100%);
 }
 
+/* Hand-class suited/offsuit marker — small lettered pill sitting next to
+   the two doesn't-matter cards from group 9 ("AKs", "AKo"). Using the
+   letters "s" / "o" is the poker-idiomatic shorthand — players read it
+   instantly. Tinted background carries the secondary "matched / mixed"
+   signal: blue-violet for suited (cool / together), warm gray for offsuit
+   (neutral / apart). The font is bold tabular-num so the two badges have
+   identical width regardless of which letter shows. */
+.tok-suit-suffix {
+  display: inline-block;
+  vertical-align: 0;
+  min-width: 14px;
+  padding: 1px 4px;
+  margin: 0 2px 0 3px;
+  font-size: 0.62rem;
+  font-weight: 700;
+  line-height: 1;
+  text-align: center;
+  border-radius: 3px;
+  color: #fdfdfb;
+  cursor: help;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+  font-variant-numeric: tabular-nums;
+}
+.tok-suit-suffix-s::before { content: "s"; }
+.tok-suit-suffix-o::before { content: "o"; }
+.tok-suit-suffix-s { background: #4a6fa5; }   /* cool blue: same-suit / together */
+.tok-suit-suffix-o { background: #6b6359; }   /* warm gray: mixed-suit / apart */
+
 /* Inline range chip — clickable anchor that pre-loads the equity panel. */
 .tok-range {
   color: var(--villain);
