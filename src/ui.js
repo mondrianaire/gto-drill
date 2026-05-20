@@ -442,6 +442,11 @@ export function buildVillainRangeBlock({ scen, onRangeClick }) {
   if (!scen) return null;
   const ranges = Array.isArray(scen.villain_ranges) ? scen.villain_ranges : [];
   if (ranges.length === 0) return null;
+
+  // Range cards — each one a deduced range. The label is the conclusion
+  // ("BB's 3-bet range vs BTN open"); the summary is the supporting
+  // evidence ("Linear 3-bet range: JJ+, AK, AQs, plus a slice of
+  // suited bluffs"). Clicking pops the equity panel pre-loaded.
   const list = h("div", { class: "villain-range-list" });
   for (const range of ranges) {
     const card = h(
@@ -464,15 +469,95 @@ export function buildVillainRangeBlock({ scen, onRangeClick }) {
     }
     list.appendChild(card);
   }
+
+  // Evidence row — what we have to work with: villain's actions through
+  // the hand. For scenarios where villain hasn't acted yet (e.g.,
+  // push/fold on the BTN before the blinds respond), this falls back
+  // to a predictive context note instead.
+  const evidence = buildVillainEvidence(scen);
+  const subtitleText = onRangeClick
+    ? "GTO read of what villain could hold, given the action above. Tap a range to test equity."
+    : "GTO read of what villain could hold, given the action above.";
+
   return h("div", { class: "villain-range-block" },
-    h("div", { class: "villain-range-label" },
-      h("span", null, "Villain's range"),
-      h("span", { class: "spot-context-hint muted" },
-        onRangeClick ? " — deduced from action · tap to test equity" : " — deduced from action"
-      )
+    h("div", { class: "villain-range-header" },
+      h("div", { class: "villain-range-title" }, "Villain's range"),
+      h("div", { class: "villain-range-subtitle muted" }, subtitleText)
     ),
+    evidence,
     list
   );
+}
+
+/**
+ * Build the "Evidence" row for the villain range section — surfaces
+ * the actions villain has taken in the hand so the user sees the
+ * deductive inputs. For scenarios where villain hasn't acted yet
+ * (push/fold spots, opening decisions), falls back to a predictive
+ * note explaining that the ranges are based on what villain WILL face.
+ */
+function buildVillainEvidence(scen) {
+  if (!scen || !scen.replay) return null;
+  const replay = scen.replay;
+  const hero = replay.hero_seat;
+  const villainActs = (replay.actions || []).filter(
+    (a) => a.actor !== hero && a.type !== "post" && a.type !== "fold"
+  );
+
+  if (villainActs.length === 0) {
+    // Predictive: villain hasn't acted; range is what they'll face the
+    // decision with (e.g., shove range, calling range vs hero's bet).
+    return h("div", { class: "villain-evidence villain-evidence-predictive" },
+      h("span", { class: "villain-evidence-label" }, "Predicting"),
+      h("span", { class: "villain-evidence-text muted" },
+        "Villain hasn't acted — these are the ranges they'll be making the decision with."
+      )
+    );
+  }
+
+  // Reactive: render villain's actions as evidence chips. For preflop
+  // raise naming (opens / 3-bets / 4-bets), the escalation depends on
+  // raises across BOTH players, so count up through the full action
+  // sequence (not just villain's).
+  const allActions = replay.actions || [];
+  const chips = [];
+  for (const a of villainActs) {
+    // For each villain raise, count how many preflop raises preceded
+    // it in the full action sequence (across both players).
+    let priorPreflopRaises = 0;
+    if (a.street === "preflop" && a.type === "raise") {
+      for (const p of allActions) {
+        if (p === a) break;
+        if (p.street === "preflop" && p.type === "raise") priorPreflopRaises++;
+      }
+    }
+    chips.push(h("span", { class: "villain-evidence-chip" },
+      h("span", { class: "villain-evidence-street" }, streetShort(a.street)),
+      h("span", { class: "villain-evidence-act" }, evidenceVerb(a, priorPreflopRaises))
+    ));
+  }
+  return h("div", { class: "villain-evidence" },
+    h("span", { class: "villain-evidence-label" }, "Evidence"),
+    h("div", { class: "villain-evidence-chips" }, ...chips)
+  );
+}
+
+function streetShort(s) {
+  return { preflop: "PRE", flop: "FLOP", turn: "TURN", river: "RIVER" }[s] || s.toUpperCase();
+}
+function evidenceVerb(a, priorPreflopRaises) {
+  if (a.type === "check") return "checks";
+  if (a.type === "call") return "calls" + (a.amount_bb ? " " + a.amount_bb + "bb" : "");
+  if (a.type === "bet") return "bets " + (a.amount_bb || 0) + "bb";
+  if (a.type === "raise") {
+    if (a.street === "preflop") {
+      const n = priorPreflopRaises;
+      const verb = n === 0 ? "opens to" : n === 1 ? "3-bets to" : n === 2 ? "4-bets to" : "5-bets to";
+      return verb + " " + (a.amount_bb || 0) + "bb";
+    }
+    return "raises to " + (a.amount_bb || 0) + "bb";
+  }
+  return a.type;
 }
 
 /**
