@@ -195,9 +195,9 @@ export function mountEquityPanel(container, scen, opts = {}) {
     ...(board.length ? board.map((c) => cardEl(c, "sm")) : [h("span", { class: "muted" }, "preflop")]));
 
   // ----- range picker -------------------------------------------------------
+  // The picker owns its own header (stats + Customize toggle) — the equity
+  // panel just provides it a host element.
   const pickerHost = h("div", { class: "eq-picker-host" });
-  const countLabel = h("span", { class: "eq-count" }, "0 combos · pick a range below");
-  const rangeLabel = h("span", { class: "eq-range-label" }, opts.initialRangeLabel || "");
   let currentCombos = [];
 
   function recomputeLive() {
@@ -205,9 +205,6 @@ export function mountEquityPanel(container, scen, opts = {}) {
     const sel = picker.getSelection();
     currentCombos = sel.combos;
     if (hero.length !== 2) {
-      countLabel.textContent = sel.classes.length
-        ? sel.classes.length + " hand class" + (sel.classes.length === 1 ? "" : "es") + " · pick a hero hand to enable Run"
-        : "0 combos · pick a range and a hero hand";
       runBtn.disabled = true;
       resetAcc();
       return;
@@ -215,15 +212,13 @@ export function mountEquityPanel(container, scen, opts = {}) {
     const live = sel.combos.filter((c) =>
       !c.includes(hero[0]) && !c.includes(hero[1]) &&
       !board.includes(c[0]) && !board.includes(c[1]));
-    countLabel.textContent =
-      sel.classes.length + " hand class" + (sel.classes.length === 1 ? "" : "es") +
-      " · " + live.length + " combos vs this spot";
     runBtn.disabled = live.length === 0;
     resetAcc();
   }
 
   const picker = mountRangePicker(pickerHost, {
     initial: opts.initialRange || [],
+    initialLabel: opts.initialRangeLabel || null,
     onChange: () => recomputeLive(),
   });
 
@@ -303,13 +298,7 @@ export function mountEquityPanel(container, scen, opts = {}) {
     pinnedHero
       ? h("div", { class: "eq-header" }, heroSection, boardRow)
       : h("div", { class: "eq-header eq-header-pickable" }, heroSection, boardRow),
-    h("div", { class: "eq-picker-section" },
-      h("div", { class: "eq-picker-title" },
-        h("span", null, "Villain range"),
-        rangeLabel,
-        countLabel),
-      pickerHost
-    ),
+    pickerHost,
     h("div", { class: "eq-run-row" }, trialsSel, runBtn),
     result
   );
@@ -319,8 +308,7 @@ export function mountEquityPanel(container, scen, opts = {}) {
   recomputeLive();
 
   function setRange(classes, label) {
-    picker.setSelection(classes || []);
-    rangeLabel.textContent = label || "";
+    picker.setSelection(classes || [], label || null);
   }
 
   return {

@@ -302,8 +302,18 @@ export function mountSoloView(container, onExit) {
         }
       }
       testBtn.addEventListener("click", () => {
-        if (eqState.open) closePanel();
-        else openWithRange(null);
+        if (eqState.open) { closePanel(); return; }
+        // Auto-load the LAST chip in the scenario's GTO explanation, if any.
+        const ranges = (scen && scen.villain_ranges) || [];
+        const last = ranges.length ? ranges[ranges.length - 1] : null;
+        if (last) {
+          openWithRange({
+            classes: last.classes,
+            label: "Auto-loaded: " + last.label,
+          });
+        } else {
+          openWithRange(null);
+        }
       });
 
       const explain = h("p", { class: "gto-explanation" },

@@ -8,4 +8,4 @@
 // will see the OLD version here even after a deploy — that's the signal
 // to hard-refresh (Ctrl+Shift+R / Cmd+Shift+R).
 
-export const APP_VERSION = "2026-05-19.12-mobile-relax";
+export const APP_VERSION = "2026-05-19.12-pass1-fixes";
