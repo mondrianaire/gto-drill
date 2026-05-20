@@ -13,6 +13,8 @@ import { perPlayerAccuracy, interPlayerAgreement, rankedDisagreements } from "./
 import { recordGame, writeActiveGameId } from "./history.js";
 import { mountReplay, cardEl, liveVillains } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
+import { buildTermRegex, lookupTerm } from "./dictionary.js";
+import { wireTermTrigger } from "./tooltip.js";
 
 // -----------------------------------------------------------------------
 // Small DOM helpers (duplicated from onboarding.js intentionally to keep
@@ -139,7 +141,7 @@ export function richText(text, scen, opts) {
   const ranges = (scen && Array.isArray(scen.villain_ranges)) ? scen.villain_ranges : [];
   const onRangeClick = opts && opts.onRangeClick;
   if (!ranges.length || !onRangeClick) {
-    frag.appendChild(tokenizeProse(text, scen));
+    frag.appendChild(wrapDictionaryTerms(tokenizeProse(text, scen)));
     return frag;
   }
   // Longest anchor first so "BB's 3-bet range" wins over "3-bet range".
@@ -148,14 +150,58 @@ export function richText(text, scen, opts) {
   let last = 0;
   let m;
   while ((m = anchorRe.exec(text))) {
-    if (m.index > last) frag.appendChild(tokenizeProse(text.slice(last, m.index), scen));
+    if (m.index > last) frag.appendChild(wrapDictionaryTerms(tokenizeProse(text.slice(last, m.index), scen)));
     const matched = m[1];
     const range = sorted.find((r) => r.anchor === matched);
     frag.appendChild(makeRangeChip(matched, range, onRangeClick));
     last = m.index + m[0].length;
   }
-  if (last < text.length) frag.appendChild(tokenizeProse(text.slice(last), scen));
+  if (last < text.length) frag.appendChild(wrapDictionaryTerms(tokenizeProse(text.slice(last), scen)));
   return frag;
+}
+
+/**
+ * Post-process a tokenized fragment: walk its text-node children, wrap any
+ * known dictionary terms in tooltip-enabled spans. DOM-element children
+ * (cards, position chips, range chips) are passed through untouched.
+ *
+ * This runs AFTER tokenizeProse so dictionary terms don't fight cards /
+ * positions for the same text — they only get a shot at the plain-text
+ * residue.
+ */
+function wrapDictionaryTerms(fragOrEl) {
+  const termRe = buildTermRegex();
+  if (!termRe) return fragOrEl;
+  const out = document.createDocumentFragment();
+  for (const node of Array.from(fragOrEl.childNodes)) {
+    if (node.nodeType !== 3 /* TEXT_NODE */) {
+      out.appendChild(node);
+      continue;
+    }
+    const text = node.textContent;
+    let last = 0;
+    let m;
+    termRe.lastIndex = 0;
+    while ((m = termRe.exec(text))) {
+      if (m.index > last) out.appendChild(document.createTextNode(text.slice(last, m.index)));
+      const matched = m[1];
+      const entry = lookupTerm(matched);
+      if (entry) {
+        const span = h("span",
+          { class: "term-trigger", role: "button", tabindex: "0", "data-term-id": entry.id, "aria-label": entry.term + " — tap for definition" },
+          matched);
+        wireTermTrigger(span, entry);
+        out.appendChild(span);
+      } else {
+        out.appendChild(document.createTextNode(matched));
+      }
+      last = m.index + m[0].length;
+    }
+    // Handles both the no-match case (last=0, appends entire text) and the
+    // trailing portion after the last match.
+    if (last < text.length) out.appendChild(document.createTextNode(text.slice(last)));
+  }
+  return out;
 }
 
 function getDisplayName(game, uid) {

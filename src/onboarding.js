@@ -60,7 +60,7 @@ const GOOGLE_G_SVG =
 // when no user is signed in.
 // -----------------------------------------------------------------------
 
-export function mountSignInView(container, onSignedIn, onSolo, onCalculator) {
+export function mountSignInView(container, onSignedIn, onSolo, onCalculator, onDictionary) {
   clear(container);
   const errorBox = h("div", { class: "error", role: "alert" });
 
@@ -118,6 +118,17 @@ export function mountSignInView(container, onSignedIn, onSolo, onCalculator) {
     if (onCalculator) onCalculator();
   });
 
+  // Poker dictionary — fourth main-menu option.
+  const dictBtn = h(
+    "button",
+    { type: "button", class: "solo-btn dict-btn" },
+    h("span", { class: "alt-btn-label" }, "📖  Poker dictionary"),
+    h("span", { class: "alt-btn-sub" }, "Browse GTO terms used throughout the app. Searchable.")
+  );
+  dictBtn.addEventListener("click", () => {
+    if (onDictionary) onDictionary();
+  });
+
   const root = h(
     "section",
     { class: "signin" },
@@ -130,6 +141,7 @@ export function mountSignInView(container, onSignedIn, onSolo, onCalculator) {
     btn,
     soloBtn,
     calcBtn,
+    dictBtn,
     errorBox,
     h(
       "p",

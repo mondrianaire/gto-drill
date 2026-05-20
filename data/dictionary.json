@@ -1,0 +1,941 @@
+{
+  "version": 1,
+  "entries": [
+    {
+      "id": "3-bet",
+      "term": "3-bet",
+      "aliases": ["3bet", "three-bet", "3-bets", "3-betting", "3-bettor"],
+      "short_def": "The first re-raise of a hand. Pre-flop, the big blind counts as the 1st bet and the open as the 2nd; a re-raise of that open is the 3rd bet.",
+      "long_def": "Pre-flop: an open-raise is the second 'bet' (the BB being the first), so any re-raise of that open is called a 3-bet. Sizing is usually 3× the open in position or 4× out of position. The 3-bet polarizes the raiser's range — strong value plus bluffs — while the opener has to defend (call or 4-bet) wider than vs a single bet. Post-flop, a 3-bet is also any re-raise of a bet.",
+      "see_also": ["4-bet", "squeeze", "polarized", "capped-range"]
+    },
+    {
+      "id": "4-bet",
+      "term": "4-bet",
+      "aliases": ["4bet", "four-bet", "4-bets", "4-betting"],
+      "short_def": "A re-raise of a 3-bet. Pre-flop, the 4th bet in the sequence (BB · open · 3-bet · 4-bet).",
+      "long_def": "Pre-flop, the open is the 2nd bet, the 3-bet the 3rd, and the 4-bet the 4th. A value 4-bet is typically QQ+ and AK; a 4-bet bluff is usually a hand with a blocker to the 3-bettor's value range (A5s, A4s — the ace blocks AA and AK). Sizing is 2.2-2.5× the 3-bet in position, often larger out of position. 4-bets create very low SPRs post-flop, which favors the 4-bettor's narrow strong range.",
+      "see_also": ["3-bet", "5-bet", "blocker", "SPR"]
+    },
+    {
+      "id": "squeeze",
+      "term": "squeeze",
+      "aliases": ["squeezes", "squeezing", "squeeze play"],
+      "short_def": "A 3-bet against an open + at least one caller, sized larger than a normal 3-bet to account for the extra dead money.",
+      "long_def": "A squeeze is a 3-bet made when the action is open + cold-call (or multiple cold-calls). The pot already has dead money beyond the open, so the squeeze is sized roughly 3.5-4× the original raise (vs ~3× for a heads-up 3-bet). The play applies pressure on two ranges at once: the opener (must defend wider) and the caller (whose range is typically capped, since they'd usually 3-bet a premium). Squeeze candidates often include blockers to the opener's value range (suited aces, AKo).",
+      "see_also": ["3-bet", "capped-range", "dead-money", "blocker"]
+    },
+    {
+      "id": "c-bet",
+      "term": "c-bet",
+      "aliases": ["cbet", "c-bets", "continuation bet", "continuation-bet", "c-betting"],
+      "short_def": "A continuation bet — the preflop raiser bets again on the flop, regardless of whether they connected.",
+      "long_def": "A continuation bet (c-bet) is when the preflop aggressor follows up with a bet on the flop. The aggressor has the range advantage on many flops because their preflop range is stronger, so they can c-bet most of their range for a small size. C-bets come in two flavors: range-bet (small, dense) used on flops that favor the raiser's range, and polar (big, condensed) used on flops where the raiser has nut advantage but the caller has more middling pairs.",
+      "see_also": ["range-advantage", "polarized", "range-bet"]
+    },
+    {
+      "id": "polarized",
+      "term": "polarized",
+      "aliases": ["polar", "polarize", "polarizing", "polar range"],
+      "short_def": "A betting range that contains only very strong hands and bluffs, with no middling hands.",
+      "long_def": "A polarized range is one that contains the very top of the range (value) and the very bottom (bluffs), with the middling hands removed. Polar ranges fire larger bet sizes because the strong hands can extract from worse calls and the bluffs benefit from maximum fold equity. The opposite is a merged or linear range, which contains medium-strength hands and uses smaller sizes.",
+      "see_also": ["merged", "value-bet", "bluff", "c-bet"]
+    },
+    {
+      "id": "capped-range",
+      "term": "capped range",
+      "aliases": ["capped", "range-cap", "range cap"],
+      "short_def": "A range that's missing the very top of the hand strength curve — usually because the player would have raised those hands earlier.",
+      "long_def": "A range is capped when it can't contain the strongest hands. A common example: a flat-caller against an open is capped because they'd usually 3-bet premiums (AA, KK, AKs). Capped ranges are exploitable by polarized over-bets — the capped player can't comfortably call with anything near the top of their range, so they're forced to fold or call with marginal hands.",
+      "see_also": ["polarized", "3-bet", "merged"]
+    },
+    {
+      "id": "blocker",
+      "term": "blocker",
+      "aliases": ["blockers", "blocking", "blocker effect"],
+      "short_def": "A card you hold that 'blocks' (removes from possibility) hands in your opponent's range — making certain hands less likely for them to hold.",
+      "long_def": "A blocker is a card in your hand that reduces the combinations of specific hands your opponent can hold. Holding the A♥ on a 3-heart board means your opponent has fewer nut-flush combos. Holding an Ace means your opponent has fewer AA, AK, and AQ combos. Blocker effects matter most in bluff/bluff-catch decisions: bluffing with a hand that blocks their value range and unblocks their bluffs is ideal; bluff-catching with a hand that blocks their bluffs is bad.",
+      "see_also": ["combos", "bluff", "bluff-catcher"]
+    },
+    {
+      "id": "SPR",
+      "term": "SPR",
+      "aliases": ["stack-to-pot ratio", "stack to pot ratio"],
+      "short_def": "Stack-to-Pot Ratio — the ratio of the effective stack to the current pot. Low SPR (≤2) favors strong made hands; high SPR (>10) favors implied-odds hands.",
+      "long_def": "SPR = effective stack ÷ pot. Calculated at the start of a betting street. Low SPR (~1) means commitment is near-automatic with top pair or better — the pot is large relative to remaining stack. High SPR (>10) means strong made hands are exposed to draws and reverse implied odds matter; speculative hands like small pairs and suited connectors gain value. 4-bet pots typically have SPR ~1-2; single-raised pots have SPR ~10-15 at 100bb.",
+      "see_also": ["4-bet", "effective-stack", "implied-odds"]
+    },
+    {
+      "id": "TPTK",
+      "term": "TPTK",
+      "aliases": ["top pair top kicker", "top-pair-top-kicker"],
+      "short_def": "Top Pair, Top Kicker — your hole card matches the highest card on the board, with the best possible side card.",
+      "long_def": "TPTK is hand strength like A♣K♥ on K♠7♦4♦ — top pair (K) with the best kicker (A). Strong but not invulnerable: vulnerable to two-pair, sets, and made straights/flushes; vulnerable in 4-bet pots to AA/KK; in 3-bet pots TPTK has to be played carefully against capped ranges. Generally too strong to fold, too weak to bloat the pot when called.",
+      "see_also": ["range-advantage", "polarized", "SPR"]
+    },
+    {
+      "id": "open-ender",
+      "term": "open-ender",
+      "aliases": ["open-ended straight draw", "OESD", "open-ended draw", "open ender"],
+      "short_def": "An open-ended straight draw — 4 cards to a straight where either of two ranks completes it. 8 outs.",
+      "long_def": "An open-ended straight draw is 4 consecutive cards to a straight, with two open ends. Example: holding 8-9 on a board of T-7-2 — a 6 or a J makes a straight. 8 outs in the deck, ~31% to hit by the river from the flop, ~17% from the turn. Strong semi-bluff candidate. Contrast with a gutshot (4 outs) which only needs one specific rank in the middle of the run.",
+      "see_also": ["gutshot", "outs", "semi-bluff"]
+    },
+    {
+      "id": "ICM",
+      "term": "ICM",
+      "aliases": ["independent chip model"],
+      "short_def": "Independent Chip Model — converts tournament chip stacks into expected dollar value based on payout structure. Marginal chip-EV shoves become losing under ICM pressure.",
+      "long_def": "ICM models the dollar value of a tournament chip stack. Because tournament payouts are top-heavy, the marginal dollar value of chips decreases as your stack grows — and busting before a pay jump has a real dollar cost. On a bubble or near a pay jump, the chip-EV optimal range tightens because the cost of busting outweighs the gain from accumulating. A hand that's a +EV chip shove (like A9s at 20bb) becomes a fold under ICM pressure.",
+      "see_also": ["bubble", "chip-EV", "shove"]
+    },
+    {
+      "id": "donk",
+      "term": "donk",
+      "aliases": ["donks", "donking", "donk bet", "donk lead", "donk-lead", "lead"],
+      "short_def": "A bet by the out-of-position player into the previous street's aggressor — leading into the player who'd normally be expected to c-bet.",
+      "long_def": "A donk bet is when an out-of-position caller bets first on the next street, before the previous aggressor has a chance to c-bet. Historically labeled a 'donkey' move (hence the name), modern solvers have shown small donks are correct on certain textures — particularly low-connected boards (765-type) where the caller's range has a structural advantage. The donking range is usually condensed around made straights, two pair, sets, and strong draws — not bluff-heavy.",
+      "see_also": ["c-bet", "out-of-position", "range-advantage"]
+    },
+    {
+      "id": "5-bet",
+      "term": "5-bet",
+      "aliases": ["5bet", "five-bet", "5-bets", "5-bet shove", "5-bet-shoving"],
+      "short_def": "A re-raise of a 4-bet. At 100bb this is usually all-in or near-all-in.",
+      "long_def": "A 5-bet is the third re-raise pre-flop (BB · open · 3-bet · 4-bet · 5-bet). At 100bb effective the 5-bet is almost always an all-in shove because the prior sizes have already committed so much of the stack. Value 5-bets concentrate on QQ+ and AK; bluff 5-bets use ace blockers like A5s. The 4-bettor calling a 5-bet is committed by pot odds with much of their value range, including AK.",
+      "see_also": ["4-bet", "shove", "blocker", "pot-odds"]
+    },
+    {
+      "id": "range-advantage",
+      "term": "range advantage",
+      "aliases": ["range advantage", "range-advantaged", "range edge", "equity edge", "range-wide equity edge"],
+      "short_def": "When one player's entire range has more equity than the other's on a given board — usually because the board hits their preflop range harder.",
+      "long_def": "Range advantage measures whose overall preflop range does better against the other on a specific flop. The preflop raiser usually has range advantage on high-card boards (AK7, K72) because their range contains more big cards. The flat-caller often has range advantage on low connected boards (765, 654) because they continue many small connectors that the raiser folds preflop. Range advantage drives c-betting frequency and sizing: with a big edge you can range-bet small; without it you should check more.",
+      "see_also": ["range-bet", "c-bet", "range-disadvantage", "preflop-raiser"]
+    },
+    {
+      "id": "range-disadvantage",
+      "term": "range disadvantage",
+      "aliases": ["range disadvantage", "range-disadvantaged"],
+      "short_def": "The flip side of range advantage — your overall range has less equity than your opponent's on the current board.",
+      "long_def": "Range disadvantage exists when the texture of the board favors the other player's preflop range. A common example: as the BTN flat-caller against a BB 3-bet, on a K72r flop the BB has more Kx, AA, and KK in their 3-bet range than you do — so you have range disadvantage. The correct response is usually to check more often, fold more often when bet into, and rely on specific strong combos rather than your whole range.",
+      "see_also": ["range-advantage", "check-back", "capped-range"]
+    },
+    {
+      "id": "range-bet",
+      "term": "range bet",
+      "aliases": ["range bet", "range-bet", "range-betting", "range bets"],
+      "short_def": "A small c-bet made with the entire range, used on flops that favor the preflop raiser. Usually 25-35% pot.",
+      "long_def": "A range bet is when the preflop aggressor bets a small size (~25-35% pot) with their whole range on a flop where they have a clear range advantage — typically high-card, dry boards like AK7r, A72r, K72r. Because the entire range bets, no specific hand is revealed; weak hands get folds for cheap, strong hands extract small value, and middle hands deny equity. The size is small because the raiser doesn't need a polarized big bet to win — the structural edge does the work.",
+      "see_also": ["c-bet", "range-advantage", "polarized", "static-board"]
+    },
+    {
+      "id": "merged",
+      "term": "merged",
+      "aliases": ["merged range", "merged ranges", "linear", "linear range"],
+      "short_def": "A betting range containing the top to the medium portions of hand strength — value and protection, but few pure bluffs.",
+      "long_def": "A merged range is the opposite of polarized: it includes premiums, strong made hands, and a chunk of medium-strength hands, but very few pure bluffs. Merged ranges use smaller bet sizes (33-66% pot) because the middling hands can't get called by worse if they bet huge. Used on textures where you want value from a wide calling range and protection against draws, but where you don't have enough nut advantage to polarize.",
+      "see_also": ["polarized", "value-bet", "protection-bet", "range-bet"]
+    },
+    {
+      "id": "condensed",
+      "term": "condensed",
+      "aliases": ["condensed range", "condensed ranges", "condensed-range"],
+      "short_def": "A range made of mostly medium-strength hands — bluff-light and missing both the very top and very bottom.",
+      "long_def": "A condensed range has its strongest and weakest hands stripped out, leaving mostly one-pair hands, weak draws, and showdown-value middling holdings. The classic example is a BB cold-caller after preflop bet-call-call: premium hands would have 3-bet, total trash folded, so the calling range is condensed. Condensed ranges struggle against polar overbets because they can neither call comfortably with their best hands nor make hero-folds, and they're best played passively.",
+      "see_also": ["capped-range", "polarized", "merged", "bluff-catcher"]
+    },
+    {
+      "id": "equity-realization",
+      "term": "equity realization",
+      "aliases": ["realize equity", "realizes equity", "realizing equity", "realization", "equity realisation", "realize-equity"],
+      "short_def": "How much of a hand's raw equity it actually captures over the betting rounds — affected by position, ranges, and playability.",
+      "long_def": "Two hands with identical raw equity can win very different amounts depending on how easily they realize it. A weak ace out of position against a strong range often folds before seeing showdown — under-realizing its equity. Suited connectors in position with implied odds over-realize. Position, range strength, and the ability to fold without losing too much all drive realization. GTO solvers weigh equity realization heavily when deciding what to call, 3-bet, or fold preflop.",
+      "see_also": ["implied-odds", "in-position", "out-of-position", "playability"]
+    },
+    {
+      "id": "implied-odds",
+      "term": "implied odds",
+      "aliases": ["implied odds", "implied-odds", "implied pot odds"],
+      "short_def": "The money you can expect to win on later streets if you hit your hand, beyond what's currently in the pot.",
+      "long_def": "Implied odds describe the future winnings a drawing hand can expect when it hits — not just the immediate pot. Set-mining with small pocket pairs depends on implied odds: you call hoping to stack an overpair when you flop a set. Implied odds shrink when stacks are short, when your hand will be obvious if you hit (a 3-flush board), or when your opponent's range can fold to the action. Suited connectors, small pairs, and suited aces are the canonical implied-odds hands.",
+      "see_also": ["set-mining", "pot-odds", "effective-stack", "SPR"]
+    },
+    {
+      "id": "pot-odds",
+      "term": "pot odds",
+      "aliases": ["pot odds", "pot-odds", "price"],
+      "short_def": "The ratio of the call amount to the total pot after calling — used to decide whether a draw or bluff-catch is profitable.",
+      "long_def": "Pot odds tell you the price you're getting on a call. Facing a 50 bet into a 100 pot means calling 50 to win 150 — you need to win more than 1 in 4 times (25% equity) to break even. Compare your equity (vs the opponent's range) or your bluff-catcher's win rate to the pot odds: better than the price means call, worse means fold. Pot odds drive minimum-defense frequencies and bluff-catching math.",
+      "see_also": ["MDF", "implied-odds", "bluff-catcher", "equity"]
+    },
+    {
+      "id": "fold-equity",
+      "term": "fold equity",
+      "aliases": ["fold equity", "fold-equity", "FE"],
+      "short_def": "The portion of a bet's EV that comes from your opponent folding — distinct from the equity you'd realize at showdown.",
+      "long_def": "Fold equity is the value a bet generates because your opponent sometimes folds. It's why a semi-bluff with 35% equity can be more profitable than a pure call: when called you still have a draw, and when folded out you simply win the pot. Fold equity is highest when bet sizes are large and the opponent's range is weak or capped. Semi-bluffs, 3-bet bluffs, and check-raises all rely on it.",
+      "see_also": ["semi-bluff", "bluff", "polarized", "capped-range"]
+    },
+    {
+      "id": "equity",
+      "term": "equity",
+      "aliases": ["equities", "raw equity"],
+      "short_def": "Your percentage chance of winning a pot at showdown, given the cards you and your opponent could hold.",
+      "long_def": "Equity is the probability (expressed as a percentage) that your hand wins by the river, calculated against your opponent's range. AA preflop has ~85% equity vs a random hand, ~80% vs AK. A flush draw on the flop has ~35% equity vs an overpair. Equity is the foundation of EV calculations: you compare your equity to the price the pot is offering you (pot odds). Solvers compute equity across thousands of run-outs.",
+      "see_also": ["pot-odds", "equity-realization", "fold-equity", "EV"]
+    },
+    {
+      "id": "EV",
+      "term": "EV",
+      "aliases": ["expected value", "+EV", "-EV", "expected-value"],
+      "short_def": "Expected Value — the average chips/dollars a decision wins or loses over many trials. The yardstick GTO play maximizes.",
+      "long_def": "EV is the long-run average of a decision: sum over every possible outcome, weight by probability, and add. A play with positive EV (+EV) makes money on average; -EV loses money. GTO play picks the highest-EV action against a balanced opponent. In tournaments, chip-EV and dollar-EV diverge because of ICM: a play that wins chips on average can still lose dollars if it risks elimination near a pay jump.",
+      "see_also": ["chip-EV", "ICM", "equity", "fold-equity"]
+    },
+    {
+      "id": "chip-EV",
+      "term": "chip-EV",
+      "aliases": ["chip ev", "chipev", "cev", "chip-ev"],
+      "short_def": "Expected value measured in tournament chips, not dollars. Ignores ICM payout effects.",
+      "long_def": "Chip-EV is the EV of a play measured purely in chips won or lost. In cash games chip-EV equals dollar-EV (chips are dollars). In tournaments they diverge: a chip-EV shove can be dollar-EV negative when ICM pressure inflates the cost of busting. Push-fold charts come in two flavors — chip-EV (Nash) and ICM-adjusted — and the right shoving range depends on which you're using.",
+      "see_also": ["EV", "ICM", "push-fold", "bubble"]
+    },
+    {
+      "id": "set-mining",
+      "term": "set-mining",
+      "aliases": ["set mine", "set mines", "set-mine", "set-mining", "set mining", "set-mining odds"],
+      "short_def": "Calling a raise with a small pocket pair, hoping to flop a set (~1 in 8.5 flops) and win a big pot when you do.",
+      "long_def": "Set-mining is the speculative play of calling a raise (or 3-bet) with a small pocket pair for the implied odds of flopping a set. You flop a set about 1 in 8.5 times (~11.8%), and you need to win roughly 10-15× the call amount when you do, so it requires deep stacks and an opponent who'll pay you off. Set-mining becomes unprofitable when stacks are short (40bb or less) or against ranges that won't stack off light.",
+      "see_also": ["implied-odds", "set", "effective-stack", "cooler"]
+    },
+    {
+      "id": "set",
+      "term": "set",
+      "aliases": ["sets", "flopped set", "top set", "middle set", "bottom set"],
+      "short_def": "Three-of-a-kind made by hitting one of your pocket pair's cards on the board. (Trips is three-of-a-kind from one hole card + a pair on the board.)",
+      "long_def": "A set is three-of-a-kind from a pocket pair: e.g. 99 on a 9-7-2 board. Top set is the highest set possible on that board, bottom set the lowest. Sets are typically disguised and very strong — they beat one-pair hands, two pair, and most draws. They're the canonical hand to bet/raise for value on dry boards and to slow-play on coordinated ones. Distinct from trips (one hole card + paired board), which is more obvious and has worse implied odds.",
+      "see_also": ["set-mining", "trips", "two-pair", "value-bet"]
+    },
+    {
+      "id": "trips",
+      "term": "trips",
+      "aliases": ["trip", "tripped up"],
+      "short_def": "Three-of-a-kind made with one hole card matching a pair on the board — weaker and more obvious than a set.",
+      "long_def": "Trips is three-of-a-kind formed by holding one card that matches a paired board (e.g. K7 on K-7-7). Distinct from a set: the third card is on the board, visible to everyone, so trips are less disguised and your kicker matters a lot. Trips with a weak kicker (like 73 on 7-7-2) can be dominated by higher trips with a better kicker (A7) — be cautious in big pots.",
+      "see_also": ["set", "kicker", "value-bet"]
+    },
+    {
+      "id": "overpair",
+      "term": "overpair",
+      "aliases": ["overpairs", "over-pair"],
+      "short_def": "A pocket pair higher than the highest card on the board — e.g. JJ on a T-7-2 flop.",
+      "long_def": "An overpair is a pocket pair that's higher than every card on the board: QQ on 9-6-2, AA on K-7-4, etc. Overpairs are strong but vulnerable to sets, two pair, and made draws on coordinated boards. On dry static textures they want to bet for value and protection; on wet dynamic textures they often pot-control to avoid playing huge pots with one pair.",
+      "see_also": ["underpair", "top-pair", "set", "protection-bet"]
+    },
+    {
+      "id": "underpair",
+      "term": "underpair",
+      "aliases": ["underpairs", "under-pair"],
+      "short_def": "A pocket pair lower than the highest card on the board — e.g. 88 on a K-9-4 flop.",
+      "long_def": "An underpair is a pocket pair below the top card on the board. Underpairs usually have showdown value against bluffs but lose to top pair, so they're often played passively: check-call once, then reassess. On wet boards underpairs can lose to many draws too, making them difficult bluff-catchers.",
+      "see_also": ["overpair", "showdown-value", "bluff-catcher", "middle-pair"]
+    },
+    {
+      "id": "top-pair",
+      "term": "top pair",
+      "aliases": ["top pair", "top-pair", "TP", "top pairs"],
+      "short_def": "A pair using your hole card and the highest card on the board.",
+      "long_def": "Top pair is a pair made with the highest board card — KQ on K-7-2 is top pair queen kicker. The strength of top pair depends heavily on kicker, board texture, and SPR. Top pair top kicker (TPTK) is strong on dry boards but vulnerable in 4-bet pots. Top pair weak kicker on wet boards is often a bluff-catcher at best.",
+      "see_also": ["TPTK", "kicker", "second-pair", "middle-pair"]
+    },
+    {
+      "id": "second-pair",
+      "term": "second pair",
+      "aliases": ["second pair", "second-pair", "2nd pair"],
+      "short_def": "A pair using your hole card and the second-highest card on the board.",
+      "long_def": "Second pair is a pair to the middle-or-second-highest card on the board — KT on an A-K-7 board is second pair. Second pair has more showdown value than middle pair against bluffs but is dominated by top pair. Often plays as a bluff-catcher or thin value bet on later streets, and can fit into small range bets on dry textures.",
+      "see_also": ["top-pair", "middle-pair", "bluff-catcher", "showdown-value"]
+    },
+    {
+      "id": "middle-pair",
+      "term": "middle pair",
+      "aliases": ["middle pair", "middle-pair", "mid pair"],
+      "short_def": "A pair to a middle card on the board — between the highest and lowest board cards.",
+      "long_def": "Middle pair is a pair to the middle card on the flop (87 on T-8-3, for example). It has marginal showdown value: better than ace-high, worse than top pair. Middle pair often check-calls one street and folds to a second barrel, but it can also be a fine probe or thin-value candidate against capped ranges that missed the board entirely.",
+      "see_also": ["top-pair", "second-pair", "showdown-value", "probe"]
+    },
+    {
+      "id": "kicker",
+      "term": "kicker",
+      "aliases": ["kickers", "side card"],
+      "short_def": "The side card that breaks ties between two hands of the same rank — e.g. AK vs AQ on an A-7-4 board.",
+      "long_def": "When two players have the same primary hand (top pair, two pair, trips), the kicker — the highest unmatched side card — decides who wins. AK on A-7-4 beats AQ because the K outkicks the Q. Kicker strength is why TPTK (top pair top kicker) is strong and top pair weak kicker is precarious. With trips and paired boards, kicker problems are especially dangerous.",
+      "see_also": ["TPTK", "top-pair", "domination", "trips"]
+    },
+    {
+      "id": "gutshot",
+      "term": "gutshot",
+      "aliases": ["gutshots", "gut-shot", "inside straight draw", "belly buster"],
+      "short_def": "An inside straight draw needing one specific rank in the middle of the run to complete. 4 outs.",
+      "long_def": "A gutshot is a straight draw missing the middle card — holding 8-9 on a board of T-6-2, only a 7 makes the straight. 4 outs in the deck, ~17% to hit by the river from the flop. Much weaker than an open-ender (8 outs) but often a useful equity-add to bluffs and as a backdoor combo with overcards or a flush draw.",
+      "see_also": ["open-ender", "outs", "semi-bluff", "combo-draw"]
+    },
+    {
+      "id": "outs",
+      "term": "outs",
+      "aliases": ["out", "outs"],
+      "short_def": "The remaining cards in the deck that complete your hand. 9 outs to a flush, 8 to an open-ender, 4 to a gutshot.",
+      "long_def": "Outs are the unseen cards that make your hand. From the flop, multiply outs by ~4 for a rough probability of hitting by the river; from the turn, multiply by ~2. A flush draw has 9 outs (~36% by the river), an open-ender 8 (~32%), a gutshot 4 (~16%). 'Clean' outs are ones that make your hand without making a better one for the opponent.",
+      "see_also": ["gutshot", "open-ender", "flush-draw", "equity"]
+    },
+    {
+      "id": "flush-draw",
+      "term": "flush draw",
+      "aliases": ["flush draw", "flush-draw", "flush draws", "fd", "FD"],
+      "short_def": "Four cards to a flush, with 9 outs to complete. ~35% to hit by the river from the flop.",
+      "long_def": "A flush draw is four cards of the same suit, needing one more to make a flush. 9 outs, roughly 35% to hit by the river from the flop and 19% from the turn. The 'nut flush draw' has the ace of the suit, which both maximizes value when it hits and acts as a useful blocker for bluffing. Flush draws are premium semi-bluff candidates because of their high equity and strong fold equity.",
+      "see_also": ["nut-flush", "semi-bluff", "combo-draw", "backdoor"]
+    },
+    {
+      "id": "nut-flush",
+      "term": "nut flush",
+      "aliases": ["nut flush", "nut-flush", "nut flush draw", "nut-flush draw", "nut-flush blocker"],
+      "short_def": "The highest possible flush given the board — the ace-high flush of the suit on the board.",
+      "long_def": "The nut flush is the best flush possible on a given board — the ace-high flush of whichever suit has hit. Holding the nut flush card (the ace of the relevant suit) gives the most value when you complete and also functions as a powerful blocker: it removes a chunk of your opponent's potential flushes, making bluff catches and bluffs significantly stronger.",
+      "see_also": ["flush-draw", "blocker", "nut-blocker", "value-bet"]
+    },
+    {
+      "id": "nut-straight",
+      "term": "nut straight",
+      "aliases": ["nut straight", "nut-straight"],
+      "short_def": "The highest possible straight given the board cards.",
+      "long_def": "The nut straight is the best straight available on the current board. On 6-7-8, T-9 makes the nut straight (six-to-ten); 9-5 makes a lower straight. The nut straight is often 'the stone-cold nuts' if no flush or boat is possible. Holding the nuts is a classic raise-for-value spot, especially when the opponent has been betting strongly into a range that contains many second-best hands.",
+      "see_also": ["nuts", "value-bet", "two-pair", "set"]
+    },
+    {
+      "id": "nuts",
+      "term": "the nuts",
+      "aliases": ["nuts", "stone-cold nuts", "stone cold nuts", "absolute nuts"],
+      "short_def": "The single best possible hand on the current board — no opponent's hole cards can beat it.",
+      "long_def": "The nuts is the strongest hand the board allows. On 6h-7c-8d-Td-3s, T9 is the nut straight (J-T-9-8-7 doesn't exist since there's no J). The nuts can change street to street: a turn nut straight may be drawn out on by a river flush. With the nuts the question is always about maximizing value — sizing big against capped ranges, raising on the river when the opponent has shown strength, and avoiding leaving money on the table.",
+      "see_also": ["nut-straight", "nut-flush", "value-bet", "overbet"]
+    },
+    {
+      "id": "two-pair",
+      "term": "two pair",
+      "aliases": ["two pair", "two-pair", "two pairs", "top two"],
+      "short_def": "Two distinct pairs — e.g. QJ on a Q-J-9 board (top two pair).",
+      "long_def": "Two pair is two pairs of different ranks. Top two (both hole cards pair the top two board cards) is the strongest version; bottom two is weakest and most vulnerable. Two pair beats one pair and overpairs but loses to sets, straights, flushes, and full houses. On wet dynamic boards two pair often plays cautiously — strong enough to bet but easily counterfeited by overcards or completing draws.",
+      "see_also": ["set", "top-pair", "dynamic-board", "pot-control"]
+    },
+    {
+      "id": "combo-draw",
+      "term": "combo draw",
+      "aliases": ["combo draws", "combo-draw", "monster draw", "big draw", "combo-draws"],
+      "short_def": "A multi-component draw — usually a straight draw plus a flush draw — with 13+ outs and ~50% equity vs made hands.",
+      "long_def": "A combo draw combines two draws in one hand: a flush draw plus an open-ender (JhTh on 9h-8h-2c is the classic — flush draw, open-ender, and a straight-flush card), or a flush draw plus a pair. Combo draws often have 15+ outs and 50%+ equity even against top pair, making them premium semi-bluff and check-raise candidates. They build the pot while equity is high and have plenty of cards to barrel.",
+      "see_also": ["semi-bluff", "flush-draw", "open-ender", "check-raise"]
+    },
+    {
+      "id": "semi-bluff",
+      "term": "semi-bluff",
+      "aliases": ["semi-bluff", "semibluff", "semi bluffs", "semi-bluffs", "semibluffs", "semi-bluffing"],
+      "short_def": "A bet or raise with a hand that has poor showdown value but real equity to improve — the bluff that gets to win two ways.",
+      "long_def": "A semi-bluff is aggressive action with a drawing hand: you'd rather your opponent fold, but if they don't you still have outs to make the best hand. Flush draws, open-enders, and combo draws are canonical semi-bluffs. They beat pure bluffs because they win the pot two ways — fold equity now and showdown equity later — and they're the engine that makes balanced aggressive play possible.",
+      "see_also": ["fold-equity", "combo-draw", "check-raise", "bluff"]
+    },
+    {
+      "id": "bluff",
+      "term": "bluff",
+      "aliases": ["bluffs", "bluffing", "pure bluff", "bluff-heavy"],
+      "short_def": "A bet or raise with a hand that has no showdown value, aiming purely to fold out a better hand.",
+      "long_def": "A pure bluff is aggressive action with no equity to fall back on if called — its EV comes entirely from fold equity. Bluffs are essential to balance a value-betting range: without them, opponents fold every time you bet and you never get paid. GTO bluff frequencies are tied to bet size (bigger bets need more bluffs to remain unexploitable) and to the structure of the betting line. Good bluffs use blockers and unblockers to target the right portion of the opponent's range.",
+      "see_also": ["fold-equity", "semi-bluff", "value-bet", "polarized"]
+    },
+    {
+      "id": "value-bet",
+      "term": "value bet",
+      "aliases": ["value bets", "value-bet", "value-betting", "value bet", "value-bets"],
+      "short_def": "A bet made hoping to get called by a worse hand. Contrast with a bluff (hoping a better hand folds).",
+      "long_def": "A value bet aims to extract chips from worse hands that will call. To value-bet, you need a hand that beats a meaningful portion of your opponent's calling range; if the only hands that call beat you, the bet is a 'no-value-bet' and should be checked. Sizing depends on what calls: thin-value spots use small bets to keep weaker hands in, while polar value bets use large sizes to extract from strong but second-best hands.",
+      "see_also": ["thin-value", "bluff", "merged", "polarized"]
+    },
+    {
+      "id": "thin-value",
+      "term": "thin value",
+      "aliases": ["thin value", "thin-value", "thin value bet", "thin-value bet"],
+      "short_def": "A small value bet with a marginal made hand, designed to get called by only slightly worse hands.",
+      "long_def": "Thin value is the art of betting hands that beat only a sliver of the calling range. A river bet of 30% pot with second pair into a range full of busted draws and weak top pair is a thin-value bet — bigger sizes would fold out the marginal calls that make the bet profitable. Recognizing thin-value spots (rather than checking back hands that 'aren't worth a bet') is a meaningful EV unlock at the river.",
+      "see_also": ["value-bet", "showdown-value", "merged", "showdown-equity"]
+    },
+    {
+      "id": "bluff-catcher",
+      "term": "bluff-catcher",
+      "aliases": ["bluff catcher", "bluff catchers", "bluff-catchers", "bluff-catching", "bluff catch"],
+      "short_def": "A hand that beats only the opponent's bluffs — used to call when the bet-to-pot ratio and bluff frequency justify it.",
+      "long_def": "A bluff-catcher is a marginal made hand whose only purpose is to call against the bluffing portion of the opponent's range. It loses to all value bets and beats all bluffs. The math: you need to call often enough to make bluffing unprofitable (MDF), but selecting the best bluff-catchers — those that block value and unblock bluffs — is what separates good defense from bad. Top pair weak kicker on a coordinated river is a typical bluff-catcher.",
+      "see_also": ["MDF", "blocker", "bluff", "pot-odds"]
+    },
+    {
+      "id": "MDF",
+      "term": "MDF",
+      "aliases": ["minimum defense frequency", "minimum-defense frequency", "minimum defence frequency"],
+      "short_def": "Minimum Defense Frequency — the share of your range you must continue against a bet to prevent the opponent from auto-profiting with bluffs.",
+      "long_def": "MDF is the smallest fraction of your range you can defend (call or raise) against a bet without becoming exploitable to any-two bluffs. The formula is pot / (pot + bet): a half-pot bet requires defending ~67% of your range, a pot-sized bet ~50%, and a 2x overbet ~33%. MDF is a guide rail, not a strict rule — against polar overbets where the opponent's bluff frequency is below MDF, over-folding is correct.",
+      "see_also": ["pot-odds", "bluff-catcher", "overbet", "polarized"]
+    },
+    {
+      "id": "overbet",
+      "term": "overbet",
+      "aliases": ["overbets", "overbet", "overbetting", "over-bet", "over bet"],
+      "short_def": "A bet larger than the size of the pot. Used with polarized ranges when the bettor has nut advantage.",
+      "long_def": "An overbet is any bet larger than the current pot, often 125-200% pot. Overbets are polarized: they require a range made of strong value and bluffs, with no middling hands. The bettor needs nut advantage — more of the absolute best combos — to size up safely, otherwise the opponent can raise. Overbets maximize fold equity against capped ranges and extract maximum chips from second-best hands; they're devastating against opponents who haven't adjusted their defending ranges.",
+      "see_also": ["polarized", "capped-range", "MDF", "leverage"]
+    },
+    {
+      "id": "protection-bet",
+      "term": "protection bet",
+      "aliases": ["protection bet", "protection-bet", "protection", "betting for protection", "protect"],
+      "short_def": "A bet aimed at denying free equity to draws and overcards, not primarily for value or fold equity.",
+      "long_def": "A protection bet is made with a vulnerable made hand (overpair, top pair) to charge draws and overcards a price to continue. It's neither pure value nor pure bluff — it's about denying equity to the many hands that would improve on free cards. On wet or coordinated boards, protection sizing tends to be larger (50-75% pot) to make a draw's call mathematically unprofitable; the upside is keeping draws in to pay you when they miss and extracting from worse made hands when they don't.",
+      "see_also": ["overpair", "value-bet", "merged", "denial"]
+    },
+    {
+      "id": "check-raise",
+      "term": "check-raise",
+      "aliases": ["check-raise", "check raise", "check-raises", "check-raising", "c/r", "checkraise"],
+      "short_def": "Checking with the intention of raising after the opponent bets — a powerful aggressive play, especially out of position.",
+      "long_def": "A check-raise is checking your option, letting the opponent bet, then raising over their bet. It's the strongest aggressive line out of position because it traps the opponent's range and lets you build a big pot with strong made hands and powerful semi-bluffs. Check-raise ranges are typically polarized: sets and two pair for value, combo draws and equity-rich semi-bluffs for the bluffs. Underused at low stakes and a key defensive weapon vs c-bets.",
+      "see_also": ["semi-bluff", "combo-draw", "out-of-position", "polarized"]
+    },
+    {
+      "id": "check-back",
+      "term": "check back",
+      "aliases": ["check back", "check-back", "checks back", "checking back", "check-backs"],
+      "short_def": "Declining to bet when checked to, ending the betting round. The IP equivalent of giving up aggression.",
+      "long_def": "Checking back means the in-position player checks after their opponent checks, ending the street with no bet. It's not weakness — modern solvers check back large portions of the in-position range when the texture doesn't favor a c-bet, when range disadvantage exists, or to pot-control a marginal made hand. Checking back also caps the range slightly, which the opponent can then attack on later streets with overbets or probes.",
+      "see_also": ["c-bet", "in-position", "pot-control", "probe"]
+    },
+    {
+      "id": "pot-control",
+      "term": "pot control",
+      "aliases": ["pot control", "pot-control", "pot-controlling", "pot-controls", "control the pot"],
+      "short_def": "Keeping the pot small with a hand strong enough to win at showdown but too weak to bloat the pot. Often a check-back.",
+      "long_def": "Pot control is the deliberate choice to keep a pot small — usually by checking back — with a hand that has showdown value but would be in trouble in a big pot. Top pair on a wet turn, overpair on a scary river, second pair on the turn: all common pot-control spots. The reasoning: betting only gets called by better and folded by worse, so a check realizes equity cheaply and avoids being raised off a one-pair hand.",
+      "see_also": ["check-back", "showdown-value", "top-pair", "scare-card"]
+    },
+    {
+      "id": "showdown-value",
+      "term": "showdown value",
+      "aliases": ["showdown value", "showdown-value", "SDV", "sv"],
+      "short_def": "How likely your hand is to win at showdown without improvement. Hands with SDV want to see showdown cheaply.",
+      "long_def": "Showdown value is the probability your hand wins if both players check to the river and turn over their cards. Ace-high vs a range full of busted draws has decent SDV; bottom pair on a scary board often has none. Hands with real SDV don't want to be turned into bluffs — they want to check down or thin-value the river. Hands with no SDV are bluff candidates: bet or give up.",
+      "see_also": ["pot-control", "bluff-catcher", "thin-value", "give-up"]
+    },
+    {
+      "id": "give-up",
+      "term": "give up",
+      "aliases": ["give up", "give-up", "gives up", "gave up", "giving up", "turn give-up", "turn give up"],
+      "short_def": "Abandoning a bluff line and checking with a hand that has no equity, accepting the pot is lost more often than not.",
+      "long_def": "A give-up is when the prior aggressor checks instead of barreling because the turn or river card kills their fold equity or the opponent's range got too strong. Typical example: c-bet flop with a weak hand, the turn brings a card that hits the caller's range, so the bettor checks back and gives up. It's often correct — barreling without fold equity burns chips. Give-up frequency is part of every solver's barrel/checkdown mix.",
+      "see_also": ["fold-equity", "check-back", "scare-card", "bluff"]
+    },
+    {
+      "id": "barrel",
+      "term": "barrel",
+      "aliases": ["barrels", "barreling", "barrelling", "barrel-off", "double barrel", "triple barrel", "double-barrel", "triple-barrel", "barreling-off"],
+      "short_def": "A continued bet on a later street — 'double barrel' on the turn, 'triple barrel' on the river.",
+      "long_def": "Barreling is firing additional bets on subsequent streets after a c-bet. A double barrel is a turn bet following a flop c-bet; a triple barrel is a river bet completing the line. Barrels work best when the turn or river card improves the bettor's range relative to the caller's (a scare card for the defender), and when the caller's range is condensed enough to fold to pressure. Triple-barrel bluffs need the strongest blocker structure since they push opponents to call larger and larger amounts.",
+      "see_also": ["c-bet", "scare-card", "polarized", "bluff"]
+    },
+    {
+      "id": "float",
+      "term": "float",
+      "aliases": ["floats", "floating", "floated", "float-call"],
+      "short_def": "Calling a c-bet with a weak hand intending to bluff later when the aggressor checks or the board changes.",
+      "long_def": "Floating is calling a flop bet with a weak hand to take the pot away on a later street — usually when the original raiser checks the turn or the board runs out scary for their range. Floats with backdoor equity are stronger because they sometimes improve. Modern solvers float wider than humans typically do, especially in position, because the c-bettor can't barrel their whole range.",
+      "see_also": ["c-bet", "backdoor", "in-position", "bluff"]
+    },
+    {
+      "id": "probe",
+      "term": "probe",
+      "aliases": ["probes", "probing", "probe bet", "probe-bet"],
+      "short_def": "A bet on the turn or river by the out-of-position player after the in-position aggressor checked back the previous street.",
+      "long_def": "A probe is an OOP lead on the turn or river that exploits a checked-back flop. When the preflop aggressor checks back the flop, their range is capped — strong hands and most pairs would have bet. The OOP defender can then probe with value (any pair, draws) and bluffs to take the pot away. Sizing is usually merged (~50% pot) because the probe range is heavy on one-pair value and draws, not polar.",
+      "see_also": ["delayed-c-bet", "capped-range", "out-of-position", "merged"]
+    },
+    {
+      "id": "delayed-c-bet",
+      "term": "delayed c-bet",
+      "aliases": ["delayed c-bet", "delayed c bet", "delayed-c-bet", "delayed cbet", "delayed continuation bet"],
+      "short_def": "A c-bet on the turn after checking back the flop — used to attack a capped defender or to balance the flop check-back range.",
+      "long_def": "A delayed c-bet is when the preflop raiser checks the flop and then bets the turn. It's used when the flop didn't favor the raiser's range or when checking with the whole range is correct, and the turn either improves the raiser's hand or attacks a defender's capped range. Ace-high hands with overcard equity and backdoor draws are common delayed-c-bet candidates against a defender who checked back a weak flop themselves.",
+      "see_also": ["c-bet", "probe", "capped-range", "backdoor"]
+    },
+    {
+      "id": "backdoor",
+      "term": "backdoor",
+      "aliases": ["backdoor", "backdoors", "backdoor draw", "backdoor flush draw", "backdoor straight draw", "bdfd", "backdoor equity"],
+      "short_def": "A draw that needs two more cards to complete — e.g. one card to a flush or one card to a straight draw after the flop.",
+      "long_def": "Backdoor draws need two specific running cards to make a flush or straight. A backdoor flush draw (BDFD) — three of one suit with two on the flop and one in hand — adds ~4% equity to a hand and helps balance c-bet ranges. Backdoor equity matters most as a tiebreaker between two similar hands when deciding which to bluff with: the one with backdoors is the better candidate because it can hit a real draw on the turn.",
+      "see_also": ["flush-draw", "open-ender", "equity", "semi-bluff"]
+    },
+    {
+      "id": "scare-card",
+      "term": "scare card",
+      "aliases": ["scare card", "scare-card", "scare cards", "scary card", "scary turn", "range-flipping card"],
+      "short_def": "A turn or river card that meaningfully shifts equity or range strength — usually toward the non-aggressor's range.",
+      "long_def": "A scare card changes the dynamics of a hand: a third flush card on the turn, an overcard that hits the caller's range, a fourth straight card on the river. Scare cards force the aggressor to re-evaluate barrel size and frequency, and create opportunities for the defender to lead or check-raise. The flip side is a 'brick' — a card that changes nothing and lets the aggressor keep barreling unimpeded.",
+      "see_also": ["brick", "barrel", "give-up", "pot-control"]
+    },
+    {
+      "id": "brick",
+      "term": "brick",
+      "aliases": ["brick", "bricks", "blank", "blank card"],
+      "short_def": "A turn or river card that doesn't change the relative strength of either range — an inconsequential card.",
+      "long_def": "A brick is a card that doesn't complete draws and doesn't shift range equity. On a 7-6-2 flop, a 2 on the turn is a brick — no flush or straight reached, no overcard. Bricks let the prior aggressor keep barreling because their polarized range remains intact. Recognizing bricks vs scare cards is a core part of turn/river decision-making.",
+      "see_also": ["scare-card", "barrel", "runout", "polarized"]
+    },
+    {
+      "id": "runout",
+      "term": "runout",
+      "aliases": ["runouts", "run-out", "run-outs", "run out", "the runout"],
+      "short_def": "The sequence of turn and river cards that complete a hand after the flop.",
+      "long_def": "A runout is the specific turn-and-river combination that finishes a hand. Solvers evaluate every possible runout and assign strategies to each. 'A low-action runout' is one where neither card changed much, while a 'wet runout' brought in flushes or straights. Range-vs-range thinking requires considering how different runouts shift each player's relative strength — what looked like a bluff-catch on the flop may be a fold by the river depending on the runout.",
+      "see_also": ["brick", "scare-card", "barrel", "equity-realization"]
+    },
+    {
+      "id": "rainbow",
+      "term": "rainbow",
+      "aliases": ["rainbow", "rainbow board", "rainbow flop", "three-tone"],
+      "short_def": "A flop with three different suits — no flush draw possible on the flop.",
+      "long_def": "A rainbow flop has three different suits, so no flush draw is on the flop. Rainbow textures are generally drier and favor the preflop raiser's range, especially on high-card boards like AK7r or K72r. Range bets are common on rainbow high-card flops because the raiser has the equity edge and there are no flush draws to worry about.",
+      "see_also": ["dry-board", "static-board", "range-bet", "monotone"]
+    },
+    {
+      "id": "monotone",
+      "term": "monotone",
+      "aliases": ["monotone", "monotone board", "monotone flop", "three-flush", "flush-board"],
+      "short_def": "A flop with all three cards of the same suit — a flush is already possible.",
+      "long_def": "A monotone flop has all three cards of one suit. The flat-caller usually has range advantage on monotone boards because they hold more single-suited cards that flopped a flush or flush draw; the preflop raiser is often forced to check large portions of their range, including overpairs without the relevant suit. Single-suited holdings in the right suit gain enormous value; everything else has to play cautiously.",
+      "see_also": ["rainbow", "wet-board", "flush-draw", "range-disadvantage"]
+    },
+    {
+      "id": "paired-board",
+      "term": "paired board",
+      "aliases": ["paired board", "paired-board", "paired flop", "paired", "8-8-3 board"],
+      "short_def": "A board where two of the cards are the same rank — making trips and full houses live.",
+      "long_def": "A paired board has two cards of the same rank (8-8-3, K-7-7). Paired boards reduce the relevance of one-pair hands and favor strong overpairs and trips; the texture is generally dry unless the unpaired card is high or coordinated. Polar c-bet ranges are common on paired boards because the bettor's strong hands have much more value than the middling pairs.",
+      "see_also": ["dry-board", "trips", "polarized", "static-board"]
+    },
+    {
+      "id": "dry-board",
+      "term": "dry board",
+      "aliases": ["dry board", "dry-board", "dry flop", "dry textures", "dry texture"],
+      "short_def": "A flop with no flush draws and few straight draws — high-card and uncoordinated. Favors made hands.",
+      "long_def": "A dry board is uncoordinated, with few draws — A-K-2r, K-7-2r, J-6-3r. Dry boards favor the preflop raiser because their range hits the high cards harder and there are no draws to defend. Range bets, small c-bets, and check-backs all show up frequently on dry boards. The defender often has to fold a lot or trap with the rare premium hand.",
+      "see_also": ["wet-board", "static-board", "rainbow", "range-bet"]
+    },
+    {
+      "id": "wet-board",
+      "term": "wet board",
+      "aliases": ["wet board", "wet-board", "wet flop", "wet textures", "wet texture", "coordinated board"],
+      "short_def": "A flop with flush draws, straight draws, and/or connected cards — many draws and dynamic equity.",
+      "long_def": "A wet board is highly coordinated — flush draws, straight draws, and pairs that interact with many hole-card combinations (Q-J-9 two-tone, 8-7-6, 9-6-5 with a flush draw). Wet boards favor stronger made hands and discourage range bets; pot-control, check-raises, and big bets to deny equity all become more common. Equities run closer because draws have so many outs.",
+      "see_also": ["dry-board", "dynamic-board", "combo-draw", "check-raise"]
+    },
+    {
+      "id": "dynamic-board",
+      "term": "dynamic board",
+      "aliases": ["dynamic board", "dynamic-board", "dynamic textures", "dynamic flop", "dynamic", "dynamic against"],
+      "short_def": "A board where many turn cards meaningfully change relative hand strength. The opposite of static.",
+      "long_def": "A dynamic board is one where equities shift a lot from street to street: 9-8-6 two-tone, T-9-7, Q-J-9 with a flush draw. On dynamic boards a made hand's value can evaporate by the river, so betting for protection and folding to raises becomes more important. The wide range of meaningful turn cards drives more polarized betting and bigger sizings.",
+      "see_also": ["static-board", "wet-board", "protection-bet", "scare-card"]
+    },
+    {
+      "id": "static-board",
+      "term": "static board",
+      "aliases": ["static board", "static-board", "static texture", "static flop", "static"],
+      "short_def": "A board where most turn cards don't change relative hand strength much. Favors small bets and range bets.",
+      "long_def": "A static board changes little from street to street: A-K-2r, K-7-2r, A-8-3r. Top pair on the flop is still top pair on the river the vast majority of the time, so small bets and range bets work well. Static boards favor the player with range advantage because they can keep betting with a wide range across all streets without losing equity.",
+      "see_also": ["dry-board", "dynamic-board", "range-bet", "range-advantage"]
+    },
+    {
+      "id": "in-position",
+      "term": "in position",
+      "aliases": ["in position", "in-position", "IP", "ip"],
+      "short_def": "Acting last on every postflop street. The structural advantage of seeing your opponent's action first.",
+      "long_def": "Being in position (IP) means you act after your opponent on every postflop street. The information edge — seeing whether they bet or check before deciding — is so valuable that ranges expand significantly when in position, and equity realization is higher. IP players can check back with marginal hands, bluff more credibly, and put OOP players in tough spots on every street.",
+      "see_also": ["out-of-position", "equity-realization", "check-back", "preflop-raiser"]
+    },
+    {
+      "id": "out-of-position",
+      "term": "out of position",
+      "aliases": ["out of position", "out-of-position", "OOP", "oop"],
+      "short_def": "Acting first on every postflop street. The structural disadvantage of having to decide without seeing what your opponent does.",
+      "long_def": "Out of position (OOP) means you must act before your opponent on every postflop street. Without the information advantage, OOP ranges defend tighter preflop, check more postflop, and rely more heavily on check-raises and donk leads to inject aggression. Equity realization is meaningfully worse OOP — the same hand wins less than it would IP — which is why solvers fold more from the blinds than from the BTN.",
+      "see_also": ["in-position", "equity-realization", "check-raise", "donk"]
+    },
+    {
+      "id": "cold-call",
+      "term": "cold-call",
+      "aliases": ["cold call", "cold-call", "cold-calls", "cold-caller", "cold-calling", "cold caller"],
+      "short_def": "Calling an open-raise without having previously invested money in the pot — typically from a position other than the blinds.",
+      "long_def": "A cold-call is a flat call of an open-raise from a player who hasn't yet put money in voluntarily (excludes the blinds). Cold-calling ranges are typically capped — premium hands prefer to 3-bet — and contain pocket pairs (for set-mining), suited broadways, and suited connectors. The cold-caller is often range-disadvantaged on high-card boards and needs to defend carefully; modern solvers shrink cold-calling ranges and prefer 3-betting more often.",
+      "see_also": ["3-bet", "capped-range", "squeeze", "flat"]
+    },
+    {
+      "id": "flat",
+      "term": "flat",
+      "aliases": ["flat", "flats", "flatted", "flatting", "flat-call", "flat call", "flat-caller"],
+      "short_def": "Calling rather than raising — passive continuation. Often used to keep the opponent's bluffs in the pot.",
+      "long_def": "To flat is to just call a bet or raise rather than re-raising. Flatting preserves your opponent's bluff frequency, controls the pot size, and avoids turning a marginal made hand into a bluff. Modern solvers flat with much more than just trapping premiums: medium pairs vs 3-bets in position, top pair against small flop raises, and many other spots are flat-heavy strategies.",
+      "see_also": ["cold-call", "pot-control", "3-bet", "bluff-catcher"]
+    },
+    {
+      "id": "isolation",
+      "term": "isolation",
+      "aliases": ["isolation", "isolate", "iso", "iso-raise", "iso raise", "isolation raise", "isolating"],
+      "short_def": "Raising over a limper to play heads-up in position against them — usually with a larger-than-standard size.",
+      "long_def": "An isolation raise (iso) is a raise over a limper, aiming to play heads-up against them with positional advantage and a stronger range. Iso sizes are larger than standard opens (5x rather than 2.5x at 100bb) to charge the limper for being out of position and to discourage cold-callers from joining the pot. Iso ranges are wide on the button (any reasonable suited or broadway hand) and tighter from early position.",
+      "see_also": ["limp", "in-position", "open-raise", "blind-steal"]
+    },
+    {
+      "id": "limp",
+      "term": "limp",
+      "aliases": ["limp", "limps", "limping", "limper", "limpers", "open-limp"],
+      "short_def": "Just calling the big blind preflop rather than raising. Generally weak — but solver SB strategies include a small limping range.",
+      "long_def": "A limp is a flat call of the big blind preflop, putting in the minimum to see the flop. Open-limping from any position other than SB is a recognized leak — it caps your range, surrenders initiative, and invites multiway pots — but solver SB-vs-BB strategy includes a small limping range. Limp-reraise (or limp-3-bet) is a balanced trap: a few monsters mixed in to keep iso-raisers honest.",
+      "see_also": ["isolation", "limp-reraise", "SB-vs-BB", "open-raise"]
+    },
+    {
+      "id": "limp-reraise",
+      "term": "limp-reraise",
+      "aliases": ["limp reraise", "limp-reraise", "limp re-raise", "limp-3-bet", "limp 3-bet"],
+      "short_def": "Limping with the intention of re-raising over a subsequent raise — typically with a monster hand.",
+      "long_def": "A limp-reraise is the trap line: limp in, wait for someone to iso-raise, then re-raise over them. At 100bb it's a balanced way to play premiums like AA and KK when you also have a limping range, because a flat after limping would cap and trap-cap your range. Without a balanced limping range, limp-reraises become face-up and predictable.",
+      "see_also": ["limp", "isolation", "balance", "trapping"]
+    },
+    {
+      "id": "open-raise",
+      "term": "open",
+      "aliases": ["open-raise", "open raise", "opens", "opening", "opener", "RFI", "open-raises", "open up", "open-raising"],
+      "short_def": "The first voluntary raise of a hand preflop — sets the initial action and identifies the preflop aggressor.",
+      "long_def": "The open is the first raise made preflop (after the blinds are posted). Standard sizing at 100bb is 2.2-3bb depending on stake and position. The open establishes the preflop aggressor — usually the player with range advantage on most flops — and earns initiative through c-betting rights. Opening ranges tighten from early position (UTG) and widen toward the button.",
+      "see_also": ["c-bet", "range-advantage", "blind-steal", "preflop-raiser"]
+    },
+    {
+      "id": "blind-steal",
+      "term": "blind steal",
+      "aliases": ["blind steal", "blind-steal", "stealing the blinds", "steal", "steal-raise", "steal raise"],
+      "short_def": "An open-raise from a late position (CO, BTN, SB) aimed at taking the blinds uncontested.",
+      "long_def": "A blind steal is a late-position open designed to pick up the blinds without a fight. Wider opening ranges from the CO, BTN, and SB exist because the only players left to act are the blinds, who fold most hands. Even when called, the late-position opener has positional advantage. Defending the blinds wide enough to make stealing unprofitable is the BB's main job preflop.",
+      "see_also": ["open-raise", "blind-defense", "in-position", "SB-vs-BB"]
+    },
+    {
+      "id": "blind-defense",
+      "term": "blind defense",
+      "aliases": ["blind defense", "blind defence", "defending the blinds", "blind-defense", "BB defense", "BB-defense"],
+      "short_def": "The BB (and sometimes SB) calling or 3-betting to prevent the opener from auto-profiting on steals.",
+      "long_def": "Blind defense is the act of continuing in the BB (or SB) against an open, either by calling or 3-betting. Because the BB already has 1bb invested and closes the action, the calling range is wide — almost any pair, suited connector, suited ace, or broadway against late-position opens. 3-bet bluffs from the BB use blockers (A5o, K5s) to balance value 3-bets and recover fold equity that calling out of position can't.",
+      "see_also": ["blind-steal", "3-bet", "blocker", "out-of-position"]
+    },
+    {
+      "id": "SB-vs-BB",
+      "term": "SB vs BB",
+      "aliases": ["SB vs BB", "SB-vs-BB", "sb vs bb", "blind vs blind", "blind-vs-blind", "BvB"],
+      "short_def": "Heads-up confrontation between the small blind and big blind when everyone else folds. A unique strategic spot.",
+      "long_def": "When the action folds to the SB, only the BB remains. Modern SB strategy is predominantly raise-or-fold (3x to 3.5x) with a small limping range mixed in for balance. The BB defends very wide because they get the best price closing the action and act in position post-flop. Blind-vs-blind play features wide ranges, lots of position-driven postflop aggression, and a lot of small pots.",
+      "see_also": ["blind-defense", "blind-steal", "limp", "open-raise"]
+    },
+    {
+      "id": "preflop-raiser",
+      "term": "preflop raiser",
+      "aliases": ["preflop raiser", "preflop aggressor", "pre-flop raiser", "PFR", "preflop-raiser"],
+      "short_def": "The player who made the last raise before the flop. Often has range advantage and c-betting initiative.",
+      "long_def": "The preflop raiser (PFR) is whoever made the final raise pre-flop. They take initiative into the flop, usually have the stronger range on most textures, and earn the right to c-bet at a high frequency. The PFR's range structure (linear, polarized, or merged) drives most postflop decisions, and recognizing when a defender flips the range advantage on certain flops is key to playing well as either side.",
+      "see_also": ["c-bet", "range-advantage", "cold-call", "open-raise"]
+    },
+    {
+      "id": "effective-stack",
+      "term": "effective stack",
+      "aliases": ["effective stack", "effective-stack", "effective stacks", "effective", "eff stack"],
+      "short_def": "The smaller of the two stacks in a hand — the maximum amount that can actually change hands.",
+      "long_def": "The effective stack is the smaller stack between two players, because the most you can win or lose is what the shorter stack has. At 100bb vs 200bb, effective stack is 100bb. Effective stack determines SPR, set-mining odds, and most strategic decisions; all preflop charts assume a specific effective stack (usually 100bb for cash, 20-40bb for tournament charts).",
+      "see_also": ["SPR", "deep-stack", "short-stack", "set-mining"]
+    },
+    {
+      "id": "deep-stack",
+      "term": "deep stack",
+      "aliases": ["deep stack", "deep-stack", "deep stacked", "deep-stacked", "deep stacks", "deep"],
+      "short_def": "Effective stacks of 150bb or more — implied odds, postflop maneuvering, and reverse implied odds all become more important.",
+      "long_def": "Deep-stacked play (~150bb+) shifts the strategic landscape: implied odds for set-miners and suited connectors grow, reverse implied odds (losing big with second-best hands) become more dangerous, and postflop play matters more than preflop. Polarized ranges and overbets become more available because there's more room to maneuver, and one-pair hands lose value relative to nutted hands.",
+      "see_also": ["effective-stack", "implied-odds", "short-stack", "SPR"]
+    },
+    {
+      "id": "short-stack",
+      "term": "short stack",
+      "aliases": ["short stack", "short-stack", "short stacked", "short-stacked", "shallow", "shallow stack", "shallow-stacked"],
+      "short_def": "Effective stacks small enough that preflop and shove/fold decisions dominate — typically 20bb or less.",
+      "long_def": "Short-stacked play (~20bb and below) is dominated by preflop math. Set-mining stops being profitable, suited connectors lose implied-odds value, and push-fold charts take over. Open-raises become more committing, 3-bets are mostly all-in, and ICM considerations in tournaments tighten ranges further. The strategic toolkit shrinks but precision matters more — each chip is more meaningful.",
+      "see_also": ["push-fold", "shove", "ICM", "effective-stack"]
+    },
+    {
+      "id": "push-fold",
+      "term": "push-fold",
+      "aliases": ["push fold", "push-fold", "shove fold", "shove-fold", "push or fold", "Nash push-fold"],
+      "short_def": "A short-stack strategy where the only preflop options are open-shove all-in or fold.",
+      "long_def": "Push-fold is the simplified preflop strategy used at very short stacks (typically 12bb or less): open all-in or fold. Nash equilibrium charts give the equilibrium shoving and calling ranges at each stack depth. Min-raising at this depth creates terrible decisions — you can't fold to a 3-bet shove but you commit big chunks of your stack — so the cleanest line is push or pass.",
+      "see_also": ["shove", "short-stack", "Nash", "ICM"]
+    },
+    {
+      "id": "shove",
+      "term": "shove",
+      "aliases": ["shove", "shoves", "shoving", "shoved", "all-in", "all in", "open-shove", "open shove", "jam"],
+      "short_def": "An all-in bet or raise that commits your entire stack.",
+      "long_def": "A shove is going all-in — moving the full effective stack into the pot. Shoves remove future-street decisions and force the opponent into a single yes/no decision. Open-shoving is standard at short stacks (12bb-ish from late position); 5-bet shoving over a 4-bet is standard at 100bb. The size of a shove relative to the pot determines the opponent's pot odds and required calling equity.",
+      "see_also": ["push-fold", "5-bet", "pot-odds", "short-stack"]
+    },
+    {
+      "id": "bubble",
+      "term": "bubble",
+      "aliases": ["bubble", "the bubble", "bubble factor", "money bubble", "near the bubble", "ICM bubble"],
+      "short_def": "The tournament stage where the next player eliminated wins nothing and the rest cash. ICM pressure peaks here.",
+      "long_def": "The bubble is the point in a tournament just before the money — one elimination away from everyone in profit. ICM pressure is at its highest because busting means leaving with nothing while folding into the money guarantees a payout. Correct strategy tightens shoving ranges, widens fold-to-shove ranges with big stacks (avoiding flips), and lets short stacks shove wider into medium stacks that can't risk busting.",
+      "see_also": ["ICM", "chip-EV", "pay-jump", "short-stack"]
+    },
+    {
+      "id": "pay-jump",
+      "term": "pay jump",
+      "aliases": ["pay jump", "pay-jump", "pay jumps", "pay-jumps", "payout jump"],
+      "short_def": "An increase in the prize money awarded as players bust out of a tournament. Drives ICM pressure.",
+      "long_def": "A pay jump is the difference in payout between two adjacent finishes. Tournaments are top-heavy, so the jumps grow larger as the final table approaches and become enormous between 3rd, 2nd, and 1st. Big pay jumps inflate the dollar value of survival relative to chip accumulation, which is the math underlying ICM: a play that wins chips on average can lose money if it risks elimination before a big jump.",
+      "see_also": ["bubble", "ICM", "chip-EV", "satellite"]
+    },
+    {
+      "id": "satellite",
+      "term": "satellite",
+      "aliases": ["satellite", "satellites", "satellite-style", "satellite final"],
+      "short_def": "A tournament whose prize is a seat in a larger tournament. All paying finishes win the same prize, which warps strategy.",
+      "long_def": "A satellite awards seats to a larger tournament rather than cash, and every paying finish wins the same seat. Once you have enough chips to lock a seat, additional chips have zero dollar value — so ICM pressure is extreme on the bubble and any avoidable confrontation is a mistake. Big stacks bully relentlessly, short stacks fold even premiums to avoid eliminations, and chip-EV math is largely irrelevant.",
+      "see_also": ["ICM", "bubble", "pay-jump", "chip-EV"]
+    },
+    {
+      "id": "Nash",
+      "term": "Nash equilibrium",
+      "aliases": ["Nash", "nash", "Nash equilibrium", "nash equilibrium", "Nash open-shove", "Nash leak", "Nash range"],
+      "short_def": "A strategy pair where neither player can improve their result by unilaterally deviating. The mathematical target of GTO play.",
+      "long_def": "A Nash equilibrium is the game-theory solution where neither player can do better by changing strategy as long as the other stays put. GTO solvers approximate Nash equilibria for full no-limit holdem. At short stacks the Nash push-fold charts give exact equilibrium shoving and calling ranges. 'Nash leak' refers to a play (like folding A8o on the BTN at 12bb) that deviates from equilibrium and costs measurable EV.",
+      "see_also": ["GTO", "push-fold", "solver", "EV"]
+    },
+    {
+      "id": "GTO",
+      "term": "GTO",
+      "aliases": ["GTO", "gto", "game theory optimal", "game-theory optimal", "game theory-optimal"],
+      "short_def": "Game-Theory Optimal — a strategy unexploitable by any opponent. The benchmark solvers compute.",
+      "long_def": "GTO refers to game-theory optimal play: a strategy mix that an opponent cannot exploit even with perfect information about your tendencies. Real-world GTO is approximated by solvers (PioSOLVER, GTO+, etc.) which compute Nash equilibria for specific spots. GTO play is the default baseline; exploitative deviations from GTO are correct when an opponent's tendencies are known and reliable.",
+      "see_also": ["Nash", "solver", "balance", "EV"]
+    },
+    {
+      "id": "solver",
+      "term": "solver",
+      "aliases": ["solver", "solvers", "solver-approved", "solver output", "GTO solver", "solver solution"],
+      "short_def": "Software that computes near-Nash strategies for postflop spots — the tool modern poker theory is built around.",
+      "long_def": "Solvers (PioSOLVER, GTO+, Wizard, etc.) compute equilibrium strategies for specific preflop ranges and board textures, outputting mixed frequencies for each combo and street. Modern poker theory is largely an effort to interpret solver outputs into human-playable heuristics: when to range-bet, when to overbet, what to bluff with. Solver outputs are noisy at the combo level but extremely stable at the range level.",
+      "see_also": ["GTO", "Nash", "balance", "mixed-strategy"]
+    },
+    {
+      "id": "mixed-strategy",
+      "term": "mixed strategy",
+      "aliases": ["mixed strategy", "mixed-strategy", "mix", "mixes", "mixed frequency"],
+      "short_def": "Playing the same hand multiple ways at specific frequencies, rather than always doing the same thing.",
+      "long_def": "A mixed strategy splits a single hand across multiple actions at specific frequencies — e.g. raise 70%, call 30%. Mixing keeps you unexploitable: an opponent can't pin down your range for any one action. Solvers output mixed frequencies for many hands. In practice, humans approximate mixes by making consistent choices and randomizing across the session, knowing that what matters is the range frequency, not the per-hand decision.",
+      "see_also": ["GTO", "solver", "balance", "frequency"]
+    },
+    {
+      "id": "balance",
+      "term": "balance",
+      "aliases": ["balance", "balanced", "balancing", "unbalanced", "balance the range"],
+      "short_def": "Constructing a betting line so it contains the right ratio of value to bluffs, leaving no exploitable hole.",
+      "long_def": "Balance means your range for a given action contains both value hands and bluffs in the right proportions, so an opponent can't exploit you by always calling or always folding. A polarized bet sized 75% pot needs roughly 40% bluffs to be unexploitable; bigger bets need more bluffs, smaller bets fewer. Unbalanced lines (all value, no bluffs) get folded against; lines with too many bluffs get called down.",
+      "see_also": ["polarized", "bluff", "value-bet", "GTO"]
+    },
+    {
+      "id": "denial",
+      "term": "equity denial",
+      "aliases": ["denial", "denies equity", "denying equity", "deny equity"],
+      "short_def": "Betting to deny your opponent the free card they'd need to realize their equity. Often a reason to bet medium hands.",
+      "long_def": "Equity denial is the value generated by forcing the opponent to fold a hand that would have had outs to improve. Charging a flush draw or overcard equity to continue captures EV beyond the immediate fold or call. Protection bets, semi-bluffs, and small c-bets all generate equity denial. Recognizing that 'deny equity' is itself a betting reason — distinct from value or fold equity — explains why solvers bet many medium-strength hands.",
+      "see_also": ["protection-bet", "semi-bluff", "fold-equity", "merged"]
+    },
+    {
+      "id": "suited-connectors",
+      "term": "suited connectors",
+      "aliases": ["suited connectors", "suited connector", "SC", "SCs", "suited-connectors", "small suited connectors"],
+      "short_def": "Two consecutive suited hole cards like 87s, 76s, 65s — speculative hands with strong implied odds.",
+      "long_def": "Suited connectors are two consecutive cards of the same suit (87s, 76s, T9s, etc.). They make flushes and straights, which when they hit are usually well-disguised and can stack opponents — the textbook implied-odds hand. They realize equity well in position, less well out of position. Suited connectors are a core part of cold-calling, button-opening, and BB-defending ranges, and they create the structural advantage on low-connected boards.",
+      "see_also": ["implied-odds", "set-mining", "playability", "cold-call"]
+    },
+    {
+      "id": "broadway",
+      "term": "broadway",
+      "aliases": ["broadway", "broadways", "broadway cards", "offsuit broadways", "suited broadways"],
+      "short_def": "Cards Ten through Ace (T, J, Q, K, A). 'Broadway hands' are two such cards together (KQ, QJ, JT).",
+      "long_def": "Broadway refers to the five highest cards (T-J-Q-K-A) and 'broadway hands' to any two of them paired (KQ, QJ, AT, etc.). Broadway hands make top pair on many flops, can make the nut straight (broadway straight, T-J-Q-K-A), and play well in position. Offsuit broadway hands (KJo, QJo) are core flat-calling and blind-defense holdings; suited broadways add 3-bet equity and flush potential.",
+      "see_also": ["top-pair", "blind-defense", "domination", "kicker"]
+    },
+    {
+      "id": "wheel",
+      "term": "wheel",
+      "aliases": ["wheel", "wheel straight", "wheel equity", "wheel-straight", "the wheel"],
+      "short_def": "The straight A-2-3-4-5 (the lowest possible straight). Suited aces gain a lot of equity from their wheel potential.",
+      "long_def": "The wheel is the ace-to-five straight — A-2-3-4-5 — where the ace plays low. Suited aces (A5s, A4s, A3s, A2s) gain meaningful equity from wheel potential: they make a strong straight on low-card boards and a flush when suited, on top of having ace blockers preflop. This combination is why A5s and A4s are the canonical 3-bet and 4-bet bluff candidates.",
+      "see_also": ["suited-connectors", "blocker", "3-bet", "4-bet"]
+    },
+    {
+      "id": "domination",
+      "term": "domination",
+      "aliases": ["domination", "dominated", "dominates", "dominating"],
+      "short_def": "When one hand has only a few outs against another that shares a card — like AK dominating AQ (A blocked, only Q outs).",
+      "long_def": "A dominated hand has its kicker out-kicked by a sharing card. KQ vs KJ: when a king pairs, KQ wins because the Q outkicks the J — KJ has only 3 outs to the J. Domination is why offsuit broadways underperform in 3-bet pots (often dominated by tighter ranges) and why kickers matter so much on paired boards. Set vs set, two-pair vs better two-pair, and trips vs better trips are all domination spots.",
+      "see_also": ["kicker", "broadway", "TPTK", "cooler"]
+    },
+    {
+      "id": "cooler",
+      "term": "cooler",
+      "aliases": ["cooler", "coolers", "coolered", "cooler hand"],
+      "short_def": "A spot where both players have strong hands and stacks go in with one player crushed. Often unavoidable.",
+      "long_def": "A cooler is a hand where two big hands collide and stacks go in — set over set, AA vs KK, the top set vs the second-nut straight. Both players play correctly but one loses a stack. Coolers are the cost of doing business at depth: you can't avoid the rare set-over-set when set-mining, and trying to dodge coolers usually means folding profitable hands.",
+      "see_also": ["set", "set-mining", "domination", "deep-stack"]
+    },
+    {
+      "id": "playability",
+      "term": "playability",
+      "aliases": ["playability", "playable", "playably", "plays well"],
+      "short_def": "How easily a hand makes strong made hands or strong draws postflop — drives equity realization beyond raw equity.",
+      "long_def": "Playability is how well a hand navigates postflop streets. Suited connectors have strong playability (flushes, straights, two-way draws); offsuit ace-low (A6o) has poor playability — it makes top pair with a bad kicker or air. Hands with high playability realize more of their equity, make better bluff candidates, and continue more profitably against 3-bets. Solvers weigh playability heavily when constructing flatting and 3-betting ranges.",
+      "see_also": ["equity-realization", "suited-connectors", "implied-odds", "in-position"]
+    },
+    {
+      "id": "dead-money",
+      "term": "dead money",
+      "aliases": ["dead money", "dead-money"],
+      "short_def": "Chips already in the pot from players who have folded or are unlikely to invest more. Raises the price the action gets.",
+      "long_def": "Dead money is chips in the pot that nobody is contesting anymore — the blinds after folds, the open-raiser's chips after a 3-bet wins, the limper's chip after an iso-raise. Dead money improves the EV of aggression because each fold-out captures it. Squeeze plays are sized larger specifically to account for the extra dead money from the open-and-caller chain.",
+      "see_also": ["squeeze", "blind-steal", "isolation", "pot-odds"]
+    },
+    {
+      "id": "showdown-equity",
+      "term": "showdown equity",
+      "aliases": ["showdown equity", "showdown-equity", "showdown"],
+      "short_def": "How often your hand wins if both players check it down to showdown.",
+      "long_def": "Showdown equity is the win rate of your hand at a forced check-down against the opponent's range, ignoring bets and folds. A hand with strong showdown equity (top pair) wants to see showdown cheaply; a hand with no showdown equity (busted draw) needs to bet to win the pot. The distinction drives the choice between bluffing, value-betting, and checking — turning a hand with showdown equity into a bluff is a common, expensive mistake.",
+      "see_also": ["showdown-value", "equity", "pot-control", "give-up"]
+    },
+    {
+      "id": "frequency",
+      "term": "frequency",
+      "aliases": ["frequencies", "at frequency", "high frequency", "low frequency", "frequency of"],
+      "short_def": "How often a strategy takes a given action across the range — e.g. 'c-bet 70% frequency' or 'fold at high frequency'.",
+      "long_def": "Frequency in GTO talk is the percentage of the range that takes a given action: c-bet 70%, fold 60%, raise 15%. Solvers think in frequencies because individual hands often have multiple actions that are close in EV. Range-level frequency is what creates balance — a high check-back frequency on a given flop tells you the range disadvantage demands caution. Frequencies are the language of solver outputs.",
+      "see_also": ["mixed-strategy", "solver", "balance", "GTO"]
+    },
+    {
+      "id": "ace-high",
+      "term": "ace-high",
+      "aliases": ["ace high", "ace-high", "A-high", "ahigh"],
+      "short_def": "A hand whose highest card is an ace and which hasn't paired the board. Often has meaningful showdown value vs busted draws.",
+      "long_def": "Ace-high describes an unpaired hand featuring an ace as the high card. Despite making no pair, ace-high beats every busted draw and every king-high or lower bluff-catcher, so it carries real showdown value against opponents whose ranges are full of busted draws. Common pot-control candidates on the river: small bets for thin value, check-backs to realize showdown equity, or selective bluffs when the blocker structure favors it.",
+      "see_also": ["showdown-value", "blocker", "give-up", "pot-control"]
+    },
+    {
+      "id": "combos",
+      "term": "combos",
+      "aliases": ["combos", "combo", "combinations", "combo count", "flush combos"],
+      "short_def": "The specific two-card combinations of a hand class. AA has 6 combos; AKs has 4; AKo has 12.",
+      "long_def": "Combos are the distinct two-card holdings of a hand class. Pocket pairs have 6 combos (any 2 of 4 suits), suited hands have 4 (one per suit), and offsuit non-pair hands have 12. Combo counting is how solvers and skilled players weight ranges: a flop that removes specific value combos (board blockers) shifts the bluff-to-value ratio in measurable ways. Counting flush combos on a paired board, or AK vs AQ combos when an ace falls, drives many close decisions.",
+      "see_also": ["blocker", "frequency", "bluff-catcher", "domination"]
+    },
+    {
+      "id": "nut-blocker",
+      "term": "nut blocker",
+      "aliases": ["nut blocker", "nut-blocker", "nut blockers", "nut-blockers"],
+      "short_def": "Holding the ace of the relevant flush suit (or the card that makes the nut straight) — blocks the opponent's strongest hands.",
+      "long_def": "A nut blocker is specifically the card that removes the nuts from the opponent's range. On a three-flush board, the Ace of that suit is the nut-flush blocker; on a board where 65 makes the nut straight, the 6 or 5 are nut-straight blockers. Nut blockers are the premier bluff-raise and bluff-catch tools: they remove the hands you fear most, leaving the opponent's range relatively weaker than it looks.",
+      "see_also": ["blocker", "nut-flush", "nut-straight", "bluff"]
+    },
+    {
+      "id": "click-back",
+      "term": "click-back",
+      "aliases": ["click back", "click-back", "click-back raise", "small raise", "min-click", "click"],
+      "short_def": "A very small raise — sometimes a min-raise — used as a merged sizing for protection and thin value rather than as a polar bluff/value raise.",
+      "long_def": "A click-back is a small raise (often near the minimum) used in spots where a large polar raise would be incorrect. The merged click-back range contains flush draws, weak top pair, sets, two pair, and protection-oriented one-pair hands — the kind of hand that wants to charge draws and build a pot but doesn't want to fold out everything weaker. Common on dry flops in single-raised pots facing a small c-bet.",
+      "see_also": ["merged", "protection-bet", "value-bet", "c-bet"]
+    },
+    {
+      "id": "trapping",
+      "term": "trap",
+      "aliases": ["trap", "trapping", "traps", "trapped", "slow-play", "slow-played", "slow play", "slowplay"],
+      "short_def": "Disguising the strength of a premium hand by underplaying it — usually calling or checking instead of raising.",
+      "long_def": "Trapping or slow-playing is intentionally not raising a strong hand, hoping to let the opponent's bluffs and weaker value continue. Slow-playing is correct when the opponent is likely to bet without much, when raising would fold out their entire continuing range, or when stack depth makes building the pot slowly more valuable. Overdone, slow-playing leaks value — premium hands usually want action.",
+      "see_also": ["check-raise", "limp-reraise", "value-bet", "pot-control"]
+    },
+    {
+      "id": "bet-for-value",
+      "term": "bet for value",
+      "aliases": ["betting for value", "for value"],
+      "short_def": "Making a bet because you expect to be called by worse hands more often than better. The flip side of bluffing.",
+      "long_def": "Betting for value is making a bet whose EV comes primarily from being called by worse. The hand needs to beat enough of the opponent's calling range to offset losing the times they call with better. Value-bet sizing depends on what calls: thin value uses small bets, polar value uses big bets. Misidentifying value spots (betting a hand that only folds worse and calls better) is one of the most common postflop leaks.",
+      "see_also": ["value-bet", "thin-value", "polarized", "merged"]
+    },
+    {
+      "id": "front-door",
+      "term": "front-door",
+      "aliases": ["front door", "front-door", "front-door flush", "front-door draw", "frontdoor"],
+      "short_def": "A draw where the flop already had two cards toward it — the 'expected' way to complete, as opposed to a backdoor.",
+      "long_def": "A front-door draw is one started on the flop — two suited cards on the flop make a flop flush draw; two-card straight draws on the flop are front-door straight draws. When a front-door draw completes on the turn (e.g. a third suited card), it's the 'expected' bad runout for the defender of the flop bet — the calling range had many of these draws and now gets there.",
+      "see_also": ["backdoor", "flush-draw", "scare-card", "runout"]
+    },
+    {
+      "id": "leverage",
+      "term": "leverage",
+      "aliases": ["leverage", "high-leverage", "leveraged", "leverage spot"],
+      "short_def": "The pressure a future bet puts on the current decision — bigger remaining stacks create more leverage.",
+      "long_def": "Leverage is the threat that future bets put on a current decision. Calling a flop bet at low SPR has little leverage — there's not much more to bet — but calling at deep SPRs means committing to facing turn and river bets that can cost much more. Big bets and overbets generate leverage; small bets generate little. Semi-bluffs gain value from leverage because the threat of further barrels folds out hands now that would call without that threat.",
+      "see_also": ["SPR", "overbet", "semi-bluff", "implied-odds"]
+    },
+    {
+      "id": "multiway",
+      "term": "multiway",
+      "aliases": ["multiway", "multi-way", "multiway pot", "multi-way pot", "three-handed", "3-way", "three handed"],
+      "short_def": "A pot with more than two players seeing the flop. Ranges are stronger and bluffing frequency drops sharply.",
+      "long_def": "Multiway pots have three or more players post-flop. Ranges are collectively stronger (someone is more likely to have a real hand), bluff frequencies drop, and made hands play more straightforwardly. C-bet sizing tends to shrink (~33% pot) and c-bet frequency drops because somebody has flopped something. Trapping with premiums and value-betting thinly become more common; polarized overbets and big bluffs become much less so.",
+      "see_also": ["isolation", "value-bet", "c-bet", "pot-control"]
+    },
+    {
+      "id": "single-raised-pot",
+      "term": "single-raised pot",
+      "aliases": ["single raised pot", "single-raised pot", "SRP", "srp"],
+      "short_def": "A pot with a preflop open and at least one caller but no 3-bet. SPR is typically 10-15 at 100bb.",
+      "long_def": "A single-raised pot (SRP) sees one preflop raise and at least one call. SPR is typically 10-15 at 100bb depth, leaving lots of postflop maneuvering room. SRPs feature the widest preflop ranges and the most varied postflop strategies — range bets, check-backs, donk leads, and probes all show up. Compare with 3-bet pots (SPR ~5-7) and 4-bet pots (SPR ~1-2), where ranges narrow and strategies tighten.",
+      "see_also": ["3-bet-pot", "4-bet-pot", "SPR", "open-raise"]
+    },
+    {
+      "id": "3-bet-pot",
+      "term": "3-bet pot",
+      "aliases": ["3bet pot", "3-bet pot", "3-bet pots", "three-bet pot", "3bet-pot"],
+      "short_def": "A pot where preflop action was open · 3-bet · call. SPR is typically 5-7 at 100bb.",
+      "long_def": "A 3-bet pot starts with open, 3-bet, and call. SPR drops to ~5-7 at 100bb, so postflop play is more straightforward than in single-raised pots: ranges are narrower, premium hands more concentrated. The 3-bettor is usually the in-position aggressor when 3-betting from late position, with a polarized 3-bet range; the caller's range is condensed and bluff-catcher heavy. Big draws become check-raise candidates because the low SPR creates leverage.",
+      "see_also": ["single-raised-pot", "4-bet-pot", "SPR", "3-bet"]
+    },
+    {
+      "id": "4-bet-pot",
+      "term": "4-bet pot",
+      "aliases": ["4bet pot", "4-bet pot", "4-bet pots", "four-bet pot", "4bet-pot"],
+      "short_def": "A pot where preflop action included a 4-bet and call. SPR is typically 1-2 — commitment is near-automatic with top pair or better.",
+      "long_def": "A 4-bet pot has SPR around 1-2 at 100bb. The 4-bettor's range is concentrated around QQ+, AK and the canonical A5s-type bluff. With so little behind, the 4-bettor can c-bet their entire range for a tiny size on most flops — they retain range-wide equity and commitment is near-automatic. The caller has to play tight, mostly check-call and check-fold, with very little raising room.",
+      "see_also": ["SPR", "4-bet", "range-bet", "range-advantage"]
+    }
+  ]
+}
