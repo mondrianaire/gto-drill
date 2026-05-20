@@ -9,6 +9,36 @@
 let LOADED = null;     // { version, entries: [...] }
 let INDEX  = null;     // Map<lowercased term/alias, entry>
 
+// -----------------------------------------------------------------------
+// Tooltip-complexity threshold
+// -----------------------------------------------------------------------
+// Each dictionary entry carries a `complexity` field (1/2/3):
+//   1 = common (any rec player knows it — gutshot, set, shove)
+//   2 = intermediate (rec-study territory — c-bet, polarized, blocker)
+//   3 = advanced (solver-era / math — SPR, MDF, alpha, EV calculation)
+//
+// The threshold controls what gets a tooltip in tokenized prose. A
+// threshold of N means: only entries with complexity >= N tokenize.
+// Default = 1 (everything tokenizes — today's behavior).
+// User-configurable from the dictionary view; persisted in localStorage.
+
+const TOOLTIP_THRESHOLD_KEY = "gto-duel.tooltipThreshold";
+
+export function getTooltipThreshold() {
+  try {
+    const raw = localStorage.getItem(TOOLTIP_THRESHOLD_KEY);
+    if (raw == null) return 1;
+    const n = parseInt(raw, 10);
+    return n >= 1 && n <= 3 ? n : 1;
+  } catch { return 1; }
+}
+
+export function setTooltipThreshold(n) {
+  const clamped = Math.max(1, Math.min(3, parseInt(n, 10) || 1));
+  try { localStorage.setItem(TOOLTIP_THRESHOLD_KEY, String(clamped)); } catch {}
+  return clamped;
+}
+
 function h(tag, attrs, ...children) {
   const el = document.createElement(tag);
   if (attrs) {
@@ -82,11 +112,29 @@ export function getEntry(id) {
  * Returns a regex matching any known term/alias, with capture group 1 = the
  * matched substring. Word-boundary aware; case-insensitive. Longest variants
  * first so "polar c-bet range" wins over the individual words.
+ *
+ * @param {Object} [opts]
+ * @param {number} [opts.minComplexity] — exclude any entry whose `complexity`
+ *   is below this value. Lets callers hide tooltips for terms the audience
+ *   already knows (e.g. minComplexity=2 drops basic terms like "shove" /
+ *   "set" / "gutshot" so only intermediate+ terms still tokenize).
+ *   The dictionary VIEW itself ignores this and shows everything — the
+ *   filter only affects inline tokenization.
  */
-export function buildTermRegex() {
+export function buildTermRegex(opts) {
   if (!INDEX || INDEX.size === 0) return null;
-  const variants = [...INDEX.keys()].sort((a, b) => b.length - a.length);
-  // Escape regex metacharacters in each variant.
+  const minComplexity = opts && Number.isFinite(opts.minComplexity) ? opts.minComplexity : 1;
+  // Collect variant strings, skipping any whose entry is below threshold.
+  // INDEX maps lowercased variant → entry, so the same entry shows up under
+  // each of its variants. We dedupe by walking the map and keeping variants
+  // whose entry passes the threshold.
+  const kept = [];
+  for (const [variant, entry] of INDEX.entries()) {
+    const c = (entry && entry.complexity) || 1;
+    if (c >= minComplexity) kept.push(variant);
+  }
+  if (kept.length === 0) return null;
+  const variants = kept.sort((a, b) => b.length - a.length);
   const escaped = variants.map((v) => v.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"));
   // \b doesn't play nice with characters like "-" (3-bet), so we use
   // lookaheads/lookbehinds to enforce non-letter boundaries on either side.
@@ -115,10 +163,37 @@ export function mountDictionaryView(container, onExit, opts = {}) {
     class: "dict-search", "aria-label": "Search dictionary",
   });
 
+  // Tooltip-threshold selector. Lives in the dictionary header because that's
+  // where the user is already thinking about which terms get explained.
+  // Changing it persists immediately; the change takes effect on the next
+  // tokenized render (i.e. when you navigate to solo/duel and prose
+  // re-tokenizes). This is intentional — re-tokenizing every mounted view
+  // live would be more complexity than it earns.
+  const currentT = getTooltipThreshold();
+  const thresholdSel = h("select", {
+    class: "dict-threshold",
+    "aria-label": "Show tooltips for terms at or above this level",
+    title: "Which terms get tooltips in prose elsewhere in the app",
+  });
+  const opts2 = [
+    { v: 1, label: "Common+", hint: "all terms get tooltips" },
+    { v: 2, label: "Intermediate+", hint: "skip basics like fold, set, gutshot" },
+    { v: 3, label: "Advanced only", hint: "only solver-era terms (SPR, MDF, alpha)" },
+  ];
+  for (const o of opts2) {
+    const optEl = h("option", { value: String(o.v) }, "Tooltips: " + o.label);
+    if (o.v === currentT) optEl.setAttribute("selected", "");
+    thresholdSel.appendChild(optEl);
+  }
+  thresholdSel.addEventListener("change", (e) => {
+    setTooltipThreshold(parseInt(e.target.value, 10));
+  });
+
   const counter = h("span", { class: "dict-count muted" }, entries.length + " terms");
   const header = h("div", { class: "dict-header" },
     h("h2", null, "Poker dictionary"),
     counter,
+    thresholdSel,
     exitBtn);
 
   const listEl = h("div", { class: "dict-list" });
