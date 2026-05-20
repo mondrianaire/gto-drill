@@ -1857,12 +1857,46 @@ form { margin-top: 8px; }
 
 /* --- Poker-hand replay --- */
 .replay { margin: 10px 0 6px 0; }
+/* Header row above the table — format/depth chip on the left, optional
+   context tag (tournament / short-stack) on the right. */
+.replay-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
 .replay-gameinfo {
   font-size: 0.74rem;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.07em;
-  margin-bottom: 8px;
+}
+.replay-gameinfo.is-tournament {
+  color: #ffd58a;
+}
+/* Context tag — shows only when the depth/format meaningfully changes
+   strategy. Lights up vs the muted gameinfo so the user catches it
+   during decide, not just in post-decision framing bullets. */
+.replay-context-tag {
+  font-size: 0.72rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  padding: 3px 9px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: rgba(255, 255, 255, 0.03);
+}
+.replay-context-tag.is-tournament {
+  color: #ffd58a;
+  border-color: rgba(255, 213, 138, 0.45);
+  background: rgba(255, 213, 138, 0.08);
+}
+.replay-context-tag.is-shortstack {
+  color: #c4dcff;
+  border-color: rgba(120, 180, 255, 0.5);
+  background: rgba(120, 180, 255, 0.08);
 }
 /* Poker felt — radial gradient base + a fine dot grain to break up the
    flat-color look. The grain dots are tiny + low opacity so it reads as

@@ -663,12 +663,24 @@ export function mountReplay(container, replay, opts) {
     togglePlay();
   });
 
-  const gameInfoPrefix = (replay.format === "tournament" ? "Tournament" : "Cash") + " · ";
+  // Format + depth (always shown) + optional context tag (only present
+  // when depth/format meaningfully changes strategy — tournament hands,
+  // short-stack cash, etc.). The context tag lights up so the user
+  // catches it at a glance during the decide phase, not just in
+  // post-decision framing bullets.
+  const isTournament = replay.format === "tournament";
+  const gameInfoPrefix = (isTournament ? "Tournament" : "Cash") + " · ";
+  const gameInfoChip = h("div", { class: "replay-gameinfo" + (isTournament ? " is-tournament" : "") },
+    gameInfoPrefix, bbChip(replay.stack_depth_bb), " deep");
+  const contextTag = replay.context_tag
+    ? h("div", { class: "replay-context-tag" + (isTournament ? " is-tournament" : " is-shortstack") },
+        replay.context_tag)
+    : null;
 
   const root = h(
     "div",
     { class: "replay" },
-    h("div", { class: "replay-gameinfo" }, gameInfoPrefix, bbChip(replay.stack_depth_bb), " deep"),
+    h("div", { class: "replay-header" }, gameInfoChip, contextTag),
     table,
     h("div", { class: "replay-controls" }, rewindBtn, prevBtn, playBtn, nextBtn, stepLabel)
   );
