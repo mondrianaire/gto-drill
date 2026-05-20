@@ -107,6 +107,13 @@ function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
  *   preceded by "Bet"/"bet" get the suffix — keeps past-action prose
  *   ("BB 3-bets to 11bb" inside a description) from receiving a pct
  *   computed against the wrong (current-decision) pot.
+ * @param {boolean} [opts.actorLabels] — Render position chips for the
+ *   hero seat as "HERO" and live-villain seats as "VILLAIN", instead of
+ *   the position name ("BTN" / "BB" / etc.). Used in the wrap-up so the
+ *   reader can scan disagreement cards across many scenarios without
+ *   having to remember which position they were in each spot. Also
+ *   strips "(Hero)" / "(Villain)" parenthetical annotations from the
+ *   text, since those would be redundant with the new chip labels.
  */
 function tokenizeProse(text, scen, opts) {
   const frag = document.createDocumentFragment();
@@ -114,6 +121,12 @@ function tokenizeProse(text, scen, opts) {
   const heroPos = scen && scen.replay ? scen.replay.hero_seat : null;
   const villains = liveVillains(scen && scen.replay);
   const known = knownCards(scen);
+  const actorLabels = !!(opts && opts.actorLabels);
+  // When actorLabels is on, strip "(Hero)" / "(Villain)" annotations that
+  // would otherwise read redundantly next to the new HERO/VILLAIN chip.
+  if (actorLabels) {
+    text = text.replace(/\s*\((?:Hero|Villain)\)/g, "");
+  }
   RICH_RE.lastIndex = 0;
   let last = 0;
   let m;
@@ -133,8 +146,18 @@ function tokenizeProse(text, scen, opts) {
       }
     } else if (m[2]) {
       const pos = m[2];
-      const role = pos === heroPos ? " is-hero" : villains.includes(pos) ? " is-villain" : "";
-      frag.appendChild(h("span", { class: "tok-pos" + role }, pos));
+      const isHero = pos === heroPos;
+      const isVillain = villains.includes(pos);
+      const role = isHero ? " is-hero" : isVillain ? " is-villain" : "";
+      // In actor-label mode, replace the position name with HERO/VILLAIN
+      // for the actors. Folded / non-actor positions keep their position
+      // name (they're contextual, not the actors we're discussing).
+      let label = pos;
+      if (actorLabels) {
+        if (isHero) label = "HERO";
+        else if (isVillain) label = "VILLAIN";
+      }
+      frag.appendChild(h("span", { class: "tok-pos" + role }, label));
     } else if (m[3]) {
       const role = /^h/i.test(m[3]) ? " is-hero" : " is-villain";
       frag.appendChild(h("span", { class: "tok-word" + role }, m[3]));
@@ -315,11 +338,14 @@ function makeRangeChip(matchedText, range, onClick) {
  *
  * @param {string} text
  * @param {Object} scen
- * @param {{ onRangeClick?: (range:any) => void, asAction?: boolean }} [opts]
+ * @param {{ onRangeClick?: (range:any) => void, asAction?: boolean, actorLabels?: boolean }} [opts]
  *   `asAction` signals that `text` is an action label (current decision)
  *   so every bb chip in it gets a computed pot-% suffix regardless of
  *   which verb precedes it (Bet / Donk lead / Raise to / Re-raise to /
  *   3-bet to / Check-raise to / Probe bet / Overbet / etc.).
+ *   `actorLabels` swaps position chips for HERO/VILLAIN in the hero +
+ *   live-villain seats (used in wrap-up so the reader doesn't have to
+ *   track which position they were in each scenario).
  * @returns {DocumentFragment}
  */
 export function richText(text, scen, opts) {
@@ -327,7 +353,9 @@ export function richText(text, scen, opts) {
   if (!text) return frag;
   const ranges = (scen && Array.isArray(scen.villain_ranges)) ? scen.villain_ranges : [];
   const onRangeClick = opts && opts.onRangeClick;
-  const tokOpts = opts && opts.asAction ? { asAction: true } : undefined;
+  const tokOpts = (opts && (opts.asAction || opts.actorLabels))
+    ? { asAction: !!opts.asAction, actorLabels: !!opts.actorLabels }
+    : undefined;
   if (!ranges.length || !onRangeClick) {
     frag.appendChild(wrapDictionaryTerms(tokenizeProse(text, scen, tokOpts)));
     return frag;
@@ -1072,7 +1100,10 @@ export function mountWrapUpView(container, gameId, opts) {
             h("span", { class: "muted" }, " Round " + (d.roundIndex + 1))
           ),
           h("h4", null, d.scenario ? d.scenario.lesson_tag : d.scenario_id),
-          h("p", { class: "scenario-desc" }, d.scenario ? richText(d.scenario.description, d.scenario) : ""),
+          // Render description with HERO/VILLAIN labels — wrap-up users
+          // have played multiple positions across many spots and shouldn't
+          // need to track which seat they were in each one.
+          h("p", { class: "scenario-desc" }, d.scenario ? richText(d.scenario.description, d.scenario, { actorLabels: true }) : ""),
           h("div", { class: "dis-row" },
             h("strong", null, aName + ": "), d.playerA_action, " (conf " + d.playerA_confidence + ")",
             d.playerA_note ? h("p", { class: "player-note" }, "“" + d.playerA_note + "”") : null
@@ -1084,7 +1115,7 @@ export function mountWrapUpView(container, gameId, opts) {
           h("div", { class: "dis-row gto" },
             h("strong", null, "GTO: "), d.scenario ? d.scenario.gto_action : "—"
           ),
-          d.scenario ? h("p", { class: "gto-explanation" }, richText(d.scenario.gto_explanation, d.scenario)) : null
+          d.scenario ? h("p", { class: "gto-explanation" }, richText(d.scenario.gto_explanation, d.scenario, { actorLabels: true })) : null
         );
         disagreementList.appendChild(card);
       });
