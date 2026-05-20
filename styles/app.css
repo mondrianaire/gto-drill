@@ -1808,6 +1808,76 @@ form { margin-top: 8px; }
   border-radius: 4px;
 }
 
+/* "Your active games" panel (landing) — lists in-progress and
+   waiting-for-opponent games the user is a participant in. Each row
+   has Resume (continue play) and Cancel (close the stale game). */
+.active-games {
+  margin-top: 28px;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+.active-games[hidden] { display: none; }
+.active-games h2 { margin: 0 0 4px 0; font-size: 1.15rem; }
+.active-games-hint { font-size: 0.88rem; margin: 0 0 14px 0; }
+.active-games-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.active-games-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+  flex-wrap: wrap;
+}
+.active-games-main { flex: 1 1 240px; min-width: 0; }
+.active-games-line {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.active-games-line strong {
+  font-family: monospace;
+  font-size: 0.95rem;
+  letter-spacing: 0.02em;
+}
+.active-games-status {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+}
+.active-games-status.is-waiting {
+  color: #ffd58a;
+  background: rgba(255, 213, 138, 0.10);
+  border-color: rgba(255, 213, 138, 0.4);
+}
+.active-games-status.is-progress {
+  color: #6fd9a0;
+  background: rgba(76, 200, 130, 0.10);
+  border-color: rgba(76, 200, 130, 0.45);
+}
+.active-games-vs { font-size: 0.85rem; }
+.active-games-progress { font-size: 0.84rem; margin-top: 2px; }
+.active-games-actions {
+  display: flex;
+  gap: 8px;
+  flex: 0 0 auto;
+}
+.active-games-resume { padding: 6px 14px; min-height: 38px; }
+.active-games-cancel { padding: 6px 14px; min-height: 38px; }
+
 /* Past games (landing) */
 .past-games {
   margin-top: 28px;

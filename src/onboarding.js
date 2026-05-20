@@ -9,6 +9,8 @@ import {
   joinGame,
   watchOpenLobbies,
   cancelLobby,
+  watchMyActiveGames,
+  cancelGame,
   signInWithGoogle,
   getCurrentUser,
   signOutUser,
@@ -159,6 +161,10 @@ export function mountSignInView(container, onSignedIn, onSolo, onCalculator, onD
 
 export function mountLandingView(container, onCreate, onJoin) {
   clear(container);
+  // Live "Your active games" section — populated by a Firestore
+  // subscription; the section hides itself when there are no active
+  // games. Built first so we can pass its cleanup back in the unmount.
+  const activeGames = buildActiveGamesSection();
   const root = h(
     "section",
     { class: "landing" },
@@ -174,6 +180,7 @@ export function mountLandingView(container, onCreate, onJoin) {
       h("button", { class: "primary", onClick: () => onCreate() }, "Start a game"),
       h("button", { class: "secondary", onClick: () => onJoin() }, "Join a game")
     ),
+    activeGames.el,
     h(
       "details",
       { class: "how-it-works" },
@@ -191,7 +198,92 @@ export function mountLandingView(container, onCreate, onJoin) {
     buildAccountBar()
   );
   container.appendChild(root);
-  return { unmount: () => clear(container) };
+  return { unmount: () => {
+    try { activeGames.unsubscribe(); } catch (_) {}
+    clear(container);
+  }};
+}
+
+/**
+ * Build the "Your active games" live panel. Subscribes to the user's
+ * in-progress games; renders one row per game with Resume / Cancel
+ * actions. Auto-hides when the user has no active games. Returns
+ * { el, unsubscribe } so the landing view can clean up the listener
+ * on unmount.
+ */
+function buildActiveGamesSection() {
+  const base = location.origin + location.pathname;
+  const list = h("ul", { class: "active-games-list" });
+  const section = h("section", { class: "active-games", hidden: true },
+    h("h2", null, "Your active games"),
+    h("p", { class: "muted active-games-hint" },
+      "Resume to keep playing, or cancel a stale game to close it out."),
+    list
+  );
+
+  function render(games) {
+    while (list.firstChild) list.removeChild(list.firstChild);
+    if (!games || games.length === 0) {
+      section.hidden = true;
+      return;
+    }
+    section.hidden = false;
+    for (const g of games) {
+      const isWaiting = g.status === "waiting_for_opponent";
+      const opponent = g.opponentName
+        ? "vs " + g.opponentName.split(/\s+/)[0]
+        : "waiting to join";
+      const roundLine = isWaiting
+        ? "Round 1 of " + (g.totalRounds || 1) + " · 0 / " + (g.handfulSize || 0) + " played"
+        : "Round " + (g.currentRoundIdx + 1) + " of " + (g.totalRounds || 1) +
+          " · " + g.myInRound + " / " + (g.handfulSize || 0) + " played";
+
+      const resumeBtn = h("button", { type: "button", class: "primary active-games-resume" }, "Resume");
+      resumeBtn.addEventListener("click", () => {
+        writeActiveGameId(g.gameId);
+        location.assign(base);
+      });
+
+      const cancelBtn = h("button", { type: "button", class: "secondary active-games-cancel" }, "Cancel");
+      cancelBtn.addEventListener("click", async () => {
+        const ok = confirm("Cancel game " + g.gameId + "? It can't be resumed once cancelled.");
+        if (!ok) return;
+        cancelBtn.disabled = true;
+        resumeBtn.disabled = true;
+        try { await cancelGame(g.gameId); } catch (err) { console.warn(err); }
+        // Snapshot listener will re-render and drop this row.
+      });
+
+      const statusBadge = h("span", { class: "active-games-status" + (isWaiting ? " is-waiting" : " is-progress") },
+        isWaiting ? "Waiting" : "In progress");
+
+      list.appendChild(h("li", { class: "active-games-item" },
+        h("div", { class: "active-games-main" },
+          h("div", { class: "active-games-line" },
+            h("strong", null, g.gameId),
+            statusBadge,
+            h("span", { class: "muted active-games-vs" }, opponent)
+          ),
+          h("div", { class: "active-games-progress muted" }, roundLine)
+        ),
+        h("div", { class: "active-games-actions" },
+          resumeBtn,
+          cancelBtn
+        )
+      ));
+    }
+  }
+
+  let unsub = () => {};
+  try {
+    unsub = watchMyActiveGames((games, err) => {
+      if (err) { console.warn("watchMyActiveGames err:", err); return; }
+      render(games);
+    });
+  } catch (err) {
+    console.warn("active-games subscribe failed:", err);
+  }
+  return { el: section, unsubscribe: unsub };
 }
 
 // A small "Signed in as … · Sign out" line for the landing screen.

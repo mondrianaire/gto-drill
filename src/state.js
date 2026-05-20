@@ -335,6 +335,93 @@ export async function cancelLobby(gameId) {
   await updateDoc(doc(_db, "games", gameId), { status: "cancelled" });
 }
 
+/**
+ * Cancel any game I'm a participant in (lobby OR in-progress). Same
+ * Firestore write as cancelLobby — separate export name so call sites
+ * downstream of the "stale active game" UI read as their intent.
+ */
+export async function cancelGame(gameId) {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  await updateDoc(doc(_db, "games", gameId), { status: "cancelled" });
+}
+
+/**
+ * Subscribe to MY active games (statuses: waiting_for_opponent, in_progress).
+ * Returns summaries with enough info to render a "stale game" row: status,
+ * opponent identity, my progress in the current round, total rounds.
+ *
+ * Implementation: queries on `participantUids array-contains uid` only —
+ * status filter is applied client-side so we don't need a composite
+ * Firestore index. Cancelled and complete games are filtered out.
+ *
+ * @param {(games:(Array|null), error?:Error)=>void} onChange
+ * @returns {()=>void} unsubscribe
+ */
+export function watchMyActiveGames(onChange) {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  if (!_uid) {
+    // Not signed in — nothing to watch; behave like an empty subscription.
+    onChange([]);
+    return () => {};
+  }
+  const myUid = _uid;
+  const q = query(collection(_db, "games"), where("participantUids", "array-contains", myUid));
+  return onSnapshot(
+    q,
+    (snap) => {
+      const games = [];
+      snap.forEach((d) => {
+        const g = d.data();
+        if (g.status !== "waiting_for_opponent" && g.status !== "in_progress") return;
+        const uids = g.participantUids || [];
+        const oppUid = uids.find((u) => u !== myUid) || null;
+        const opp = oppUid
+          ? (g.participants || []).find((p) => p.uid === oppUid)
+          : null;
+        // Current-round progress: find the first non-completed round
+        // (mirrors computePhase, but kept inline so we don't import
+        // flow.js into state.js).
+        const rounds = g.rounds || [];
+        const handful = (g.config && g.config.handful_size) || 0;
+        const totalRounds = (g.config && g.config.rounds) || rounds.length;
+        let currentRoundIdx = 0;
+        let myInRound = 0;
+        for (let i = 0; i < rounds.length; i++) {
+          const r = rounds[i];
+          const expected = (r.scenarioIds || []).length;
+          const sbu = r.submissionsByUid || {};
+          const myLen = Array.isArray(sbu[myUid]) ? sbu[myUid].length : 0;
+          const oppLen = oppUid && Array.isArray(sbu[oppUid]) ? sbu[oppUid].length : 0;
+          if (myLen < expected || oppLen < expected) {
+            currentRoundIdx = i;
+            myInRound = myLen;
+            break;
+          }
+        }
+        games.push({
+          gameId: g.gameId || d.id,
+          status: g.status,
+          opponentUid: oppUid,
+          opponentName: opp ? opp.displayName : null,
+          opponentPhoto: opp ? opp.photoURL : null,
+          currentRoundIdx,
+          myInRound,
+          handfulSize: handful,
+          totalRounds,
+          createdAt: g.createdAt || "",
+        });
+      });
+      // Newest first.
+      games.sort((a, b) => String(b.createdAt).localeCompare(String(a.createdAt)));
+      onChange(games);
+    },
+    (err) => {
+      console.warn("watchMyActiveGames error:", err);
+      onChange(null, err);
+    }
+  );
+}
+
 // -----------------------------------------------------------------------
 // Live read + submit
 // -----------------------------------------------------------------------
