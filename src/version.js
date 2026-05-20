@@ -8,4 +8,4 @@
 // will see the OLD version here even after a deploy — that's the signal
 // to hard-refresh (Ctrl+Shift+R / Cmd+Shift+R).
 
-export const APP_VERSION = "2026-05-20.63-active-games-panel";
+export const APP_VERSION = "2026-05-20.64-rainbow-glyph-fix";

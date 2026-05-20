@@ -1674,20 +1674,24 @@ form { margin-top: 8px; }
 .tok-modifier {
   display: inline-block;
   vertical-align: middle;
-  width: 22px;
-  height: 14px;
+  width: 28px;
+  height: 16px;
   margin: 0 2px 0 3px;
   border-radius: 3px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
   cursor: help;
 }
-/* Rainbow — four-stripe gradient (♠ ♥ ♦ ♣) reads as "all four suits". */
+/* Rainbow — four hard-stop stripes using the 4-color deck palette
+   (♠ black, ♥ red, ♦ blue, ♣ green). Each quarter is a distinct
+   color so the glyph unambiguously reads "all four suits". The
+   previous gradient repeated colors and looked indistinguishable
+   from two-tone. */
 .tok-modifier-rainbow {
   background: linear-gradient(90deg,
-    #1a1a1a 0 25%,
-    #c0202a 25% 50%,
-    #c0202a 50% 75%,
-    #1a1a1a 75% 100%);
+    #1a1a1a 0%, #1a1a1a 25%,
+    #c0202a 25%, #c0202a 50%,
+    #2563eb 50%, #2563eb 75%,
+    #16a34a 75%, #16a34a 100%);
 }
 /* Monotone — single solid block in a generic red (the most visually
    distinct from rainbow). Carries the "all one suit" signal. */
