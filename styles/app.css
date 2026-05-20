@@ -423,7 +423,9 @@ form { margin-top: 8px; }
 }
 .spot-framing-text { flex: 1 1 auto; min-width: 0; }
 
-/* Villain range chip — clickable, opens the equity panel pre-loaded. */
+/* Villain range chip — clickable, opens the equity panel pre-loaded.
+   (Legacy class, used by the backwards-compatible buildSpotContext.
+   Newer surfaces use .villain-range-card below for a fuller treatment.) */
 .spot-ranges-chips {
   display: flex;
   flex-wrap: wrap;
@@ -443,9 +445,7 @@ form { margin-top: 8px; }
   line-height: 1.2;
   transition: background 0.12s, border-color 0.12s;
 }
-.spot-range-chip.is-clickable {
-  cursor: pointer;
-}
+.spot-range-chip.is-clickable { cursor: pointer; }
 .spot-range-chip.is-clickable:hover,
 .spot-range-chip.is-clickable:focus {
   background: rgba(74, 138, 204, 0.22);
@@ -453,6 +453,66 @@ form { margin-top: 8px; }
   outline: none;
 }
 .spot-range-chip-icon { font-size: 0.9rem; line-height: 1; }
+
+/* Villain range justification block — LEAD of the reveal. Each
+   villain_range becomes a card showing its label + the summary that
+   justifies why we narrowed villain to it. Cards are clickable to
+   pop the Monte Carlo equity panel. More prominent than the legacy
+   small chip — this is the primary surface because identifying
+   what villain is doing is half the value of the app. */
+.villain-range-block {
+  margin-bottom: 12px;
+  padding: 12px 14px;
+  border: 1px solid rgba(232, 169, 63, 0.40);
+  border-radius: var(--radius);
+  background: rgba(232, 169, 63, 0.06);
+}
+.villain-range-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--villain);
+  margin-bottom: 8px;
+}
+.villain-range-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.villain-range-card {
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.025);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transition: background 0.12s, border-color 0.12s;
+}
+.villain-range-card.is-clickable { cursor: pointer; }
+.villain-range-card.is-clickable:hover,
+.villain-range-card.is-clickable:focus {
+  background: rgba(232, 169, 63, 0.10);
+  border-color: rgba(232, 169, 63, 0.55);
+  outline: none;
+}
+.villain-range-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+}
+.villain-range-card-label {
+  font-weight: 700;
+  color: var(--villain);
+  font-size: 0.95rem;
+}
+.villain-range-card-icon { font-size: 0.95rem; opacity: 0.7; flex: 0 0 auto; }
+.villain-range-card-summary {
+  font-size: 0.9rem;
+  color: var(--text);
+  line-height: 1.4;
+}
 
 /* The equity panel mounts into this host (formerly .test-host). Lives
    right below spot-context so the panel pops in context. Empty when
@@ -577,24 +637,20 @@ form { margin-top: 8px; }
   line-height: 1.5;
 }
 
-/* GTO Read lead box — top of the reveal screen.
-   Headline: "GTO line" label + the action chip (large, prominent).
-   Body: the gto_explanation paragraph walking through WHY GTO chose
-   this line and HOW villain's range got narrowed. The user reads the
-   GTO answer + reasoning FIRST, then the verdict, then the comparison.
-   THE SPOT (framing + range chips) lives below as supporting facts. */
-.gto-read {
-  background: rgba(74, 138, 204, 0.08);
-  border: 1px solid rgba(74, 138, 204, 0.35);
-  border-radius: var(--radius);
-  padding: 14px 16px;
-  margin-bottom: 12px;
-}
-.gto-read-header {
+/* GTO line blurb — small inline tag between the villain-range lead and
+   the verdict. Per user: "GTO line is a small blurb about the best
+   option." Just the label + action chip on one line. The long
+   explanation paragraph is gone; villain-range justification above
+   covers the WHY, and the spot framing below covers situational facts. */
+.gto-read-blurb {
   display: flex;
   align-items: baseline;
   gap: 10px;
-  margin-bottom: 8px;
+  padding: 8px 14px;
+  margin-bottom: 12px;
+  background: rgba(74, 138, 204, 0.08);
+  border: 1px solid rgba(74, 138, 204, 0.35);
+  border-radius: var(--radius);
   flex-wrap: wrap;
 }
 .gto-read-label {
@@ -603,16 +659,10 @@ form { margin-top: 8px; }
   letter-spacing: 0.08em;
 }
 .gto-read-action {
-  font-size: 1.25rem;
+  font-size: 1.05rem;
   font-weight: 700;
   color: var(--ok);
   line-height: 1.2;
-}
-.gto-read-body {
-  color: var(--text);
-  margin: 0;
-  font-size: 0.95rem;
-  line-height: 1.5;
 }
 
 /* Dedicated opponent's view panel — appears below the option matrix when

@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult, buildSpotContext, buildGtoRead } from "./ui.js";
+import { richText, buildRevealResult, buildVillainRangeBlock, buildSpotFramingBlock, buildGtoRead } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
 
 // -----------------------------------------------------------------------
@@ -234,10 +234,19 @@ export function mountSoloView(container, onExit) {
         eqState.open = false;
       }
 
-      // Spot context block — framing + clickable villain ranges. Lives at
-      // the TOP of the GTO screen, ABOVE the verdict, so it "sets the
-      // scene" in GTO terms before the user reads the outcome.
-      const spotContext = buildSpotContext({ scen, onRangeClick: openWithRange });
+      // Villain range justification (NEW LEAD) — replaces the old framing
+      // block at the top. Each villain_range entry shows its label + the
+      // summary that justifies the read (e.g., "Linear 3-bet range: JJ+,
+      // AK, AQs, plus a slice of suited bluffs"). Clickable to pop the
+      // equity panel.
+      const villainRangeBlock = buildVillainRangeBlock({ scen, onRangeClick: openWithRange });
+
+      // GTO line — a small one-line blurb naming the solver's choice.
+      const gtoRead = buildGtoRead({ scen, gtoAction: gto });
+
+      // Spot framing — situational facts (board / SPR / position), now
+      // moved BELOW the verdict as supporting context.
+      const spotFraming = buildSpotFramingBlock({ scen, onRangeClick: openWithRange });
 
       // Test-it fallback — auto-loads the LAST villain range as a quick
       // entry into the equity panel, for users who prefer one click.
@@ -265,17 +274,12 @@ export function mountSoloView(container, onExit) {
         confidence: draft.confidence,
       });
 
-      // GTO Read lead — the new top section: "GTO line: [chip]" headline
-      // plus the gto_explanation paragraph. The user sees the GTO answer
-      // + reasoning FIRST, then the verdict, then comparison, then the
-      // supporting spot-context (framing + range chips) beneath.
-      const gtoRead = buildGtoRead({ scen, gtoAction: gto, onRangeClick: openWithRange });
-
       body = h("div", { class: "hand-reveal" },
-        gtoRead,        // NEW LEAD: GTO line + reasoning paragraph
-        result,         // verdict bar + comparison + opponent panel
-        spotContext,    // THE SPOT framing + villain range chips (supporting)
-        equityHost,     // Monte Carlo panel mounts here when a chip is clicked
+        villainRangeBlock,  // LEAD: villain range justification
+        gtoRead,            // GTO line: small blurb
+        result,             // verdict + compact comparison + opponent
+        spotFraming,        // THE SPOT — situational facts (supporting)
+        equityHost,         // equity panel mounts here
         h("div", { class: "test-row" }, testBtn)
       );
 
