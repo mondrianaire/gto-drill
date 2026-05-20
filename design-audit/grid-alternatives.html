@@ -109,6 +109,30 @@
   .hc-scroll-grid button.is-on .pcard { box-shadow:0 0 0 2px #4cb6ff; }
   .hc-scroll-grid button.is-dead .pcard { opacity:0.3; filter:grayscale(60%); }
 
+  /* Villain alt B — slider + presets + matrix-as-display              */
+  .sm { background:#0c1620; border-radius:8px; padding:8px;
+    border:1px solid #1a2735; }
+  .sm-presets { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:10px; }
+  .sm-presets button { font-size:.74rem; padding:5px 10px; border-radius:999px;
+    background:#16222e; border:1px solid #243646; color:#cfe6da; min-height:0; }
+  .sm-presets button.is-on { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+  .sm-slider-row { display:flex; align-items:center; gap:10px; margin-bottom:10px;
+    padding:8px 4px; background:#0c1620; border-radius:6px; }
+  .sm-slider-row input[type="range"] { flex:1 1 auto; accent-color:#4cb6ff; }
+  .sm-slider-label { font-size:.78rem; color:#cfe6da; font-weight:600;
+    min-width:60px; text-align:right; }
+  .sm-matrix-wrap { background:#0c1620; padding:6px; border-radius:6px;
+    border:1px solid #1a2735; }
+  .sm-matrix { display:grid; grid-template-columns:repeat(13, 1fr); gap:2px; }
+  .sm-matrix button { aspect-ratio:1; padding:0; font-size:.55rem;
+    font-weight:700; color:#5b6271; border-radius:2px;
+    background:#0c1620; border:1px solid #16222e; }
+  .sm-matrix button.cell-pair    { background:rgba(76,182,255,0.08); }
+  .sm-matrix button.cell-suited  { background:rgba(74,222,128,0.05); }
+  .sm-matrix button.cell-offsuit { background:rgba(248,113,113,0.04); }
+  .sm-matrix button.is-on { background:#4cb6ff; color:#061018; border-color:#4cb6ff; }
+  .sm-hint { font-size:11px; color:#8aa1b1; margin-top:8px; font-style:italic; line-height:1.3; }
+
   /* Hero alt — rank-then-suit two-step                                 */
   .ts { background:#0c1620; border-radius:8px; padding:8px;
     border:1px solid #1a2735; }
@@ -154,6 +178,24 @@
           <div class="md-detail-title" id="v-alt-title">Tap a rank →</div>
           <div class="md-cells" id="v-alt-cells"></div>
         </div>
+      </div>
+      <div class="sm-hint" style="color:#ff5d9e; padding-top:8px;">⚠ Rejected by the UX consult: replacing the matrix breaks the spatial mental model poker players already use ("top-left = premium," etc).</div>
+    </div>
+
+    <div class="phone" style="grid-column: 1 / -1; max-width: 760px;">
+      <div class="phone-title"><strong>Villain range</strong><span class="tag tag-alt">Alt B — slider + presets + matrix</span></div>
+      <div id="v-smr-stats" class="panel-stats">0 hand classes selected</div>
+      <div class="sm">
+        <div class="sm-presets" id="v-smr-presets"></div>
+        <div class="sm-slider-row">
+          <span style="font-size:.7rem; color:#8aa1b1; letter-spacing:.08em; text-transform:uppercase; font-weight:700;">Top</span>
+          <input type="range" id="v-smr-slider" min="0" max="100" value="0" step="1" />
+          <span class="sm-slider-label" id="v-smr-pct">0%</span>
+        </div>
+        <div class="sm-matrix-wrap">
+          <div class="sm-matrix" id="v-smr-matrix"></div>
+        </div>
+        <div class="sm-hint">Matrix is the <b>display</b> of the range. Slider + presets are the <b>input</b>. Tap any cell to fine-tune. (Pinch-zoom to enlarge on a real phone.)</div>
       </div>
     </div>
   </div>
@@ -278,6 +320,133 @@
       ranksHost.appendChild(btn);
     }
     updateStats();
+  })();
+
+  // ---------------- VILLAIN — Alt B (slider + presets + matrix) -------------
+  // Approximation of preflop hand strength. Real solvers use PokerStove's
+  // canonical 169-hand ranking; this rough formula puts hands in roughly
+  // the right order for demonstrating the slider UX without 169 lines of data.
+  function handStrength(lbl) {
+    const RANK_IDX = "AKQJT98765432";
+    const r1 = RANK_IDX.indexOf(lbl[0]);
+    const r2 = RANK_IDX.indexOf(lbl[1]);
+    if (lbl.length === 2) {
+      // Pair — heavily weighted, but small pairs are weaker than AKs/AQs.
+      // Use a curve: AA(0)=200, KK(1)=190, ... 22(12)=80.
+      return 200 - r1 * 10;
+    }
+    const high = 13 - r1; // A=13, 2=1
+    const low = 13 - r2;
+    const gap = r2 - r1;
+    const suited = lbl[2] === "s";
+    let score = high * 5 + low * 2.5;
+    if (suited) score += 8;
+    if (gap === 1) score += 5;
+    else if (gap === 2) score += 2;
+    // Ace wheel suited bonus (A5s, A4s, A3s, A2s are stronger than rank alone)
+    if (suited && r1 === 0 && r2 >= 8) score += 4;
+    return score;
+  }
+  function comboCount(lbl) {
+    if (lbl.length === 2) return 6;
+    if (lbl[2] === "s") return 4;
+    return 12;
+  }
+
+  const PRESETS_SMR = {
+    "Top 10%":    { type: "topN", pct: 10 },
+    "Top 20%":    { type: "topN", pct: 20 },
+    "Top 30%":    { type: "topN", pct: 30 },
+    "Pairs":      { type: "list", items: ["AA","KK","QQ","JJ","TT","99","88","77","66","55","44","33","22"] },
+    "Broadways":  { type: "list", items: ["AA","KK","QQ","JJ","TT","AKs","AKo","AQs","AQo","AJs","AJo","ATs","ATo","KQs","KQo","KJs","KJo","KTs","KTo","QJs","QJo","QTs","QTo","JTs","JTo"] },
+    "Suited connectors": { type: "list", items: ["JTs","T9s","98s","87s","76s","65s","54s"] },
+    "Clear":      { type: "list", items: [] },
+  };
+
+  (() => {
+    const matrixEl = document.getElementById("v-smr-matrix");
+    const presetsEl = document.getElementById("v-smr-presets");
+    const sliderEl = document.getElementById("v-smr-slider");
+    const pctEl = document.getElementById("v-smr-pct");
+    const statsEl = document.getElementById("v-smr-stats");
+
+    // Build all 169 labels and sort by handStrength descending (canonical order for slider).
+    const ALL_LABELS = [];
+    for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) ALL_LABELS.push(classLabel(r, c));
+    const ORDERED = [...ALL_LABELS].sort((a, b) => handStrength(b) - handStrength(a));
+
+    const sel = new Set();
+    const cellBy = {};
+
+    function render() {
+      let combos = 0;
+      for (const lbl of ALL_LABELS) {
+        const on = sel.has(lbl);
+        cellBy[lbl].classList.toggle("is-on", on);
+        if (on) combos += comboCount(lbl);
+      }
+      statsEl.innerHTML = "<b>" + sel.size + "</b> hand class" + (sel.size === 1 ? "" : "es") +
+        " · <b>" + combos + "</b> combo" + (combos === 1 ? "" : "s");
+    }
+
+    function setTopN(pct) {
+      const n = Math.round((pct / 100) * 169);
+      sel.clear();
+      for (let i = 0; i < n; i++) sel.add(ORDERED[i]);
+      pctEl.textContent = "Top " + pct + "%";
+      sliderEl.value = pct;
+      // Clear preset highlight unless it matches a top-N preset
+      const matchingPreset = Object.entries(PRESETS_SMR).find(([k, v]) => v.type === "topN" && v.pct === pct);
+      Array.from(presetsEl.children).forEach((b) => b.classList.toggle("is-on", matchingPreset && b.textContent === matchingPreset[0]));
+      render();
+    }
+
+    function setList(labels) {
+      sel.clear();
+      for (const l of labels) sel.add(l);
+      sliderEl.value = 0;
+      pctEl.textContent = labels.length ? labels.length + " hands" : "0%";
+      render();
+    }
+
+    // Build matrix (13×13).
+    for (let r = 0; r < 13; r++) {
+      for (let c = 0; c < 13; c++) {
+        const lbl = classLabel(r, c);
+        const kind = r === c ? "pair" : (c > r ? "suited" : "offsuit");
+        const btn = document.createElement("button");
+        btn.className = "cell-" + kind;
+        btn.textContent = lbl;
+        btn.addEventListener("click", () => {
+          if (sel.has(lbl)) sel.delete(lbl);
+          else sel.add(lbl);
+          // Manual tap clears slider + preset highlights
+          sliderEl.value = 0;
+          pctEl.textContent = sel.size + " hands";
+          Array.from(presetsEl.children).forEach((b) => b.classList.remove("is-on"));
+          render();
+        });
+        cellBy[lbl] = btn;
+        matrixEl.appendChild(btn);
+      }
+    }
+
+    // Build presets.
+    for (const [name, def] of Object.entries(PRESETS_SMR)) {
+      const btn = document.createElement("button");
+      btn.textContent = name;
+      btn.addEventListener("click", () => {
+        // Toggle visual highlight
+        Array.from(presetsEl.children).forEach((b) => b.classList.toggle("is-on", b === btn));
+        if (def.type === "topN") setTopN(def.pct);
+        else setList(def.items);
+      });
+      presetsEl.appendChild(btn);
+    }
+
+    sliderEl.addEventListener("input", (ev) => setTopN(parseInt(ev.target.value, 10) || 0));
+
+    render();
   })();
 
   // ---------------- HERO — Current (horizontal scroll grid) ----------------
