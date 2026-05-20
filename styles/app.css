@@ -225,6 +225,44 @@ form { margin-top: 8px; }
 
 .waiting .secondary { margin-top: 12px; }
 
+/* "Waiting for opponent" screen affordances — added so the user has
+   a way out (back-to-home button) and a signal about whether the
+   opponent is still engaged (last-submitted activity line + a stalled
+   warning badge when silence exceeds 7 days). */
+.waiting .waiting-stalled-badge {
+  display: inline-block;
+  margin: 8px 0 4px 0;
+  padding: 5px 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #ffd58a;
+  background: rgba(255, 213, 138, 0.10);
+  border: 1px solid rgba(255, 213, 138, 0.45);
+  border-radius: 999px;
+}
+.waiting .waiting-activity {
+  font-size: 0.95rem;
+  margin: 6px 0 12px 0;
+}
+.waiting .waiting-activity.is-stalled {
+  color: #ffd58a;
+}
+.waiting .waiting-actions {
+  margin-top: 20px;
+  display: flex;
+  gap: 10px;
+}
+.waiting .waiting-back {
+  flex: 1 1 auto;
+  min-height: 42px;
+}
+.waiting.is-stalled {
+  border-left: 3px solid #ffd58a;
+  padding-left: 14px;
+  background: rgba(255, 213, 138, 0.04);
+}
+
 /* In-game */
 .game-header {
   display: flex;
