@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult, buildVillainRangeBlock, buildSpotFramingBlock, buildGtoRead, buildLessonTakeaway } from "./ui.js";
+import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildHandIntro, buildOptionsAnalysis } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
 
 // -----------------------------------------------------------------------
@@ -262,19 +262,25 @@ export function mountSoloView(container, onExit) {
         eqState.open = false;
       }
 
-      // Villain range justification — moved DOWN to sit just above the
-      // equity panel + "Test it" button. The range chips lead the reader
-      // straight into testing equity against that exact range. Each
-      // villain_range entry shows its label + summary; clicking pops
-      // the equity panel pre-loaded with that range's classes.
+      // Villain range — framed as a deduction ("based on the action so
+      // far, here's what villain looks like"). Sits just above the
+      // equity panel + Test it so clicking flows into verification.
       const villainRangeBlock = buildVillainRangeBlock({ scen, onRangeClick: openWithRange });
 
       // GTO line — a small one-line blurb naming the solver's choice.
       const gtoRead = buildGtoRead({ scen, gtoAction: gto });
 
-      // Spot framing — situational facts (board / SPR / position), the
-      // strategic WHY behind the GTO line.
-      const spotFraming = buildSpotFramingBlock({ scen, onRangeClick: openWithRange });
+      // Hand intro — short narrative setting up the spot (positions,
+      // action to here, board, pot). Replaces the old "The spot"
+      // framing-bullets block as the scenario brief.
+      const handIntro = buildHandIntro({ scen });
+
+      // Options analysis matrix — every available action as a card with
+      // pros/cons, GTO pick highlighted, user pick tagged. Lets the
+      // reader compare the trade-offs of every choice they had.
+      const optionsAnalysis = buildOptionsAnalysis({
+        scen, userAction: draft.action, gtoAction: gto,
+      });
 
       // Test-it fallback — auto-loads the LAST villain range as a quick
       // entry into the equity panel, for users who prefer one click.
@@ -307,8 +313,9 @@ export function mountSoloView(container, onExit) {
         takeaway,           // LEAD: one-line lesson takeaway
         gtoRead,            // GTO line: small blurb
         result,             // verdict + compact comparison + opponent
-        spotFraming,        // THE SPOT — strategic WHY (range/board/SPR)
-        villainRangeBlock,  // villain range — leads straight into Test it
+        handIntro,          // brief: positions + action + board + pot
+        optionsAnalysis,    // matrix: every option's pros/cons
+        villainRangeBlock,  // deduced villain range — into Test it
         equityHost,         // equity panel mounts here
         h("div", { class: "test-row" }, testBtn)
       );

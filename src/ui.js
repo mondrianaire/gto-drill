@@ -467,7 +467,9 @@ export function buildVillainRangeBlock({ scen, onRangeClick }) {
   return h("div", { class: "villain-range-block" },
     h("div", { class: "villain-range-label" },
       h("span", null, "Villain's range"),
-      onRangeClick ? h("span", { class: "spot-context-hint muted" }, " — tap to test equity") : null
+      h("span", { class: "spot-context-hint muted" },
+        onRangeClick ? " — deduced from action · tap to test equity" : " — deduced from action"
+      )
     ),
     list
   );
@@ -515,6 +517,108 @@ export function buildSpotContext({ scen, onRangeClick }) {
   const framing = buildSpotFramingBlock({ scen, onRangeClick });
   if (!villain && !framing) return null;
   return h("div", { class: "spot-context" }, villain, framing);
+}
+
+/**
+ * Build the hand-intro narrative — short prose framing of the scenario.
+ * Reads as the solver's "here's the spot" sentence: positions, action
+ * to here, board, pot, who's facing what. Distinct from the GTO line
+ * (the answer) and from the verdict (your result) — this is the
+ * scenario brief that introduces the analysis below.
+ *
+ * Data source: scen.description (already populated for every scenario;
+ * was previously rendered inline in older reveal layouts before being
+ * dropped in the table-only revamp).
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ */
+export function buildHandIntro({ scen }) {
+  if (!scen || !scen.description) return null;
+  return h("div", { class: "hand-intro" },
+    h("div", { class: "hand-intro-label" }, "The hand"),
+    h("p", { class: "hand-intro-text" }, richText(scen.description, scen))
+  );
+}
+
+/**
+ * Build the options-analysis matrix — every available action as a card
+ * with pros / cons bullets, GTO pick highlighted with a green ✓ ribbon,
+ * the user's pick highlighted with a "Your pick" tag (and red ✗ if it
+ * differs from GTO). Lets the user compare the trade-offs of every
+ * choice they had, not just the one they made.
+ *
+ * Data source: scen.action_analysis — { [action]: { pros: string[],
+ * cons: string[] } } — populated for every scenario.
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ * @param {string} args.userAction
+ * @param {string} args.gtoAction
+ */
+export function buildOptionsAnalysis({ scen, userAction, gtoAction }) {
+  if (!scen) return null;
+  const analysis = scen.action_analysis || {};
+  const options = Array.isArray(scen.available_actions) ? scen.available_actions : [];
+  if (options.length === 0) return null;
+
+  const cards = h("div", { class: "options-analysis-list" });
+  for (const opt of options) {
+    const isGto = opt === gtoAction;
+    const isUser = opt === userAction;
+    const optAnalysis = analysis[opt] || {};
+    const pros = Array.isArray(optAnalysis.pros) ? optAnalysis.pros : [];
+    const cons = Array.isArray(optAnalysis.cons) ? optAnalysis.cons : [];
+
+    // Tags row on the card: GTO ✓ ribbon and/or "Your pick" tag
+    const tagsRow = h("div", { class: "options-analysis-tags" });
+    if (isGto) tagsRow.appendChild(h("span", { class: "options-analysis-tag is-gto" }, "✓ GTO"));
+    if (isUser) {
+      const cls = "options-analysis-tag is-user" + (isGto ? " is-match" : " is-miss");
+      tagsRow.appendChild(h("span", { class: cls }, isGto ? "Your pick" : "✗ Your pick"));
+    }
+
+    const prosEl = pros.length
+      ? h("ul", { class: "options-analysis-pros" },
+          ...pros.map((p) => h("li", null, richText(p, scen)))
+        )
+      : null;
+    const consEl = cons.length
+      ? h("ul", { class: "options-analysis-cons" },
+          ...cons.map((c) => h("li", null, richText(c, scen)))
+        )
+      : null;
+
+    const classes = "options-analysis-card"
+      + (isGto ? " is-gto" : "")
+      + (isUser ? " is-user" : "")
+      + (isUser && !isGto ? " is-miss" : "");
+
+    cards.appendChild(h("div", { class: classes },
+      h("div", { class: "options-analysis-card-header" },
+        h("div", { class: "options-analysis-action" }, richText(opt, scen, { asAction: true })),
+        tagsRow.children.length > 0 ? tagsRow : null
+      ),
+      h("div", { class: "options-analysis-body" },
+        prosEl ? h("div", { class: "options-analysis-section" },
+          h("div", { class: "options-analysis-section-label" }, "For"),
+          prosEl
+        ) : null,
+        consEl ? h("div", { class: "options-analysis-section" },
+          h("div", { class: "options-analysis-section-label" }, "Against"),
+          consEl
+        ) : null
+      )
+    ));
+  }
+
+  return h("div", { class: "options-analysis" },
+    h("div", { class: "options-analysis-header" },
+      h("div", { class: "options-analysis-title" }, "Your options"),
+      h("div", { class: "options-analysis-subtitle muted" }, "How the solver weighs each choice")
+    ),
+    cards
+  );
 }
 
 /**
@@ -951,10 +1055,14 @@ export function mountInGameView(container, gameId) {
         eqState.open = false;
       }
 
-      // Villain range justification (now placed just above Test it) +
-      // spot framing (strategic WHY, sits between verdict and range).
+      // Villain range — framed as a deduction ("based on the action so
+      // far, here's what villain looks like"). Sits just above the
+      // equity panel + Test it so clicking flows into verification.
       const villainRangeBlock = buildVillainRangeBlock({ scen, onRangeClick: openEquityWithRange });
-      const spotFraming = buildSpotFramingBlock({ scen, onRangeClick: openEquityWithRange });
+
+      // Hand intro — short narrative setting up the spot. Replaces the
+      // old "The spot" framing-bullets block as the scenario brief.
+      const handIntro = buildHandIntro({ scen });
 
       // Find the opponent's participant record + their submission for this
       // hand (if they've already played). Pass identity (avatar + name) into
@@ -979,6 +1087,13 @@ export function mountInGameView(container, gameId) {
         gtoAction: gto,
         confidence: sub.confidence,
         opponent,
+      });
+
+      // Options analysis matrix — every available action with pros/cons.
+      // userAction must be available here, so build after `sub` is in
+      // scope (above the body composition).
+      const optionsAnalysis = buildOptionsAnalysis({
+        scen, userAction: sub.action, gtoAction: gto,
       });
 
       // GTO Read lead — top of the reveal: GTO line headline + reasoning.
@@ -1007,8 +1122,9 @@ export function mountInGameView(container, gameId) {
         takeaway,           // LEAD: one-line lesson takeaway
         gtoRead,            // GTO line: small blurb
         result,             // verdict + compact comparison + opponent
-        spotFraming,        // THE SPOT — strategic WHY (range/board/SPR)
-        villainRangeBlock,  // villain range — leads straight into Test it
+        handIntro,          // brief: positions + action + board + pot
+        optionsAnalysis,    // matrix: every option's pros/cons
+        villainRangeBlock,  // deduced villain range — into Test it
         equityHost,         // equity panel mounts here
         h("div", { class: "test-row" }, testBtn)
       );

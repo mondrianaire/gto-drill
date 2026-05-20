@@ -535,6 +535,160 @@ form { margin-top: 8px; }
 }
 .spot-framing-text { flex: 1 1 auto; min-width: 0; }
 
+/* Hand-intro brief — short narrative framing of the scenario, sits
+   between the verdict and the options-analysis matrix. Reads as the
+   solver's "here's the spot" sentence. */
+.hand-intro {
+  margin: 16px 0 14px 0;
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.hand-intro-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+.hand-intro-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+/* Options-analysis matrix — every available action as a card with
+   For/Against bullets. GTO pick gets a green ring + ✓ GTO ribbon;
+   the user's pick gets a "Your pick" tag (green if matched, red if
+   missed). Lets the user compare trade-offs across choices, not
+   just the one they made. */
+.options-analysis {
+  margin: 16px 0;
+}
+.options-analysis-header {
+  margin-bottom: 10px;
+}
+.options-analysis-title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--text);
+}
+.options-analysis-subtitle {
+  font-size: 0.78rem;
+  margin-top: 2px;
+}
+.options-analysis-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.options-analysis-card {
+  padding: 10px 14px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.options-analysis-card.is-gto {
+  background: rgba(76, 200, 130, 0.06);
+  border-color: rgba(76, 200, 130, 0.45);
+}
+.options-analysis-card.is-miss {
+  background: rgba(240, 100, 100, 0.05);
+  border-color: rgba(240, 100, 100, 0.4);
+}
+.options-analysis-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.options-analysis-action {
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+.options-analysis-tags {
+  display: inline-flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.options-analysis-tag {
+  font-size: 0.7rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.options-analysis-tag.is-gto {
+  background: rgba(76, 200, 130, 0.18);
+  color: #6fd9a0;
+  border: 1px solid rgba(76, 200, 130, 0.5);
+}
+.options-analysis-tag.is-user.is-match {
+  background: rgba(76, 200, 130, 0.12);
+  color: #cdebd9;
+  border: 1px solid rgba(76, 200, 130, 0.35);
+}
+.options-analysis-tag.is-user.is-miss {
+  background: rgba(240, 100, 100, 0.15);
+  color: #f3c0c0;
+  border: 1px solid rgba(240, 100, 100, 0.5);
+}
+.options-analysis-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+@media (max-width: 600px) {
+  .options-analysis-body { grid-template-columns: 1fr; }
+}
+.options-analysis-section-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--text-dim);
+  margin-bottom: 4px;
+}
+.options-analysis-pros,
+.options-analysis-cons {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 0.86rem;
+  line-height: 1.4;
+}
+.options-analysis-pros li,
+.options-analysis-cons li {
+  padding-left: 14px;
+  position: relative;
+  color: var(--text);
+}
+.options-analysis-pros li::before {
+  content: "+";
+  position: absolute;
+  left: 0;
+  color: #6fd9a0;
+  font-weight: 700;
+}
+.options-analysis-cons li::before {
+  content: "−";
+  position: absolute;
+  left: 0;
+  color: #e58787;
+  font-weight: 700;
+}
+
 /* Villain range chip — clickable, opens the equity panel pre-loaded.
    (Legacy class, used by the backwards-compatible buildSpotContext.
    Newer surfaces use .villain-range-card below for a fuller treatment.) */
