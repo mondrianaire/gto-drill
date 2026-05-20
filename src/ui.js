@@ -71,9 +71,12 @@ function knownCards(scen) {
 //   4 = "Nbb" / "N.Nbb" → stylized bb chip
 //   5 = "K?" → unknown-suit card (suit not yet determined)
 //   6 = "Kx" → doesn't-matter-suit card (analyst says suit irrelevant)
-//   7 = "K72" / "K72r" / "K72 rainbow" → multi-card rainbow board
-// Order matters for regex alternation: more-specific patterns first.
-const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(?:r\b|\s+rainbow\b)?/g;
+//   7 = "K72" / "K72r" / "K72 rainbow" → multi-card rainbow board (3-5 ranks)
+//   8 = "KK" / "AA" / "AK" / "JT" → 2-rank hand-class shorthand (pair or non-pair)
+// Order matters for regex alternation: longer/more-specific patterns first.
+// Group 7 (3-5 ranks) is listed before group 8 (2 ranks) so multi-card
+// boards aren't truncated to a 2-rank hand class.
+const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s+[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|BTN|SB|BB)\b|\b([Hh]ero|[Vv]illain)\b|\b(\d+(?:\.\d+)?)bb\b|\b([2-9TJQKA])\?|\b([2-9TJQKA])x\b|\b([2-9TJQKA]{3,5})(?:r\b|\s+rainbow\b)?|\b([2-9TJQKA]{2})\b/g;
 
 /** Escape regex meta-characters for safe use inside a constructed RegExp. */
 function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
@@ -132,6 +135,17 @@ function tokenizeProse(text, scen) {
         frag.appendChild(h("span", { class: "tok-rainbow", title: r + " — rainbow board (any of 4 suits, all different)" },
           h("span", { class: "tok-rainbow-rank" }, r === "T" ? "10" : r),
           h("span", { class: "tok-rainbow-suit", "aria-hidden": "true" })));
+      }
+    } else if (m[8]) {
+      // 2-rank hand-class shorthand ("KK", "AA", "AK", "JT", etc.) — render
+      // as two cards each with a "doesn't matter" suit mark. Reads as "any
+      // K + any K" or "any A + any K" — which is what the shorthand means.
+      const ranks = m[8];
+      for (let i = 0; i < ranks.length; i++) {
+        const r = ranks[i];
+        frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
+          h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r),
+          h("span", { class: "tok-anysuit-mark" }, "x")));
       }
     }
     last = m.index + m[0].length;
