@@ -33,6 +33,10 @@ html, body {
   line-height: 1.45;
   min-height: 100vh;
   -webkit-text-size-adjust: 100%;
+  /* Kill iOS Safari's double-tap-to-zoom on UI elements. Pinch-zoom
+     (the accessibility one) still works because we don't set
+     user-scalable=no on the viewport meta. */
+  touch-action: manipulation;
 }
 
 body { padding-bottom: 4rem; }
