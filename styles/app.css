@@ -1552,9 +1552,23 @@ form { margin-top: 8px; }
 }
 .tok-pos.is-hero { background: var(--hero-soft); color: var(--hero); }
 .tok-pos.is-villain { background: var(--villain-soft); color: var(--villain); }
-.tok-word { font-weight: 700; }
-.tok-word.is-hero { color: var(--hero); }
-.tok-word.is-villain { color: var(--villain); }
+/* Literal "Hero" / "Villain" words in prose share the SAME chip
+   treatment as the .tok-pos.is-hero / .is-villain swapped-position
+   chips. Without this, a paragraph that mixed "VILLAIN" (from a
+   tokenized position) with "Villain" (from the literal word) showed
+   inconsistent styling — one chip-shaped, the other bold-colored
+   text. */
+.tok-word {
+  display: inline-block;
+  font-weight: 700;
+  font-size: 0.82em;
+  padding: 0 5px;
+  border-radius: 4px;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+.tok-word.is-hero { background: var(--hero-soft); color: var(--hero); }
+.tok-word.is-villain { background: var(--villain-soft); color: var(--villain); }
 
 /* bb chip — every "Nbb" / "N.Nbb" gets a stylized pill. Number bold,
    unit subscripted small-caps. Reads as "thirteen big-blinds" while
