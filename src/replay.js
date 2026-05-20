@@ -250,6 +250,13 @@ export function mountReplay(container, replay) {
     const bet = st.street > 0
       ? h("div", { class: "rseat-bet" }, bbChip(round1(st.street)))
       : null;
+    // Dealer button — small "D" disc attached to whichever seat holds
+    // the BTN (regardless of whether that's the hero). Real-table cue
+    // that orients the eye to where the action started.
+    const isDealer = seatDef.pos === "BTN";
+    const dealerBtn = isDealer
+      ? h("div", { class: "rseat-dealer", title: "Dealer button" }, "D")
+      : null;
     return h(
       "div",
       { class: cls + (isTurn ? " rseat-turn" : "") + (st.folded ? " rseat-folded" : "") +
@@ -257,7 +264,8 @@ export function mountReplay(container, replay) {
       cardRow,
       h("div", { class: "rseat-pos" }, seatDef.pos + (isHero ? " (you)" : "")),
       h("div", { class: "rseat-stack" }, bbChip(round1(st.stack))),
-      bet
+      bet,
+      dealerBtn
     );
   }
 
