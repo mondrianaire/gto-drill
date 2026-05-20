@@ -11,6 +11,7 @@ import {
   cancelLobby,
   watchMyActiveGames,
   cancelGame,
+  deleteLobby,
   signInWithGoogle,
   getCurrentUser,
   getCurrentUid,
@@ -522,9 +523,11 @@ export function buildAvatar(name, photoURL) {
   return h("div", { class: "avatar avatar-fallback" }, initial);
 }
 
-// Builds a lobby-list card for the Join screen — owner avatar, name,
-// and game shape (rounds × hands).
-function buildLobbyCard(lobby, onJoin) {
+// Builds a lobby-list row for the Join screen. The big tap-target is
+// the join button (the card itself); a small ×-style delete button sits
+// alongside so users can nuke orphan / bot lobbies (the rules allow
+// delete on any waiting_for_opponent doc).
+function buildLobbyCard(lobby, onJoin, onDelete) {
   const card = h(
     "button",
     { type: "button", class: "lobby-card" },
@@ -538,7 +541,19 @@ function buildLobbyCard(lobby, onJoin) {
     h("span", { class: "lobby-go" }, "Join")
   );
   card.addEventListener("click", () => onJoin(card));
-  return card;
+
+  const deleteBtn = h("button", {
+    type: "button",
+    class: "lobby-delete",
+    title: "Delete this lobby",
+    "aria-label": "Delete lobby " + lobby.gameId,
+  }, "×");
+  deleteBtn.addEventListener("click", (ev) => {
+    ev.stopPropagation();
+    onDelete(lobby, deleteBtn);
+  });
+
+  return h("div", { class: "lobby-row" }, card, deleteBtn);
 }
 
 /**
@@ -622,7 +637,30 @@ export function mountJoinGameView(container, onJoined, onBack) {
       ? main + " · " + dropped + " stale hidden"
       : main;
     for (const lobby of fresh) {
-      listEl.appendChild(buildLobbyCard(lobby, (card) => joinLobby(lobby, card)));
+      listEl.appendChild(buildLobbyCard(
+        lobby,
+        (card) => joinLobby(lobby, card),
+        (l, delBtn) => deleteOrphanLobby(l, delBtn)
+      ));
+    }
+  }
+
+  async function deleteOrphanLobby(lobby, delBtn) {
+    if (busy) return;
+    const ok = confirm(
+      "Delete lobby " + lobby.gameId + " (" + (lobby.ownerName || "owner unknown") + ")?\n" +
+      "This permanently removes the lobby."
+    );
+    if (!ok) return;
+    delBtn.disabled = true;
+    try {
+      await deleteLobby(lobby.gameId);
+      // Snapshot listener will drop the row automatically.
+    } catch (err) {
+      console.warn("deleteLobby failed:", err);
+      delBtn.disabled = false;
+      errorBox.textContent =
+        "Couldn't delete that lobby. If the Firestore rules were just updated, make sure they've been published in the Firebase Console.";
     }
   }
 

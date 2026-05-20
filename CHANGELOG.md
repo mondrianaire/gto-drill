@@ -5,14 +5,25 @@ All notable changes to GTO Duel after its promotion from AutoBuilder
 
 ## [Unreleased]
 
-### ⚠ Firestore rules update required (v2026-05-20.63)
+### ⚠ Firestore rules update required (v2026-05-20.63 and v2026-05-20.75)
 
-The "Your active games" panel introduces a new query
-(`where("participantUids", "array-contains", uid)`). The shipped
-`firestore.rules` has been updated to allow this list query for the
-participant. **Re-publish the updated `firestore.rules` in the Firebase
-Console** (Firestore Database → Rules → Publish) — otherwise the new
-panel will silently show empty and log a permission-denied warning.
+Two cumulative rule changes need to be live in the Firebase Console
+(Firestore Database → Rules → Publish):
+
+1. **List query for participant's own active games** (v2026-05-20.63)
+   — adds an OR branch on the existing `allow list` rule so the
+   "Your active games" panel can read games where the caller is a
+   participant.
+
+2. **Delete on orphan lobbies** (v2026-05-20.75) — flips the previous
+   `allow delete: if false` to allow any signed-in user to delete a
+   game whose status is still `waiting_for_opponent`. Powers the
+   new "×" delete button on the Join-screen lobby browser; in-progress
+   and completed games still cannot be deleted.
+
+Both changes live in the repo's `firestore.rules`. Paste the full file
+into the Console and Publish — both the active-games panel and the
+lobby delete button silently no-op until the rules are live.
 
 ### Changed
 - **Mobile pass 1 fixes** (from `design-audit/mobile-audit.html`).
