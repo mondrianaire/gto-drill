@@ -289,7 +289,13 @@ export function buildSpotSummary(replay) {
       : null;
     const actionsEl = h("div", { class: "spot-sum-actions" });
     items.forEach((a) => {
-      actionsEl.appendChild(h("div", { class: "spot-sum-action" }, ...actionNodes(a)));
+      // data-step = the replay `step` value AT WHICH this action's
+      // effects are on the table (setStep(N) applies actions[0..N-1]).
+      // The replay component drives highlight via spotSummary.setStep().
+      const stepValue = actions.indexOf(a) + 1;
+      const actionEl = h("div", { class: "spot-sum-action" }, ...actionNodes(a));
+      actionEl.setAttribute("data-step", String(stepValue));
+      actionsEl.appendChild(actionEl);
     });
     // Hero-turn arrow on the decision street (its own line at the end)
     if (isDecision) {
@@ -303,7 +309,22 @@ export function buildSpotSummary(replay) {
   }
 
   if (rows.length === 0) return null;
-  return h("div", { class: "spot-summary" }, ...rows);
+  const el = h("div", { class: "spot-summary" }, ...rows);
+  // setStep(step) — driven by mountReplay's onStep callback. Highlights
+  // the action with the largest data-step ≤ step (the most recent
+  // action applied at the current replay position). At minStep (before
+  // any voluntary action) nothing is highlighted.
+  el.setStep = function (step) {
+    const all = el.querySelectorAll(".spot-sum-action");
+    let current = null;
+    all.forEach((a) => {
+      a.classList.remove("is-current");
+      const s = parseInt(a.getAttribute("data-step"), 10);
+      if (!Number.isNaN(s) && s <= step) current = a;
+    });
+    if (current) current.classList.add("is-current");
+  };
+  return el;
 }
 
 // -----------------------------------------------------------------------
@@ -340,8 +361,13 @@ function describeAction(replay, index) {
 /**
  * @param {HTMLElement} container
  * @param {Object} replay  A scenario's `replay` object.
+ * @param {Object} [opts]
+ * @param {(step:number)=>void} [opts.onStep]  Notified on every render
+ *   with the current step value. Used by callers to drive an external
+ *   highlight (e.g. the spot-summary mini-display).
  */
-export function mountReplay(container, replay) {
+export function mountReplay(container, replay, opts) {
+  const onStep = opts && typeof opts.onStep === "function" ? opts.onStep : null;
   const actions = replay.actions || [];
   const decisionStep = actions.length;
   // SB/BB blind posts come FIRST in the actions array. They're forced
@@ -483,6 +509,9 @@ export function mountReplay(container, replay) {
     prevBtn.disabled = step <= minStep;
     nextBtn.disabled = step === decisionStep;
     playBtn.textContent = (playTimer || autoplayTimer) ? "❚❚" : "▶";
+    if (onStep) {
+      try { onStep(step); } catch (_) { /* swallow — highlight is cosmetic */ }
+    }
   }
 
   function setStep(s) {
