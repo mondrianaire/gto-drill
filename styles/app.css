@@ -748,6 +748,60 @@ form { margin-top: 8px; }
 .tok-word.is-hero { color: var(--hero); }
 .tok-word.is-villain { color: var(--villain); }
 
+/* bb chip — every "Nbb" / "N.Nbb" gets a stylized pill. Number bold,
+   unit subscripted small-caps. Reads as "thirteen big-blinds" while
+   looking distinct from prose. */
+.tok-bb {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 1px;
+  padding: 0 4px;
+  border-radius: 4px;
+  background: rgba(76, 182, 255, 0.10);
+  color: var(--text);
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+  white-space: nowrap;
+}
+.tok-bb-num { font-weight: 700; font-size: 0.95em; }
+.tok-bb-unit {
+  font-size: 0.62em;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-dim);
+  margin-left: 1px;
+}
+
+/* Any-suit card — "Kx" / "Ax" / "Qx" renders as a card-shaped pill with
+   the rank + a tiny 4-suit rainbow row indicating "any suit". */
+.tok-anysuit {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  width: 19px;
+  height: 23px;
+  border-radius: 3px;
+  vertical-align: -5px;
+  margin: 0 1px;
+  background: #fdfdfb;
+  color: #1a1a1a;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
+  line-height: 1;
+  cursor: help;
+}
+.tok-anysuit-rank { font-weight: 700; font-size: 0.58rem; }
+.tok-anysuit-suits {
+  font-size: 0.46rem;
+  letter-spacing: -0.3px;
+  background: linear-gradient(90deg, #1a1a1a 0 50%, #c0202a 50% 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
 /* Inline range chip — clickable anchor that pre-loads the equity panel. */
 .tok-range {
   color: var(--villain);

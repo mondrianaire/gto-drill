@@ -62,6 +62,19 @@ function fmtBb(n) {
   return (Number.isInteger(n) ? String(n) : String(n)) + "bb";
 }
 
+/**
+ * DOM equivalent of fmtBb — returns a bb-chip element matching the
+ * .tok-bb visual used throughout the app's prose. Use this for visual
+ * displays (pot, stack, bet bubble, table-info bar) so the bb voice is
+ * consistent everywhere. The text version fmtBb is still used inside
+ * `describeAction()` because action-log lines are plain text.
+ */
+function bbChip(n) {
+  return h("span", { class: "tok-bb" },
+    h("span", { class: "tok-bb-num" }, String(n)),
+    h("span", { class: "tok-bb-unit" }, "bb"));
+}
+
 // -----------------------------------------------------------------------
 // Replay reducer — derive table state after `step` actions are applied.
 // -----------------------------------------------------------------------
@@ -207,7 +220,7 @@ export function mountReplay(container, replay) {
       h("div", { class: "replay-board" }, boardCards.length
         ? boardCards.map((c) => cardEl(c, "sm"))
         : [h("span", { class: "replay-board-empty" }, "preflop")]),
-      h("div", { class: "replay-pot" }, "Pot " + fmtBb(round1(state.displayPot)))
+      h("div", { class: "replay-pot" }, "Pot ", bbChip(round1(state.displayPot)))
     ));
   }
 
@@ -223,7 +236,7 @@ export function mountReplay(container, replay) {
       cardRow = h("div", { class: "rseat-cards" }, cards);
     }
     const bet = st.street > 0
-      ? h("div", { class: "rseat-bet" }, fmtBb(round1(st.street)))
+      ? h("div", { class: "rseat-bet" }, bbChip(round1(st.street)))
       : null;
     return h(
       "div",
@@ -231,7 +244,7 @@ export function mountReplay(container, replay) {
         (!isHero && !st.folded ? " rseat-villain" : "") },
       cardRow,
       h("div", { class: "rseat-pos" }, seatDef.pos + (isHero ? " (you)" : "")),
-      h("div", { class: "rseat-stack" }, fmtBb(round1(st.stack))),
+      h("div", { class: "rseat-stack" }, bbChip(round1(st.stack))),
       bet
     );
   }
@@ -296,13 +309,12 @@ export function mountReplay(container, replay) {
   nextBtn.addEventListener("click", () => { stopPlay(); setStep(step + 1); });
   playBtn.addEventListener("click", togglePlay);
 
-  const gameInfo = (replay.format === "tournament" ? "Tournament" : "Cash") +
-    " · " + fmtBb(replay.stack_depth_bb) + " deep";
+  const gameInfoPrefix = (replay.format === "tournament" ? "Tournament" : "Cash") + " · ";
 
   const root = h(
     "div",
     { class: "replay" },
-    h("div", { class: "replay-gameinfo" }, gameInfo),
+    h("div", { class: "replay-gameinfo" }, gameInfoPrefix, bbChip(replay.stack_depth_bb), " deep"),
     table,
     h("div", { class: "replay-controls" }, prevBtn, playBtn, nextBtn, stepLabel),
     h("details", { class: "replay-history" },
