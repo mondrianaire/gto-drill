@@ -85,7 +85,8 @@ function deriveState(replay, step) {
     seats[s.pos] = { pos: s.pos, stack: s.stack_bb, street: 0, total: 0, folded: false };
   }
   let pot = replay.starting_pot_bb || 0;
-  const applied = (replay.actions || []).slice(0, step);
+  const allActions = replay.actions || [];
+  const applied = allActions.slice(0, step);
   let curStreet = "preflop";
   for (const a of applied) {
     if (a.street !== curStreet) {
@@ -108,8 +109,28 @@ function deriveState(replay, step) {
       seat.stack -= a.amount_bb || 0;
     }
   }
-  // Street currently in view = street of the last applied action.
-  const viewStreet = applied.length ? applied[applied.length - 1].street : "preflop";
+  // Determine the street to show on the table. Normal case: the street of
+  // the last applied action. EXCEPTION: when we're at the decision point
+  // AND the next street has been DEALT (i.e. scen.replay.board has cards
+  // for it), the dealer would have advanced the board between the last
+  // action and the hero's decision. Show the new street's cards and sweep
+  // any open street-bets into the pot. Fixes scenarios where the hero is
+  // first to act on a new street (e.g., BB facing a flop with no preflop
+  // continuation from villain).
+  let viewStreet = applied.length ? applied[applied.length - 1].street : "preflop";
+  if (step === allActions.length) {
+    const board = replay.board || {};
+    let dealtStreet = "preflop";
+    if (board.river && board.river.length) dealtStreet = "river";
+    else if (board.turn && board.turn.length) dealtStreet = "turn";
+    else if (board.flop && board.flop.length) dealtStreet = "flop";
+    const order = ["preflop", "flop", "turn", "river"];
+    if (order.indexOf(dealtStreet) > order.indexOf(viewStreet)) {
+      // Sweep the still-open street-bets into the pot, then advance.
+      for (const p of Object.values(seats)) { pot += p.street; p.street = 0; }
+      viewStreet = dealtStreet;
+    }
+  }
   const liveBets = Object.values(seats).reduce((s, p) => s + p.street, 0);
   return { seats, pot, displayPot: pot + liveBets, viewStreet };
 }
@@ -185,6 +206,12 @@ function describeAction(replay, index) {
 export function mountReplay(container, replay) {
   const actions = replay.actions || [];
   const decisionStep = actions.length;
+  // SB/BB blind posts come FIRST in the actions array. They're forced
+  // bets — not "action history" the user steps through. Treat them as a
+  // default minimum-state: the table starts with blinds already posted,
+  // and the previous-action button never steps before them.
+  let minStep = 0;
+  while (minStep < actions.length && actions[minStep].type === "post") minStep += 1;
   let step = decisionStep; // start showing the full pre-decision state
   let playTimer = null;
 
@@ -234,6 +261,21 @@ export function mountReplay(container, replay) {
         : [h("span", { class: "replay-board-empty" }, "preflop")]),
       h("div", { class: "replay-pot" }, "Pot ", bbChip(round1(state.displayPot)))
     ));
+
+    // Bet bubbles — a SEPARATE pass so each bubble sits halfway between
+    // its seat and the pot (positioned via .rbet-slot-N CSS), not above
+    // or below the seat itself. Reads as "chips pushed forward to the
+    // pot" rather than a label attached to the player.
+    ordered.forEach((pos, slot) => {
+      const st = state.seats[pos];
+      if (st.street > 0) {
+        table.appendChild(h(
+          "div",
+          { class: "rbet rbet-slot-" + slot },
+          bbChip(round1(st.street))
+        ));
+      }
+    });
   }
 
   function seatEl(seatDef, st, isHero, isTurn, cls) {
@@ -247,9 +289,6 @@ export function mountReplay(container, replay) {
         : [cardEl(null, "sm"), cardEl(null, "sm")];
       cardRow = h("div", { class: "rseat-cards" }, cards);
     }
-    const bet = st.street > 0
-      ? h("div", { class: "rseat-bet" }, bbChip(round1(st.street)))
-      : null;
     // Dealer button — small "D" disc attached to whichever seat holds
     // the BTN (regardless of whether that's the hero). Real-table cue
     // that orients the eye to where the action started.
@@ -264,14 +303,17 @@ export function mountReplay(container, replay) {
       cardRow,
       h("div", { class: "rseat-pos" }, seatDef.pos + (isHero ? " (you)" : "")),
       h("div", { class: "rseat-stack" }, bbChip(round1(st.stack))),
-      bet,
       dealerBtn
     );
   }
 
   function renderLog() {
     while (log.firstChild) log.removeChild(log.firstChild);
+    // Skip the SB/BB blind posts — they're default forced bets that exist
+    // in every hand, not part of the action history. Real "action" starts
+    // at UTG (or whoever's first to voluntarily act).
     actions.forEach((a, i) => {
+      if (a.type === "post") return;
       const li = h("li", {
         class: "replay-logitem" + (i < step ? " is-done" : "") + (i === step - 1 ? " is-current" : ""),
         onClick: () => setStep(i + 1),
@@ -291,19 +333,20 @@ export function mountReplay(container, replay) {
     renderLog();
     if (step === decisionStep) {
       stepLabel.textContent = "Decision point";
-    } else if (step === 0) {
+    } else if (step === minStep) {
+      // Initial state — blinds posted, no voluntary action yet.
       stepLabel.textContent = "Start of hand";
     } else {
       const a = actions[step - 1];
       stepLabel.textContent = capitalize(a.street) + " — " + describeAction(replay, step - 1);
     }
-    prevBtn.disabled = step === 0;
+    prevBtn.disabled = step <= minStep;
     nextBtn.disabled = step === decisionStep;
     playBtn.textContent = playTimer ? "❚❚" : "▶";
   }
 
   function setStep(s) {
-    step = Math.max(0, Math.min(decisionStep, s));
+    step = Math.max(minStep, Math.min(decisionStep, s));
     if (playTimer && step === decisionStep) stopPlay();
     render();
   }
@@ -315,7 +358,8 @@ export function mountReplay(container, replay) {
 
   function togglePlay() {
     if (playTimer) { stopPlay(); return; }
-    if (step === decisionStep) step = 0;
+    // Restart from the post-blinds baseline if we're at the end already.
+    if (step === decisionStep) step = minStep;
     render();
     playTimer = setInterval(() => {
       if (step >= decisionStep) { stopPlay(); return; }
