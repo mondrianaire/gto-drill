@@ -141,6 +141,25 @@
   .sm-controls-wrap.is-open {
     max-height:800px; opacity:1; margin-top:0;
   }
+
+  /* Demo state switcher — only present in the mock, not in the real app */
+  .sm-mode-btn {
+    background:#16222e; border:1px solid #243646; color:#8aa1b1;
+    font-size:.74rem; font-weight:500; padding:5px 10px;
+    border-radius:6px; min-height:0; cursor:pointer;
+  }
+  .sm-mode-btn:hover { color:#e6edf3; border-color:#4cb6ff; }
+  .sm-mode-btn.is-active {
+    background:#1c2c39; color:#4cb6ff; border-color:#4cb6ff; font-weight:600;
+  }
+
+  /* Standalone-mode hint: shown above the matrix when it's empty */
+  .sm-empty-hint {
+    background:rgba(76,182,255,0.06); border:1px dashed #243646;
+    border-radius:6px; padding:10px 12px; font-size:.82rem;
+    color:#8aa1b1; text-align:center;
+  }
+  .sm-empty-hint b { color:#4cb6ff; font-weight:600; }
   /* Each input section is its own labeled card */
   .sm-section {
     background:#0c1620; border:1px solid #1a2735;
@@ -286,15 +305,25 @@
     <div class="phone" style="grid-column: 1 / -1; max-width: 760px;">
       <div class="phone-title"><strong>Villain range</strong><span class="tag tag-alt">Alt B — matrix-first, controls collapsed</span></div>
 
+      <div style="display:flex; gap:6px; margin-bottom:10px; flex-wrap:wrap;">
+        <span style="font-size:.7rem; letter-spacing:.1em; text-transform:uppercase; color:#5b6271; font-weight:700; margin-right:6px; align-self:center;">Demo state</span>
+        <button class="sm-mode-btn is-active" data-mode="chip">🎯 Chip click</button>
+        <button class="sm-mode-btn" data-mode="testit">🎲 Test it</button>
+        <button class="sm-mode-btn" data-mode="standalone">🧮 Calculator</button>
+      </div>
+
       <div class="sm-header">
         <div id="v-smr-stats" class="panel-stats" style="margin:0; flex:1 1 auto;">…</div>
         <button id="v-smr-modify" class="sm-modify-btn" aria-expanded="false" title="Show controls to modify the range">
-          <span class="lbl">Modify range</span>
+          <span class="lbl">Customize</span>
           <span class="chev">▼</span>
         </button>
       </div>
 
       <div class="sm">
+        <div class="sm-empty-hint" id="v-smr-empty-hint" hidden>
+          No villain range yet. Tap <b>Customize</b> to pick a range, or hit a category chip in there to start fast.
+        </div>
         <div class="sm-matrix-wrap">
           <div class="sm-matrix" id="v-smr-matrix"></div>
         </div>
@@ -542,14 +571,30 @@
     const modifyEl = document.getElementById("v-smr-modify");
     const controlsWrapEl = document.getElementById("v-smr-controls-wrap");
 
-    // Mimic a chip-click from the GTO prose: the panel opens with the
-    // named villain range pre-loaded. The "loaded label" stays visible
-    // until the user modifies, at which point it switches to "Custom".
-    const PRELOADED_RANGE = {
-      label: "BB's 3-bet range",
-      hands: ["AA","KK","QQ","JJ","AKs","AKo","A5s","A4s","A3s"],
+    // Three open-states the panel could land in, depending on how it was
+    // launched. The mock's "Demo state" buttons toggle between them.
+    const MODES = {
+      // Chip click — a specific named range from the GTO prose.
+      chip: {
+        label: "BB's 3-bet range",
+        hands: ["AA","KK","QQ","JJ","AKs","AKo","A5s","A4s","A3s"],
+        hint: false,
+      },
+      // Test-it button on a scenario — auto-load the LAST chip in the
+      // GTO explanation (per user's call: "pick the last suggested range").
+      testit: {
+        label: "Last chip in GTO: BB's polar 4-bet range",
+        hands: ["AA","KK","QQ","AKs","AKo","A5s"],
+        hint: false,
+      },
+      // Standalone calculator — no scenario context, empty matrix.
+      standalone: {
+        label: null,
+        hands: [],
+        hint: true,
+      },
     };
-    let loadedLabel = PRELOADED_RANGE.label;
+    let loadedLabel = null;
 
     const ALL_LABELS = [];
     for (let r = 0; r < 13; r++) for (let c = 0; c < 13; c++) ALL_LABELS.push(classLabel(r, c));
@@ -575,6 +620,13 @@
         const on = sel.has(lbl);
         cellBy[lbl].classList.toggle("is-on", on);
         if (on) combos += comboCount(lbl);
+      }
+      const emptyHint = document.getElementById("v-smr-empty-hint");
+      const isEmpty = sel.size === 0 && !loadedLabel;
+      emptyHint.hidden = !isEmpty;
+      if (isEmpty) {
+        statsEl.innerHTML = '<span class="muted">No range selected</span>';
+        return;
       }
       const prefix = loadedLabel
         ? '<span class="sm-loaded-label">' + loadedLabel + '</span>'
@@ -702,11 +754,44 @@
       controlsWrapEl.classList.toggle("is-open", open);
       modifyEl.classList.toggle("is-open", open);
       modifyEl.setAttribute("aria-expanded", open ? "true" : "false");
-      modifyEl.querySelector(".lbl").textContent = open ? "Hide controls" : "Modify range";
+      modifyEl.querySelector(".lbl").textContent = open ? "Hide controls" : "Customize";
     });
 
-    // Pre-load a sample named range to mimic a GTO chip-click flow.
-    loadNamedRange(PRELOADED_RANGE.label, PRELOADED_RANGE.hands);
+    // Apply one of the three open-states (chip / testit / standalone).
+    function applyMode(modeName) {
+      const m = MODES[modeName];
+      if (!m) return;
+      playableOnly = false;
+      playableEl.classList.remove("is-on");
+      playableEl.setAttribute("aria-pressed", "false");
+      // Reset the disclosure to collapsed on every mode switch
+      controlsWrapEl.classList.remove("is-open");
+      modifyEl.classList.remove("is-open");
+      modifyEl.setAttribute("aria-expanded", "false");
+      modifyEl.querySelector(".lbl").textContent = "Customize";
+      if (m.hands.length > 0) {
+        loadNamedRange(m.label, m.hands);
+      } else {
+        raw.clear();
+        loadedLabel = null;
+        sliderEl.value = 0;
+        pctEl.textContent = "0%";
+        Array.from(catsEl.children).forEach((b) => b.classList.remove("is-on"));
+        Array.from(jumpsEl.children).forEach((b) => b.classList.remove("is-on"));
+        render();
+      }
+    }
+
+    // Mode switcher (mock only — not part of the real-app UI).
+    document.querySelectorAll(".sm-mode-btn").forEach((btn) => {
+      btn.addEventListener("click", () => {
+        document.querySelectorAll(".sm-mode-btn").forEach((b) => b.classList.toggle("is-active", b === btn));
+        applyMode(btn.dataset.mode);
+      });
+    });
+
+    // Start in "chip" mode — the most common entry point in the GTO workflow.
+    applyMode("chip");
   })();
 
   // ---------------- HERO — Current (horizontal scroll grid) ----------------
