@@ -222,15 +222,21 @@ export async function createGame(config) {
   const gameId = generateShareCode(6);
 
   const scenarioSeed = gameId; // deterministic per game
+  const nowIso = new Date().toISOString();
   const gameDoc = {
     gameId,
-    createdAt: new Date().toISOString(),
+    createdAt: nowIso,
     createdAtServer: serverTimestamp(),
     config: { rounds, handful_size: handful, scenario_seed: scenarioSeed },
     participantUids: [me.uid], // queryable array for Security Rules
     participants: [participantRecord(me)],
     rounds: precomputeRounds(rounds, handful, scenarioSeed, [me.uid]),
     status: "waiting_for_opponent",
+    // Activity tracking — surfaces "is the opponent still around?" in
+    // the active-games panel. lastActivityAt is touched on join + each
+    // submitHandful; lastSubmittedAt is per-user.
+    lastActivityAt: nowIso,
+    lastSubmittedAt: {}, // map uid → ISO timestamp of latest handful submission
   };
   await setDoc(doc(_db, "games", gameId), gameDoc);
   return { gameId };
@@ -270,6 +276,7 @@ export async function joinGame(gameId) {
         participants: newParticipants,
         rounds: newRounds,
         status: "in_progress",
+        lastActivityAt: new Date().toISOString(),
       });
       return { gameId: id };
     });
@@ -398,6 +405,7 @@ export function watchMyActiveGames(onChange) {
             break;
           }
         }
+        const lastSubByUid = g.lastSubmittedAt || {};
         games.push({
           gameId: g.gameId || d.id,
           status: g.status,
@@ -409,6 +417,26 @@ export function watchMyActiveGames(onChange) {
           handfulSize: handful,
           totalRounds,
           createdAt: g.createdAt || "",
+          // Activity signals: when did the game last see ANY action
+          // (join or submit), and when did each side last submit?
+          // Used by the active-games panel to render "is the opponent
+          // coming back" status text + a stalled-warning badge.
+          lastActivityAt: g.lastActivityAt || g.createdAt || "",
+          myLastSubmittedAt: lastSubByUid[myUid] || null,
+          opponentLastSubmittedAt: oppUid ? (lastSubByUid[oppUid] || null) : null,
+          // Whose turn is it right now? Computed inline so the panel
+          // can label the row without re-running computePhase.
+          turnOwnerUid: (function () {
+            const r = rounds[currentRoundIdx];
+            if (!r) return null;
+            const expected = (r.scenarioIds || []).length;
+            const sbu = r.submissionsByUid || {};
+            const myLen = Array.isArray(sbu[myUid]) ? sbu[myUid].length : 0;
+            const oppLen = oppUid && Array.isArray(sbu[oppUid]) ? sbu[oppUid].length : 0;
+            if (myLen < expected) return myUid;
+            if (oppUid && oppLen < expected) return oppUid;
+            return null;
+          })(),
         });
       });
       // Newest first.
@@ -505,7 +533,17 @@ export async function submitHandful(gameId, roundIndex, submissions) {
       (r) => uids.every((u) => Array.isArray(r.submissionsByUid[u]) && r.submissionsByUid[u].length === (r.scenarioIds || []).length)
     );
     const newStatus = everyRoundComplete ? "complete" : "in_progress";
-    tx.update(ref, { rounds, status: newStatus });
+    // Activity tracking — game-wide last-touched plus per-user
+    // last-submitted-at so the active-games panel can surface
+    // "Opponent last submitted X ago" / staleness flags.
+    const nowIso = new Date().toISOString();
+    const lastSubmittedAt = Object.assign({}, data.lastSubmittedAt || {}, { [uid]: nowIso });
+    tx.update(ref, {
+      rounds,
+      status: newStatus,
+      lastActivityAt: nowIso,
+      lastSubmittedAt,
+    });
     // Return the status this submission triggered for the section-4 caller.
     const bothInThisRound = uids.length === 2 && uids.every(
       (u) => Array.isArray(round.submissionsByUid[u]) && round.submissionsByUid[u].length === expectedIds.length

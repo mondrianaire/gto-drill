@@ -13,6 +13,7 @@ import {
   cancelGame,
   signInWithGoogle,
   getCurrentUser,
+  getCurrentUid,
   signOutUser,
 } from "./state.js";
 import { listHistory, historySummary, removeGame, writeActiveGameId } from "./history.js";
@@ -228,6 +229,7 @@ function buildActiveGamesSection() {
       return;
     }
     section.hidden = false;
+    const myUid = getCurrentUid();
     for (const g of games) {
       const isWaiting = g.status === "waiting_for_opponent";
       const opponent = g.opponentName
@@ -237,6 +239,35 @@ function buildActiveGamesSection() {
         ? "Round 1 of " + (g.totalRounds || 1) + " · 0 / " + (g.handfulSize || 0) + " played"
         : "Round " + (g.currentRoundIdx + 1) + " of " + (g.totalRounds || 1) +
           " · " + g.myInRound + " / " + (g.handfulSize || 0) + " played";
+
+      // --- activity / "is the opponent coming back" interpretation ---
+      // Use opponent's last submission if we have it, else fall back to
+      // join time, else game creation. Compute days-ago; flag stalled
+      // when >= 7 days with no opponent activity AND it's their turn.
+      const oppFirst = g.opponentName ? g.opponentName.split(/\s+/)[0] : "Opponent";
+      const myTurn = g.turnOwnerUid === myUid;
+      let activityLine = "";
+      let isStalled = false;
+      if (isWaiting) {
+        const ago = friendlyAgo(g.createdAt);
+        activityLine = "Created " + ago + " · opponent hasn't joined yet";
+      } else if (myTurn) {
+        activityLine = "Your turn — opponent is waiting on you";
+      } else {
+        // It's their turn (or game just finished a round). Surface
+        // when they last submitted.
+        const oppLast = g.opponentLastSubmittedAt;
+        if (oppLast) {
+          const days = daysBetween(oppLast, new Date().toISOString());
+          activityLine = oppFirst + " last submitted " + friendlyAgo(oppLast);
+          if (days >= 7) isStalled = true;
+        } else {
+          // Opponent joined but never submitted.
+          const days = daysBetween(g.lastActivityAt || g.createdAt, new Date().toISOString());
+          activityLine = oppFirst + " joined but hasn't played a hand yet";
+          if (days >= 7) isStalled = true;
+        }
+      }
 
       const resumeBtn = h("button", { type: "button", class: "primary active-games-resume" }, "Resume");
       resumeBtn.addEventListener("click", () => {
@@ -256,15 +287,20 @@ function buildActiveGamesSection() {
 
       const statusBadge = h("span", { class: "active-games-status" + (isWaiting ? " is-waiting" : " is-progress") },
         isWaiting ? "Waiting" : "In progress");
+      const stalledBadge = isStalled
+        ? h("span", { class: "active-games-status is-stalled", title: "No opponent activity for 7+ days" }, "Stalled")
+        : null;
 
-      list.appendChild(h("li", { class: "active-games-item" },
+      list.appendChild(h("li", { class: "active-games-item" + (isStalled ? " is-stalled" : "") },
         h("div", { class: "active-games-main" },
           h("div", { class: "active-games-line" },
             h("strong", null, g.gameId),
             statusBadge,
+            stalledBadge,
             h("span", { class: "muted active-games-vs" }, opponent)
           ),
-          h("div", { class: "active-games-progress muted" }, roundLine)
+          h("div", { class: "active-games-progress muted" }, roundLine),
+          h("div", { class: "active-games-activity muted" }, activityLine)
         ),
         h("div", { class: "active-games-actions" },
           resumeBtn,
@@ -272,6 +308,42 @@ function buildActiveGamesSection() {
         )
       ));
     }
+  }
+
+  // ----- timestamp helpers -----
+  // Both accept ISO strings; resilient to null/undefined.
+  function daysBetween(aIso, bIso) {
+    if (!aIso || !bIso) return 0;
+    const a = Date.parse(aIso);
+    const b = Date.parse(bIso);
+    if (Number.isNaN(a) || Number.isNaN(b)) return 0;
+    return Math.abs(b - a) / 86400000;
+  }
+  function friendlyAgo(iso) {
+    if (!iso) return "recently";
+    const ms = Date.now() - Date.parse(iso);
+    if (Number.isNaN(ms)) return "recently";
+    const minutes = ms / 60000;
+    if (minutes < 60) {
+      const m = Math.max(1, Math.round(minutes));
+      return m === 1 ? "1 minute ago" : m + " minutes ago";
+    }
+    const hours = minutes / 60;
+    if (hours < 24) {
+      const h = Math.round(hours);
+      return h === 1 ? "1 hour ago" : h + " hours ago";
+    }
+    const days = hours / 24;
+    if (days < 30) {
+      const d = Math.round(days);
+      return d === 1 ? "1 day ago" : d + " days ago";
+    }
+    const months = days / 30;
+    if (months < 12) {
+      const mo = Math.round(months);
+      return mo === 1 ? "1 month ago" : mo + " months ago";
+    }
+    return "over a year ago";
   }
 
   let unsub = () => {};
