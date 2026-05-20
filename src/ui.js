@@ -475,10 +475,10 @@ export function buildVillainRangeBlock({ scen, onRangeClick }) {
         tabindex: onRangeClick ? "0" : null,
         title: onRangeClick ? "Tap to test equity vs this range" : null },
       h("div", { class: "villain-range-card-header" },
-        h("span", { class: "villain-range-card-label" }, range.label ? richText(range.label, scen) : "Range"),
+        h("span", { class: "villain-range-card-label" }, range.label ? richText(range.label, scen, { actorLabels: true }) : "Range"),
         onRangeClick ? h("span", { class: "villain-range-card-icon", "aria-hidden": "true" }, "🎲") : null
       ),
-      range.summary ? h("div", { class: "villain-range-card-summary" }, richText(range.summary, scen)) : null
+      range.summary ? h("div", { class: "villain-range-card-summary" }, richText(range.summary, scen, { actorLabels: true })) : null
     );
     if (onRangeClick) {
       card.addEventListener("click", (ev) => { ev.preventDefault(); onRangeClick(range); });
@@ -670,7 +670,7 @@ export function buildGtoExplanation({ scen }) {
   if (!scen || !scen.gto_explanation) return null;
   return h("div", { class: "gto-explanation" },
     h("div", { class: "gto-explanation-label" }, "GTO read"),
-    h("p", { class: "gto-explanation-text" }, richText(scen.gto_explanation, scen))
+    h("p", { class: "gto-explanation-text" }, richText(scen.gto_explanation, scen, { actorLabels: true }))
   );
 }
 
@@ -713,12 +713,12 @@ export function buildOptionsAnalysis({ scen, userAction, gtoAction }) {
 
     const prosEl = pros.length
       ? h("ul", { class: "options-analysis-pros" },
-          ...pros.map((p) => h("li", null, richText(p, scen)))
+          ...pros.map((p) => h("li", null, richText(p, scen, { actorLabels: true })))
         )
       : null;
     const consEl = cons.length
       ? h("ul", { class: "options-analysis-cons" },
-          ...cons.map((c) => h("li", null, richText(c, scen)))
+          ...cons.map((c) => h("li", null, richText(c, scen, { actorLabels: true })))
         )
       : null;
 
