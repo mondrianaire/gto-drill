@@ -381,6 +381,49 @@ form { margin-top: 8px; }
 .reveal-result.is-miss .reveal-verdict { background: rgba(248, 113, 113, 0.12); color: var(--miss); }
 .reveal-verdict-icon { font-size: 1.35rem; line-height: 1; }
 
+/* Framing — universal facts about the spot that apply to every option.
+   Sits between the verdict and the option matrix; the reader gets
+   range / board / SPR context BEFORE drilling into per-option pros/cons.
+   Compact bullet list — facts, not recommendations. Visually quieter
+   than per-option content so it reads as setup, not advice. */
+.reveal-framing {
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.025);
+}
+.reveal-framing-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin-bottom: 6px;
+}
+.reveal-framing-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.reveal-framing-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  font-size: 0.90rem;
+  line-height: 1.4;
+  color: var(--text);
+}
+.reveal-framing-marker {
+  flex: 0 0 auto;
+  width: 14px;
+  text-align: center;
+  color: var(--text-dim);
+  font-weight: 700;
+  line-height: 1.4;
+}
+.reveal-framing-text { flex: 1 1 auto; min-width: 0; }
+
 /* Options stack — one card per available_action. */
 .reveal-options {
   display: flex;

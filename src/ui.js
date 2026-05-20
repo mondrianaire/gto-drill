@@ -93,8 +93,22 @@ const RICH_RE = /((?:[2-9TJQKA][cdhs])(?:\s*[2-9TJQKA][cdhs])*)\b|\b(UTG|HJ|CO|B
 /** Escape regex meta-characters for safe use inside a constructed RegExp. */
 function reEscape(s) { return s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"); }
 
-/** Tokenize a chunk of prose (no anchor handling) into card icons + chips. */
-function tokenizeProse(text, scen) {
+/**
+ * Tokenize a chunk of prose (no anchor handling) into card icons + chips.
+ *
+ * @param {string} text
+ * @param {Object} scen — scenario context (for pot computation, ranges)
+ * @param {Object} [opts]
+ * @param {boolean} [opts.asAction] — Signals this whole text is an action
+ *   LABEL (current decision), not prose. When true, every bb chip in the
+ *   result gets its computed pot-% suffix appended regardless of which
+ *   verb precedes it ("Bet 7bb", "Donk lead 2bb", "Raise to 5bb", "3-bet
+ *   to 11bb" etc. all get tagged). When false (default), only chips
+ *   preceded by "Bet"/"bet" get the suffix — keeps past-action prose
+ *   ("BB 3-bets to 11bb" inside a description) from receiving a pct
+ *   computed against the wrong (current-decision) pot.
+ */
+function tokenizeProse(text, scen, opts) {
   const frag = document.createDocumentFragment();
   if (!text) return frag;
   const heroPos = scen && scen.replay ? scen.replay.hero_seat : null;
@@ -196,7 +210,7 @@ function tokenizeProse(text, scen) {
     last = m.index + m[0].length;
   }
   if (last < text.length) frag.appendChild(document.createTextNode(text.slice(last)));
-  attachBetPotPct(frag, scen);
+  attachBetPotPct(frag, scen, opts);
   return frag;
 }
 
@@ -216,18 +230,51 @@ function tokenizeProse(text, scen) {
  * pot at the current decision — computing % against the current pot
  * would lie. Action buttons + GTO line are where this lands well.
  */
-function attachBetPotPct(frag, scen) {
+// A pot-% parenthetical adjacent to a bb chip — in any of these forms:
+//   "(~30% pot)"  "(30% pot)"  "(~30%)"  "(30%)"  "(~75.5% pot)"
+// The regex only matches a parenthetical that's clearly a percent (digits
+// + `%`) so it's safe to apply WITHOUT a verb-prefix check — random
+// parentheticals after a bb chip ("(BB's stack)", etc.) won't match.
+const POT_PCT_PAREN_RE = /^\s*\(~?\d+(?:\.\d+)?\s*%(?:\s*pot)?\)/;
+
+function attachBetPotPct(frag, scen, opts) {
   const potBb = potAtDecisionBb(scen && scen.replay);
-  if (!potBb) return;
+  const asAction = !!(opts && opts.asAction);
   // Snapshot children before mutating so we don't iterate a moving list.
   const nodes = Array.prototype.slice.call(frag.childNodes);
   for (let i = 0; i < nodes.length; i++) {
     const node = nodes[i];
     if (!(node && node.nodeType === 1 && node.classList && node.classList.contains("tok-bb"))) continue;
     const prev = node.previousSibling;
-    if (!prev || prev.nodeType !== 3) continue;
-    if (!/\b[Bb]et\s+$/.test(prev.textContent)) continue;
-    // Extract the bb number from the chip we just rendered.
+    const next = node.nextSibling;
+    const prevText = (prev && prev.nodeType === 3) ? prev.textContent : "";
+
+    // Step 1: STRIP a redundant pot-% parenthetical adjacent to ANY bb
+    // chip. The chip itself displays the bb amount; a literal "(~30%)" /
+    // "(~30% pot)" / "(50%)" duplicates information. Done unconditionally
+    // because the regex only matches digit-% paren patterns — random
+    // text adjacent to the chip is unaffected.
+    if (next && next.nodeType === 3) {
+      const stripped = next.textContent.replace(POT_PCT_PAREN_RE, "");
+      if (stripped !== next.textContent) next.textContent = stripped;
+    }
+
+    // Step 2: ADD the computed "~XX% pot" suffix INSIDE the chip when the
+    // chip is a CURRENT BET. Two signals get a chip tagged:
+    //
+    //   (a) opts.asAction is true — caller is rendering an action LABEL
+    //       (an option-card action, an action button, the opponent's
+    //       picked-action chip). The whole text IS the action, so every
+    //       bb in it is a bet amount; verb-prefix matching is irrelevant.
+    //
+    //   (b) chip is preceded by "Bet "/"bet " in prose — narrow rule that
+    //       catches inline references like "the GTO line is to Bet 7bb"
+    //       without mislabelling past-action narration ("BB 3-bets to
+    //       11bb" in a description should NOT get a pct against the
+    //       current pot, since the 3-bet happened earlier).
+    if (!potBb) continue;
+    const isCurrentBet = asAction || /\b[Bb]et\s+$/.test(prevText);
+    if (!isCurrentBet) continue;
     const numEl = node.querySelector(".tok-bb-num");
     if (!numEl) continue;
     const num = parseFloat(numEl.textContent);
@@ -238,13 +285,6 @@ function attachBetPotPct(frag, scen) {
     pctSpan.className = "tok-bb-pct";
     pctSpan.textContent = "~" + rounded + "% pot";
     node.appendChild(pctSpan);
-    // Strip a literal "(~N% pot)" parenthetical that follows so we don't
-    // double-print the same information.
-    const next = node.nextSibling;
-    if (next && next.nodeType === 3) {
-      const stripped = next.textContent.replace(/^\s*\(~?\d+(?:\.\d+)?\s*%\s*pot\)/, "");
-      if (stripped !== next.textContent) next.textContent = stripped;
-    }
   }
 }
 
@@ -275,7 +315,11 @@ function makeRangeChip(matchedText, range, onClick) {
  *
  * @param {string} text
  * @param {Object} scen
- * @param {{ onRangeClick?: (range:any) => void }} [opts]
+ * @param {{ onRangeClick?: (range:any) => void, asAction?: boolean }} [opts]
+ *   `asAction` signals that `text` is an action label (current decision)
+ *   so every bb chip in it gets a computed pot-% suffix regardless of
+ *   which verb precedes it (Bet / Donk lead / Raise to / Re-raise to /
+ *   3-bet to / Check-raise to / Probe bet / Overbet / etc.).
  * @returns {DocumentFragment}
  */
 export function richText(text, scen, opts) {
@@ -283,8 +327,9 @@ export function richText(text, scen, opts) {
   if (!text) return frag;
   const ranges = (scen && Array.isArray(scen.villain_ranges)) ? scen.villain_ranges : [];
   const onRangeClick = opts && opts.onRangeClick;
+  const tokOpts = opts && opts.asAction ? { asAction: true } : undefined;
   if (!ranges.length || !onRangeClick) {
-    frag.appendChild(wrapDictionaryTerms(tokenizeProse(text, scen)));
+    frag.appendChild(wrapDictionaryTerms(tokenizeProse(text, scen, tokOpts)));
     return frag;
   }
   // Longest anchor first so "BB's 3-bet range" wins over "3-bet range".
@@ -293,15 +338,15 @@ export function richText(text, scen, opts) {
   let last = 0;
   let m;
   while ((m = anchorRe.exec(text))) {
-    if (m.index > last) frag.appendChild(wrapDictionaryTerms(tokenizeProse(text.slice(last, m.index), scen)));
+    if (m.index > last) frag.appendChild(wrapDictionaryTerms(tokenizeProse(text.slice(last, m.index), scen, tokOpts)));
     const matched = m[1];
     const range = sorted.find((r) => r.anchor === matched);
     // Tokenize the chip's own text too so bb chips / any-suit / etc.
     // appear consistently INSIDE range chips, not just around them.
-    frag.appendChild(makeRangeChip(tokenizeProse(matched, scen), range, onRangeClick));
+    frag.appendChild(makeRangeChip(tokenizeProse(matched, scen, tokOpts), range, onRangeClick));
     last = m.index + m[0].length;
   }
-  if (last < text.length) frag.appendChild(wrapDictionaryTerms(tokenizeProse(text.slice(last), scen)));
+  if (last < text.length) frag.appendChild(wrapDictionaryTerms(tokenizeProse(text.slice(last), scen, tokOpts)));
   return frag;
 }
 
@@ -369,6 +414,28 @@ export function buildRevealResult({ scen, userAction, gtoAction, confidence, opp
     h("span", { class: "reveal-verdict-icon", "aria-hidden": "true" }, correct ? "✓" : "✗"),
     h("span", { class: "reveal-verdict-text" }, correct ? "You matched the GTO line" : "Off the GTO line")
   );
+
+  // Framing section — universal facts about the spot that apply to every
+  // option. Sits BETWEEN the verdict and the option matrix so the reader
+  // gets situational context (range advantages, board texture, SPR, ...)
+  // before drilling into per-option pros/cons. Each bullet runs through
+  // richText so voice tokens fire naturally.
+  const framing = (scen && Array.isArray(scen.framing)) ? scen.framing : [];
+  let framingEl = null;
+  if (framing.length) {
+    const list = h("ul", { class: "reveal-framing-list" });
+    const richOptsFraming = onRangeClick ? { onRangeClick } : undefined;
+    for (const b of framing) {
+      list.appendChild(h("li", { class: "reveal-framing-item" },
+        h("span", { class: "reveal-framing-marker", "aria-hidden": "true" }, "·"),
+        h("span", { class: "reveal-framing-text" }, richText(b, scen, richOptsFraming))
+      ));
+    }
+    framingEl = h("div", { class: "reveal-framing" },
+      h("div", { class: "reveal-framing-label" }, "The spot"),
+      list
+    );
+  }
 
   // Build one card per available action.
   const optionsList = h("div", { class: "reveal-options" });
@@ -448,7 +515,7 @@ export function buildRevealResult({ scen, userAction, gtoAction, confidence, opp
 
     // Top row of the card: action chip on the left, badges on the right.
     const topRow = h("div", { class: "reveal-option-top" },
-      h("div", { class: "reveal-option-action" }, richText(action, scen)),
+      h("div", { class: "reveal-option-action" }, richText(action, scen, { asAction: true })),
       badges.childNodes.length ? badges : null
     );
 
@@ -492,7 +559,7 @@ export function buildRevealResult({ scen, userAction, gtoAction, confidence, opp
       ),
       h("div", { class: "reveal-opp-panel-pick" },
         h("span", { class: "reveal-opp-panel-label muted" }, "Picked"),
-        h("span", { class: "reveal-opp-panel-action" }, richText(opponent.action, scen))
+        h("span", { class: "reveal-opp-panel-action" }, richText(opponent.action, scen, { asAction: true }))
       ),
       opponent.confidence ? h("div", { class: "reveal-opp-panel-conf" },
         h("span", { class: "reveal-opp-panel-label muted" }, "Confidence"),
@@ -507,6 +574,7 @@ export function buildRevealResult({ scen, userAction, gtoAction, confidence, opp
 
   return h("div", { class: "reveal-result" + (correct ? " is-ok" : " is-miss") },
     verdict,
+    framingEl,
     optionsList,
     opponentPanel
   );
@@ -684,7 +752,7 @@ export function mountInGameView(container, gameId) {
       (scen ? scen.available_actions : []).forEach((a) => {
         // Run the action label through richText so bb chips / pot-%s /
         // any token style applies consistently with the prose voice.
-        const btn = h("button", { type: "button", class: "action-btn" + (sub.action === a ? " selected" : "") }, richText(a, scen));
+        const btn = h("button", { type: "button", class: "action-btn" + (sub.action === a ? " selected" : "") }, richText(a, scen, { asAction: true }));
         btn.addEventListener("click", () => {
           sub.action = a;
           actionRow.querySelectorAll(".action-btn").forEach((x) => x.classList.toggle("selected", x === btn));

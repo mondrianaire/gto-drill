@@ -148,7 +148,7 @@ export function mountSoloView(container, onExit) {
       (scen.available_actions || []).forEach((a) => {
         // Run action label through richText so bb chips / any-suit / etc.
         // apply consistently with the prose voice.
-        const btn = h("button", { type: "button", class: "action-btn" + (draft.action === a ? " selected" : "") }, richText(a, scen));
+        const btn = h("button", { type: "button", class: "action-btn" + (draft.action === a ? " selected" : "") }, richText(a, scen, { asAction: true }));
         btn.addEventListener("click", () => {
           draft.action = a;
           actionRow.querySelectorAll(".action-btn").forEach((x) => x.classList.toggle("selected", x === btn));
