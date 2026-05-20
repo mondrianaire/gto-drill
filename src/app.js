@@ -230,10 +230,13 @@ function mountRouter(root) {
 
   function goJoin() {
     clearRoot();
-    mountJoinGameView(root, (gameId) => {
-      writeActiveGameId(gameId);
-      goInGame(gameId);
-    });
+    mountJoinGameView(root,
+      (gameId) => {
+        writeActiveGameId(gameId);
+        goInGame(gameId);
+      },
+      () => goLanding()
+    );
   }
 
   function goWaitingOrGame(gameId) {
