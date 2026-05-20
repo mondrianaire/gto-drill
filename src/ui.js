@@ -305,6 +305,122 @@ export function richText(text, scen, opts) {
 }
 
 /**
+ * Build the reveal-result block — the visual comparison of "what the user
+ * played" vs "what the GTO line was". This is the educational moment of
+ * every hand; it lives on the solo reveal AND the multiplayer reveal (and
+ * stays consistent between them via this single helper).
+ *
+ * Visual model:
+ *   - When the user matched GTO → one centered tile (no point in showing
+ *     "your play" and "GTO line" twice with identical text).
+ *   - When the user missed     → two-column comparison: YOUR PLAY | GTO LINE.
+ *     Mobile collapses to stacked rows.
+ *
+ * Confidence renders as five dots (filled vs empty) so the rating is
+ * readable at a glance — vs the previous "3/5" buried in muted text.
+ *
+ * @param {Object} args
+ * @param {Object} args.scen        — full scenario (for richText tokenizing)
+ * @param {string} args.userAction  — what the user picked
+ * @param {string} args.gtoAction   — scen.gto_action
+ * @param {number} args.confidence  — 1..5
+ */
+export function buildRevealResult({ scen, userAction, gtoAction, confidence }) {
+  const correct = userAction === gtoAction;
+
+  const verdict = h("div", { class: "reveal-verdict" },
+    h("span", { class: "reveal-verdict-icon", "aria-hidden": "true" }, correct ? "✓" : "✗"),
+    h("span", { class: "reveal-verdict-text" }, correct ? "You matched the GTO line" : "Off the GTO line")
+  );
+
+  const confDots = h("div", { class: "reveal-conf", "aria-label": "Confidence " + confidence + " of 5" });
+  for (let i = 1; i <= 5; i++) {
+    confDots.appendChild(h("span", {
+      class: "reveal-conf-dot" + (i <= confidence ? " is-filled" : ""),
+      "aria-hidden": "true",
+    }));
+  }
+  const confRow = h("div", { class: "reveal-conf-row" },
+    h("span", { class: "reveal-conf-label" }, "Confidence"),
+    confDots
+  );
+
+  let comparison;
+  if (correct) {
+    // Single tile — the action is the answer.
+    comparison = h("div", { class: "reveal-compare reveal-compare-single" },
+      h("div", { class: "reveal-side reveal-side-correct" },
+        h("div", { class: "reveal-side-action" }, richText(userAction, scen)),
+        confRow
+      )
+    );
+  } else {
+    // Two columns — you vs GTO. Confidence sits under "your play".
+    comparison = h("div", { class: "reveal-compare reveal-compare-split" },
+      h("div", { class: "reveal-side reveal-side-you reveal-side-miss" },
+        h("div", { class: "reveal-side-label muted" }, "You played"),
+        h("div", { class: "reveal-side-action" }, richText(userAction, scen)),
+        confRow
+      ),
+      h("div", { class: "reveal-side reveal-side-gto" },
+        h("div", { class: "reveal-side-label muted" }, "GTO line"),
+        h("div", { class: "reveal-side-action" }, richText(gtoAction, scen))
+      )
+    );
+  }
+
+  return h("div", { class: "reveal-result" + (correct ? " is-ok" : " is-miss") },
+    verdict,
+    comparison
+  );
+}
+
+/**
+ * Build the opponent comparison block for multiplayer reveals — appears
+ * BELOW the main result and shows what the opponent picked, with an
+ * agreement note vs you AND vs GTO. Returns null when there's no
+ * opponent submission yet (we render the rest of the reveal without it).
+ *
+ * @param {Object} args
+ * @param {Object} args.scen         — full scenario
+ * @param {string} args.userAction
+ * @param {string} args.gtoAction
+ * @param {string} args.oppName
+ * @param {string} args.oppAction
+ * @param {number|null} args.oppConfidence
+ * @param {string|null} args.oppNote
+ */
+function buildOpponentBlock({ scen, userAction, gtoAction, oppName, oppAction, oppConfidence, oppNote }) {
+  if (!oppAction) return null;
+  const oppCorrect = oppAction === gtoAction;
+  const oppMatchedYou = oppAction === userAction;
+  const confDots = h("div", { class: "reveal-conf", "aria-label": "Opponent confidence " + (oppConfidence || 0) + " of 5" });
+  for (let i = 1; i <= 5; i++) {
+    confDots.appendChild(h("span", {
+      class: "reveal-conf-dot" + (oppConfidence && i <= oppConfidence ? " is-filled" : ""),
+      "aria-hidden": "true",
+    }));
+  }
+  return h("div", { class: "reveal-opp" + (oppCorrect ? " is-ok" : " is-miss") },
+    h("div", { class: "reveal-opp-header" },
+      h("span", { class: "reveal-opp-name" }, oppName),
+      h("span", { class: "reveal-opp-played muted" }, " played")
+    ),
+    h("div", { class: "reveal-side-action" }, richText(oppAction, scen)),
+    h("div", { class: "reveal-conf-row" },
+      h("span", { class: "reveal-conf-label" }, "Confidence"),
+      confDots
+    ),
+    h("div", { class: "reveal-agree" + (oppMatchedYou ? " is-agree" : " is-disagree") },
+      oppMatchedYou
+        ? "You both made the same call."
+        : "You and " + oppName + " disagreed here."
+    ),
+    oppNote ? h("p", { class: "reveal-opp-note" }, "“" + oppNote + "”") : null
+  );
+}
+
+/**
  * Post-process a tokenized fragment: walk its text-node children, wrap any
  * known dictionary terms in tooltip-enabled spans. DOM-element children
  * (cards, position chips, range chips) are passed through untouched.
@@ -526,20 +642,13 @@ export function mountInGameView(container, gameId) {
     } else {
       // ===================== REVEAL =====================
       const gto = scen ? scen.gto_action : "";
-      const correct = sub.action === gto;
 
-      const result = h("div", { class: "hand-result" + (correct ? " is-ok" : " is-miss") },
-        h("div", { class: "result-verdict" }, correct ? "✓ You matched the GTO line" : "✗ Off the GTO line"),
-        h("div", { class: "result-picks" },
-          h("div", null,
-            h("span", { class: "muted" }, "You played  "),
-            h("strong", { class: correct ? "ok" : "miss" }, richText(sub.action, scen)),
-            h("span", { class: "muted" }, "   ·   confidence " + sub.confidence + "/5")),
-          h("div", null,
-            h("span", { class: "muted" }, "GTO line  "),
-            h("strong", { class: "gto-action" }, richText(gto, scen)))
-        )
-      );
+      const result = buildRevealResult({
+        scen,
+        userAction: sub.action,
+        gtoAction: gto,
+        confidence: sub.confidence,
+      });
       // "Test it!" — Monte Carlo equity vs a user-picked villain range.
       // (Declared up here so inline range chips in the explanation prose can
       // call into the same panel.)
@@ -591,21 +700,17 @@ export function mountInGameView(container, gameId) {
       const oppUid = (game.participantUids || []).find((u) => u !== myUid);
       const oppSubs = oppUid && round.submissionsByUid ? round.submissionsByUid[oppUid] : null;
       const oppSub = Array.isArray(oppSubs) ? oppSubs[handIdx] : null;
-      let oppBlock = null;
-      if (oppSub && oppSub.action) {
-        const oppName = getDisplayName(game, oppUid);
-        const agree = oppSub.action === sub.action;
-        oppBlock = h("div", { class: "hand-opp" },
-          h("div", null,
-            h("strong", null, oppName + " played  "),
-            h("strong", { class: oppSub.action === gto ? "ok" : "miss" }, oppSub.action),
-            h("span", { class: "muted" }, "   ·   confidence " + (oppSub.confidence || "-") + "/5")),
-          h("div", { class: "hand-agree muted" }, agree
-            ? "You both made the same call."
-            : "You and " + oppName + " disagreed here."),
-          oppSub.note ? h("p", { class: "player-note" }, "“" + oppSub.note + "”") : null
-        );
-      }
+      const oppBlock = oppSub && oppSub.action
+        ? buildOpponentBlock({
+            scen,
+            userAction: sub.action,
+            gtoAction: gto,
+            oppName: getDisplayName(game, oppUid),
+            oppAction: oppSub.action,
+            oppConfidence: oppSub.confidence,
+            oppNote: oppSub.note,
+          })
+        : null;
 
       body = h("div", { class: "hand-reveal" },
         result,
