@@ -427,6 +427,7 @@ export function watchMyActiveGames(onChange) {
           opponentUid: oppUid,
           opponentName: opp ? opp.displayName : null,
           opponentPhoto: opp ? opp.photoURL : null,
+          opponentJoinedAt: opp ? (opp.joinedAt || null) : null,
           currentRoundIdx,
           myInRound,
           handfulSize: handful,
