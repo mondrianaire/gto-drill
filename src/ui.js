@@ -675,6 +675,119 @@ export function buildGtoExplanation({ scen }) {
 }
 
 /**
+ * Build the "How others played" crowd breakdown — aggregates every
+ * recorded response to this scenario into a per-option distribution.
+ * For each action: a % bar, the player count, a row of player avatars
+ * (hover → name), the average confidence of that group, and markers
+ * for the GTO line / the user's own pick. A non-GTO option that a
+ * meaningful slice of the crowd picked with high average confidence
+ * gets a "⚠ Blind spot" flag — the crowd-scale version of the
+ * confidence-gap insight.
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ * @param {Array<{uid,displayName,photoURL,action,confidence}>} args.responses
+ * @param {string} args.userAction  The current user's pick (for the marker).
+ */
+export function buildCrowdBreakdown({ scen, responses, userAction }) {
+  if (!scen) return null;
+  const options = Array.isArray(scen.available_actions) ? scen.available_actions : [];
+  const gto = scen.gto_action;
+  const list = Array.isArray(responses) ? responses : [];
+  const total = list.length;
+
+  const header = h("div", { class: "crowd-header" },
+    h("div", { class: "crowd-title" }, "How others played"),
+    h("div", { class: "crowd-subtitle muted" },
+      total === 0 ? "No one else has played this hand yet"
+        : total === 1 ? "1 player so far"
+        : total + " players so far")
+  );
+
+  if (total === 0) {
+    return h("div", { class: "crowd-breakdown" },
+      header,
+      h("p", { class: "crowd-empty muted" },
+        "You're the first to play this hand — come back later to see how the crowd reads it.")
+    );
+  }
+
+  // Group responses by action.
+  const byAction = {};
+  for (const r of list) {
+    const a = r.action || "—";
+    (byAction[a] = byAction[a] || []).push(r);
+  }
+  // Render every available action, plus any responded-to action that
+  // somehow isn't in available_actions (defensive — old data shapes).
+  const allActions = options.slice();
+  for (const a of Object.keys(byAction)) {
+    if (!allActions.includes(a)) allActions.push(a);
+  }
+  // Most-picked first.
+  allActions.sort((a, b) => (byAction[b] || []).length - (byAction[a] || []).length);
+
+  const rows = h("div", { class: "crowd-rows" });
+  for (const opt of allActions) {
+    const group = byAction[opt] || [];
+    const count = group.length;
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    const isGto = opt === gto;
+    const isUser = opt === userAction;
+
+    // Average confidence over this group's valid 1–5 ratings.
+    const confs = group.map((r) => Number(r.confidence)).filter((c) => c >= 1 && c <= 5);
+    const avgConf = confs.length ? confs.reduce((s, c) => s + c, 0) / confs.length : null;
+    // Crowd blind spot — a non-GTO option a meaningful slice picked
+    // with high average confidence.
+    const isBlindSpot = !isGto && pct >= 15 && avgConf != null && avgConf >= 3.5;
+
+    const tags = h("div", { class: "crowd-row-tags" });
+    if (isGto) tags.appendChild(h("span", { class: "crowd-tag is-gto" }, "✓ GTO"));
+    if (isUser) tags.appendChild(h("span", { class: "crowd-tag is-user" }, "Your pick"));
+    if (isBlindSpot) {
+      tags.appendChild(h("span", {
+        class: "crowd-tag is-blindspot",
+        title: "A lot of players picked this confidently — but it's not the GTO line",
+      }, "⚠ Blind spot"));
+    }
+
+    // Avatar row, capped with a "+N" overflow chip.
+    const CAP = 10;
+    const avatarRow = h("div", { class: "crowd-avatars" });
+    group.slice(0, CAP).forEach((r) => {
+      const av = buildAvatar(r.displayName || "Player", r.photoURL || null);
+      av.classList.add("crowd-avatar");
+      av.title = r.displayName || "Player";
+      avatarRow.appendChild(av);
+    });
+    if (count > CAP) {
+      avatarRow.appendChild(h("span", { class: "crowd-avatar-more" }, "+" + (count - CAP)));
+    }
+
+    rows.appendChild(h("div",
+      { class: "crowd-row" + (isGto ? " is-gto" : "") + (isBlindSpot ? " is-blindspot" : "") },
+      h("div", { class: "crowd-row-head" },
+        h("div", { class: "crowd-row-action" }, richText(opt, scen, { asAction: true })),
+        tags.children.length ? tags : null
+      ),
+      h("div", { class: "crowd-bar" },
+        h("div", { class: "crowd-bar-fill" + (isGto ? " is-gto" : ""), style: "width:" + pct + "%" }),
+        h("span", { class: "crowd-bar-label" }, pct + "% · " + count + (count === 1 ? " player" : " players"))
+      ),
+      h("div", { class: "crowd-row-foot" },
+        avatarRow,
+        avgConf != null
+          ? h("span", { class: "crowd-conf muted" }, "avg confidence " + avgConf.toFixed(1))
+          : null
+      )
+    ));
+  }
+
+  return h("div", { class: "crowd-breakdown" }, header, rows);
+}
+
+/**
  * Build the options-analysis matrix — every available action as a card
  * with pros / cons bullets, GTO pick highlighted with a green ✓ ribbon,
  * the user's pick highlighted with a "Your pick" tag (and red ✗ if it

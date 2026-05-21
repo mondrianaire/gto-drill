@@ -42,6 +42,7 @@ import {
   collection,
   query,
   where,
+  getDocs,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 import { sampleNScenarioIds } from "./scenarios.js";
@@ -365,6 +366,67 @@ export async function cancelGame(gameId) {
 export async function deleteLobby(gameId) {
   if (!_db) throw new Error("initFirebase() must be called first");
   await deleteDoc(doc(_db, "games", gameId));
+}
+
+// -----------------------------------------------------------------------
+// Crowd responses — the global answer pool
+// -----------------------------------------------------------------------
+//
+// Every player's answer to a scenario is recorded as one document in the
+// `responses` collection, keyed `${scenario_id}__${uid}` so re-answering
+// overwrites rather than duplicates (one data point per player per
+// scenario). The reveal screen aggregates these into a "how others
+// played" breakdown.
+
+/**
+ * Record (or overwrite) the signed-in user's answer to a scenario.
+ * No-ops silently when not signed in — the play view still works for
+ * anonymous users, they just don't contribute to / can't read the
+ * crowd pool.
+ *
+ * @param {string} scenarioId
+ * @param {string} action     The action label the user picked.
+ * @param {number} confidence 1–5.
+ * @returns {Promise<boolean>} true if recorded, false if skipped.
+ */
+export async function recordResponse(scenarioId, action, confidence) {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  const me = getCurrentUser();
+  if (!me || !scenarioId || !action) return false;
+  const docId = scenarioId + "__" + me.uid;
+  await setDoc(doc(_db, "responses", docId), {
+    scenario_id: scenarioId,
+    uid: me.uid,
+    displayName: (me.displayName || me.email || "Player").slice(0, 60),
+    photoURL: me.photoURL || null,
+    action: action,
+    confidence: Number(confidence) || null,
+    updatedAt: new Date().toISOString(),
+  });
+  return true;
+}
+
+/**
+ * Read every recorded response for a scenario — the raw crowd pool the
+ * reveal aggregates. Returns [] when not signed in or on error (the
+ * reveal degrades gracefully to a no-crowd-data state).
+ *
+ * @param {string} scenarioId
+ * @returns {Promise<Array<{uid,displayName,photoURL,action,confidence}>>}
+ */
+export async function readScenarioResponses(scenarioId) {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  if (!getCurrentUser() || !scenarioId) return [];
+  try {
+    const q = query(collection(_db, "responses"), where("scenario_id", "==", scenarioId));
+    const snap = await getDocs(q);
+    const out = [];
+    snap.forEach((d) => out.push(d.data()));
+    return out;
+  } catch (err) {
+    console.warn("readScenarioResponses failed:", err);
+    return [];
+  }
 }
 
 /**

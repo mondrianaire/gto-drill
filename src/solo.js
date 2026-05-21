@@ -9,8 +9,9 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis } from "./ui.js";
+import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
+import { recordResponse, readScenarioResponses, getCurrentUser } from "./state.js";
 
 // -----------------------------------------------------------------------
 // Tiny DOM helper (local; intentionally duplicated to keep this module
@@ -37,6 +38,59 @@ function h(tag, attrs, ...children) {
 
 function clear(container) {
   while (container.firstChild) container.removeChild(container.firstChild);
+}
+
+/**
+ * Fill the crowd-breakdown host on the reveal screen. Records the
+ * user's answer to the global response pool, reads the full pool for
+ * the scenario, and renders the "how others played" block.
+ *
+ * Async + best-effort: the reveal renders instantly with a "loading"
+ * placeholder; this swaps in the real block once Firestore responds.
+ * Bails if the host was detached (user advanced to the next hand).
+ *
+ * Not signed in → shows a sign-in nudge instead (the crowd pool needs
+ * an identity to read/write).
+ */
+async function loadCrowd(scen, draft, host) {
+  host.appendChild(h("p", { class: "crowd-loading muted" }, "Loading how others played…"));
+
+  // Not signed in — show a sign-in nudge. This branch is synchronous
+  // (no awaits), so the host being momentarily detached at call time
+  // is fine: mutations land and show once the host is appended to the
+  // reveal body. getCurrentUser() is null-safe (returns null before
+  // sign-in / Firebase init) — unlike getCurrentUid() which throws.
+  if (!getCurrentUser()) {
+    clear(host);
+    host.appendChild(h("div", { class: "crowd-breakdown" },
+      h("div", { class: "crowd-header" },
+        h("div", { class: "crowd-title" }, "How others played"),
+        h("div", { class: "crowd-subtitle muted" }, "Sign in to record your answer and see the crowd")
+      )
+    ));
+    return;
+  }
+
+  // Record first so the subsequent read includes this answer, then
+  // read the full pool. Both are best-effort — a failure just yields
+  // a smaller / empty crowd block, never blocks the reveal.
+  try {
+    await recordResponse(scen.scenario_id, draft.action, draft.confidence);
+  } catch (err) {
+    console.warn("recordResponse failed:", err);
+  }
+  let responses = [];
+  try {
+    responses = await readScenarioResponses(scen.scenario_id);
+  } catch (err) {
+    console.warn("readScenarioResponses failed:", err);
+  }
+  // Only NOW guard on connectivity — after the awaits, the user may
+  // have advanced to the next hand and this host is stale.
+  if (!host.isConnected) return;
+  clear(host);
+  const block = buildCrowdBreakdown({ scen, responses, userAction: draft.action });
+  if (block) host.appendChild(block);
 }
 
 // -----------------------------------------------------------------------
@@ -310,10 +364,16 @@ export function mountSoloView(container, onExit) {
       });
 
       const takeaway = buildLessonTakeaway({ scen });
+      // Crowd breakdown mounts here — async: we record this answer and
+      // read the scenario's full response pool, then fill the host.
+      const crowdHost = h("div", { class: "crowd-host" });
+      loadCrowd(scen, draft, crowdHost);
+
       body = h("div", { class: "hand-reveal" },
         takeaway,           // LEAD: one-line lesson takeaway
         gtoRead,            // GTO line: small blurb (the answer)
-        result,             // verdict + compact comparison + opponent
+        result,             // verdict + compact comparison
+        crowdHost,          // "how others played" crowd distribution
         gtoExplanation,     // preamble: strategic landscape + option impacts
         optionsAnalysis,    // matrix: every option's pros/cons
         villainRangeBlock,  // deduced villain range — into Test it

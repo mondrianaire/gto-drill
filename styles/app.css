@@ -837,6 +837,136 @@ form { margin-top: 8px; }
   font-weight: 700;
 }
 
+/* "How others played" crowd breakdown — per-option distribution of
+   every recorded response: % bar, player count, avatar row, average
+   confidence. The GTO option and the user's own pick get markers; a
+   non-GTO option picked confidently by a meaningful slice gets a
+   "⚠ Blind spot" flag. */
+.crowd-breakdown { margin: 16px 0; }
+.crowd-header { margin-bottom: 10px; }
+.crowd-title {
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--text);
+}
+.crowd-subtitle { font-size: 0.78rem; margin-top: 2px; }
+.crowd-empty {
+  font-size: 0.88rem;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+}
+.crowd-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.crowd-row {
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.02);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+.crowd-row.is-gto {
+  background: rgba(76, 200, 130, 0.06);
+  border-color: rgba(76, 200, 130, 0.4);
+}
+.crowd-row.is-blindspot {
+  background: rgba(255, 213, 138, 0.05);
+  border-color: rgba(255, 213, 138, 0.4);
+}
+.crowd-row-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.crowd-row-action { font-size: 0.95rem; font-weight: 600; }
+.crowd-row-tags { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.crowd-tag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+  border: 1px solid transparent;
+}
+.crowd-tag.is-gto {
+  background: rgba(76, 200, 130, 0.18);
+  color: #6fd9a0;
+  border-color: rgba(76, 200, 130, 0.5);
+}
+.crowd-tag.is-user {
+  background: rgba(120, 180, 255, 0.14);
+  color: #c4dcff;
+  border-color: rgba(120, 180, 255, 0.45);
+}
+.crowd-tag.is-blindspot {
+  background: rgba(255, 213, 138, 0.14);
+  color: #ffd58a;
+  border-color: rgba(255, 213, 138, 0.5);
+}
+/* % bar — track + fill, with the label overlaid. */
+.crowd-bar {
+  position: relative;
+  height: 22px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 5px;
+  overflow: hidden;
+  margin-bottom: 8px;
+}
+.crowd-bar-fill {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(120, 180, 255, 0.32);
+  transition: width 0.3s ease;
+}
+.crowd-bar-fill.is-gto { background: rgba(76, 200, 130, 0.34); }
+.crowd-bar-label {
+  position: absolute;
+  top: 0;
+  left: 8px;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.crowd-row-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.crowd-avatars {
+  display: inline-flex;
+  align-items: center;
+  gap: -4px;
+}
+.crowd-avatar {
+  width: 22px !important;
+  height: 22px !important;
+  font-size: 0.66rem !important;
+  margin-right: -4px;
+  border: 1.5px solid var(--bg);
+  box-sizing: border-box;
+}
+.crowd-avatar-more {
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  margin-left: 8px;
+}
+.crowd-conf { font-size: 0.78rem; white-space: nowrap; }
+
 /* Villain range chip — clickable, opens the equity panel pre-loaded.
    (Legacy class, used by the backwards-compatible buildSpotContext.
    Newer surfaces use .villain-range-card below for a fuller treatment.) */
