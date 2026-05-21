@@ -98,14 +98,15 @@ export function mountSignInView(container, onSignedIn, onSolo, onCalculator, onD
     }
   });
 
-  // Anonymous-solo escape hatch — same size as the Google button, muted.
-  // Two-line label structure (bold action + muted subtext) so parenthetical
-  // disclaimers don't wrap awkwardly inside the click target on narrow phones.
+  // Anonymous-practice escape hatch — same size as the Google button,
+  // muted. Two-line label (bold action + muted subtext). Without
+  // sign-in your answers aren't recorded and you don't see the crowd
+  // breakdown — but the GTO reveal still works.
   const soloBtn = h(
     "button",
     { type: "button", class: "solo-btn" },
-    h("span", { class: "alt-btn-label" }, "🃏  Practice solo"),
-    h("span", { class: "alt-btn-sub" }, "No sign-in. No opponent. Random scenarios.")
+    h("span", { class: "alt-btn-label" }, "🃏  Practice without signing in"),
+    h("span", { class: "alt-btn-sub" }, "GTO reveal only — no crowd stats, nothing recorded.")
   );
   soloBtn.addEventListener("click", () => {
     if (onSolo) onSolo();
@@ -140,7 +141,7 @@ export function mountSignInView(container, onSignedIn, onSolo, onCalculator, onD
     h(
       "p",
       { class: "tagline" },
-      "An asynchronous head-to-head GTO poker quiz. Sign in to start a game with a friend — your games follow your account on any device."
+      "A GTO poker trainer. Read the spot, call the line, rate your confidence — then see the GTO answer and how everyone else played the same hand."
     ),
     btn,
     soloBtn,
@@ -150,7 +151,7 @@ export function mountSignInView(container, onSignedIn, onSolo, onCalculator, onD
     h(
       "p",
       { class: "signin-note muted" },
-      "Your Google account is used only to identify you to your opponent. Nothing is ever posted on your behalf."
+      "Your Google account identifies your answers in the crowd breakdown. Nothing is ever posted on your behalf."
     )
   );
   container.appendChild(root);
