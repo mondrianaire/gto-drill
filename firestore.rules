@@ -56,5 +56,24 @@ service cloud.firestore {
                     && (resource.data.status == 'waiting_for_opponent'
                         || resource.data.participantUids.size() < 1);
     }
+
+    // responses/{scenarioId__uid} — one doc per (scenario, player).
+    // Powers the crowd-distribution model: every player's answer to a
+    // scenario is recorded, and the reveal aggregates them into a
+    // "how others played" breakdown.
+    //
+    //   read   — any signed-in user may read ALL responses (the crowd
+    //            aggregation queries every response for a scenario).
+    //   create/update — a user may only write their OWN response; the
+    //            uid field in the doc must match the caller. The doc id
+    //            convention is `${scenario_id}__${uid}` so re-answering
+    //            overwrites rather than duplicates.
+    //   delete — never (responses are permanent data points).
+    match /responses/{responseId} {
+      allow read: if request.auth != null;
+      allow create, update: if request.auth != null
+                             && request.resource.data.uid == request.auth.uid;
+      allow delete: if false;
+    }
   }
 }
