@@ -58,8 +58,8 @@ Status key: ✅ done · ◑ mostly done · ⏳ open · 🔒 blocked on an owner 
 | Compressed four-stage workflow — board strip, action timeline, decision panel | §6 / M2–M3 | ⏳ open · structural |
 | View toggle (expanded ⇄ compact) + first-run coach mark | §7 / M4 | ⏳ open · structural |
 | Secondary controls → Tier 2, 44px | §4.2 | ✅ PR #115 |
-| Accessibility layer — focus rings, contrast, reduced-motion, ARIA | §3 | ◑ focus rings / contrast / reduced-motion shipped (#115); a few ARIA gaps remain (e.g. `.spot-sum-action` keyboard role) — small |
-| Shape pass — pills for buttons, boxes for tags/badges | §2.4 / M8 | ⏳ open · small |
+| Accessibility layer — focus rings, contrast, reduced-motion, ARIA | §3 | ✅ focus rings / contrast / reduced-motion (#115); spot-summary keyboard role + Enter/Space (#127) closed the last ARIA gap |
+| Shape pass — boxes for tags/badges | §2.4 / M8 | ✅ PR #129 — 7 static badges/tags moved off the 999px pill onto a `--radius-box` token; buttons left as-is per owner call (consistency-only scope) |
 
 ### Wave 3 — build the trainer
 
@@ -70,7 +70,7 @@ Status key: ✅ done · ◑ mostly done · ⏳ open · 🔒 blocked on an owner 
 | Chip-and-felt vocabulary propagation | Finding 05 | 🔒 Decision 2 |
 | Duel mode, opt-in (off by default) | Spec §8.8 | ⏳ open · the retired duel code still exists (task #79) — this is partly a revive, not a from-scratch build |
 
-**Tally:** ~18 items — 4 done, 2 mostly done, 10 open, 2 decision-blocked.
+**Tally:** ~18 items — 6 done, 1 mostly done, 9 open, 2 decision-blocked.
 
 ---
 
@@ -108,8 +108,8 @@ Wave order is **dependency-driven** (per the meta-deliverable) — each wave is 
 floor the next stands on.
 
 1. **Unblocked now — startable without any decision:** the honest small-crowd
-   state (Wave 0), the shape pass (Wave 2), the residual ARIA gaps (Wave 2). All
-   small.
+   state (Wave 0). The shape pass and the residual ARIA gaps (both Wave 2) are
+   done (PR #129, #127).
 2. **After Decision 1:** finish the pivot (Wave 0) — trivial once the name exists.
 3. **Wave 1 — rebuild the results screen.** The biggest payoff chunk and the
    foundation Wave 3's aggregate sits on; build it before Wave 3 regardless of
