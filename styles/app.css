@@ -2262,56 +2262,16 @@ form { margin-top: 8px; }
   letter-spacing: -0.04em;
 }
 
-/* Board-texture modifier glyph — a small pill that sits beside a run of
-   doesn't-matter cards to convey the suit relationship of the board.
-   Sized to read alongside the 19×23 cards without dominating. */
-.tok-modifier {
-  display: inline-block;
-  vertical-align: middle;
-  width: 28px;
-  height: 16px;
-  margin: 0 2px 0 3px;
-  border-radius: 3px;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
-  cursor: help;
-}
-/* Rainbow — uses the 🌈 emoji rather than a colored pane. The emoji
-   reads instantly as "rainbow" (all four suits) and removes any
-   ambiguity with the two-tone gradient. Strip the base modifier
-   chrome (background, box-shadow, fixed dimensions) and let the
-   emoji size itself. */
-.tok-modifier-rainbow {
-  background: none;
-  box-shadow: none;
-  width: auto;
-  height: auto;
-  font-size: 1em;
-  line-height: 1;
-}
-.tok-modifier-rainbow::before {
-  content: "🌈";
-}
-/* Monotone — single solid block in a generic red (the most visually
-   distinct from rainbow). Carries the "all one suit" signal. */
-.tok-modifier-monotone {
-  background: #c0202a;
-}
-/* Two-tone — split block: half black, half red. "Two of these, two of
-   those." Different enough from monotone at a glance. */
-.tok-modifier-twotone {
-  background: linear-gradient(90deg,
-    #1a1a1a 0 50%,
-    #c0202a 50% 100%);
-}
-
-/* Hand-class group — "AKs" / "AKo": the two doesn't-matter cards sit on
-   a red/black diagonal frame (red + black being the two playing-card
-   colours). The frame's RIGHT side extends into a band that carries the
-   suited/offsuit marker — "s" or "o" — so the marker is part of the
-   border itself, not a separate card-like cell. The whole tag is the
-   diagonal; the white cards cover the middle, leaving it visible as a
-   frame around them and a band on the right. */
-.tok-handclass {
+/* Modifier tag — a run of doesn't-matter cards wrapped in a frame whose
+   right side extends into a band carrying a one-letter modifier marker.
+   ONE unified treatment for every suit-pattern modifier:
+     hand   — suited "s" / offsuit "o"
+     board  — monotone "m" / two-tone "t" / rainbow "r"
+   The frame fill encodes the suit COUNT: solid = one suit, red/black
+   split = two, four-colour = four. The whole tag is 23px tall — a
+   standalone card glyph's height — so the frame costs no extra line
+   height (vertical space is at a premium). */
+.tok-modtag {
   position: relative;
   display: inline-flex;
   align-items: center;
@@ -2321,24 +2281,19 @@ form { margin-top: 8px; }
   padding: 2px;
   padding-right: 15px;
   border-radius: 4px;
-  background: linear-gradient(135deg, #c0202a 0 55%, #1a1a1a 55% 100%);
 }
-/* Vertical real estate is tight: the cards inside the tag are scaled
-   down a touch so the WHOLE tag (cards + 2px frame) is exactly 23px —
-   the height of a standalone card glyph. The frame costs zero extra
-   line height. */
-.tok-handclass .tok-anysuit {
+.tok-modtag .tok-anysuit {
   margin: 0;
   width: 16px;
   height: 19px;
   border-radius: 2px;
 }
-.tok-handclass .tok-anysuit-doesntmatter .tok-anysuit-rank {
+.tok-modtag .tok-anysuit-doesntmatter .tok-anysuit-rank {
   font-size: 0.8rem;
 }
-/* The s/o marker — a letter sitting directly on the frame's extended
-   right band (no panel of its own). */
-.tok-handclass-glyph {
+/* The modifier marker — a (non-italic) letter on the frame's extended
+   right band. */
+.tok-modtag-glyph {
   position: absolute;
   right: 0;
   top: 0;
@@ -2348,11 +2303,22 @@ form { margin-top: 8px; }
   align-items: center;
   justify-content: center;
   font-weight: 800;
-  font-style: italic;
-  font-size: 0.66rem;
+  font-size: 0.68rem;
   line-height: 1;
   color: #fdfdfb;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
+}
+/* Frame fill by suit count.
+   One suit (suited / monotone) — solid, in the app's accent-blue family. */
+.tok-modtag-solid { background: #3f86c4; }
+/* Two suits (offsuit / two-tone) — red/black diagonal. */
+.tok-modtag-split {
+  background: linear-gradient(135deg, #c0202a 0 55%, #1a1a1a 55% 100%);
+}
+/* Four suits (rainbow) — the four 4-colour-deck suit hues, diagonally. */
+.tok-modtag-rainbow {
+  background: linear-gradient(135deg,
+    #1a1a1a 0 25%, #c0202a 25% 50%, #2f6fb0 50% 75%, #2f8a52 75% 100%);
 }
 
 /* Inline range chip — clickable anchor that pre-loads the equity panel. */

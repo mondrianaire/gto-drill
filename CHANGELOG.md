@@ -32,14 +32,15 @@ lobby delete button silently no-op until the rules are live.
   unambiguously that seat's button on desktop and mobile alike. It
   stays bright when the BTN folds (folded seats now dim their content,
   not the whole seat box).
-- **Suited / offsuit hand-classes as a bordered group.** "AKs" / "AKo"
-  in prose now render as the two cards sitting on a red/black diagonal
-  frame (red + black being the two playing-card colours). The frame's
-  right side extends into a band that carries the suited/offsuit "s" /
-  "o" marker — the marker is part of the border itself, not a separate
-  card-like cell. The cards inside the tag are scaled down slightly so
-  the whole framed tag is exactly as tall as a standalone card glyph
-  (23px) — the frame costs zero extra line height.
+- **Unified modifier-tag styling.** Every suit-pattern modifier now
+  renders as one consistent framed tag — a run of cards wrapped in a
+  frame whose right side extends into a band carrying a one-letter
+  marker. Covers hand suitedness (suited "s" / offsuit "o") and board
+  texture (monotone "m" / two-tone "t" / rainbow "r"). The frame fill
+  encodes the suit count: solid blue = one suit, red/black diagonal =
+  two, four-colour diagonal = four (rainbow). Each tag is exactly 23px
+  — a standalone card glyph's height — so it costs no extra line
+  height.
 
 ### Added
 - **Running pot per street.** Each street row in the spot summary now
