@@ -217,28 +217,36 @@ function tokenizeProse(text, scen, opts) {
         }
       }
     } else if (m[9]) {
-      // 2-rank hand-class shorthand ("KK", "AA", "AK", "JT", etc.) — render
-      // as two doesn't-matter cards each. Reads as "any K + any K" or
-      // "any A + any K" — which is what the shorthand means. The OPTIONAL
-      // group-10 suffix ("s" suited or "o" offsuit) appends a small
-      // marker pill so AKs reads as cards + suited badge, AKo as cards +
-      // offsuit badge. (Pairs can't be suited; if someone writes "KKs"
-      // we silently drop the suffix — the pair already implies offsuit.)
+      // 2-rank hand-class shorthand ("KK", "AA", "AK", "JT", etc.) —
+      // render as two doesn't-matter cards. When an OPTIONAL group-10
+      // suffix ("s" suited / "o" offsuit) is present — and it isn't a
+      // pair — the two cards PLUS an "s"/"o" marker compartment are
+      // wrapped in one bordered group, so "AKs" reads as a single tidy
+      // unit. The offsuit "o" is split diagonally red/black to echo
+      // "two different suits". (Pairs can't be suited; a stray "KKs"
+      // suffix is silently dropped.)
       const ranks = m[9];
+      const suffix = m[10];
+      const hasSuffix = (suffix === "s" || suffix === "o") && ranks[0] !== ranks[1];
+      const isSuited = suffix === "s";
+      const cardHost = hasSuffix
+        ? h("span", {
+            class: "tok-handclass tok-handclass-" + (isSuited ? "s" : "o"),
+            title: isSuited ? "Suited — same suit" : "Offsuit — different suits",
+          })
+        : frag;
       for (let i = 0; i < ranks.length; i++) {
         const r = ranks[i];
-        frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
+        cardHost.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
           h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r)));
       }
-      const suffix = m[10];
-      if (suffix && ranks[0] !== ranks[1]) {
-        const isSuited = suffix === "s";
-        const label = isSuited ? "Suited — same suit" : "Offsuit — different suits";
-        frag.appendChild(h("span", {
-          class: "tok-suit-suffix tok-suit-suffix-" + (isSuited ? "s" : "o"),
-          title: label,
-          "aria-label": label,
-        }));
+      if (hasSuffix) {
+        cardHost.appendChild(h("span", { class: "tok-handclass-mark" },
+          h("span", {
+            class: "tok-handclass-glyph tok-handclass-glyph-" + (isSuited ? "s" : "o"),
+            "aria-hidden": "true",
+          }, isSuited ? "s" : "o")));
+        frag.appendChild(cardHost);
       }
     } else if (m[11]) {
       // Dash-separated rank board ("6-7-8-9-T", "7-4-2-5-6"). Same
