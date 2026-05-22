@@ -188,6 +188,10 @@
           "AKo"
         ]
       }
+    ],
+    "concept_tags": [
+      "range-reading",
+      "pot-control"
     ]
   },
   {
@@ -323,7 +327,11 @@
       }
     },
     "gto_explanation": "A5o is at the bottom of BB's defending range but is a high-frequency 3-bet bluff candidate, not a flat. The blocker to AA/AK and the wheel-straight potential make it block more value than a hand like K5o, and 3-betting recovers fold equity that calling out of position cannot. Flatting OOP with A5o realizes equity poorly. Solvers 3-bet A5o in BB-vs-CO at high frequency.",
-    "lesson_tag": "BB 3-bet bluff blockers"
+    "lesson_tag": "BB 3-bet bluff blockers",
+    "concept_tags": [
+      "preflop",
+      "bluffing"
+    ]
   },
   {
     "scenario_id": "small-blind-vs-button-srp-turn-overbet-003",
@@ -573,6 +581,11 @@
           "6c2c"
         ]
       }
+    ],
+    "concept_tags": [
+      "board-texture",
+      "aggression",
+      "range-reading"
     ]
   },
   {
@@ -689,7 +702,11 @@
       }
     },
     "gto_explanation": "At 40bb effective from UTG in 6-max, small pocket pairs like 22-44 no longer have the set-mining odds they need against the depth-adjusted calling/3-betting ranges. Implied odds shrink because if you flop a set against a 3-bettor at 40bb, you cannot get a full 'set value' stacked off the cooler. The mixed-strategy range tightens at this depth and 22 falls below the cutoff for UTG opens. This is a 'shallow-depth UTG fold' that players who open standard 100bb ranges leak with.",
-    "lesson_tag": "Short-stack range tightening"
+    "lesson_tag": "Short-stack range tightening",
+    "concept_tags": [
+      "preflop",
+      "equity-realization"
+    ]
   },
   {
     "scenario_id": "blind-vs-blind-river-thin-value-005",
@@ -914,6 +931,10 @@
           "JsTs"
         ]
       }
+    ],
+    "concept_tags": [
+      "value-betting",
+      "aggression"
     ]
   },
   {
@@ -1113,6 +1134,10 @@
           "77"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluff-catching",
+      "range-reading"
     ]
   },
   {
@@ -1315,6 +1340,10 @@
           "T9o"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluff-catching",
+      "range-reading"
     ]
   },
   {
@@ -1481,6 +1510,10 @@
           "T9s"
         ]
       }
+    ],
+    "concept_tags": [
+      "preflop",
+      "equity-realization"
     ]
   },
   {
@@ -1697,6 +1730,10 @@
           "A4s"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluff-catching",
+      "equity-realization"
     ]
   },
   {
@@ -1842,7 +1879,12 @@
       }
     },
     "gto_explanation": "On low connected boards like 765 the BB has a range advantage relative to the CO opener because BB calls all the small connectors (87, 76s, 65s, 54s, 87s for some constructions) that the CO does not open. Solvers have begun donking these boards at meaningful frequencies with the nutted part of the range (made straights) plus bluffs that have wheel equity. 84o is a strong donking bluff candidate here — it has clean equity to backdoor straight, blocks 87, and turns into a barrel target. Solvers donk lead BB on 765-type boards at ~25-40% frequency.",
-    "lesson_tag": "BB donk lead range advantage"
+    "lesson_tag": "BB donk lead range advantage",
+    "concept_tags": [
+      "range-reading",
+      "board-texture",
+      "aggression"
+    ]
   },
   {
     "scenario_id": "all-in-or-fold-short-stack-011",
@@ -2002,6 +2044,10 @@
           "QJs"
         ]
       }
+    ],
+    "concept_tags": [
+      "icm",
+      "preflop"
     ]
   },
   {
@@ -2235,6 +2281,9 @@
           "98o"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluff-catching"
     ]
   },
   {
@@ -2398,6 +2447,10 @@
           "JTo"
         ]
       }
+    ],
+    "concept_tags": [
+      "preflop",
+      "aggression"
     ]
   },
   {
@@ -2554,6 +2607,10 @@
           "A4s"
         ]
       }
+    ],
+    "concept_tags": [
+      "preflop",
+      "bluffing"
     ]
   },
   {
@@ -2774,6 +2831,10 @@
           "ATo"
         ]
       }
+    ],
+    "concept_tags": [
+      "pot-control",
+      "value-betting"
     ]
   },
   {
@@ -2981,6 +3042,11 @@
           "65o"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluffing",
+      "aggression",
+      "equity-realization"
     ]
   },
   {
@@ -3201,6 +3267,10 @@
           "A3s"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluff-catching",
+      "board-texture"
     ]
   },
   {
@@ -3392,6 +3462,10 @@
           "QJs"
         ]
       }
+    ],
+    "concept_tags": [
+      "value-betting",
+      "board-texture"
     ]
   },
   {
@@ -3617,6 +3691,10 @@
           "54s"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluffing",
+      "range-reading"
     ]
   },
   {
@@ -3757,7 +3835,11 @@
       }
     },
     "gto_explanation": "The 'limp-reraise' is a legitimate balanced line at 100bb depth precisely because the limping range needs to include a few monsters to prevent opponents from blasting limpers off their hand profitably. Flatting AA after limping caps your range and invites multiway pots where AA performs poorly. The reraise size is roughly 3.5x the isolation to a similar effective number as a standard 3-bet. Folding AA is obviously catastrophic. Calling traps you in a multiway-prone pot.",
-    "lesson_tag": "Limp re-raise with monsters"
+    "lesson_tag": "Limp re-raise with monsters",
+    "concept_tags": [
+      "preflop",
+      "value-betting"
+    ]
   },
   {
     "scenario_id": "four-bet-pot-range-cbet-021",
@@ -3938,6 +4020,10 @@
           "KQs"
         ]
       }
+    ],
+    "concept_tags": [
+      "range-reading",
+      "aggression"
     ]
   },
   {
@@ -4172,6 +4258,10 @@
           "7s5s"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluffing",
+      "aggression"
     ]
   },
   {
@@ -4371,6 +4461,11 @@
           "QhJh"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluffing",
+      "aggression",
+      "equity-realization"
     ]
   },
   {
@@ -4565,6 +4660,10 @@
           "A4s"
         ]
       }
+    ],
+    "concept_tags": [
+      "range-reading",
+      "aggression"
     ]
   },
   {
@@ -4764,6 +4863,10 @@
           "A2s"
         ]
       }
+    ],
+    "concept_tags": [
+      "range-reading",
+      "aggression"
     ]
   },
   {
@@ -4937,6 +5040,10 @@
           "Q9s"
         ]
       }
+    ],
+    "concept_tags": [
+      "preflop",
+      "equity-realization"
     ]
   },
   {
@@ -5121,6 +5228,10 @@
           "AJo"
         ]
       }
+    ],
+    "concept_tags": [
+      "preflop",
+      "aggression"
     ]
   },
   {
@@ -5426,6 +5537,9 @@
           "32o"
         ]
       }
+    ],
+    "concept_tags": [
+      "preflop"
     ]
   },
   {
@@ -5618,6 +5732,10 @@
           "KJo"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluff-catching",
+      "board-texture"
     ]
   },
   {
@@ -5836,6 +5954,10 @@
           "5c4c"
         ]
       }
+    ],
+    "concept_tags": [
+      "board-texture",
+      "pot-control"
     ]
   },
   {
@@ -6062,6 +6184,10 @@
           "6h5h"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluffing",
+      "pot-control"
     ]
   },
   {
@@ -6295,6 +6421,11 @@
           "4h3h"
         ]
       }
+    ],
+    "concept_tags": [
+      "value-betting",
+      "aggression",
+      "range-reading"
     ]
   },
   {
@@ -6488,6 +6619,9 @@
           "T9s"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluff-catching"
     ]
   },
   {
@@ -6674,6 +6808,10 @@
           "ATs"
         ]
       }
+    ],
+    "concept_tags": [
+      "aggression",
+      "board-texture"
     ]
   },
   {
@@ -6876,6 +7014,11 @@
           "6c4c"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluffing",
+      "aggression",
+      "equity-realization"
     ]
   },
   {
@@ -6999,7 +7142,11 @@
       }
     },
     "gto_explanation": "A9s is a comfortable chip-EV shove from the BTN at 20bb, but under heavy ICM pressure — a near-flat payout where survival matters far more than chip accumulation — marginal shoves that risk elimination become losing plays. With three of four paid and equal stacks, busting before another player forfeits a guaranteed pay jump. The ICM bubble factor inflates the cost of getting called and tightens the correct shoving range well below the chip-EV range, so A9s is a fold.",
-    "lesson_tag": "ICM tightens the bubble shove"
+    "lesson_tag": "ICM tightens the bubble shove",
+    "concept_tags": [
+      "icm",
+      "preflop"
+    ]
   },
   {
     "scenario_id": "bb-flat-offsuit-broadway-vs-btn-037",
@@ -7160,6 +7307,10 @@
           "A4s"
         ]
       }
+    ],
+    "concept_tags": [
+      "preflop",
+      "equity-realization"
     ]
   },
   {
@@ -7377,6 +7528,10 @@
           "65s"
         ]
       }
+    ],
+    "concept_tags": [
+      "pot-control",
+      "board-texture"
     ]
   },
   {
@@ -7568,6 +7723,10 @@
           "QsTs"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluff-catching",
+      "board-texture"
     ]
   },
   {
@@ -7794,6 +7953,9 @@
           "65s"
         ]
       }
+    ],
+    "concept_tags": [
+      "bluffing"
     ]
   },
   {
@@ -7956,6 +8118,10 @@
           "A4s"
         ]
       }
+    ],
+    "concept_tags": [
+      "preflop",
+      "bluff-catching"
     ]
   },
   {
@@ -8157,6 +8323,11 @@
           "AJo"
         ]
       }
+    ],
+    "concept_tags": [
+      "range-reading",
+      "board-texture",
+      "aggression"
     ]
   },
   {
@@ -8367,6 +8538,10 @@
           "AQo"
         ]
       }
+    ],
+    "concept_tags": [
+      "pot-control",
+      "board-texture"
     ]
   },
   {
@@ -8552,6 +8727,9 @@
           "AKo"
         ]
       }
+    ],
+    "concept_tags": [
+      "preflop"
     ]
   },
   {
@@ -8782,6 +8960,10 @@
           "KQs"
         ]
       }
+    ],
+    "concept_tags": [
+      "value-betting",
+      "aggression"
     ]
   }
 ]
