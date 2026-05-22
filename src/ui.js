@@ -718,6 +718,43 @@ export function buildCrowdBreakdown({ scen, responses, userAction }) {
     const a = r.action || "—";
     (byAction[a] = byAction[a] || []).push(r);
   }
+
+  // One avatar for a response. If the player left a comment, the
+  // avatar gets a green note-dot and a hover (desktop) / tap (mobile)
+  // popover showing the comment — a mini player-info card.
+  function crowdAvatar(r) {
+    const name = r.displayName || "Player";
+    const av = buildAvatar(name, r.photoURL || null);
+    av.classList.add("crowd-avatar");
+    const note = r.note && String(r.note).trim();
+    if (!note) {
+      av.title = name;
+      return av;
+    }
+    const wrap = h("div",
+      { class: "crowd-avatar-wrap has-note", role: "button", tabindex: "0",
+        "aria-label": name + " left a comment" },
+      av,
+      h("span", { class: "crowd-note-dot", "aria-hidden": "true" }),
+      h("div", { class: "crowd-note-pop" },
+        h("div", { class: "crowd-note-pop-name" }, name),
+        h("p", { class: "crowd-note-pop-text" }, "“" + note + "”")
+      )
+    );
+    function openExclusive() {
+      // Tap-to-toggle (mobile); close any other open popover first.
+      const wasOpen = wrap.classList.contains("pop-open");
+      const root = wrap.closest(".crowd-breakdown");
+      if (root) root.querySelectorAll(".crowd-avatar-wrap.pop-open")
+        .forEach((w) => w.classList.remove("pop-open"));
+      if (!wasOpen) wrap.classList.add("pop-open");
+    }
+    wrap.addEventListener("click", (ev) => { ev.stopPropagation(); openExclusive(); });
+    wrap.addEventListener("keydown", (ev) => {
+      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openExclusive(); }
+    });
+    return wrap;
+  }
   // Render every available action, plus any responded-to action that
   // somehow isn't in available_actions (defensive — old data shapes).
   const allActions = options.slice();
@@ -752,14 +789,12 @@ export function buildCrowdBreakdown({ scen, responses, userAction }) {
       }, "⚠ Blind spot"));
     }
 
-    // Avatar row, capped with a "+N" overflow chip.
+    // Avatar row, capped with a "+N" overflow chip. Players who left
+    // a comment get a green dot + a hover/tap popover with the note.
     const CAP = 10;
     const avatarRow = h("div", { class: "crowd-avatars" });
     group.slice(0, CAP).forEach((r) => {
-      const av = buildAvatar(r.displayName || "Player", r.photoURL || null);
-      av.classList.add("crowd-avatar");
-      av.title = r.displayName || "Player";
-      avatarRow.appendChild(av);
+      avatarRow.appendChild(crowdAvatar(r));
     });
     if (count > CAP) {
       avatarRow.appendChild(h("span", { class: "crowd-avatar-more" }, "+" + (count - CAP)));
