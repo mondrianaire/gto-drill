@@ -32,9 +32,11 @@ lobby delete button silently no-op until the rules are live.
   the board, and the pot. At ≤560px the seats shrink to 62px (with
   slightly smaller cards) and the four corner seats are pulled back out
   to the edges, so all six seats and the five-card board no longer
-  overlap. The capsule table shape is kept on mobile — on a squeezed
-  phone table the corner seats may spill slightly past the rounded ends,
-  which is fine.
+  overlap. The phone table is near-square, so the felt is drawn by a
+  short full-width `::before` — a true horizontal capsule — instead of
+  rounding the square box into a near-circle. The seat layout box keeps
+  its full height; the corner seats overhang the felt's rounded ends,
+  which is fine on a squeezed phone table.
 - **Reveal-screen gap before the Lesson pill.** The reveal body sat
   flush against the hand-summary (replay table + spot-summary), so the
   💡 Lesson pill read as overlapping the last spot-summary row. The
