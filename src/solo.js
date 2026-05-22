@@ -257,6 +257,10 @@ export function mountSoloView(container, onExit, onPlayers) {
       const lockInBtn = h("button", { type: "button", class: "primary hand-fwd lock-in-btn", hidden: true }, "Lock in & see GTO →");
       function refreshLockBtn() {
         lockInBtn.hidden = !(draft.action && draft.confidence);
+        // When a move is picked but confidence isn't, glow the
+        // confidence row to point the user at the missing input.
+        // (confRow is declared just below — only ever called after.)
+        confRow.classList.toggle("needs-confidence", !!draft.action && !draft.confidence);
       }
 
       const actionRow = h("div", { class: "actions-row", role: "radiogroup", "aria-label": "Your move" });

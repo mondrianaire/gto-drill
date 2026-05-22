@@ -721,6 +721,23 @@ form { margin-top: 8px; }
   min-height: 38px;
   font-size: 0.9rem;
 }
+/* When a move is picked but confidence isn't, the confidence row
+   pulses to point the user at the one input still missing before
+   they can lock in. Cleared as soon as a confidence is chosen. */
+.confidence-row.needs-confidence {
+  border-radius: var(--radius);
+  animation: conf-glow 1.6s ease-in-out infinite;
+}
+@keyframes conf-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(76, 182, 255, 0); }
+  50%      { box-shadow: 0 0 0 4px rgba(76, 182, 255, 0.28); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .confidence-row.needs-confidence {
+    animation: none;
+    box-shadow: 0 0 0 3px rgba(76, 182, 255, 0.3);
+  }
+}
 .note-toggle { margin-top: 14px; font-size: 0.9rem; }
 .note-toggle summary { cursor: pointer; color: var(--accent); }
 .note-toggle .note-input { margin-top: 8px; }
