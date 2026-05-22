@@ -444,3 +444,116 @@ that would weight the proposal heavily toward one domain.
 - **Tag honestly, not to hit a number.** Every tag above reflects a real
   teaching point of the scenario. If authoring drifts, re-run the one-line
   tally in this doc's history rather than back-filling tags to chase the count.
+
+---
+
+## 7. Consolidated build queue
+
+§4 proposed 20 scenarios (context gaps); §6 proposed 14 (tag balance). This
+section merges them into one de-duplicated, prioritised queue.
+
+### 7.1 De-duplication — 34 raw → 29 unique
+
+Five collapses:
+
+| §6 item | Resolution |
+|---------|-----------|
+| N2 "Satellite — fold the premium" | **= §4 #6** (exact duplicate) |
+| N5 "Big-stack pressure" | **= §4 #8** (exact duplicate) |
+| N6 "Pay-jump laddering" | **= §4 #7** (exact duplicate) |
+| N10 "Protection-value bet" | **merged into §4 #15** (same scenario) |
+| N12 "Merged river value bet" | **merged into §4 #16** — one "value bet driven by a blocker/range read" |
+
+The other nine §6 items (N1, N3, N4, N7, N8, N9, N11, N13, N14) are genuinely
+new. **29 unique proposed scenarios.**
+
+### 7.2 Scoring rubric
+
+- **Gap** — how under-covered the area is. *Severe* = multiway / ICM / heads-up
+  (0–2 of 45 today). *Moderate* = stack depth. *Specific* = a missing sub-concept
+  inside an otherwise well-covered pillar.
+- **Gotcha** — confidence-gap potential, i.e. how counter-intuitive the answer
+  is. This is the app's core engine, so it is weighted heavily.
+  **★★★** big disagreement · **★★** moderate · **★** mild.
+- **Effort** — authoring cost *in this app*. *Low* = a standard 100bb heads-up
+  pot, prose + board + options only (identical to the existing 45). *Med* = ICM
+  framing + INFO pane, a `heads-up` tag, or a deep-stack setup. *High* = multiway
+  replay data for 3–4 seats.
+- **Rank** = gap severity + gotcha, with low effort breaking ties upward.
+
+### 7.3 Master ranked queue
+
+#### Tier 1 — build first (ranks 1–10)
+Highest gotcha value, covers every major gap at least once, effort-mixed so it
+ships as one coherent "Scenario Pack v2."
+
+| # | Scenario | Source | Gap | Gotcha | Effort |
+|---|----------|--------|-----|--------|--------|
+| 1 | Satellite — fold the premium (fold QQ/AA as a qualified lock) | §4 #6 | ICM (severe) | ★★★ | Med |
+| 2 | Overpair, wet board, c-bet or check — 4-way | §4 #1 | Multiway (severe) | ★★★ | Med-High |
+| 3 | 200bb deep — overpair is nut-or-fold facing barrels | §4 #9 | Depth (moderate) | ★★★ | Low-Med |
+| 4 | Heads-up SB raise-first-in with "trash" | §4 #11 | Heads-up (severe) | ★★★ | Low-Med |
+| 5 | Facing a turn overbet (turn-MDF) | §4 #13 | Specific: overbet defense | ★★★ | Low |
+| 6 | ICM bubble call-off (fold a +chip-EV call) | §4 #5 | ICM (severe) | ★★★ | Med |
+| 7 | Protection / equity-denial bet | §4 #15 + N10 | Specific: 4th reason to bet | ★★ | Low |
+| 8 | The third-barrel decision | §4 #18 | Specific: barreling | ★★★ | Low |
+| 9 | Heads-up BB defend vs a min-raise | §4 #12 | Heads-up (severe) | ★★ | Low-Med |
+| 10 | Pay-jump laddering at a final table | §4 #7 | ICM (severe) | ★★★ | Med |
+
+#### Tier 2 — build next (ranks 11–21)
+
+| # | Scenario | Source | Gap | Gotcha | Effort |
+|---|----------|--------|-----|--------|--------|
+| 11 | Blocker-driven / merged value bet (read drives size) | §4 #16 + N12 | Specific: blockers → sizing | ★★★ | Low-Med |
+| 12 | Big-stack ICM pressure (attack the shackled mediums) | §4 #8 | ICM (severe) | ★★ | Med |
+| 13 | ICM thin-value tightening (a value bet becomes a check) | §6 N3 | ICM (severe) | ★★★ | Med |
+| 14 | Sandwiched flush draw, multiway | §4 #2 | Multiway (severe) | ★★ | Med-High |
+| 15 | 3-bet pot played out of position | §4 #14 | Specific: 3-bet pot OOP | ★★ | Low |
+| 16 | Multiway river thin value (the threshold rises) | §4 #4 | Multiway (severe) | ★★ | Med-High |
+| 17 | ICM turn fold (postflop reinforcement of #6) | §6 N1 | ICM (severe) | ★★★ | Med |
+| 18 | 200bb deep — preflop range-widening | §4 #10 | Depth (moderate) | ★★ | Low |
+| 19 | Floating in position | §4 #17 | Specific: the float | ★★ | Low |
+| 20 | Reading ICM-adjusted ranges | §6 N8 | ICM (severe) | ★★ | Med |
+| 21 | Bet-thin-or-pot-control river | §6 N9 | Specific: value vs pot-control | ★★ | Low |
+
+#### Tier 3 — later / nice-to-have (ranks 22–29)
+
+| # | Scenario | Source | Gap | Gotcha | Effort |
+|---|----------|--------|-----|--------|--------|
+| 22 | Squeezed pot, 3-way, out of position | §4 #3 | Multiway (severe) | ★★ | High |
+| 23 | ICM pot-control with a big hand | §6 N4 | ICM (severe) | ★★ | Med |
+| 24 | Cold 4-bet | §4 #19 | Specific: preflop | ★★ | Low |
+| 25 | Pot-control to realise equity cheaply | §6 N11 | Specific: pot-control | ★★ | Low |
+| 26 | ICM-leveraged bluff | §6 N7 | ICM (severe) | ★★ | Med |
+| 27 | The value/bluff boundary (the polar threshold) | §6 N14 | Specific: polarisation | ★★ | Low |
+| 28 | Limped family pot — postflop | §4 #20 | Multiway / limped | ★★ | Med-High |
+| 29 | Pot-control a bluff-catcher | §6 N13 | Specific: pot-control | ★ | Low |
+
+### 7.4 Recommended first batch — "Scenario Pack v2" (Tier 1, 10 scenarios)
+
+Tier 1 is designed to ship as one unit. It takes the library **45 → 55** and:
+
+- **Touches every gap:** ICM 2 → 5, heads-up 0 → 2, multiway 1 → 2, plus the
+  first deep-stack scenario.
+- **Front-loads the gotchas:** seven of the ten are ★★★ — including the four
+  best disagreement hands in the whole proposal (fold-the-premium, the 4-way
+  overpair check, the 200bb nut-or-fold, the heads-up raise-trash).
+- **Mixes effort:** four Low-effort quick wins (#5, #7, #8 — standard 100bb
+  pots) balance the heavier multiway/ICM builds, so the batch is not blocked on
+  the hardest scenario.
+- **Needs two small bits of plumbing:** a `heads-up` `concept_tag`, and a check
+  that the INFO pane copy covers a *deep-stack* (200bb) setup as well as it
+  covers short stacks (it already flags non-standard stacks, so this is likely
+  a copy tweak, not new logic).
+
+### 7.5 Tier 2 / 3 and tag balance
+
+Tier 2 finishes the job §6 started: it adds four more ICM scenarios (#12, #13,
+#17, #20), so by the end of Tier 2 the `icm` tag has risen from 2 to ~9 — the
+tag histogram is essentially balanced (see §6.3) without Tier 3 being required.
+Tier 3 is polish: the highest-effort multiway build (#22), the limped pot, and
+the remaining pot-control / boundary scenarios that round out the count.
+
+**Suggested next step:** flesh Tier 1 into full `scenarios.json` specs — boards,
+`action_history`, `available_actions`, `gto_action`, `framing`, `villain_ranges`
+— each with a fresh `scenario_id`.
