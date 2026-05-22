@@ -678,7 +678,16 @@ form { margin-top: 8px; }
   font-weight: 600;
   color: var(--accent);
   white-space: nowrap;
-  margin-top: 2px;
+  margin: 2px -6px 0;
+  padding: 2px 6px;
+  border-radius: 4px;
+  transition: background-color 0.15s ease, box-shadow 0.15s ease;
+}
+/* When the replay is AT the decision point, the "← Action on HERO"
+   marker is the current step — same highlight bar as an action chip. */
+.spot-sum-yourturn.is-current {
+  background: rgba(120, 180, 255, 0.14);
+  box-shadow: inset 3px 0 0 var(--accent);
 }
 
 .decide {

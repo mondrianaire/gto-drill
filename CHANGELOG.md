@@ -26,6 +26,11 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Decision point is now the selected spot-summary entry.** When the
+  replay reaches the decision point, the spot summary highlights the
+  "← Action on HERO" marker (rather than leaving the highlight on the
+  last villain action). Clicking that marker fast-forwards the replay
+  all the way to the decision-time hand state.
 - **Scenario headline replaces the share-link button.** Each scenario
   now shows a `Scenario #NNN` headline at the top of the hand card
   (the number is the atomic reference — the trailing digits of the
