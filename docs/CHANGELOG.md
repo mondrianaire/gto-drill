@@ -24,6 +24,15 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Added
+- **Rich link-preview card** (v2026-05-22.126). Sharing the app's URL in a text
+  message, Slack, etc. now shows a proper preview card — the GTO Drill wordmark,
+  tagline, and the READ → DECIDE → REVEAL → LEARN flow on the dark brand
+  background — instead of a bare title and URL. Adds Open Graph + Twitter Card
+  meta tags to `index.html` and a 1200×630 `og-image.png` (79 KB) at the repo
+  root. The `og:image` URL is absolute — link-preview crawlers run no
+  JavaScript and have no page context to resolve a relative path.
+
 ### Fixed
 - **Double-tap-to-zoom no longer fights navigation** (v2026-05-22.123). On iOS
   Safari, `touch-action: manipulation` (the CSS base patch) does not reliably
