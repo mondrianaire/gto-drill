@@ -161,6 +161,19 @@ function buildCommentBox(scen, draft) {
 // @param {() => void} onExit  Called when the user backs out to sign-in.
 // -----------------------------------------------------------------------
 
+// Verdict tint — drive the browser toolbar's theme-color to the hand's
+// outcome on the GTO reveal (a dark green on a match, a dark red on a
+// miss), and rest it at the neutral near-black everywhere else. A
+// peripheral, redundant echo of the on-screen verdict — never the only
+// channel. Implements the verdict-tint design note (extends Finding 04).
+const THEME_NEUTRAL = "#0f1a24";
+const THEME_MATCH = "#1f4d3a";
+const THEME_MISS = "#4a2326";
+function setThemeColor(hex) {
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute("content", hex);
+}
+
 export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDatabase) {
   const scenarios = listScenarios();
   if (scenarios.length === 0) {
@@ -330,6 +343,7 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
     if (playersBtn) {
       playersBtn.addEventListener("click", () => {
         if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
+        setThemeColor(THEME_NEUTRAL);  // leaving the reveal — drop the tint
         onPlayers();
       });
     }
@@ -343,6 +357,7 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
     if (databaseBtn) {
       databaseBtn.addEventListener("click", () => {
         if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
+        setThemeColor(THEME_NEUTRAL);  // leaving the reveal — drop the tint
         onDatabase();
       });
     }
@@ -409,6 +424,8 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
     // read of the spot; they live ONLY in the post-submission GTO screen.
     let body, primaryBtn;
     if (!draft.revealed) {
+      // Decide phase — the toolbar rests at the neutral near-black.
+      setThemeColor(THEME_NEUTRAL);
       // Lock-in button is built first so the action/confidence click
       // handlers below can reveal it once both are picked. It lives
       // INSIDE the decide body (below the note), not in the separate
@@ -489,6 +506,9 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
       //   - verdict + per-option pros/cons matrix + opponent panel
       //   - "Test it" fallback button
       const gto = scen.gto_action;
+      // Verdict tint — the toolbar greens on a match, reds on a miss;
+      // an ambient echo of the on-screen verdict (verdict-tint note).
+      setThemeColor(draft.action === gto ? THEME_MATCH : THEME_MISS);
 
       // Equity panel state — local to the reveal branch since chips and
       // the Test-it button both live here.
