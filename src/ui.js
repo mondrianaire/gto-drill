@@ -150,8 +150,14 @@ function tokenizeProse(text, scen, opts) {
       const codes = m[1].match(/[2-9TJQKA][cdhs]/g) || [];
       // Multi-card runs are always iconified; a lone code only if it's a
       // card actually in play (avoids "As"/"Ah" English-word false hits).
-      if (codes.length >= 2 || known.has(codes[0])) {
-        codes.forEach((c) => frag.appendChild(cardEl(c, "inline")));
+      // A run of 2+ cards is wrapped in .cardrun so the line never
+      // breaks between the cards — the run reads as one entity.
+      if (codes.length >= 2) {
+        const run = h("span", { class: "cardrun" });
+        codes.forEach((c) => run.appendChild(cardEl(c, "inline")));
+        frag.appendChild(run);
+      } else if (known.has(codes[0])) {
+        frag.appendChild(cardEl(codes[0], "inline"));
       } else {
         frag.appendChild(document.createTextNode(m[1]));
       }
@@ -221,7 +227,8 @@ function tokenizeProse(text, scen, opts) {
           h("span", { class: "tok-modtag-glyph", "aria-hidden": "true" }, modTag.mark)
         ));
       } else {
-        for (const c of cards) frag.appendChild(c);
+        // No modifier — render the board cards as one unbreakable run.
+        frag.appendChild(h("span", { class: "cardrun" }, ...cards));
       }
     } else if (m[9]) {
       // 2-rank hand-class shorthand ("KK", "AA", "AK", "JT", etc.) —
@@ -254,17 +261,20 @@ function tokenizeProse(text, scen, opts) {
           h("span", { class: "tok-modtag-glyph", "aria-hidden": "true" }, isSuited ? "s" : "o")
         ));
       } else {
-        for (const c of cards) frag.appendChild(c);
+        // No suffix — the two cards still stay together on one line.
+        frag.appendChild(h("span", { class: "cardrun" }, ...cards));
       }
     } else if (m[11]) {
       // Dash-separated rank board ("6-7-8-9-T", "7-4-2-5-6"). Same
       // rendering as the concatenated form (group 7): each rank as a
       // doesn't-matter-suit card.
       const ranks = m[11].split("-");
+      const run = h("span", { class: "cardrun" });
       for (const r of ranks) {
-        frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
+        run.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
           h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r)));
       }
+      frag.appendChild(run);
     }
     last = m.index + m[0].length;
   }
