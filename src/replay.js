@@ -281,16 +281,27 @@ export function buildRunoutStrip(replay) {
           "Pot ", h("b", null, String(Math.round(pot * 10) / 10)), " bb")
       : null
   );
-  const streetEls = streets.map((s) =>
-    h("div", { class: "runout-street" },
-      h("span", { class: "runout-street-tag" }, s.tag),
-      h("div", { class: "runout-street-cards" },
-        ...s.cards.map((c) => cardEl(c, "sm")))
-    )
-  );
+  // Interleave a thin vertical divider between street groups so FLOP /
+   // TURN / RIVER read as distinct chunks rather than one long card run
+   // (mockup M3 — compressed-workflow pass).
+  const streetChildren = [];
+  streets.forEach((s, i) => {
+    if (i > 0) {
+      streetChildren.push(
+        h("span", { class: "runout-divider", "aria-hidden": "true" })
+      );
+    }
+    streetChildren.push(
+      h("div", { class: "runout-street" },
+        h("span", { class: "runout-street-tag" }, s.tag),
+        h("div", { class: "runout-street-cards" },
+          ...s.cards.map((c) => cardEl(c, "sm")))
+      )
+    );
+  });
   return h("div", { class: "runout-strip" },
     head,
-    h("div", { class: "runout-streets" }, ...streetEls)
+    h("div", { class: "runout-streets" }, ...streetChildren)
   );
 }
 
