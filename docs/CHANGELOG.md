@@ -25,6 +25,14 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Added
+- **Verdict tint on the GTO reveal** (v2026-05-22.127). On the reveal screen
+  the browser toolbar's `theme-color` now shifts to the hand's outcome — a dark
+  green on a match, a dark red on a miss — and rests at the neutral near-black
+  `#0f1a24` on every other screen. A peripheral, ambient echo of the on-screen
+  verdict at zero layout cost; it only reinforces the verdict already shown in
+  text and shape (the ✓/✗ band), never replaces it, and moves only at that one
+  high-signal moment. Implements the verdict-tint design note (extends the
+  audit's Finding 04).
 - **Rich link-preview card** (v2026-05-22.126). Sharing the app's URL in a text
   message, Slack, etc. now shows a proper preview card — the GTO Drill wordmark,
   tagline, and the READ → DECIDE → REVEAL → LEARN flow on the dark brand
