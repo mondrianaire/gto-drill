@@ -774,6 +774,17 @@ form { margin-top: 8px; }
 }
 .decide .lock-in-btn[hidden] { display: none; }
 
+/* The reveal body sits directly below the hand-summary (replay table +
+   spot-summary). Without separation the lesson pill renders flush against
+   the last spot-summary row and reads as overlapping it. Mirror the
+   .decide treatment — top margin + hairline divider + padding — so the
+   GTO reveal is clearly its own section under the hand summary. */
+.hand-reveal {
+  margin-top: 16px;
+  border-top: 1px solid var(--border);
+  padding-top: 16px;
+}
+
 /* Per-hand reveal — the educational moment of every hand. Replaces the
    old cramped text-block layout with a "matrix" of every selectable
    option, each carrying badges identifying who picked it:
