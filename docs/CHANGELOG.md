@@ -25,6 +25,13 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Keyboard access for the spot-summary** (v2026-05-22.119). The replay's
+  spot-summary action rows can be tapped to drive the replay table, but the
+  rows are `<div>`s with no keyboard path. When the summary is interactive,
+  each action row (and the "Action on Hero" marker) now carries button
+  semantics and a tab stop, with an Enter/Space handler — so a keyboard user
+  can scrub the replay too, not just mouse and touch. Closes the residual
+  ARIA gap from the Wave 2 accessibility work.
 - **Scenario prose corrections** (v2026-05-22.118). A hand-vs-board audit of all
   45 scenarios — re-deriving each Hero hand objectively against its board —
   turned up two minor equity overstatements in the analysis text.

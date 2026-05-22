@@ -409,16 +409,31 @@ export function buildSpotSummary(replay, opts) {
   if (rows.length === 0) return null;
   const el = h("div", { class: "spot-summary" + (onJumpToStep ? " is-clickable" : "") }, ...rows);
 
-  // Click → drive the replay table to that action's state. Delegated
-  // off the root so we don't need to wire per-element listeners. Reads
-  // data-step from the clicked .spot-sum-action or .spot-sum-yourturn.
+  // Click or keyboard → drive the replay table to that action's state.
+  // Delegated off the root; reads data-step from the activated
+  // .spot-sum-action / .spot-sum-yourturn. Each such row is given button
+  // semantics and a tab stop so keyboard users can drive the replay too,
+  // not just mouse / touch.
   if (onJumpToStep) {
-    el.addEventListener("click", (ev) => {
-      const target = ev.target.closest(".spot-sum-action, .spot-sum-yourturn");
+    el.querySelectorAll(".spot-sum-action, .spot-sum-yourturn").forEach((row) => {
+      row.setAttribute("role", "button");
+      row.setAttribute("tabindex", "0");
+      row.setAttribute("title", "Jump the replay to this point");
+    });
+    const jumpFrom = (target) => {
       if (!target || !el.contains(target)) return;
       const s = parseInt(target.getAttribute("data-step"), 10);
-      if (Number.isNaN(s)) return;
-      onJumpToStep(s);
+      if (!Number.isNaN(s)) onJumpToStep(s);
+    };
+    el.addEventListener("click", (ev) => {
+      jumpFrom(ev.target.closest(".spot-sum-action, .spot-sum-yourturn"));
+    });
+    el.addEventListener("keydown", (ev) => {
+      if (ev.key !== "Enter" && ev.key !== " ") return;
+      const target = ev.target.closest(".spot-sum-action, .spot-sum-yourturn");
+      if (!target || !el.contains(target)) return;
+      ev.preventDefault();
+      jumpFrom(target);
     });
   }
   // setStep(step) — driven by mountReplay's onStep callback. Highlights
