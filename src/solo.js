@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown } from "./ui.js";
+import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown, buildScenarioInfo } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
 import { recordResponse, readScenarioResponses, readMyResponses, saveResponseComment, getCurrentUser } from "./state.js";
 
@@ -298,6 +298,12 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
       stats
     );
 
+    // --- scenario INFO pane --------------------------------------------------
+    // Shown ABOVE the hand summary for any scenario whose setup deviates
+    // from the 100bb-cash, cards-shown default (tournament, short stack,
+    // hidden hole cards). null — and absent from the DOM — otherwise.
+    const infoPane = buildScenarioInfo({ scen });
+
     // --- the spot ------------------------------------------------------------
     const spot = h("div", { class: "hand-spot" });
     if (scen.replay) {
@@ -521,7 +527,7 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
       header,
       shareFallback,
       stickyNav,          // sticky "Next hand →" on reveal
-      h("div", { class: "hand-card" }, spot, body),
+      h("div", { class: "hand-card" }, infoPane, spot, body),
       errorBox
     ));
   }

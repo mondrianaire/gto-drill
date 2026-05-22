@@ -1569,6 +1569,49 @@ form { margin-top: 8px; }
   flex-wrap: wrap;
 }
 
+/* Scenario INFO pane — a heads-up shown ABOVE the hand summary for any
+   scenario whose setup deviates from the 100bb-cash, cards-shown default
+   (tournament, short stack, hidden hole cards). Cool blue "notice"
+   styling, distinct from the warm Lesson pill. One row per deviation. */
+.scenario-info {
+  margin-bottom: 14px;
+  padding: 12px 14px;
+  background: linear-gradient(180deg, rgba(76, 182, 255, 0.10) 0%, rgba(76, 182, 255, 0.05) 100%);
+  border: 1px solid rgba(76, 182, 255, 0.38);
+  border-left: 4px solid var(--accent);
+  border-radius: var(--radius);
+}
+.scenario-info-label {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  font-weight: 700;
+  color: var(--accent);
+  margin-bottom: 9px;
+}
+.scenario-info-icon { font-size: 0.95rem; }
+/* Second and later deviations get a hairline rule above them so each
+   "what + why" row stays visually distinct. */
+.scenario-info-item + .scenario-info-item {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid rgba(76, 182, 255, 0.18);
+}
+.scenario-info-head {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 3px;
+}
+.scenario-info-reason {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text-dim);
+}
+
 /* Lesson-takeaway pill — the one-line crystallization of the hand's
    pattern. Sits at the very top of the reveal so the user carries
    away a transferable concept before working through detail. Warm
