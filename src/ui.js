@@ -229,24 +229,25 @@ function tokenizeProse(text, scen, opts) {
       const suffix = m[10];
       const hasSuffix = (suffix === "s" || suffix === "o") && ranks[0] !== ranks[1];
       const isSuited = suffix === "s";
-      const cardHost = hasSuffix
-        ? h("span", {
-            class: "tok-handclass tok-handclass-" + (isSuited ? "s" : "o"),
-            title: isSuited ? "Suited — same suit" : "Offsuit — different suits",
-          })
-        : frag;
+      const cards = [];
       for (let i = 0; i < ranks.length; i++) {
         const r = ranks[i];
-        cardHost.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
+        cards.push(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
           h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r)));
       }
       if (hasSuffix) {
-        cardHost.appendChild(h("span", { class: "tok-handclass-mark" },
-          h("span", {
-            class: "tok-handclass-glyph tok-handclass-glyph-" + (isSuited ? "s" : "o"),
-            "aria-hidden": "true",
-          }, isSuited ? "s" : "o")));
-        frag.appendChild(cardHost);
+        // The two cards sit on a red/black diagonal frame; the frame's
+        // right side extends into a band carrying the suited/offsuit
+        // "s" / "o" marker — the marker is part of the border itself.
+        frag.appendChild(h("span", {
+          class: "tok-handclass tok-handclass-" + (isSuited ? "s" : "o"),
+          title: isSuited ? "Suited — same suit" : "Offsuit — different suits",
+        },
+          ...cards,
+          h("span", { class: "tok-handclass-glyph", "aria-hidden": "true" }, isSuited ? "s" : "o")
+        ));
+      } else {
+        for (const c of cards) frag.appendChild(c);
       }
     } else if (m[11]) {
       // Dash-separated rank board ("6-7-8-9-T", "7-4-2-5-6"). Same

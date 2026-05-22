@@ -33,10 +33,11 @@ lobby delete button silently no-op until the rules are live.
   stays bright when the BTN folds (folded seats now dim their content,
   not the whole seat box).
 - **Suited / offsuit hand-classes as a bordered group.** "AKs" / "AKo"
-  in prose now render as the two cards plus an "s"/"o" marker wrapped
-  in one bordered pill, instead of a loose card-card-pill sequence. The
-  offsuit "o" is split diagonally red/black (echoing "two different
-  suits"); the suited "s" is a single solid mark.
+  in prose now render as the two cards sitting on a red/black diagonal
+  frame (red + black being the two playing-card colours). The frame's
+  right side extends into a band that carries the suited/offsuit "s" /
+  "o" marker — the marker is part of the border itself, not a separate
+  card-like cell.
 
 ### Added
 - **Running pot per street.** Each street row in the spot summary now
