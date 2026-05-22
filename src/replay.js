@@ -345,14 +345,26 @@ export function buildSpotSummary(replay, opts) {
     });
   }
   // setStep(step) — driven by mountReplay's onStep callback. Highlights
-  // the action with the largest data-step ≤ step (the most recent
-  // action applied at the current replay position). At minStep (before
-  // any voluntary action) nothing is highlighted.
+  // the spot-summary entry matching the replay's current position:
+  //   - at (or past) the decision point → the "← Action on HERO" marker,
+  //     so the decision step itself is the selected entry (not the last
+  //     villain action, which lands on the same replay step);
+  //   - earlier → the action chip with the largest data-step ≤ step
+  //     (the most recent action applied).
+  // At minStep (before any voluntary action) nothing is highlighted.
   el.setStep = function (step) {
     const all = el.querySelectorAll(".spot-sum-action");
+    const yourTurn = el.querySelector(".spot-sum-yourturn");
+    all.forEach((a) => a.classList.remove("is-current"));
+    if (yourTurn) yourTurn.classList.remove("is-current");
+    // Decision point reached — the hand is fully built and it's hero's
+    // turn; the "← Action on HERO" marker is the current step.
+    if (yourTurn && step >= actions.length) {
+      yourTurn.classList.add("is-current");
+      return;
+    }
     let current = null;
     all.forEach((a) => {
-      a.classList.remove("is-current");
       const s = parseInt(a.getAttribute("data-step"), 10);
       if (!Number.isNaN(s) && s <= step) current = a;
     });
