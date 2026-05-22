@@ -3272,11 +3272,48 @@ form { margin-top: 8px; }
    card, above the table's CASH/TOURNAMENT context line; it replaces the
    old share-link button as the way to refer to a specific scenario. */
 .scenario-headline {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 10px;
   margin-bottom: 12px;
+}
+/* First-run coach mark — a one-time hint pointing at the view toggle
+   when a hand first overflows the viewport (spec §7). Absolutely
+   positioned, so it costs the layout nothing. */
+.view-coach {
+  position: absolute;
+  top: calc(100% + 9px);
+  right: 0;
+  z-index: 20;
+  max-width: 250px;
+  padding: 9px 12px;
+  font-size: 0.8rem;
+  line-height: 1.45;
+  color: var(--text);
+  background: var(--bg-elev-2);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  box-shadow: var(--shadow-3);
+  opacity: 0;
+  transform: translateY(-4px);
+  transition: opacity 0.2s ease, transform 0.2s ease;
+}
+.view-coach.is-in { opacity: 1; transform: translateY(0); }
+.view-coach b { color: var(--accent); font-weight: 700; }
+/* Pointer notch up toward the toggle. */
+.view-coach::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  right: 22px;
+  width: 9px;
+  height: 9px;
+  background: var(--bg-elev-2);
+  border-left: 1px solid var(--accent);
+  border-top: 1px solid var(--accent);
+  transform: rotate(45deg);
 }
 .scenario-headline-main {
   font-size: 1rem;

@@ -311,6 +311,46 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
     render();
   }
 
+  // First-run coach mark (spec §7) — the one-time "try Compact view"
+  // hint. Shown at most once per device: the first decide screen that
+  // overflows the viewport in the expanded layout. It fades in beside
+  // the toggle, auto-dismisses on any tap or after 6s, and is then
+  // recorded as seen so it never repeats.
+  function maybeShowCompactCoach(headlineEl, toggleBtn) {
+    if (viewMode !== "expanded" || !toggleBtn || !headlineEl) return;
+    if (draft && draft.revealed) return;            // decide screens only
+    try {
+      if (window.localStorage.getItem("gto-drill.compactCoachSeen") === "1") return;
+    } catch { return; }
+    // Defer a beat so layout (the replay table, the cards) has settled
+    // before measuring whether the hand overflows the screen.
+    setTimeout(() => {
+      if (!headlineEl.isConnected) return;          // already re-rendered
+      // > innerHeight + 72 clears the body's 4rem bottom padding, so
+      // this fires only on genuine overflow — the hand needs a scroll.
+      if (document.documentElement.scrollHeight <= window.innerHeight + 72) return;
+      try { window.localStorage.setItem("gto-drill.compactCoachSeen", "1"); } catch {}
+      const coach = h("div", { class: "view-coach", role: "status" },
+        "This hand runs long — tap ",
+        h("b", null, "Compact view"),
+        " to fit it on one screen.");
+      headlineEl.appendChild(coach);
+      requestAnimationFrame(() => coach.classList.add("is-in"));
+      let done = false;
+      const dismiss = () => {
+        if (done) return;
+        done = true;
+        clearTimeout(timer);
+        document.removeEventListener("pointerdown", dismiss, true);
+        coach.classList.remove("is-in");
+        setTimeout(() => { if (coach.isConnected) coach.remove(); }, 240);
+      };
+      const timer = setTimeout(dismiss, 6000);
+      // Any tap anywhere dismisses it — including a tap on the toggle.
+      document.addEventListener("pointerdown", dismiss, true);
+    }, 200);
+  }
+
   function render() {
     if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
     clear(container);
@@ -673,6 +713,10 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
       h("div", { class: "hand-card" }, scenarioHeadline, infoPane, spot, body),
       errorBox
     ));
+
+    // Once per device: nudge toward the compact layout if this decide
+    // screen overflows the viewport.
+    maybeShowCompactCoach(scenarioHeadline, viewToggleBtn);
   }
 
   // Start: load the signed-in user's completed-scenario set first so

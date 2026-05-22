@@ -25,6 +25,12 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Added
+- **First-run compact-view coach mark** (v2026-05-22.132). The first time a
+  decide screen overflows the viewport in the expanded (table) layout, a
+  one-time hint fades in beside the view toggle — "This hand runs long — tap
+  Compact view to fit it on one screen." It auto-dismisses on any tap or after
+  six seconds and is recorded as seen, so it appears at most once per device.
+  Completes the §6.1 / §7 compact one-screen hand view.
 - **Compact one-screen hand view + toggle** (v2026-05-22.131). The compact
   layout (spec §6.1 / §7) is now live and wired into the play screen: a
   **Compact view** toggle in the scenario headline switches the hand display
