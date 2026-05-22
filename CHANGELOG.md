@@ -26,6 +26,13 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Fixed
+- **Playing-card suit glyphs rendering as broken emoji.** The card suits
+  (♠♥♦♣) are Unicode characters that browsers — notably Chrome on
+  Windows — would intermittently render via the OS emoji font as colour
+  emoji: the glyph looked wrong and ignored the card's red/black
+  `color`. Each suit glyph now carries a U+FE0E text-presentation
+  selector, backed by `font-variant-emoji: text` in CSS, forcing the
+  consistent monochrome text glyph.
 - **Replay table cluttered on mobile.** The seat layout (80px seats,
   46px corner insets) is tuned for the wide desktop table; on a phone
   the table collapses toward square and the seats overlapped each other,

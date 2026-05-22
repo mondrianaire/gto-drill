@@ -3245,7 +3245,11 @@ form { margin-top: 8px; }
   line-height: 1;
 }
 .pcard-rank { font-weight: 700; font-size: 0.78rem; }
-.pcard-suit { font-size: 0.92rem; }
+/* font-variant-emoji: text reinforces the U+FE0E selector in the suit
+   strings — both tell the browser to use the monochrome text glyph for
+   ♠♥♦♣ rather than a colour emoji (which would look wrong and ignore
+   the red/black `color`). */
+.pcard-suit { font-size: 0.92rem; font-variant-emoji: text; }
 .pcard-sm .pcard-rank { font-size: 0.68rem; }
 .pcard-sm .pcard-suit { font-size: 0.82rem; }
 /* Inline card — flows inside GTO prose alongside text. Uses

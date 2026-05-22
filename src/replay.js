@@ -28,11 +28,16 @@ function h(tag, attrs, ...children) {
 }
 
 const STREETS = ["preflop", "flop", "turn", "river"];
+// Suit glyphs each carry a trailing U+FE0E VARIATION SELECTOR-15 — the
+// "text presentation" selector. Without it, browsers (notably Chrome on
+// Windows) intermittently render ♠♥♦♣ via the OS emoji font as colour
+// emoji: the glyph looks wrong AND ignores our red/black `color`. FE0E
+// forces the monochrome text glyph so the cards render consistently.
 const SUITS = {
-  c: { glyph: "♣", red: false },
-  d: { glyph: "♦", red: true },
-  h: { glyph: "♥", red: true },
-  s: { glyph: "♠", red: false },
+  c: { glyph: "♣︎", red: false },
+  d: { glyph: "♦︎", red: true },
+  h: { glyph: "♥︎", red: true },
+  s: { glyph: "♠︎", red: false },
 };
 
 // -----------------------------------------------------------------------
