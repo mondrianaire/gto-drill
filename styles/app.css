@@ -2781,28 +2781,51 @@ form { margin-top: 8px; }
   text-align: center;
 }
 
-/* Dealer button — small white "D" disc sitting on the BTN seat. Cues
-   the table's button position regardless of who's hero. Placed in the
-   top-right of the seat so it doesn't overlap the card row or stack. */
-.rseat-dealer {
+/* Betting ring — the dashed ellipse bet chips are pushed onto, the
+   casino "betting line" convention. Sits behind the seats; bets land
+   on its perimeter (.rbet-slot-N) and the dealer button rides just
+   seat-side of it. */
+.replay-ring {
   position: absolute;
-  top: -6px;
-  right: -6px;
-  width: 18px;
-  height: 18px;
+  top: 24%;
+  bottom: 24%;
+  left: 12%;
+  right: 12%;
+  border: 2px dashed rgba(255, 255, 255, 0.13);
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+/* Dealer button — small white "D" disc, rendered at TABLE level (not
+   a seat child) so it stays bright when the BTN folds. Positioned by
+   slot, toward the betting ring in front of the BTN seat. */
+.rdealer {
+  position: absolute;
+  width: 19px;
+  height: 19px;
   border-radius: 50%;
   background: linear-gradient(180deg, #fafafa 0%, #d8d8d8 100%);
   color: #1a1a1a;
-  font-size: 0.7rem;
+  font-size: 0.72rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(0, 0, 0, 0.4);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6);
-  letter-spacing: 0;
   line-height: 1;
+  transform: translate(-50%, -50%);
+  z-index: 3;
 }
+/* Dealer disc rides on the betting ring, just toward table-centre of
+   that seat's bet chip — clear of the (tall) seat box, clear of the
+   bet pill. */
+.rdealer-slot-0 { top: 68%; left: 61%; }
+.rdealer-slot-1 { top: 63%; left: 36%; }
+.rdealer-slot-2 { top: 37%; left: 36%; }
+.rdealer-slot-3 { top: 32%; left: 61%; }
+.rdealer-slot-4 { top: 37%; left: 64%; }
+.rdealer-slot-5 { top: 63%; left: 64%; }
 .rslot-0 { bottom: 6px; left: 50%; transform: translateX(-50%); }
 .rslot-1 { bottom: 6px; left: 4px; }
 .rslot-2 { top: 8px; left: 4px; }
@@ -2930,31 +2953,28 @@ form { margin-top: 8px; }
     inset 0 -1px 0 rgba(0, 0, 0, 0.2);
   z-index: 2; /* above the felt, below the pot pill which sits at center */
 }
-/* Per-slot positioning — placed roughly halfway between the seat's
-   centre and the pot's centre. The table is 300px tall with seats at
-   the top/bottom edge and pot in the middle, so midpoints sit ~80-100px
-   from the corresponding edge. */
-.rbet-slot-0 { bottom: 76px;  left: 50%;  transform: translateX(-50%); }
-.rbet-slot-1 { bottom: 60px;  left: 20%;  }
-.rbet-slot-2 { top: 60px;     left: 20%;  }
-.rbet-slot-3 { top: 76px;     left: 50%;  transform: translateX(-50%); }
-.rbet-slot-4 { top: 60px;     right: 20%; }
-.rbet-slot-5 { bottom: 60px;  right: 20%; }
+/* Per-slot positioning — each bet chip is centred on the point of the
+   betting ring (.replay-ring) nearest its seat. Casino convention:
+   chips pushed forward to the betting line. The ring spans 24%–76%
+   vertically and 12%–88% horizontally; these six points are the
+   perimeter positions in front of each seat. translate(-50%,-50%)
+   centres the chip on the point. */
+.rbet {
+  transform: translate(-50%, -50%);
+}
+.rbet-slot-0 { top: 68%; left: 50%; }
+.rbet-slot-1 { top: 63%; left: 26%; }
+.rbet-slot-2 { top: 37%; left: 26%; }
+.rbet-slot-3 { top: 32%; left: 50%; }
+.rbet-slot-4 { top: 37%; left: 74%; }
+.rbet-slot-5 { top: 63%; left: 74%; }
 
 /* Animation: bet bubble fades + scales in when a player commits chips.
-   Brief and snappy so the auto-buildup feels alive without being slow. */
+   Preserves the translate(-50%,-50%) centring through the keyframes. */
 .rbet { animation: rbet-enter 280ms ease-out; }
 @keyframes rbet-enter {
-  from { opacity: 0; transform: scale(0.5) translateY(-4px); }
-  to   { opacity: 1; transform: scale(1) translateY(0); }
-}
-/* Slot 0/3 also have transform: translateX(-50%) — preserve it in the
-   end state by overriding the keyframe target for those slots. */
-.rbet-slot-0 { animation-name: rbet-enter-center; }
-.rbet-slot-3 { animation-name: rbet-enter-center; }
-@keyframes rbet-enter-center {
-  from { opacity: 0; transform: translateX(-50%) scale(0.5) translateY(-4px); }
-  to   { opacity: 1; transform: translateX(-50%) scale(1) translateY(0); }
+  from { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
 }
 
 /* Animation: board cards fade in (subtle — every render rebuilds the
