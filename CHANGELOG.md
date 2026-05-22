@@ -40,6 +40,14 @@ lobby delete button silently no-op until the rules are live.
   hexagon that sits fully on the felt.
 
 ### Added
+- **Scenario INFO pane.** Scenarios that deviate from the default setup
+  (100bb cash, Hero's cards shown) now display a blue heads-up pane
+  above the hand summary, with one row per deviation stating *what* is
+  different and *why* it matters. Detected: tournament hands, non-standard
+  stack depth (e.g. 12/20/40bb effective), and spots where Hero's hole
+  cards are deliberately hidden (range-vs-range decisions). Standard
+  scenarios show no pane. The pane is decide-safe — it never reveals the
+  GTO answer.
 - **`SCHEMA.md`** — documents the Firestore `responses` / `users`
   collections and the preservation invariants (append-only, immutable
   `scenario_id`s, additive-only field changes) so development can

@@ -950,6 +950,76 @@ export function buildLessonTakeaway({ scen }) {
 }
 
 /**
+ * Build the scenario INFO pane — a heads-up shown ABOVE the hand summary
+ * for any scenario whose setup deviates from the default (100bb cash,
+ * Hero's cards shown). Each deviation gets its own row: what is different
+ * plus the reason it matters, so the player doesn't autopilot standard
+ * assumptions. Returns null for a fully standard scenario (the common
+ * case — no pane, no clutter).
+ *
+ * Detected deviations (all read from scen.replay):
+ *   - format === "tournament"   → tournament pressures (ICM, pay jumps)
+ *   - stack_depth_bb !== 100    → non-standard effective stacks
+ *   - hero_cards missing        → range-vs-range spot, Hero's cards hidden
+ *
+ * Decide-safe: this pane is visible during the decide phase, so it states
+ * only factual setup + neutral reasoning — never the GTO answer.
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ */
+export function buildScenarioInfo({ scen }) {
+  const replay = scen && scen.replay;
+  if (!replay) return null;
+
+  const items = [];
+
+  if (replay.format === "tournament") {
+    items.push({
+      head: "Tournament hand",
+      reason: "This is a tournament spot, not a cash game. Survival, pay " +
+        "jumps, and ICM pressure can pull the correct play away from the " +
+        "chip-EV answer you'd make in a cash game.",
+    });
+  }
+
+  const depth = Number(replay.stack_depth_bb);
+  if (depth && depth !== 100) {
+    items.push({
+      head: "Non-standard stack depth — " + depth + "bb effective",
+      reason: "Stacks are " + depth + "bb deep, not the usual 100bb. " +
+        "Standard 100bb opening ranges and implied-odds math don't carry " +
+        "over directly — read the spot on its own terms.",
+    });
+  }
+
+  const hasCards = replay.hero_cards && replay.hero_cards[0];
+  if (!hasCards) {
+    items.push({
+      head: "Hero's hole cards are hidden",
+      reason: "This spot is played without a specific Hero hand on " +
+        "purpose — it's a range-vs-range decision. Judge it from " +
+        "position, board texture, and the betting action.",
+    });
+  }
+
+  if (items.length === 0) return null;
+
+  return h("div", { class: "scenario-info" },
+    h("div", { class: "scenario-info-label" },
+      h("span", { class: "scenario-info-icon", "aria-hidden": "true" }, "ⓘ"),
+      "Heads-up — this scenario is different"
+    ),
+    ...items.map((it) =>
+      h("div", { class: "scenario-info-item" },
+        h("div", { class: "scenario-info-head" }, it.head),
+        h("div", { class: "scenario-info-reason" }, richText(it.reason, scen))
+      )
+    )
+  );
+}
+
+/**
  * Build the reveal-result block — the educational moment of every hand.
  * Returns a compact comparison: when Hero matched the GTO line, a single
  * centred tile (the action is the answer). When Hero missed, a two-column
