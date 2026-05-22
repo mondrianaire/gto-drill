@@ -11,7 +11,7 @@ import { mountReplay, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
 import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
-import { recordResponse, readScenarioResponses, getCurrentUser } from "./state.js";
+import { recordResponse, readScenarioResponses, readMyResponses, getCurrentUser } from "./state.js";
 
 // -----------------------------------------------------------------------
 // Tiny DOM helper (local; intentionally duplicated to keep this module
@@ -119,6 +119,11 @@ export function mountSoloView(container, onExit) {
   // repeats. Window = half the library or 10, whichever is smaller.
   const recentWindow = Math.min(10, Math.max(1, Math.floor(scenarios.length / 2)));
   const recent = [];
+  // Scenario ids the signed-in user has already ANSWERED — populated
+  // from readMyResponses() on mount, and added to on every lock-in.
+  // The picker skips these so a player works through fresh hands;
+  // once every scenario is completed it recycles (see pickScenario).
+  const completedIds = new Set();
   let currentScen = null;
   // Per-hand state — gets reset on each Next hand.
   let draft = null;
@@ -126,9 +131,22 @@ export function mountSoloView(container, onExit) {
   let handsCompleted = 0;
   let correctSoFar = 0;
 
-  function pickRandomScenario() {
+  function pickScenario() {
     if (pinned) return pinned;
-    let pool = scenarios.filter((s) => !recent.includes(s.scenario_id));
+    // Prefer scenarios that are neither completed nor recently shown.
+    let pool = scenarios.filter(
+      (s) => !completedIds.has(s.scenario_id) && !recent.includes(s.scenario_id)
+    );
+    // All fresh ones happen to be in the recent window — drop the
+    // recent constraint but keep excluding completed.
+    if (pool.length === 0) {
+      pool = scenarios.filter((s) => !completedIds.has(s.scenario_id));
+    }
+    // Exhausted — the user has answered every scenario. Recycle,
+    // avoiding only the recent window.
+    if (pool.length === 0) {
+      pool = scenarios.filter((s) => !recent.includes(s.scenario_id));
+    }
     if (pool.length === 0) pool = scenarios.slice();
     const next = pool[(Math.random() * pool.length) | 0];
     recent.push(next.scenario_id);
@@ -137,7 +155,7 @@ export function mountSoloView(container, onExit) {
   }
 
   function nextHand() {
-    currentScen = pickRandomScenario();
+    currentScen = pickScenario();
     draft = { action: null, confidence: null, note: "", revealed: false };
     render();
   }
@@ -160,11 +178,18 @@ export function mountSoloView(container, onExit) {
       if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
       if (onExit) onExit();
     });
+    // Stats line: this-session hands + accuracy, plus lifetime
+    // completion (distinct scenarios answered / library size) for
+    // signed-in users so they can see how far through the set they
+    // are.
+    const completionSuffix = getCurrentUser()
+      ? " · " + completedIds.size + "/" + scenarios.length + " scenarios done"
+      : "";
     const stats = handsCompleted
       ? h("span", { class: "muted solo-stats" },
           "Hands " + handsCompleted + " · GTO accuracy " +
-          Math.round((correctSoFar / handsCompleted) * 100) + "%")
-      : h("span", { class: "muted solo-stats" }, "Hands 0");
+          Math.round((correctSoFar / handsCompleted) * 100) + "%" + completionSuffix)
+      : h("span", { class: "muted solo-stats" }, "Hands 0" + completionSuffix);
     // Icon-only share link button. buildUrl is evaluated at click time so
     // the URL always points at the scenario currently on screen.
     const { button: shareBtn, fallback: shareFallback } = buildShareLinkButton({
@@ -264,6 +289,10 @@ export function mountSoloView(container, onExit) {
         draft.revealed = true;
         handsCompleted += 1;
         if (draft.action === scen.gto_action) correctSoFar += 1;
+        // Mark this scenario completed so the picker won't re-serve it
+        // (this session, and — once the Firestore write lands — across
+        // future sessions via readMyResponses).
+        completedIds.add(scen.scenario_id);
         render();
       });
 
@@ -405,11 +434,36 @@ export function mountSoloView(container, onExit) {
     ));
   }
 
-  // Pick the first scenario and render.
-  nextHand();
+  // Start: load the signed-in user's completed-scenario set first so
+  // the very first hand already skips scenarios they've answered, then
+  // render. Best-effort + bounded — a slow/failed read just means the
+  // first hand isn't completion-filtered (later hands still are, as
+  // completedIds fills in). Not signed in → start immediately.
+  let unmounted = false;
+  container.appendChild(h("p", { class: "muted solo-loading" }, "Loading…"));
+  (async () => {
+    if (getCurrentUser()) {
+      try {
+        const mine = await Promise.race([
+          readMyResponses(),
+          new Promise((resolve) => setTimeout(() => resolve(null), 4000)),
+        ]);
+        if (Array.isArray(mine)) {
+          for (const r of mine) {
+            if (r && r.scenario_id) completedIds.add(r.scenario_id);
+          }
+        }
+      } catch (err) {
+        console.warn("readMyResponses (completed-set) failed:", err);
+      }
+    }
+    if (unmounted) return;
+    nextHand();
+  })();
 
   return {
     unmount: () => {
+      unmounted = true;
       if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
       clear(container);
     },
