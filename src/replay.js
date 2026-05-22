@@ -307,7 +307,13 @@ export function buildSpotSummary(replay, opts) {
     // data-step = decisionStep so clicking it jumps the replay to the
     // decision point.
     if (isDecision) {
-      const yourTurnEl = h("div", { class: "spot-sum-yourturn" }, "← your turn");
+      // "← Action on HERO" — names the actor (the hero chip) rather
+      // than the generic "your turn", consistent with the HERO/VILLAIN
+      // voice used everywhere else.
+      const yourTurnEl = h("div", { class: "spot-sum-yourturn" },
+        document.createTextNode("← Action on "),
+        actorChip(heroSeat)
+      );
       yourTurnEl.setAttribute("data-step", String(actions.length));
       actionsEl.appendChild(yourTurnEl);
     }
