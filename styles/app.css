@@ -2263,12 +2263,13 @@ form { margin-top: 8px; }
 }
 
 /* Modifier tag — a run of doesn't-matter cards wrapped in a frame whose
-   right side extends into a band carrying a one-letter modifier marker.
+   right side extends into a band carrying a short modifier marker.
    ONE unified treatment for every suit-pattern modifier:
      hand   — suited "s" / offsuit "o"
-     board  — monotone "m" / two-tone "t" / rainbow "r"
-   The frame fill encodes the suit COUNT: solid = one suit, red/black
-   split = two, four-colour = four. The whole tag is 23px tall — a
+     board  — monotone "m" / two-tone "2" / rainbow 🌈
+   The frame fill carries the texture: solid blue (one suit), red/black
+   diagonal (offsuit), red/black horizontal stripes (two-tone), and a
+   four-colour diagonal (rainbow). The whole tag is 23px tall — a
    standalone card glyph's height — so the frame costs no extra line
    height (vertical space is at a premium). */
 .tok-modtag {
@@ -2308,17 +2309,29 @@ form { margin-top: 8px; }
   color: #fdfdfb;
   text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
 }
-/* Frame fill by suit count.
-   One suit (suited / monotone) — solid, in the app's accent-blue family. */
+/* Frame fills. */
+/* One suit (suited / monotone) — solid, in the app's accent-blue family. */
 .tok-modtag-solid { background: #3f86c4; }
-/* Two suits (offsuit / two-tone) — red/black diagonal. */
+/* Offsuit — red/black diagonal. */
 .tok-modtag-split {
   background: linear-gradient(135deg, #c0202a 0 55%, #1a1a1a 55% 100%);
 }
-/* Four suits (rainbow) — the four 4-colour-deck suit hues, diagonally. */
+/* Two-tone — horizontal red/black stripes; distinct from the offsuit
+   diagonal. */
+.tok-modtag-stripes {
+  background: repeating-linear-gradient(180deg,
+    #1a1a1a 0 5px, #c0202a 5px 10px);
+}
+/* Rainbow — the four 4-colour-deck suit hues, diagonally. */
 .tok-modtag-rainbow {
   background: linear-gradient(135deg,
     #1a1a1a 0 25%, #c0202a 25% 50%, #2f6fb0 50% 75%, #2f8a52 75% 100%);
+}
+/* Rainbow's marker is the 🌈 emoji — a drop-shadow outline lifts it off
+   the multi-colour frame band. */
+.tok-modtag-rainbow .tok-modtag-glyph {
+  font-size: 0.82rem;
+  filter: drop-shadow(0 0 1px #000) drop-shadow(0 0 1px rgba(0, 0, 0, 0.9));
 }
 
 /* Inline range chip — clickable anchor that pre-loads the equity panel. */

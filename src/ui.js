@@ -206,9 +206,9 @@ function tokenizeProse(text, scen, opts) {
       let modTag = null;
       if (modRaw) {
         const mod = modRaw.trim().toLowerCase();
-        if (mod === "rainbow" || mod === "r") modTag = { fill: "rainbow", mark: "r", label: "Rainbow — all four suits different" };
+        if (mod === "rainbow" || mod === "r") modTag = { fill: "rainbow", mark: "🌈", label: "Rainbow — all four suits different" };
         else if (mod === "monotone" || mod === "m" || mod === "mono") modTag = { fill: "solid", mark: "m", label: "Monotone — all one suit" };
-        else if (mod === "two-tone" || mod === "two-toned" || mod === "tt") modTag = { fill: "split", mark: "t", label: "Two-tone — two suits" };
+        else if (mod === "two-tone" || mod === "two-toned" || mod === "tt") modTag = { fill: "stripes", mark: "2", label: "Two-tone — two suits" };
       }
       if (modTag) {
         frag.appendChild(h("span", {
