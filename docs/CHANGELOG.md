@@ -24,6 +24,18 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Fixed
+- **Hand notation now tokenizes everywhere** (v2026-05-22.122). The prose
+  tokenizer only renders a hand as a card glyph when the suited/offsuit suffix
+  is bound tight to the ranks (`A8o`, `KQs`) — never the spelled-out form
+  (`A8 offsuit`). Four scenarios used the word form and so rendered as bare
+  cards plus a stray word: `all-in-or-fold-short-stack-011` (`A8 offsuit`),
+  `isolation-vs-limper-013` (`89 suited`), `four-bet-pot-range-cbet-021`
+  (`AK suited`), and `bb-squeeze-vs-open-and-caller-027` (`AK/AQ/AJ offsuit`).
+  All four are corrected to the compact form the other 100+ uses already use,
+  so they render the proper suited/offsuit glyph. Prose-only edits — no
+  `scenario_id` changes.
+
 ### Changed
 - **Shape pass — tags and badges are boxes, not pills** (v2026-05-22.121). The
   visual language now uses shape to encode interactivity: a pill reads as
