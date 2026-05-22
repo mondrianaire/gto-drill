@@ -3272,10 +3272,39 @@ form { margin-top: 8px; }
    card, above the table's CASH/TOURNAMENT context line; it replaces the
    old share-link button as the way to refer to a specific scenario. */
 .scenario-headline {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.scenario-headline-main {
   font-size: 1rem;
   font-weight: 600;
   color: var(--text-dim);
-  margin-bottom: 12px;
+}
+/* View toggle — switches the hand display between the animated oval
+   table and the compact one-screen layout (spec §6.1 / §7). */
+.view-toggle {
+  flex: 0 0 auto;
+  min-height: 32px;
+  padding: 4px 11px;
+  font-size: 0.74rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-dim);
+  background: var(--bg-elev-2);
+  border: 1px solid var(--border-interactive);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.view-toggle[aria-pressed="true"] {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--accent-soft);
+}
+@media (hover: hover) {
+  .view-toggle:hover { border-color: var(--accent); color: var(--text); }
 }
 .scenario-headline-num {
   color: var(--accent);

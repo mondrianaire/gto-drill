@@ -25,6 +25,13 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Added
+- **Compact one-screen hand view + toggle** (v2026-05-22.131). The compact
+  layout (spec §6.1 / §7) is now live and wired into the play screen: a
+  **Compact view** toggle in the scenario headline switches the hand display
+  from the animated oval table to the runout strip + hero strip + action
+  timeline, so a long hand fits one viewport with no scroll to the decision.
+  The animated table stays the default; the choice persists per device
+  (`localStorage`). The first-run overflow coach mark (§7) follows.
 - **Compact-view hero strip** (v2026-05-22.130). Second component of the compact
   one-screen hand view (spec §6.1 / mockup M3): `buildHeroStrip` renders the
   hero's seat, hole cards, and decision-point stack on one line — the compact
