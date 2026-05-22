@@ -7,7 +7,7 @@ optimal play.
 
 ## Live URL
 
-https://mondrianaire.github.io/gto-poker-async-duel-AB/
+https://mondrianaire.github.io/gto-drill/
 
 ## Project structure
 
