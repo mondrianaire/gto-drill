@@ -37,7 +37,9 @@ lobby delete button silently no-op until the rules are live.
   frame (red + black being the two playing-card colours). The frame's
   right side extends into a band that carries the suited/offsuit "s" /
   "o" marker — the marker is part of the border itself, not a separate
-  card-like cell.
+  card-like cell. The cards inside the tag are scaled down slightly so
+  the whole framed tag is exactly as tall as a standalone card glyph
+  (23px) — the frame costs zero extra line height.
 
 ### Added
 - **Running pot per street.** Each street row in the spot summary now
