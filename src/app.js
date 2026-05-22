@@ -84,8 +84,37 @@ function migrateLegacyStorage() {
   }
 }
 
+// iOS Safari double-tap-to-zoom guard. The CSS base patch sets
+// `touch-action: manipulation`, but on iOS Safari that does NOT reliably
+// suppress double-tap-to-zoom — a fast second tap in the same spot still
+// zooms, which makes the tightly-packed mobile UI hard to navigate.
+// Cancel only a genuine double-tap: two taps close in BOTH time and
+// position. Single taps, fast taps on different controls (confidence →
+// Lock in), scrolling, and two-finger pinch-zoom — the accessibility
+// zoom — are all left untouched.
+function installDoubleTapGuard() {
+  let lastTime = 0, lastX = 0, lastY = 0;
+  document.addEventListener("touchend", (ev) => {
+    // Ignore lifts that leave other fingers down (multi-touch gestures).
+    if (ev.touches && ev.touches.length > 0) return;
+    const t = ev.changedTouches && ev.changedTouches[0];
+    if (!t) return;
+    const now = Date.now();
+    if (now - lastTime < 300 &&
+        Math.abs(t.clientX - lastX) < 40 &&
+        Math.abs(t.clientY - lastY) < 40) {
+      // Same spot, fast repeat → a double-tap-zoom gesture. The first
+      // tap already fired its click; cancel this one's default so the
+      // page doesn't zoom.
+      ev.preventDefault();
+    }
+    lastTime = now; lastX = t.clientX; lastY = t.clientY;
+  }, { passive: false });
+}
+
 async function boot() {
   migrateLegacyStorage();
+  installDoubleTapGuard();
   renderVersionStamp();
   const root = document.getElementById("app-root");
   try {
