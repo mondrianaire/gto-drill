@@ -25,6 +25,15 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Added
+- **Per-scenario TexasSolver config export** (v2026-05-22.133). The owner
+  Database console now shows a **⚙ Solver** button on every postflop scenario's
+  coverage row — it downloads a TexasSolver console config (`.txt`) for that
+  scenario's decision spot: board, decision-point pot + effective stack, the
+  villain range (merged from `villain_ranges[].classes`), and the static
+  bet-tree / solve block. The hero range is a marked `PASTE_HERO_RANGE_HERE`
+  placeholder — scenario data stores only the dealt hand, not a hero range — so
+  each config needs the hero range filled before solving. Owner tooling toward
+  the §8.1 solver data; preflop scenarios (no board) get no export.
 - **First-run compact-view coach mark** (v2026-05-22.132). The first time a
   decide screen overflows the viewport in the expanded (table) layout, a
   one-time hint fades in beside the view toggle — "This hand runs long — tap

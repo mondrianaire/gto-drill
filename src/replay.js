@@ -333,6 +333,96 @@ export function buildHeroStrip(replay) {
 }
 
 /**
+ * Build a TexasSolver console config (the .txt body) for a scenario's
+ * decision spot — owner tooling, exported per scenario from the Database
+ * console. Fills board, decision-point pot + effective stack, the
+ * villain range, and the static bet-tree / solve block. The HERO range
+ * is a marked placeholder (PASTE_HERO_RANGE_HERE): scenario data stores
+ * only the dealt hand, not a hero range. Returns null for a preflop
+ * spot (no board to solve).
+ *
+ * @param {Object} scen  a scenario object
+ * @returns {string|null}
+ */
+export function buildSolverConfig(scen) {
+  const replay = scen && scen.replay;
+  if (!replay || !replay.board) return null;
+  const board = []
+    .concat(replay.board.flop || [])
+    .concat(replay.board.turn || [])
+    .concat(replay.board.river || []);
+  if (board.length < 3) return null;            // no flop → a preflop spot
+
+  // Pot + effective stack at the decision, in TexasSolver chip units —
+  // bb × 10, so the app's 0.5bb precision lands on whole numbers.
+  const chips = (bb) => Math.round((bb || 0) * 10);
+  const pot = potAtDecisionBb(replay) || 0;
+  const { seats } = deriveState(replay, (replay.actions || []).length);
+  const heroPos = replay.hero_seat;
+  const villPos = (liveVillains(replay) || [])[0] || null;
+  const heroStack = (seats[heroPos] && typeof seats[heroPos].stack === "number")
+    ? seats[heroPos].stack : (replay.stack_depth_bb || 100);
+  const villStack = (villPos && seats[villPos] && typeof seats[villPos].stack === "number")
+    ? seats[villPos].stack : heroStack;
+  const effStack = Math.min(heroStack, villStack);
+
+  // Villain range — every villain_ranges[].classes merged and deduped.
+  const villClasses = [];
+  for (const vr of (scen.villain_ranges || [])) {
+    for (const c of (vr.classes || [])) {
+      if (c && !villClasses.includes(c)) villClasses.push(c);
+    }
+  }
+  const villRange = villClasses.length ? villClasses.join(",") : "PASTE_VILLAIN_RANGE_HERE";
+
+  // OOP = whoever acts first postflop (the earlier seat). The hero's
+  // range is always the placeholder — it isn't in the scenario data.
+  const ORDER = ["SB", "BB", "UTG", "UTG1", "UTG2", "MP", "LJ", "HJ", "CO", "BTN"];
+  const rank = (p) => { const i = ORDER.indexOf(p); return i < 0 ? 99 : i; };
+  const heroOop = villPos ? rank(heroPos) < rank(villPos) : true;
+  const HERO = "PASTE_HERO_RANGE_HERE";
+
+  return [
+    "set_pot " + chips(pot),
+    "set_effective_stack " + chips(effStack),
+    "set_board " + board.join(","),
+    "set_range_oop " + (heroOop ? HERO : villRange),
+    "set_range_ip " + (heroOop ? villRange : HERO),
+    "set_bet_sizes oop,flop,bet,50",
+    "set_bet_sizes oop,flop,raise,60",
+    "set_bet_sizes oop,flop,allin",
+    "set_bet_sizes ip,flop,bet,50",
+    "set_bet_sizes ip,flop,raise,60",
+    "set_bet_sizes ip,flop,allin",
+    "set_bet_sizes oop,turn,bet,50",
+    "set_bet_sizes oop,turn,raise,60",
+    "set_bet_sizes oop,turn,donk,50",
+    "set_bet_sizes oop,turn,allin",
+    "set_bet_sizes ip,turn,bet,50",
+    "set_bet_sizes ip,turn,raise,60",
+    "set_bet_sizes ip,turn,allin",
+    "set_bet_sizes oop,river,bet,50",
+    "set_bet_sizes oop,river,raise,60,100",
+    "set_bet_sizes oop,river,allin",
+    "set_bet_sizes ip,river,bet,50",
+    "set_bet_sizes ip,river,raise,60,100",
+    "set_bet_sizes oop,river,donk,50",
+    "set_bet_sizes ip,river,allin",
+    "set_allin_threshold 0.67",
+    "set_raise_limit 3",
+    "build_tree",
+    "set_thread_num 8",
+    "set_accuracy 0.5",
+    "set_max_iteration 200",
+    "set_print_interval 10",
+    "set_use_isomorphism 1",
+    "start_solve",
+    "set_dump_rounds 2",
+    "dump_result " + scen.scenario_id + ".json",
+  ].join("\n") + "\n";
+}
+
+/**
  * Build a compact mini-display of the hand's INFLECTION points up to the
  * decision — replaces the verbose "spot in words" prose. Groups by
  * street and shows only the actions that meaningfully change state:

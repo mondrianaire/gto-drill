@@ -7,6 +7,7 @@
 // data rules; the owner gate just keeps this console out of their UI.
 
 import { listScenarios, getScenarioById } from "./scenarios.js";
+import { buildSolverConfig } from "./replay.js";
 import { readAllResponses } from "./state.js";
 
 // Tiny DOM helper — local, matching the per-module pattern.
@@ -152,11 +153,12 @@ export function mountDatabaseView(container, onBack) {
         num: scenNum(s.scenario_id),
         title: s.lesson_tag || "",
         n: countById.get(s.scenario_id) || 0,
+        scen: s,
       }))
       .sort((a, b) => (b.n - a.n) || a.num.localeCompare(b.num));
     const cov = h("div", { class: "db-coverage" });
     for (const row of rows) {
-      cov.appendChild(h("a", {
+      const link = h("a", {
         class: "db-cov-row" + (row.n === 0 ? " is-empty" : ""),
         href: "?scenario=" + encodeURIComponent(row.id),
       },
@@ -164,7 +166,29 @@ export function mountDatabaseView(container, onBack) {
         h("span", { class: "db-cov-title" }, row.title),
         h("span", { class: "db-cov-count" },
           row.n + (row.n === 1 ? " response" : " responses"))
-      ));
+      );
+      // Owner export — a TexasSolver config (.txt) for this scenario's
+      // decision spot. Postflop scenarios only (a preflop spot has no
+      // board to solve, so buildSolverConfig returns null).
+      const cfg = buildSolverConfig(row.scen);
+      let solverBtn = null;
+      if (cfg) {
+        solverBtn = h("button", {
+          type: "button",
+          class: "db-cov-solver",
+          title: "Download a TexasSolver config (.txt) for this scenario",
+        }, "⚙ Solver");
+        solverBtn.addEventListener("click", () => {
+          const blob = new Blob([cfg], { type: "text/plain;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const a = h("a", { href: url, download: row.id + ".txt" });
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(() => URL.revokeObjectURL(url), 1000);
+        });
+      }
+      cov.appendChild(h("div", { class: "db-cov-rowwrap" }, link, solverBtn));
     }
     bodyEl.appendChild(cov);
   })();
