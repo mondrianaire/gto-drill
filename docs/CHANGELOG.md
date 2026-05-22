@@ -25,6 +25,12 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Added
+- **Compact-view board-runout strip** (v2026-05-22.128). First component of the
+  compact one-screen hand view (spec §6.1 / mockup M3): `buildRunoutStrip`
+  renders the flop/turn/river board dealt once as a compact strip with the
+  decision-point pot — the compact layout's replacement for the oval table's
+  felt board. Standalone component for now; the hero strip, the compact
+  assembly, and the expanded⇄compact view toggle (§7) follow.
 - **Verdict tint on the GTO reveal** (v2026-05-22.127). On the reveal screen
   the browser toolbar's `theme-color` now shifts to the hand's outcome — a dark
   green on a match, a dark red on a miss — and rests at the neutral near-black
