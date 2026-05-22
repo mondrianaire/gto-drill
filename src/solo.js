@@ -627,8 +627,14 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
           new Promise((resolve) => setTimeout(() => resolve(null), 4000)),
         ]);
         if (Array.isArray(mine)) {
+          // Only count responses for scenarios still in the live
+          // library. A retired scenario_id (one replaced under a new
+          // id — see docs/SCHEMA.md) leaves an orphaned response in
+          // Firestore; counting it would push the completion tally
+          // past the library size ("46/45 scenarios done").
+          const libraryIds = new Set(scenarios.map((s) => s.scenario_id));
           for (const r of mine) {
-            if (r && r.scenario_id) {
+            if (r && r.scenario_id && libraryIds.has(r.scenario_id)) {
               completedIds.add(r.scenario_id);
               priorById.set(r.scenario_id, {
                 action: r.action, confidence: r.confidence,
