@@ -10,7 +10,6 @@ import { listScenarios } from "./scenarios.js";
 import { mountReplay, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
 import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown, buildScenarioInfo } from "./ui.js";
-import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
 import { recordResponse, readScenarioResponses, readMyResponses, saveResponseComment, getCurrentUser } from "./state.js";
 
 // -----------------------------------------------------------------------
@@ -247,12 +246,12 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
     const errorBox = h("div", { class: "error", role: "alert" });
 
     // --- header strip --------------------------------------------------------
-    // Two-row header: title + action buttons on row 1, stats on row 2. Both
-    // action buttons are icon-only (with `title` tooltips); the labels would
-    // be redundant given how visually distinct 🔗 / ← are.
+    // Two-row header: title + action buttons on row 1, stats on row 2.
+    // Exit is an always-rendered labelled button (no bare arrow); the
+    // Players control stays an icon (👥) with a tooltip.
     const exitBtn = h("button",
-      { type: "button", class: "link-btn solo-exit icon-btn", title: "Exit solo practice", "aria-label": "Exit solo practice" },
-      h("span", { "aria-hidden": "true" }, "←"));
+      { type: "button", class: "solo-exit", title: "Exit solo practice", "aria-label": "Exit solo practice" },
+      "Exit");
     exitBtn.addEventListener("click", () => {
       if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
       if (onExit) onExit();
@@ -269,13 +268,6 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
           "Hands " + handsCompleted + " · GTO accuracy " +
           Math.round((correctSoFar / handsCompleted) * 100) + "%" + completionSuffix)
       : h("span", { class: "muted solo-stats" }, "Hands 0" + completionSuffix);
-    // Icon-only share link button. buildUrl is evaluated at click time so
-    // the URL always points at the scenario currently on screen.
-    const { button: shareBtn, fallback: shareFallback } = buildShareLinkButton({
-      buildUrl: () => shareUrlForScenario(scen.scenario_id),
-      title: "Copy share link for this hand",
-      className: "solo-share",
-    });
     // Players button — opens the roster screen. Only present when the
     // caller wired onPlayers (signed-in users; the crowd pool needs an
     // identity to be meaningful).
@@ -293,10 +285,22 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
     const header = h("div", { class: "solo-header" },
       h("div", { class: "solo-header-top" },
         h("h2", null, "Solo practice"),
-        h("div", { class: "solo-header-actions" }, playersBtn, shareBtn, exitBtn)
+        h("div", { class: "solo-header-actions" }, playersBtn, exitBtn)
       ),
       stats
     );
+
+    // --- scenario headline ---------------------------------------------------
+    // "Scenario #NNN" — the atomic reference, i.e. the trailing number of
+    // the scenario slug. Sits at the very top of the hand card, above the
+    // table's CASH/TOURNAMENT context line. This is how a scenario is
+    // referred to now that the share-link button is gone.
+    const scenNum = String(scen.scenario_id || "").match(/(\d+)\s*$/);
+    const scenarioHeadline = scenNum
+      ? h("div", { class: "scenario-headline" },
+          "Scenario ",
+          h("span", { class: "scenario-headline-num" }, "#" + scenNum[1]))
+      : null;
 
     // --- scenario INFO pane --------------------------------------------------
     // Shown ABOVE the hand summary for any scenario whose setup deviates
@@ -525,9 +529,8 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
       "section",
       { class: "in-game my-turn solo-view" },
       header,
-      shareFallback,
       stickyNav,          // sticky "Next hand →" on reveal
-      h("div", { class: "hand-card" }, infoPane, spot, body),
+      h("div", { class: "hand-card" }, scenarioHeadline, infoPane, spot, body),
       errorBox
     ));
   }
