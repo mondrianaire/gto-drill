@@ -24,6 +24,19 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Changed
+- **Shape pass — tags and badges are boxes, not pills** (v2026-05-22.121). The
+  visual language now uses shape to encode interactivity: a pill reads as
+  pressable, a box reads as a static label. Seven status badges/tags that were
+  pill-shaped (999px) but not interactive — the profile concept flag, the
+  stalled-game badge, the option-analysis tags, the crowd tags, the active-game
+  status badge, the replay context tag, the villain-evidence chips — are now
+  boxes via a new `--radius-box` token. Genuinely-pressable chips
+  (`.spot-range-chip`, `.rp-cat`) keep their pill shape, and the poker-table
+  chip skeuomorphs (bet bubble, pot pill, action badge) keep theirs — a chip is
+  meant to look round. Buttons are unchanged. Closes the §2.4 / M8 shape-pass
+  item from the redesign roadmap.
+
 ### Fixed
 - **Completion count clamped to the live library** (v2026-05-22.120). The
   solo stats line could read `46/45 scenarios done` — over 100%. A retired
