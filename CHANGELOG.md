@@ -25,6 +25,20 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Fixed
+- **Replay table seat positions.** The four "corner" seats were anchored
+  4 px from the table edges, but the table is a capsule with a 140 px
+  corner radius — the felt curves sharply away there, so the 80 px-wide
+  seats overhung the rounded ends onto the page. Corner seats are now
+  inset ~46 px from each edge, turning the six seats into a clean
+  hexagon that sits fully on the felt.
+
+### Added
+- **`SCHEMA.md`** — documents the Firestore `responses` / `users`
+  collections and the preservation invariants (append-only, immutable
+  `scenario_id`s, additive-only field changes) so development can
+  continue safely while the live link collects real player data.
+
 ### Changed
 - **Mobile pass 1 fixes** (from `design-audit/mobile-audit.html`).
   Five of the six audit findings, sequenced before the deeper table
