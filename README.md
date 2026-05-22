@@ -44,7 +44,7 @@ That corpus entry is **frozen at the ratification commit** and will not change g
 
 ## Local development
 
-GTO Duel is a static ES-module app, but it **cannot be opened directly as a
+GTO Drill is a static ES-module app, but it **cannot be opened directly as a
 `file://` page** — browsers block ES-module imports and the `fetch()` of
 `data/scenarios.json` under the `file:` protocol. Run the bundled dev server
 instead:

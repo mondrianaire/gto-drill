@@ -137,7 +137,7 @@ export function mountSignInView(container, onSignedIn, onSolo, onCalculator, onD
   const root = h(
     "section",
     { class: "signin" },
-    h("h1", { class: "appname" }, "GTO Duel"),
+    h("h1", { class: "appname" }, "GTO Drill"),
     h(
       "p",
       { class: "tagline" },
@@ -231,11 +231,11 @@ export function mountLandingView(container, onCreate, onJoin) {
   const root = h(
     "section",
     { class: "landing" },
-    h("h1", { class: "appname" }, "GTO Duel"),
+    h("h1", { class: "appname" }, "GTO Drill"),
     h(
       "p",
       { class: "tagline" },
-      "An asynchronous head-to-head GTO quiz. You and one friend, the same gotcha hands, your confidence on each call. At the end, we surface where you both felt sure and disagreed."
+      "Read each spot, call the line, rate your confidence — then see the GTO answer and how the whole crowd played the same hand."
     ),
     h(
       "div",
