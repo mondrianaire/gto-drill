@@ -1,7 +1,7 @@
 {
-  "name": "GTO Duel",
-  "short_name": "GTO Duel",
-  "description": "Asynchronous head-to-head GTO poker quiz: two friends, the same gotcha scenarios, confidence-rated decisions, and a wrap-up that surfaces your highest-confidence disagreements.",
+  "name": "GTO Drill",
+  "short_name": "GTO Drill",
+  "description": "A GTO poker trainer: read each spot, commit your answer and confidence, then see the GTO line and how the crowd played the same hand.",
   "start_url": ".",
   "scope": "./",
   "display": "standalone",

@@ -1,6 +1,6 @@
 // app.js — top-level boot + router (section-6 Controller/Shell).
 //
-// GTO Duel is a crowd-response GTO trainer: sign in, play hands one at
+// GTO Drill is a crowd-response GTO trainer: sign in, play hands one at
 // a time, and each reveal shows the GTO line PLUS how the whole crowd
 // of players answered (the "How others played" breakdown).
 //

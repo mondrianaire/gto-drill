@@ -26,6 +26,14 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Renamed: GTO Duel → GTO Drill** (v2026-05-22.114). Finishes the pivot
+  the app made long ago — from a private two-player duel to a crowdsourced
+  GTO trainer — by making the name describe what the app actually is. The
+  page `<title>`, header wordmark, PWA manifest (`name` / `short_name`),
+  footer, and onboarding screens all now read "GTO Drill". Stale
+  "head-to-head duel" copy in the page meta description, the manifest
+  description, and the landing tagline is refreshed to the crowd-trainer
+  voice. "Duel" is reserved for the planned opt-in head-to-head mode.
 - **Comments now carry the answer they were written about**
   (v2026-05-22.113). A comment used to be a bare string — on a retest,
   only a session-only heuristic tied it to an answer. Now
