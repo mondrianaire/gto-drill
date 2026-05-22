@@ -224,6 +224,135 @@ form { margin-top: 8px; }
 .players-actions { margin-top: 16px; }
 .players-back { width: 100%; }
 
+/* Player profile — aggression bias, per-concept accuracy, confidence
+   calibration, synthesised from a player's recorded responses. */
+.profile-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.profile-avatar { flex: 0 0 auto; }
+.profile-name { font-size: 1.15rem; font-weight: 700; }
+.profile-sub { font-size: 0.85rem; margin-top: 2px; }
+.profile-empty { margin: 20px 0; }
+.profile-stat-big {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 12px 14px;
+  background: rgba(120, 180, 255, 0.06);
+  border: 1px solid rgba(120, 180, 255, 0.3);
+  border-radius: var(--radius);
+  margin-bottom: 16px;
+}
+.profile-stat-num { font-size: 1.8rem; font-weight: 800; color: var(--accent); }
+.profile-stat-label { font-size: 0.85rem; }
+.profile-section { margin-bottom: 20px; }
+.profile-section-label {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-weight: 700;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.profile-section-hint { font-size: 0.8rem; margin: 0 0 8px 0; }
+.profile-verdict {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  margin: 6px 0 0 0;
+  color: var(--text);
+}
+
+/* Aggression meter — a passive↔aggressive track with a marker. */
+.aggr-meter { margin: 4px 0; }
+.aggr-meter-track {
+  position: relative;
+  height: 10px;
+  border-radius: 999px;
+  background: linear-gradient(90deg,
+    rgba(120, 180, 255, 0.4) 0%,
+    rgba(255, 255, 255, 0.12) 50%,
+    rgba(255, 184, 90, 0.5) 100%);
+}
+.aggr-meter-marker {
+  position: absolute;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--text);
+  border: 2px solid var(--bg);
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  transform: translate(-50%, -50%);
+}
+.aggr-meter-marker.aggr-tone-hot { background: #ffb85a; }
+.aggr-meter-marker.aggr-tone-cold { background: #5cb7ff; }
+.aggr-meter-marker.aggr-tone-even { background: #6fd9a0; }
+.aggr-meter-ends {
+  display: flex;
+  justify-content: space-between;
+  font-size: 0.72rem;
+  margin-top: 5px;
+}
+.aggr-meter-ends span:nth-child(2) { opacity: 0.7; }
+
+/* Per-concept accuracy bars. */
+.profile-concepts {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.profile-concept {
+  padding: 8px 10px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.02);
+}
+.profile-concept.is-flagged { border-color: rgba(255, 213, 138, 0.4); }
+.profile-concept-head {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 6px;
+}
+.profile-concept-name { font-weight: 600; font-size: 0.92rem; }
+.profile-concept-pct { font-size: 0.8rem; margin-left: auto; white-space: nowrap; }
+.profile-concept-flag {
+  font-size: 0.68rem;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.profile-concept-flag.is-blindspot {
+  color: #ffd58a;
+  background: rgba(255, 213, 138, 0.14);
+  border: 1px solid rgba(255, 213, 138, 0.5);
+}
+.profile-concept-flag.is-strength {
+  color: #6fd9a0;
+  background: rgba(76, 200, 130, 0.14);
+  border: 1px solid rgba(76, 200, 130, 0.5);
+}
+.profile-concept-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  overflow: hidden;
+}
+.profile-concept-fill {
+  height: 100%;
+  background: rgba(120, 180, 255, 0.5);
+  transition: width 0.3s ease;
+}
+.profile-concept-fill.is-good { background: rgba(76, 200, 130, 0.55); }
+.profile-concept-fill.is-weak { background: rgba(240, 130, 90, 0.55); }
+.profile-actions { margin-top: 18px; }
+.profile-back { width: 100%; }
+
 /* Lobby list (Join screen) */
 .lobby-list {
   display: flex;

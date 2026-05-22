@@ -25,6 +25,7 @@ import {
 import { mountSignInView, buildAvatar } from "./onboarding.js";
 import { mountSoloView } from "./solo.js";
 import { mountPlayersView } from "./players.js";
+import { mountProfileView } from "./profile.js";
 import { mountEquityCalculator } from "./equity-calculator.js";
 import { loadDictionary, mountDictionaryView } from "./dictionary.js";
 import { setOpenCallback as setTooltipOpenCallback } from "./tooltip.js";
@@ -136,11 +137,23 @@ function goPlay(root) {
 
 // The Players screen — every player's library completion + accuracy.
 // Reachable from the play header; Back returns to the play loop.
+// Tapping a player opens their profile.
 function goPlayers(root) {
   renderHeaderUser();
   setTooltipOpenCallback((id) =>
     mountDictionaryView(root, () => goPlayers(root), { initialTermId: id }));
-  mountPlayersView(root, () => goPlay(root));
+  mountPlayersView(
+    root,
+    () => goPlay(root),
+    (uid) => goProfile(root, uid)
+  );
+}
+
+// A player's profile — aggression bias, per-concept accuracy,
+// confidence calibration. Back returns to the Players screen.
+function goProfile(root, uid) {
+  renderHeaderUser();
+  mountProfileView(root, uid, () => goPlayers(root));
 }
 
 // The sign-in gate. Once signed in → the play loop. Escape hatches for
