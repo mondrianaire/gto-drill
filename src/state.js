@@ -430,6 +430,56 @@ export async function readScenarioResponses(scenarioId) {
 }
 
 /**
+ * Read the signed-in user's own responses across every scenario.
+ * Powers (a) the "don't re-show completed scenarios" logic in the play
+ * loop and (b) the player-profile analysis. Returns [] when not signed
+ * in or on error.
+ *
+ * @returns {Promise<Array<{scenario_id,action,confidence,updatedAt}>>}
+ */
+export async function readMyResponses() {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  const me = getCurrentUser();
+  if (!me) return [];
+  try {
+    const q = query(collection(_db, "responses"), where("uid", "==", me.uid));
+    const snap = await getDocs(q);
+    const out = [];
+    snap.forEach((d) => out.push(d.data()));
+    return out;
+  } catch (err) {
+    console.warn("readMyResponses failed:", err);
+    return [];
+  }
+}
+
+/**
+ * Read EVERY recorded response across all scenarios and players — the
+ * input for the Players screen (completion + accuracy per player) and
+ * for viewing other players' profiles. Returns [] when not signed in
+ * or on error.
+ *
+ * For a small friends-and-family app this is a cheap full-collection
+ * read; if the response pool ever grows large this should move to a
+ * maintained per-user aggregate doc.
+ *
+ * @returns {Promise<Array<{scenario_id,uid,displayName,photoURL,action,confidence}>>}
+ */
+export async function readAllResponses() {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  if (!getCurrentUser()) return [];
+  try {
+    const snap = await getDocs(collection(_db, "responses"));
+    const out = [];
+    snap.forEach((d) => out.push(d.data()));
+    return out;
+  } catch (err) {
+    console.warn("readAllResponses failed:", err);
+    return [];
+  }
+}
+
+/**
  * Subscribe to MY active games (statuses: waiting_for_opponent, in_progress).
  * Returns summaries with enough info to render a "stale game" row: status,
  * opponent identity, my progress in the current round, total rounds.
