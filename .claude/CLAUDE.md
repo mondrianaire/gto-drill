@@ -70,6 +70,20 @@ site.
   `scenario_id` in `data/scenarios.json` — responses are keyed to them.
   See `docs/SCHEMA.md` for the full data contract.
 
+## Session-resume hygiene — stale plan files
+
+Plan-mode plans are saved to `~/.claude/plans/*.md` and are **never
+auto-deleted** — not when implemented, not when merged. On every session
+resume / context compaction the harness re-injects whatever it finds there as
+a "continue working on it" reminder, so a finished plan keeps resurfacing as
+phantom unfinished work. (Harness behavior, not specific to this repo.)
+
+When a resume surfaces a plan file, **verify before acting** — compare it to
+the repo and `git log`. If it already shipped, say so and delete the file
+(`rm ~/.claude/plans/<name>.md`) rather than "resuming" it. After any plan
+merges, delete its plan file as part of wrapping up — that is the only durable
+fix.
+
 ## Documentation
 
 - [docs/CHANGELOG.md](../docs/CHANGELOG.md) — Release history

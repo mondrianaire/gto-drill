@@ -55,7 +55,37 @@ function stripQuery() {
   return location.origin + location.pathname;
 }
 
+// One-time localStorage migration — the app was renamed GTO Duel →
+// GTO Drill, so local state moved from a `gto-duel.*` key prefix to
+// `gto-drill.*`. Copy any legacy keys across so returning players keep
+// their local play history, active-game pointer, and preferences.
+// Idempotent: legacy keys are removed once migrated, so re-runs no-op.
+// (Firebase crowd data is keyed by uid and is unaffected either way.)
+function migrateLegacyStorage() {
+  let ls;
+  try { ls = window.localStorage; } catch { return; }
+  if (!ls) return;
+  const OLD = "gto-duel.", NEW = "gto-drill.";
+  const legacy = [];
+  for (let i = 0; i < ls.length; i++) {
+    const k = ls.key(i);
+    if (k && k.indexOf(OLD) === 0) legacy.push(k);
+  }
+  for (const oldKey of legacy) {
+    try {
+      const newKey = NEW + oldKey.slice(OLD.length);
+      // Don't clobber data a post-rename build may already have written.
+      if (ls.getItem(newKey) === null) {
+        const v = ls.getItem(oldKey);
+        if (v !== null) ls.setItem(newKey, v);
+      }
+      ls.removeItem(oldKey);
+    } catch { /* quota / private mode — skip this key */ }
+  }
+}
+
 async function boot() {
+  migrateLegacyStorage();
   renderVersionStamp();
   const root = document.getElementById("app-root");
   try {
