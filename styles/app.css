@@ -304,6 +304,12 @@ form { margin-top: 8px; }
   white-space: nowrap;
 }
 .db-comment-text { margin: 0; font-size: 0.9rem; line-height: 1.45; }
+/* The answer a Database-console comment was written about. */
+.db-comment-ctx {
+  margin: 0 0 3px 0;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
 .db-coverage {
   display: flex;
   flex-direction: column;
@@ -1358,6 +1364,13 @@ form { margin-top: 8px; }
   font-weight: 700;
   color: #6fd9a0;
   margin-bottom: 3px;
+}
+/* The answer a crowd comment was written about — keeps the comment
+   honest if the player later changed their answer on a retest. */
+.crowd-note-pop-ctx {
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  margin-bottom: 4px;
 }
 .crowd-note-pop-text {
   margin: 0;

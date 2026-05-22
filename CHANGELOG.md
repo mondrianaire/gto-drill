@@ -26,6 +26,17 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Comments now carry the answer they were written about**
+  (v2026-05-22.113). A comment used to be a bare string — on a retest,
+  only a session-only heuristic tied it to an answer. Now
+  `saveResponseComment` snapshots the action + confidence selected when
+  the comment was written (`noteAction` / `noteConfidence` on the
+  response doc), so the comment is self-describing and a later answer
+  change can't misrepresent it. The retest stale-flag reads this stored
+  snapshot instead of guessing, and the crowd-breakdown comment popover
+  and the Database console now label each comment with the answer it
+  was written about. Additive fields — comments saved before this
+  render fine, just without the label.
 - **Retest comments no longer silently lost** (v2026-05-22.112). Re-
   answering a scenario you had already played (the retest flow)
   overwrote the whole response document — deleting any note you had

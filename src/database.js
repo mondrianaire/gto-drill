@@ -126,6 +126,13 @@ export function mountDatabaseView(container, onBack) {
             h("span", { class: "db-comment-meta" },
               (r.displayName || "Player") + " · " + timeAgo(r.updatedAt))
           ),
+          // The answer the comment was written about — present for
+          // comments saved after noteAction tracking; absent on older
+          // ones (the comment still renders, just without the label).
+          r.noteAction
+            ? h("p", { class: "db-comment-ctx" },
+                "Written when they answered “" + r.noteAction + "”")
+            : null,
           h("p", { class: "db-comment-text" }, "“" + String(r.note).trim() + "”")
         ));
       }
