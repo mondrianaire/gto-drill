@@ -147,6 +147,26 @@ The only files that originated from the fork ceremony (rather than from the buil
 
 You can edit these freely — they will not be regenerated unless an explicit re-promotion is triggered with the overwrite flag set.
 
+## Session-resume hygiene — stale plan files
+
+Plans written in plan mode are saved to `~/.claude/plans/*.md` and are **never
+auto-deleted** — not when the plan is implemented, not when it merges. On every
+session resume / context compaction, the harness re-injects whatever plan files
+it finds as a system reminder telling the agent to "continue working on it if
+not already complete." A finished plan therefore keeps resurfacing on every
+future resume — looking exactly like live, unfinished work even when it shipped
+days ago. (This is harness behavior, not specific to this repo.)
+
+**When a resume surfaces a plan file, do not assume it is live work.** The
+reminder carries no date and no done-flag, so first verify against reality:
+compare the plan's contents to the repo and `git log`. If the plan is already
+implemented and merged, say so plainly — and **delete the plan file**
+(`rm ~/.claude/plans/<name>.md`) — instead of "resuming" it.
+
+**After any plan is merged, delete its plan file** from `~/.claude/plans/` as
+part of wrapping up. That is the only durable fix: an undeleted plan file is
+guaranteed to haunt the next resume.
+
 ---
 
 ## Lifecycle vocabulary (if you need it)
