@@ -3283,6 +3283,32 @@ form { margin-top: 8px; }
    was noise; the spot-in-words prose now serves as the canonical
    textual narration. */
 
+/* ----- Replay table — narrow / mobile widths ------------------------- */
+/* The seat layout (80px seats, 46px corner insets, 140px capsule radius)
+   is tuned for the ~650px-wide desktop table. On a phone the table
+   collapses toward square: 80px seats then overlap each other, the board,
+   and the pot. At <=560px:
+     - shrink the seats so six of them fit;
+     - drop the capsule radius to a plain rounded rectangle, so seats can
+       sit near the corners without overhanging a deep 140px curve;
+     - pull the four corner seats back out to the edges — the desktop
+       inset (needed to clear the capsule ends) would, on a narrow table,
+       crowd every seat into the centre over the board. */
+@media (max-width: 560px) {
+  .replay-table { border-radius: 28px; }
+  .rseat { width: 62px; padding: 3px; }
+  .rseat-pos { font-size: 0.64rem; }
+  .rseat-stack { font-size: 0.64rem; }
+  .rslot-1 { bottom: 6px; left: 6px; }
+  .rslot-2 { top: 8px; left: 6px; }
+  .rslot-4 { top: 8px; right: 6px; }
+  .rslot-5 { bottom: 6px; right: 6px; }
+  /* Shrink the replay's small cards (seat hole cards + the community
+     board) so the 5-card river board clears the side seats on narrow
+     phones. */
+  .replay .pcard-sm { width: 23px; height: 32px; }
+}
+
 /* Mobile */
 @media (max-width: 480px) {
   .input-row { grid-template-columns: 1fr; }
