@@ -27,13 +27,14 @@ lobby delete button silently no-op until the rules are live.
 
 ### Fixed
 - **Replay table cluttered on mobile.** The seat layout (80px seats,
-  46px corner insets, 140px capsule radius) is tuned for the wide
-  desktop table; on a phone the table collapses toward square and the
-  seats overlapped each other, the board, and the pot. At ≤560px the
-  table now becomes a rounded rectangle with smaller (62px) seats pulled
-  back out to the corners and slightly smaller cards, so all six seats
-  and the five-card board fit without overlap down to ~360px-wide
-  phones.
+  46px corner insets) is tuned for the wide desktop table; on a phone
+  the table collapses toward square and the seats overlapped each other,
+  the board, and the pot. At ≤560px the seats shrink to 62px (with
+  slightly smaller cards) and the four corner seats are pulled back out
+  to the edges, so all six seats and the five-card board no longer
+  overlap. The capsule table shape is kept on mobile — on a squeezed
+  phone table the corner seats may spill slightly past the rounded ends,
+  which is fine.
 - **Reveal-screen gap before the Lesson pill.** The reveal body sat
   flush against the hand-summary (replay table + spot-summary), so the
   💡 Lesson pill read as overlapping the last spot-summary row. The
