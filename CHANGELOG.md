@@ -66,6 +66,14 @@ lobby delete button silently no-op until the rules are live.
   of a bare `←` arrow.
 
 ### Fixed
+- **Turn/river card missing at the decision point.** The replay's
+  board-advance logic (which deals the decision-street card when the
+  hero is first to act on a new street) was keyed to the old single
+  decision step; after the last-action / decision-view split it fired
+  one step too early — showing the decision-street card on the *last
+  action* frame and hiding it at the actual decision. It now fires at
+  the decision view, so the turn (or river) card is visible exactly
+  when hero is deciding on that street.
 - **Playing-card suits + replay controls drawn as inline SVG.** The
   earlier text-glyph fix (U+FE0E selector) still wasn't reliable in
   every Chrome — Unicode ♠♥♦♣ and the media glyphs (⏮ ◀ ▶ ❚❚) render

@@ -179,15 +179,15 @@ function deriveState(replay, step) {
     }
   }
   // Determine the street to show on the table. Normal case: the street of
-  // the last applied action. EXCEPTION: when we're at the decision point
-  // AND the next street has been DEALT (i.e. scen.replay.board has cards
-  // for it), the dealer would have advanced the board between the last
-  // action and the hero's decision. Show the new street's cards and sweep
-  // any open street-bets into the pot. Fixes scenarios where the hero is
-  // first to act on a new street (e.g., BB facing a flop with no preflop
-  // continuation from villain).
+  // the last applied action. EXCEPTION: at the decision VIEW — `topStep`,
+  // one step PAST the last action — the dealer has advanced the board to
+  // the hero's decision street (if its cards are dealt in replay.board).
+  // Show that street's cards and sweep open street-bets into the pot.
+  // `step > allActions.length` is exactly topStep (setStep clamps there);
+  // AT allActions.length (the last action's own frame) the board still
+  // shows that action's street, not yet the next card.
   let viewStreet = applied.length ? applied[applied.length - 1].street : "preflop";
-  if (step === allActions.length) {
+  if (step > allActions.length) {
     const board = replay.board || {};
     let dealtStreet = "preflop";
     if (board.river && board.river.length) dealtStreet = "river";
