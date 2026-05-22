@@ -28,21 +28,62 @@ function h(tag, attrs, ...children) {
 }
 
 const STREETS = ["preflop", "flop", "turn", "river"];
-// Suit glyphs each carry a trailing U+FE0E VARIATION SELECTOR-15 — the
-// "text presentation" selector. Without it, browsers (notably Chrome on
-// Windows) intermittently render ♠♥♦♣ via the OS emoji font as colour
-// emoji: the glyph looks wrong AND ignores our red/black `color`. FE0E
-// forces the monochrome text glyph so the cards render consistently.
+// Suit colour lookup. The suit SHAPE is drawn as inline SVG by
+// suitSvg() — deliberately NOT a Unicode glyph. The Unicode suit
+// characters (♠♥♦♣) render inconsistently across browsers: Chrome on
+// Windows intermittently substitutes a colour-emoji glyph, which looks
+// wrong and ignores the card's red/black colour. SVG is deterministic.
 const SUITS = {
-  c: { glyph: "♣︎", red: false },
-  d: { glyph: "♦︎", red: true },
-  h: { glyph: "♥︎", red: true },
-  s: { glyph: "♠︎", red: false },
+  c: { red: false },
+  d: { red: true },
+  h: { red: true },
+  s: { red: false },
 };
 
 // -----------------------------------------------------------------------
 // Card rendering
 // -----------------------------------------------------------------------
+
+const SVG_NS = "http://www.w3.org/2000/svg";
+function svgNode(tag, attrs) {
+  const el = document.createElementNS(SVG_NS, tag);
+  for (const k of Object.keys(attrs)) el.setAttribute(k, attrs[k]);
+  return el;
+}
+
+// Build a suit as an inline <svg> (viewBox 0 0 100 100). The shapes use
+// `fill: currentColor` (set in CSS) so the card's red/black colour
+// applies. Diamond/heart/spade are single paths; the club is three
+// discs plus a stem.
+function suitSvg(suitCode) {
+  const svg = svgNode("svg", {
+    viewBox: "0 0 100 100", class: "pcard-suit-svg", "aria-hidden": "true",
+  });
+  if (suitCode === "d") {
+    svg.appendChild(svgNode("path", { d: "M50 6 L88 50 L50 94 L12 50 Z" }));
+  } else if (suitCode === "h") {
+    svg.appendChild(svgNode("path", {
+      d: "M50 87 C50 87 8 59 8 32 C8 18 18 9 30 9 C40 9 47 16 50 24 " +
+         "C53 16 60 9 70 9 C82 9 92 18 92 32 C92 59 50 87 50 87 Z",
+    }));
+  } else if (suitCode === "s") {
+    svg.appendChild(svgNode("path", {
+      d: "M50 8 C50 8 8 39 8 64 C8 77 16 84 27 84 C35 84 42 79 46 73 " +
+         "C45 84 40 91 31 96 L69 96 C60 91 55 84 54 73 C58 79 65 84 73 84 " +
+         "C84 84 92 77 92 64 C92 39 50 8 50 8 Z",
+    }));
+  } else if (suitCode === "c") {
+    svg.appendChild(svgNode("circle", { cx: "50", cy: "30", r: "20" }));
+    svg.appendChild(svgNode("circle", { cx: "28", cy: "60", r: "20" }));
+    svg.appendChild(svgNode("circle", { cx: "72", cy: "60", r: "20" }));
+    svg.appendChild(svgNode("path", {
+      d: "M44 51 C44 71 39 87 29 96 L71 96 C61 87 56 71 56 51 Z",
+    }));
+  } else {
+    return null;
+  }
+  return svg;
+}
 
 /**
  * A single playing card. `code` like "Kd"/"Tc"; null/undefined = face down.
@@ -54,12 +95,14 @@ export function cardEl(code, size) {
   else if (size === "inline") cls += " pcard-inline";
   if (!code) return h("div", { class: cls + " pcard-back" });
   const rank = code[0] === "T" ? "10" : code[0];
-  const suit = SUITS[code[1]] || { glyph: "?", red: false };
+  const suitCode = code[1];
+  const suit = SUITS[suitCode] || { red: false };
+  const suitNode = suitSvg(suitCode) || document.createTextNode("?");
   return h(
     "div",
     { class: cls + (suit.red ? " pcard-red" : "") },
     h("span", { class: "pcard-rank" }, rank),
-    h("span", { class: "pcard-suit" }, suit.glyph)
+    h("span", { class: "pcard-suit" }, suitNode)
   );
 }
 

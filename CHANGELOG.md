@@ -40,13 +40,18 @@ lobby delete button silently no-op until the rules are live.
   of a bare `←` arrow.
 
 ### Fixed
-- **Playing-card suit glyphs rendering as broken emoji.** The card suits
-  (♠♥♦♣) are Unicode characters that browsers — notably Chrome on
-  Windows — would intermittently render via the OS emoji font as colour
-  emoji: the glyph looked wrong and ignored the card's red/black
-  `color`. Each suit glyph now carries a U+FE0E text-presentation
-  selector, backed by `font-variant-emoji: text` in CSS, forcing the
-  consistent monochrome text glyph.
+- **Playing-card suits drawn as inline SVG.** The earlier text-glyph fix
+  (U+FE0E selector) still wasn't reliable in every Chrome — the Unicode
+  ♠♥♦♣ characters render inconsistently across browsers/font configs.
+  Suits are now drawn as inline SVG shapes (`fill: currentColor` for the
+  red/black colour), which is deterministic everywhere and has no font
+  dependency at all.
+
+### Changed
+- **Folded seats keep a bounding box.** A player who has folded now
+  shows a faint grey container box + ring on the replay table (still
+  dimmed) instead of collapsing to floating dimmed text — the seat's
+  position on the table stays visible.
 - **Replay table cluttered on mobile.** The seat layout (80px seats,
   46px corner insets) is tuned for the wide desktop table; on a phone
   the table collapses toward square and the seats overlapped each other,

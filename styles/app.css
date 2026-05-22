@@ -3069,7 +3069,15 @@ form { margin-top: 8px; }
 .rslot-5 { bottom: 46px; right: 46px; }
 .rseat-turn { background: rgba(76, 182, 255, 0.16); box-shadow: 0 0 0 2px var(--accent); }
 .rseat-villain:not(.rseat-turn) { box-shadow: 0 0 0 1.5px rgba(232, 169, 63, 0.6); }
-.rseat-folded { opacity: 0.45; }
+/* Folded seats keep a bounding box — a faint grey container + ring — so
+   the seat's position on the table stays visible (rather than collapsing
+   to floating dimmed text). Still dimmed, so it clearly reads as a seat
+   that has folded out of the hand. */
+.rseat-folded {
+  opacity: 0.62;
+  background: rgba(255, 255, 255, 0.05);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
 .rseat-mucked {
   min-height: 36px;
   display: flex;
@@ -3286,11 +3294,17 @@ form { margin-top: 8px; }
   line-height: 1;
 }
 .pcard-rank { font-weight: 700; font-size: 0.78rem; }
-/* font-variant-emoji: text reinforces the U+FE0E selector in the suit
-   strings — both tell the browser to use the monochrome text glyph for
-   ♠♥♦♣ rather than a colour emoji (which would look wrong and ignore
-   the red/black `color`). */
-.pcard-suit { font-size: 0.92rem; font-variant-emoji: text; }
+.pcard-suit { font-size: 0.92rem; }
+/* The suit is an inline <svg> (see suitSvg in replay.js), sized in `em`
+   so it scales with .pcard-suit's font-size. `fill: currentColor` picks
+   up the card's red/black colour. SVG is used instead of the Unicode
+   ♠♥♦♣ glyphs because those render inconsistently across browsers. */
+.pcard-suit-svg {
+  width: 0.9em;
+  height: 0.9em;
+  display: block;
+  fill: currentColor;
+}
 .pcard-sm .pcard-rank { font-size: 0.68rem; }
 .pcard-sm .pcard-suit { font-size: 0.82rem; }
 /* Inline card — flows inside GTO prose alongside text. Uses
