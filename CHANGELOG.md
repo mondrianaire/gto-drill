@@ -25,12 +25,20 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Added
+- **Running pot per street.** Each street row in the spot summary now
+  shows a small right-aligned "Pot Nbb" tag (light grey on a dark pill)
+  — the total pot at the end of that street — so the reader watches the
+  pot grow PRE → FLOP → TURN → RIVER.
+
 ### Changed
-- **Decision point is now the selected spot-summary entry.** When the
-  replay reaches the decision point, the spot summary highlights the
-  "← Action on HERO" marker (rather than leaving the highlight on the
-  last villain action). Clicking that marker fast-forwards the replay
-  all the way to the decision-time hand state.
+- **Last action and the decision point are now distinct replay states.**
+  The last villain action and the decision point are separately
+  selectable: selecting the last action chip shows that action's badge
+  on the table ("raises to 35bb"); selecting "← Action on HERO" shows
+  the clean decision-time table state with no action badge. The replay
+  gained a `topStep` (one beyond the last action) for this clean view,
+  which is where it now settles by default.
 - **Scenario headline replaces the share-link button.** Each scenario
   now shows a `Scenario #NNN` headline at the top of the hand card
   (the number is the atomic reference — the trailing digits of the

@@ -373,8 +373,9 @@ export function buildSpotSummary(replay, opts) {
       actionsEl.appendChild(actionEl);
     });
     // Hero-turn arrow on the decision street (its own line at the end).
-    // data-step = decisionStep so clicking it jumps the replay to the
-    // decision point.
+    // data-step = actions.length + 1 (the replay's topStep) — the clean
+    // decision-time table state, DISTINCT from the last villain action's
+    // frame (which keeps its own action chip at data-step actions.length).
     if (isDecision) {
       // "← Action on HERO" — names the actor (the hero chip) rather
       // than the generic "your turn", consistent with the HERO/VILLAIN
@@ -383,13 +384,23 @@ export function buildSpotSummary(replay, opts) {
         document.createTextNode("← Action on "),
         actorChip(heroSeat)
       );
-      yourTurnEl.setAttribute("data-step", String(actions.length));
+      yourTurnEl.setAttribute("data-step", String(actions.length + 1));
       actionsEl.appendChild(yourTurnEl);
     }
+    // Running total pot at the END of this street — a small right-aligned
+    // tag so the reader sees the pot grow street by street.
+    const potThrough = actions.filter(
+      (a) => STREETS.indexOf(a.street) <= STREETS.indexOf(street)
+    ).length;
+    const potBb = deriveState(replay, potThrough).displayPot;
+    const potEl = potBb > 0
+      ? h("div", { class: "spot-sum-pot" }, "Pot " + round1(potBb) + "bb")
+      : null;
     rows.push(h("div", { class: "spot-sum-row" + (isDecision ? " is-decision" : "") },
       h("span", { class: "spot-sum-street" }, streetLabel(street)),
       cardsEl,
-      actionsEl
+      actionsEl,
+      potEl
     ));
   }
 
@@ -410,20 +421,20 @@ export function buildSpotSummary(replay, opts) {
   }
   // setStep(step) — driven by mountReplay's onStep callback. Highlights
   // the spot-summary entry matching the replay's current position:
-  //   - at (or past) the decision point → the "← Action on HERO" marker,
-  //     so the decision step itself is the selected entry (not the last
-  //     villain action, which lands on the same replay step);
-  //   - earlier → the action chip with the largest data-step ≤ step
-  //     (the most recent action applied).
+  //   - topStep (step > actions.length) → the "← Action on HERO" marker
+  //     (the clean decision-time table state);
+  //   - decisionStep and earlier → the action chip with the largest
+  //     data-step ≤ step, so the LAST action chip is still selectable
+  //     in its own right (it shows that action's badge on the table).
   // At minStep (before any voluntary action) nothing is highlighted.
   el.setStep = function (step) {
     const all = el.querySelectorAll(".spot-sum-action");
     const yourTurn = el.querySelector(".spot-sum-yourturn");
     all.forEach((a) => a.classList.remove("is-current"));
     if (yourTurn) yourTurn.classList.remove("is-current");
-    // Decision point reached — the hand is fully built and it's hero's
-    // turn; the "← Action on HERO" marker is the current step.
-    if (yourTurn && step >= actions.length) {
+    // topStep — the clean decision-time view; the "← Action on HERO"
+    // marker is the current entry.
+    if (yourTurn && step > actions.length) {
       yourTurn.classList.add("is-current");
       return;
     }
@@ -479,7 +490,13 @@ function describeAction(replay, index) {
 export function mountReplay(container, replay, opts) {
   const onStep = opts && typeof opts.onStep === "function" ? opts.onStep : null;
   const actions = replay.actions || [];
+  // decisionStep — the frame where the LAST action is applied; it shows
+  //   that action's "raises to 35bb" badge on the acting seat.
+  // topStep — one beyond: the same chips/board on the table but with NO
+  //   action badge — "the table state at decision time", hero to act.
+  // These are two distinct, separately-selectable states.
   const decisionStep = actions.length;
+  const topStep = decisionStep + 1;
   // SB/BB blind posts come FIRST in the actions array. They're forced
   // bets — not "action history" the user steps through. Treat them as a
   // default minimum-state: the table starts with blinds already posted,
@@ -503,7 +520,7 @@ export function mountReplay(container, replay, opts) {
     if (isInflection(actions[i])) inflectionSteps.push(i + 1);
   }
 
-  let step = decisionStep; // start showing the full pre-decision state
+  let step = topStep; // start on the clean decision-time table state
   let playTimer = null;
   let autoplayTimer = null;
   let userInteracted = false;
@@ -641,12 +658,14 @@ export function mountReplay(container, replay, opts) {
     const state = deriveState(replay, step);
     // Identify the action that JUST landed (if any). Posts are baseline
     // state — never flag a post as just-acted. At minStep no action has
-    // landed yet, so suppress the badge.
-    const justActed = (step > minStep && actions[step - 1] && actions[step - 1].type !== "post")
+    // landed yet; at topStep (the decision view) the badge is suppressed
+    // so it reads as the clean table state rather than "after an action".
+    const justActed = (step > minStep && step <= decisionStep
+      && actions[step - 1] && actions[step - 1].type !== "post")
       ? actions[step - 1]
       : null;
     renderTable(state, justActed);
-    if (step === decisionStep) {
+    if (step >= topStep) {
       stepLabel.textContent = "Decision point";
     } else if (step === minStep) {
       // Initial state — blinds posted, no voluntary action yet.
@@ -657,7 +676,7 @@ export function mountReplay(container, replay, opts) {
     }
     rewindBtn.disabled = step <= minStep;
     prevBtn.disabled = step <= minStep;
-    nextBtn.disabled = step === decisionStep;
+    nextBtn.disabled = step >= topStep;
     while (playBtn.firstChild) playBtn.removeChild(playBtn.firstChild);
     playBtn.appendChild(iconSvg((playTimer || autoplayTimer) ? "pause" : "play"));
     if (onStep) {
@@ -666,8 +685,8 @@ export function mountReplay(container, replay, opts) {
   }
 
   function setStep(s) {
-    step = Math.max(minStep, Math.min(decisionStep, s));
-    if (playTimer && step === decisionStep) stopPlay();
+    step = Math.max(minStep, Math.min(topStep, s));
+    if (playTimer && step >= topStep) stopPlay();
     render();
   }
 
@@ -681,11 +700,12 @@ export function mountReplay(container, replay, opts) {
   // prev/next or playing. Returns the next inflection step at or beyond
   // `s` (going forwards) or at or before `s` (going backwards). If no
   // inflection step exists in that direction, returns the appropriate
-  // endpoint (minStep or decisionStep).
+  // endpoint (minStep, decisionStep, or topStep).
   function snapForward(s) {
+    if (s >= decisionStep) return topStep;
     while (s < decisionStep) {
       const a = actions[s - 1];
-      if (s === decisionStep || s === minStep || isInflection(a)) return s;
+      if (s === minStep || isInflection(a)) return s;
       s += 1;
     }
     return decisionStep;
@@ -702,10 +722,10 @@ export function mountReplay(container, replay, opts) {
   function togglePlay() {
     if (playTimer || autoplayTimer) { stopPlay(); return; }
     // Restart from the post-blinds baseline if we're at the end already.
-    if (step === decisionStep) step = minStep;
+    if (step >= decisionStep) step = minStep;
     render();
     playTimer = setInterval(() => {
-      if (step >= decisionStep) { stopPlay(); return; }
+      if (step >= topStep) { stopPlay(); return; }
       step = snapForward(step + 1);
       render();
     }, 900);
@@ -726,7 +746,9 @@ export function mountReplay(container, replay, opts) {
       if (i >= inflectionSteps.length) {
         autoplayTimer = setTimeout(() => {
           if (userInteracted) return;
-          step = decisionStep;
+          // Settle on the clean decision-time state (topStep), having
+          // just shown the last action's badge on the final tick.
+          step = topStep;
           autoplayTimer = null;
           render();
         }, 700);

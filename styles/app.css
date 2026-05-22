@@ -689,6 +689,23 @@ form { margin-top: 8px; }
   background: rgba(120, 180, 255, 0.14);
   box-shadow: inset 3px 0 0 var(--accent);
 }
+/* Running total pot per street — a small right-aligned tag (light grey
+   on a dark pill) so the reader watches the pot grow street by street.
+   margin-left:auto pins it to the row's right edge. */
+.spot-sum-pot {
+  flex: 0 0 auto;
+  align-self: flex-start;
+  margin-left: auto;
+  margin-top: 2px;
+  font-size: 0.66rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+  color: rgba(255, 255, 255, 0.45);
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 4px;
+  padding: 3px 7px;
+}
 
 .decide {
   margin-top: 16px;
