@@ -7009,7 +7009,7 @@
     "gto_action": "Check-raise to 20bb",
     "framing": [
       "3-bet pot with SPR ~3 — low enough that turn shoves are credible after a check-raise",
-      "AcTc on 8c 7c 5d is the nut flush draw plus a gutshot to the nut straight, plus an overcard",
+      "AcTc on 8c 7c 5d is the nut flush draw plus a backdoor straight draw and an overcard",
       "Ac blocks BTN's Ac-flush draws and AK with the ace of clubs",
       "BTN flatted Hero's 3-bet OOP — range is mostly broadway and pairs that flat 3-bets",
       "BB is OOP — pressure must come from check-raise, not check-call lines"
@@ -7017,7 +7017,7 @@
     "action_analysis": {
       "Fold": {
         "pros": [
-          "None — nut flush draw + gutshot is one of the strongest non-made hands in poker"
+          "None — the nut flush draw alone is one of the strongest non-made hands in poker"
         ],
         "cons": [
           "Folds ~55% equity vs the c-bet range"
@@ -7043,7 +7043,7 @@
         ]
       }
     },
-    "gto_explanation": "AcTc on 875 with two clubs is a powerhouse semi-bluff in a 3-bet pot — the nut flush draw plus a gutshot to the nut straight, with an overcard. The low SPR means building the pot now with a check-raise both maximizes fold equity and sets up a profitable turn shove when called, and the Ac blocker removes a chunk of BTN's made flushes and flush draws. Calling is too passive with this much equity at a low SPR; folding discards one of the strongest non-made hands available.",
+    "gto_explanation": "AcTc on 875 with two clubs is a powerhouse semi-bluff in a 3-bet pot — the nut flush draw plus a backdoor straight draw, with an overcard. The low SPR means building the pot now with a check-raise both maximizes fold equity and sets up a profitable turn shove when called, and the Ac blocker removes a chunk of BTN's made flushes and flush draws. Calling is too passive with this much equity at a low SPR; folding discards one of the strongest non-made hands available.",
     "lesson_tag": "Check-raise big draws in 3-bet pots",
     "villain_ranges": [
       {
@@ -7725,7 +7725,7 @@
     "framing": [
       "6s 5s 4d is a textbook donk-lead board — wet, connected, hits BB's flat range hard",
       "BB's donk-leading range on these textures is condensed — made straights, two pair, sets, big draws",
-      "AKo has no pair, only backdoor flush, and a runner-runner straight draw (8-7 or 7-3)",
+      "AKo has no pair — just two overcards and a backdoor flush draw; the straight cards (8-7, 7-3) would land on the board, not in Hero's hand",
       "Donk lead size (~50% pot) signals strength and protection — rarely a pure bluff",
       "Pot ~12bb after the donk — Hero needs strong equity to continue OOP-vs-position"
     ],
@@ -7757,7 +7757,7 @@
         ]
       }
     },
-    "gto_explanation": "Low connected boards like 654 with a flush draw are exactly where a thinking BB builds a donk-leading range, and that range is condensed around made straights, two pair, sets, and strong draws — it is not bluff-heavy. AK is two overcards with only a backdoor flush and backdoor straight, not enough equity to continue against a strong, condensed donk range. Raising as a bluff runs into a range that rarely folds and often re-raises. Over-folding ace-high to a credible donk lead on this texture is correct.",
+    "gto_explanation": "Low connected boards like 654 with a flush draw are exactly where a thinking BB builds a donk-leading range, and that range is condensed around made straights, two pair, sets, and strong draws — it is not bluff-heavy. AK is two overcards with only a backdoor flush draw, not enough equity to continue against a strong, condensed donk range. Raising as a bluff runs into a range that rarely folds and often re-raises. Over-folding ace-high to a credible donk lead on this texture is correct.",
     "lesson_tag": "Respect the donk lead on low boards",
     "villain_ranges": [
       {

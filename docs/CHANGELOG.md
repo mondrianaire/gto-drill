@@ -25,6 +25,16 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Scenario prose corrections** (v2026-05-22.118). A hand-vs-board audit of all
+  45 scenarios — re-deriving each Hero hand objectively against its board —
+  turned up two minor equity overstatements in the analysis text.
+  `nut-flush-draw-check-raise-3bet-pot-035` claimed `AcTc` on `8 7 5` had "a
+  gutshot to the nut straight"; the board supports no one-card straight, so it
+  is corrected to a backdoor straight draw. `fold-ace-high-vs-donk-lead-039`
+  credited `AKo` on `6 5 4` with "a runner-runner straight draw"; those runouts
+  complete a straight on the board, not in Hero's hand. Both are prose-only —
+  the hands, GTO actions, and lessons are unchanged, so recorded responses
+  stay valid. No other hand-vs-prose mismatches were found.
 - **Fixed a mis-described scenario** (v2026-05-22.117). The donk-lead low-board
   scenario gave Hero `8h 4h` on a `7 6 5` flop — a **flopped straight** — but
   its framing, options analysis, and GTO explanation all described the hand as
