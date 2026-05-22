@@ -3507,6 +3507,37 @@ form { margin-top: 8px; }
   color: var(--text-dim);
 }
 .runout-street-cards { display: flex; gap: 3px; }
+/* Thin vertical separator between FLOP / TURN / RIVER groups so the
+   runout reads as three chunks rather than one long card run (mockup M3
+   compressed-workflow pass). */
+.runout-divider {
+  flex: 0 0 auto;
+  align-self: stretch;
+  width: 1px;
+  background: rgba(45, 106, 74, 0.55);
+}
+
+/* --- Street-progress dots in the scenario headline (mockup M3) --------
+   Four dots = PRE / FLOP / TURN / RIVER. Streets before the decision
+   street are dim (".is-done"); the decision street itself glows accent
+   (".is-now"); unreached future streets keep the neutral border tint. */
+.scenario-streets {
+  display: inline-flex;
+  gap: 5px;
+  align-items: center;
+  flex: 0 0 auto;
+}
+.scenario-street-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--border-interactive);
+}
+.scenario-street-dot.is-done { background: var(--text-dim); }
+.scenario-street-dot.is-now {
+  background: var(--accent);
+  box-shadow: 0 0 4px rgba(76, 182, 255, 0.55);
+}
 
 /* --- Compact-view hero strip (spec §6.1 / mockup M3) ------------------
    One line — seat, hole cards, decision-point stack. The compact

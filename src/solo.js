@@ -454,8 +454,27 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
       (scenNum && isReplay)
         ? h("span", { class: "scenario-replay-tag", title: "You've answered this scenario before" }, "Replay")
         : null);
+    // Four-dot PRE / FLOP / TURN / RIVER progress indicator (mockup M3 —
+    // compressed-workflow pass). Dots before the decision street are
+    // ".is-done" (dim), the decision street itself is ".is-now" (accent
+    // glow), and any unreached future streets stay at neutral border tint.
+    const decisionStreet = (() => {
+      const b = (scen.replay && scen.replay.board) || {};
+      if (b.river && b.river.length) return 3;
+      if (b.turn && b.turn.length) return 2;
+      if (b.flop && b.flop.length) return 1;
+      return 0;
+    })();
+    const streetsDots = scen.replay
+      ? h("div", { class: "scenario-streets", "aria-hidden": "true" },
+          ...[0, 1, 2, 3].map((i) => h("span", {
+            class: "scenario-street-dot"
+              + (i < decisionStreet ? " is-done" : "")
+              + (i === decisionStreet ? " is-now" : ""),
+          })))
+      : null;
     const scenarioHeadline = (scenNum || viewToggleBtn)
-      ? h("div", { class: "scenario-headline" }, headlineMain, viewToggleBtn)
+      ? h("div", { class: "scenario-headline" }, headlineMain, streetsDots, viewToggleBtn)
       : null;
 
     // --- scenario INFO pane --------------------------------------------------

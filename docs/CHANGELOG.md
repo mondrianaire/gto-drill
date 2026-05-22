@@ -24,6 +24,13 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Changed
+- **M3 polish: runout dividers + street-progress dots** (v2026-05-22.134). Two
+  small visuals from the compressed-workflow mockup: a thin vertical separator
+  between FLOP / TURN / RIVER groups inside the runout strip, and a four-dot
+  PRE / FLOP / TURN / RIVER progress indicator in the scenario headline (done /
+  current / not-yet — accent-glow on the current street).
+
 ### Added
 - **Per-scenario TexasSolver config export** (v2026-05-22.133). The owner
   Database console now shows a **⚙ Solver** button on every postflop scenario's
