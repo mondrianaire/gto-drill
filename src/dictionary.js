@@ -27,7 +27,7 @@ let INDEX  = null;     // Map<lowercased term/alias, entry>
 // they want a denser experience.
 // User-configurable from the dictionary view; persisted in localStorage.
 
-const TOOLTIP_THRESHOLD_KEY = "gto-duel.tooltipThreshold";
+const TOOLTIP_THRESHOLD_KEY = "gto-drill.tooltipThreshold";
 const TOOLTIP_THRESHOLD_DEFAULT = 3;
 
 export function getTooltipThreshold() {

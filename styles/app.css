@@ -1,4 +1,4 @@
-/* GTO Duel — vanilla styling, dark theme, mobile-first. */
+/* GTO Drill — vanilla styling, dark theme, mobile-first. */
 
 :root {
   --bg: #0f1a24;
@@ -2815,7 +2815,7 @@ form { margin-top: 8px; }
   margin: 0 auto;
   padding-top: 24px;
 }
-/* L-1: the page header already prints "GTO Duel"; don't repeat it in the
+/* L-1: the page header already prints "GTO Drill"; don't repeat it in the
    sign-in card body. (Same pattern as the landing screen.) */
 .signin h1.appname { display: none; }
 .signin .tagline { margin-bottom: 28px; }
@@ -3822,7 +3822,7 @@ button:focus-visible,
 .rp-cell:focus-visible { outline-offset: -1px; }
 
 /* Reduced-motion — honour the OS "reduce motion" setting app-wide.
-   GTO Duel is a serious analysis tool; none of its motion is essential,
+   GTO Drill is a serious analysis tool; none of its motion is essential,
    so all of it collapses to near-instant when the user has asked for
    less. (A narrower rule above already covers the confidence pulse.) */
 @media (prefers-reduced-motion: reduce) {

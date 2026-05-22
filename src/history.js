@@ -5,8 +5,8 @@
 //   - a list of completed-game result records, used for the "Past games"
 //     list and the running tally on the landing screen.
 
-const ACTIVE_GAME_KEY = "gto-duel.activeGameId";
-const HISTORY_KEY = "gto-duel.history";
+const ACTIVE_GAME_KEY = "gto-drill.activeGameId";
+const HISTORY_KEY = "gto-drill.history";
 const MAX_HISTORY = 50;
 
 // -----------------------------------------------------------------------

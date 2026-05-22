@@ -1,6 +1,6 @@
 # Data schema & preservation guarantees
 
-GTO Duel records every player's answers into **Firebase Firestore** (project
+GTO Drill records every player's answers into **Firebase Firestore** (project
 `gto-poker-qui`). This file is the contract for that data: what is stored, and
 **what must never change** so that data collected from real players is kept
 intact across every future code update.

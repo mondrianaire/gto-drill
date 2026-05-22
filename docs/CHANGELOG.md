@@ -1,7 +1,6 @@
 # Changelog
 
-All notable changes to GTO Duel after its promotion from AutoBuilder
-(2026-05-16) are recorded here.
+All notable changes to GTO Drill are recorded here.
 
 ## [Unreleased]
 
@@ -26,6 +25,14 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Rebrand cleanup** (v2026-05-22.116). Repo housekeeping that completes the
+  GTO Drill rename: dev-facing AutoBuilder artifacts removed, the root
+  documentation (changelog, schema, roadmap, scenarios) restructured into
+  `docs/`, and the README + `.claude/CLAUDE.md` rewritten as product docs.
+  Returning players keep their local state — a one-time boot migration copies
+  the old `gto-duel.*` localStorage keys to the new `gto-drill.*` prefix, so
+  the Past-Games list, active-game pointer, and tooltip preference all survive
+  the rename.
 - **Honest small-crowd state** (v2026-05-22.115). The "How others played"
   breakdown showed percentage bars even when only one or two players had
   answered — so "100% · 1 player" read as crowd wisdom when it was a

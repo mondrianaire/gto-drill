@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Design audit — GTO Duel decision-screen recomposition</title>
+<title>Design audit — GTO Drill decision-screen recomposition</title>
 <style>
   :root {
     --bg:#0c0e12; --panel:#14171d; --panel2:#1b1f27;
@@ -99,7 +99,7 @@
 <body>
 
 <div class="stamp">
-  <span><b>Audit</b> &nbsp;GTO Duel — in-game decision screen</span>
+  <span><b>Audit</b> &nbsp;GTO Drill — in-game decision screen</span>
   <span><b>Date</b> &nbsp;2026-05-17</span>
   <span><b>Type</b> &nbsp;Targeted recomposition</span>
 </div>
@@ -118,7 +118,7 @@
 
 <div class="telos">
   <span class="lbl">Telos</span>
-  <p>GTO Duel is an asynchronous two-player GTO poker quiz. Both players get the
+  <p>GTO Drill is an asynchronous two-player GTO poker quiz. Both players get the
   same "gotcha" hands, commit to an action, and rate their confidence 1–5; a
   wrap-up later surfaces the hands where they were both most sure and most
   disagreed.</p>
@@ -138,7 +138,7 @@
       <rect width="240" height="430" rx="14" fill="#14171d" stroke="#262b34"/>
       <!-- header -->
       <rect x="14" y="14" width="212" height="22" rx="5" fill="#1b1f27"/>
-      <text x="22" y="29" class="mvs">GTO Duel · Round 1 of 5</text>
+      <text x="22" y="29" class="mvs">GTO Drill · Round 1 of 5</text>
       <!-- handful intro -->
       <text x="14" y="54" class="mvs">Your handful — pick an action…</text>
       <!-- card 1 -->
@@ -225,7 +225,7 @@
     <text x="400" y="22" fill="#4ade80" font="600 12px sans-serif" letter-spacing="1">RECOMPOSED — one hand, ranked top to bottom</text>
     <rect x="400" y="34" width="300" height="420" rx="14" fill="#14171d" stroke="#262b34"/>
     <!-- header with progress -->
-    <text x="414" y="62" fill="#e6e9ef" font="700 13px sans-serif">GTO Duel</text>
+    <text x="414" y="62" fill="#e6e9ef" font="700 13px sans-serif">GTO Drill</text>
     <rect x="556" y="48" width="130" height="22" rx="11" fill="#1b1f27" stroke="#262b34"/>
     <circle cx="572" cy="59" r="4" fill="#4cb6ff"/>
     <circle cx="586" cy="59" r="4" fill="#3a4250"/>
@@ -325,12 +325,12 @@
 </ul>
 
 <dl class="colophon">
-  <dt>Source artifact</dt><dd>GTO Duel — in-game decision screen (the per-hand decision view)</dd>
+  <dt>Source artifact</dt><dd>GTO Drill — in-game decision screen (the per-hand decision view)</dd>
   <dt>Telos sources</dt><dd>Project README, original build prompt, the app's own in-game copy</dd>
   <dt>Familiarization</dt><dd>Running app — rendered DOM structure + computed styles. The screenshot tool was unreliable in this environment; schematics are reconstructions. No source code quoted or recommended, per the skill's R3.</dd>
   <dt>Method</dt><dd>Control panel → telos → orientation map → recomposition mockup → 4 design moves → priorities</dd>
   <dt>Ambition</dt><dd>Targeted recomposition (one screen), per R1</dd>
-  <dt>Visual register</dt><dd>Dark webapp / modern SaaS — near-black ground, Inter, the app's blue accent — chosen by the user in R1 and aligned with sharpening GTO Duel's existing dark register</dd>
+  <dt>Visual register</dt><dd>Dark webapp / modern SaaS — near-black ground, Inter, the app's blue accent — chosen by the user in R1 and aligned with sharpening GTO Drill's existing dark register</dd>
 </dl>
 
 </body>

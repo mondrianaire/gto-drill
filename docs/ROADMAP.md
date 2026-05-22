@@ -1,4 +1,4 @@
-# GTO Duel — Redesign Roadmap (reconciled)
+# GTO Drill — Redesign Roadmap (reconciled)
 
 Reconciles the UX **meta-deliverable** (design audit × Mobile Redesign Master
 Spec, 2026-05-22) with what has actually shipped since. The audit's snapshot was

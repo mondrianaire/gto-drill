@@ -1,6 +1,6 @@
-// dev-server.mjs — zero-dependency local development server for GTO Duel.
+// dev-server.mjs — zero-dependency local development server for GTO Drill.
 //
-// GTO Duel is a static ES-module app that cannot be opened as file://
+// GTO Drill is a static ES-module app that cannot be opened as file://
 // (browsers block module imports + fetch() of data/scenarios.json, and
 // service workers / Notifications need an http origin). This serves the repo
 // over http://localhost so the app runs exactly as it does on GitHub Pages.
@@ -71,7 +71,7 @@ const server = createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`GTO Duel dev server running at http://localhost:${PORT}/`);
+  console.log(`GTO Drill dev server running at http://localhost:${PORT}/`);
   console.log(`Serving ${ROOT}`);
   console.log("Press Ctrl+C to stop.");
 });
