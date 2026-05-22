@@ -2959,12 +2959,19 @@ form { margin-top: 8px; }
 .rdealer-slot-3 { top: 32%; left: 61%; }
 .rdealer-slot-4 { top: 37%; left: 64%; }
 .rdealer-slot-5 { top: 63%; left: 64%; }
+/* Seat anchors. Slots 0/3 (hero centre + top centre) sit on the table's
+   straight top/bottom edges. Slots 1/2/4/5 are the four "corner" seats —
+   they CANNOT hug the table corners (left/right: 4px) because the table
+   is a capsule with a 140px corner radius: the felt curves sharply away
+   there and a 80px-wide seat would overhang the rounded end onto the page.
+   The corner seats are inset ~46px from each edge so the seat box stays
+   fully on the felt — this turns the six seats into a clean hexagon. */
 .rslot-0 { bottom: 6px; left: 50%; transform: translateX(-50%); }
-.rslot-1 { bottom: 6px; left: 4px; }
-.rslot-2 { top: 8px; left: 4px; }
+.rslot-1 { bottom: 46px; left: 46px; }
+.rslot-2 { top: 46px; left: 46px; }
 .rslot-3 { top: 8px; left: 50%; transform: translateX(-50%); }
-.rslot-4 { top: 8px; right: 4px; }
-.rslot-5 { bottom: 6px; right: 4px; }
+.rslot-4 { top: 46px; right: 46px; }
+.rslot-5 { bottom: 46px; right: 46px; }
 .rseat-turn { background: rgba(76, 182, 255, 0.16); box-shadow: 0 0 0 2px var(--accent); }
 .rseat-villain:not(.rseat-turn) { box-shadow: 0 0 0 1.5px rgba(232, 169, 63, 0.6); }
 .rseat-folded { opacity: 0.45; }
