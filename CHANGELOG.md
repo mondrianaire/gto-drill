@@ -35,8 +35,9 @@ lobby delete button silently no-op until the rules are live.
 - **Unified modifier-tag styling.** Every suit-pattern modifier now
   renders as one consistent framed tag — a run of cards wrapped in a
   frame whose right side extends into a band carrying a one-letter
-  marker. Covers hand suitedness (suited "s" / offsuit "o") and board
-  texture (monotone "m" / two-tone "2" / rainbow 🌈). The frame fill
+  marker. Covers hand suitedness (suited "S" / offsuit "O") and board
+  texture (monotone "M" / two-tone "2" / rainbow 🌈); letter markers are
+  uppercase for legibility at the small band size. The frame fill
   carries the texture: solid blue (suited / monotone), red/black
   diagonal (offsuit), red/black horizontal stripes (two-tone), and a
   four-colour diagonal (rainbow). Each tag is exactly 23px — a
