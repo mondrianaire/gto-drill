@@ -65,6 +65,19 @@ lobby delete button silently no-op until the rules are live.
   Exit control is also now an always-rendered labelled button instead
   of a bare `←` arrow.
 
+### Changed
+- **Per-action pot indicator.** The running pot total moved from a
+  per-street tag to an inline, right-aligned indicator on every action
+  that moves chips (bet / raise / call) in the spot summary — each shows
+  the pot size *after* that action is applied. Checks get none.
+- **No "VILLAIN" label in multi-opponent spots.** When two or more
+  opponents are live at the decision point (or more than one distinct
+  opponent appears in the action log), opponents are referred to by
+  position name everywhere — the spot-summary action log and the reveal
+  prose — rather than the ambiguous "VILLAIN". Single-opponent scenarios
+  are unchanged. (One stray "villain" reference in `bb-squeeze-027`'s
+  text was also corrected to the position.)
+
 ### Fixed
 - **Turn/river card missing at the decision point.** The replay's
   board-advance logic (which deals the decision-street card when the
