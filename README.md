@@ -2,7 +2,7 @@
 
 A crowd-powered GTO poker trainer. Sign in, play real poker scenarios, rate your confidence, and learn alongside a crowd — see how your reads stack up against the field and against solver-verified optimal play.
 
-**Live:** https://mondrianaire.github.io/gto-poker-async-duel-AB/
+**Live:** https://mondrianaire.github.io/gto-drill/
 
 ---
 
