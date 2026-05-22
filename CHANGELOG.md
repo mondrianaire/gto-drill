@@ -40,18 +40,23 @@ lobby delete button silently no-op until the rules are live.
   of a bare `←` arrow.
 
 ### Fixed
-- **Playing-card suits drawn as inline SVG.** The earlier text-glyph fix
-  (U+FE0E selector) still wasn't reliable in every Chrome — the Unicode
-  ♠♥♦♣ characters render inconsistently across browsers/font configs.
-  Suits are now drawn as inline SVG shapes (`fill: currentColor` for the
-  red/black colour), which is deterministic everywhere and has no font
-  dependency at all.
+- **Playing-card suits + replay controls drawn as inline SVG.** The
+  earlier text-glyph fix (U+FE0E selector) still wasn't reliable in
+  every Chrome — Unicode ♠♥♦♣ and the media glyphs (⏮ ◀ ▶ ❚❚) render
+  inconsistently across browsers/font configs. Card suits and the
+  rewind / previous / play-pause / next replay controls are now drawn
+  as inline SVG shapes (`fill: currentColor`), deterministic everywhere
+  with no font dependency.
 
 ### Changed
 - **Folded seats keep a bounding box.** A player who has folded now
   shows a faint grey container box + ring on the replay table (still
   dimmed) instead of collapsing to floating dimmed text — the seat's
   position on the table stays visible.
+- **Players control is a labelled button.** The "see all players"
+  control in the solo header is now a labelled "Players" button
+  (matching the Exit button) instead of a 👥 emoji icon — both reliably
+  rendered and a clearer tap target.
 - **Replay table cluttered on mobile.** The seat layout (80px seats,
   46px corner insets) is tuned for the wide desktop table; on a phone
   the table collapses toward square and the seats overlapped each other,
