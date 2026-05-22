@@ -25,6 +25,13 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Compact decide-phase prompt + context chips** (v2026-05-22.135). On the
+  compact-view DECIDE screen the action timeline now hides and is replaced by a
+  one-line villain-action prompt ("BB raises to 7 bb on the flop — your move")
+  plus a small chip strip of the three numbers a poker decision actually turns
+  on: **Pot**, **To call**, **Pot odds** (auto-omitted when there's no live
+  bet). The timeline returns on REVEAL where action history is part of the
+  post-decision analysis. New helper `buildDecidePrompt` in `replay.js`.
 - **M3 polish: runout dividers + street-progress dots** (v2026-05-22.134). Two
   small visuals from the compressed-workflow mockup: a thin vertical separator
   between FLOP / TURN / RIVER groups inside the runout strip, and a four-dot

@@ -344,6 +344,86 @@ export function buildHeroStrip(replay) {
 }
 
 /**
+ * Compact decide-phase prompt for the one-screen hand view (spec §6.1 /
+ * mockup M3 — compressed-workflow pass). Renders a one-line summary of
+ * the last villain action ("BB raises to 7 bb on the flop — your move")
+ * plus a small chip strip with the three numbers a poker decision
+ * actually turns on: Pot, To call, Pot odds.
+ *
+ * Only meaningful on a decide screen — the timeline is hidden underneath
+ * in this layout, so this block is the in-spot context. Reveal-screen
+ * compact view keeps the timeline instead.
+ *
+ * Returns null if the replay has no actions yet (the prompt would have
+ * nothing to summarize), if the last actor is the hero, or if the action
+ * type isn't one we know how to phrase.
+ *
+ * @param {Object} replay
+ * @returns {HTMLElement|null}
+ */
+export function buildDecidePrompt(replay) {
+  if (!replay || !Array.isArray(replay.actions) || replay.actions.length === 0) return null;
+  const actions = replay.actions;
+  const last = actions[actions.length - 1];
+  if (!last || !last.actor) return null;
+  if (last.actor === replay.hero_seat) return null;
+
+  // Street label for "on the flop / turn / river" — null preflop, where
+  // we omit the trailing phrase.
+  const board = replay.board || {};
+  let streetLabel = null;
+  if (board.river && board.river.length) streetLabel = "river";
+  else if (board.turn && board.turn.length) streetLabel = "turn";
+  else if (board.flop && board.flop.length) streetLabel = "flop";
+
+  const amt = (bb) => Math.round((bb || 0) * 10) / 10;
+  let actionPhrase = null;
+  if (last.type === "bet") actionPhrase = "bets " + amt(last.amount_bb) + " bb";
+  else if (last.type === "raise") actionPhrase = "raises to " + amt(last.amount_bb) + " bb";
+  else if (last.type === "check") actionPhrase = "checks";
+  else if (last.type === "call") actionPhrase = "calls " + amt(last.amount_bb) + " bb";
+  if (!actionPhrase) return null;
+
+  const promptParts = [
+    h("b", { class: "decide-prompt-actor" }, last.actor),
+    document.createTextNode(" " + actionPhrase),
+  ];
+  if (streetLabel) promptParts.push(document.createTextNode(" on the " + streetLabel));
+  promptParts.push(document.createTextNode(" — your move"));
+  const promptLine = h("p", { class: "decide-prompt-line" }, ...promptParts);
+
+  // Context chips — Pot, To call, Pot odds. To-call is omitted on a
+  // check-to-hero spot (no live bet); pot odds is omitted whenever
+  // to-call is zero (the metric undefined).
+  let displayPot = 0;
+  let toCall = 0;
+  try {
+    const state = deriveState(replay, actions.length);
+    displayPot = state.displayPot || 0;
+    const heroSeat = state.seats[replay.hero_seat];
+    const maxStreet = Object.values(state.seats).reduce(
+      (m, s) => Math.max(m, s.street || 0), 0);
+    const heroStreet = (heroSeat && heroSeat.street) || 0;
+    toCall = Math.max(0, maxStreet - heroStreet);
+  } catch { /* fall through with zeros — chips degrade gracefully */ }
+
+  const chipEl = (label, value) => h("div", { class: "decide-chip" },
+    h("span", { class: "decide-chip-value" }, value),
+    h("span", { class: "decide-chip-label" }, label));
+  const chips = [chipEl("Pot", amt(displayPot) + " bb")];
+  if (toCall > 0) chips.push(chipEl("To call", amt(toCall) + " bb"));
+  if (toCall > 0) {
+    const odds = (toCall / (displayPot + toCall)) * 100;
+    chips.push(chipEl("Pot odds", Math.round(odds) + "%"));
+  }
+
+  return h("div", { class: "decide-prompt" },
+    promptLine,
+    h("div", { class: "decide-chips" }, ...chips)
+  );
+}
+
+/**
  * Build a TexasSolver console config (the .txt body) for a scenario's
  * decision spot — owner tooling, exported per scenario from the Database
  * console. Fills board, decision-point pot + effective stack, the

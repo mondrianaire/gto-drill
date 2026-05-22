@@ -7,7 +7,7 @@
 // a fresh hand on "Next hand".
 
 import { listScenarios } from "./scenarios.js";
-import { mountReplay, buildSpotSummary, buildRunoutStrip, buildHeroStrip } from "./replay.js";
+import { mountReplay, buildSpotSummary, buildRunoutStrip, buildHeroStrip, buildDecidePrompt } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
 import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown, buildScenarioInfo, buildRetestCompare } from "./ui.js";
 import { recordResponse, readScenarioResponses, readMyResponses, saveResponseComment, getCurrentUser } from "./state.js";
@@ -487,16 +487,26 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
     const spot = h("div", { class: "hand-spot" });
     if (scen.replay && viewMode === "compact") {
       // Compact one-screen layout (spec §6.1 / mockup M3): the oval
-      // table collapses to a board-runout strip + a hero strip; the
-      // spot-summary timeline carries the action history. No animated
-      // table here, so the summary is a static display — built without
+      // table collapses to a board-runout strip + a hero strip. On the
+      // DECIDE screen the action timeline is hidden — replaced by a
+      // tight decide prompt ("BB raises to 7 bb on the flop — your
+      // move") and Pot / To call / Pot odds chips, the three numbers a
+      // decision actually turns on. On REVEAL the timeline returns
+      // (the spot-summary), since action history is part of the
+      // post-decision analysis. The compact view is a static display —
+      // no animated table, so the summary is built without
       // onJumpToStep (there is nothing to scrub).
       const runout = buildRunoutStrip(scen.replay);
       const hero = buildHeroStrip(scen.replay);
       if (runout) spot.appendChild(runout);
       if (hero) spot.appendChild(hero);
-      const summary = buildSpotSummary(scen.replay);
-      if (summary) spot.appendChild(summary);
+      if (!draft.revealed) {
+        const prompt = buildDecidePrompt(scen.replay);
+        if (prompt) spot.appendChild(prompt);
+      } else {
+        const summary = buildSpotSummary(scen.replay);
+        if (summary) spot.appendChild(summary);
+      }
     } else if (scen.replay) {
       // Expanded layout (the default) — the animated oval table.
       const replayHost = h("div", { class: "replay-host" });

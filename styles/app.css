@@ -3580,6 +3580,64 @@ form { margin-top: 8px; }
   color: var(--text-dim);
 }
 
+/* --- Compact decide prompt + context chips (mockup M3) ---------------
+   On the DECIDE screen of the compact layout, the timeline is hidden;
+   in its place we render a one-line "BB raises to 7 bb on the flop —
+   your move" prompt plus a chip strip of Pot / To call / Pot odds. */
+.decide-prompt {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-box);
+  background: rgba(76, 182, 255, 0.06);
+  border: 1px solid rgba(76, 182, 255, 0.18);
+}
+.decide-prompt-line {
+  margin: 0;
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.35;
+}
+.decide-prompt-actor {
+  display: inline-block;
+  padding: 1px 6px;
+  border-radius: 3px;
+  background: rgba(76, 182, 255, 0.14);
+  color: var(--accent);
+  letter-spacing: 0.04em;
+  font-weight: 700;
+  font-size: 12px;
+}
+.decide-chips {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.decide-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1px;
+  padding: 4px 12px;
+  border-radius: 999px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-interactive);
+  min-width: 64px;
+}
+.decide-chip-value {
+  font-weight: 700;
+  font-size: 13px;
+  color: var(--text);
+  letter-spacing: 0.02em;
+}
+.decide-chip-label {
+  font-size: 0.58rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
 /* --- Poker-hand replay --- */
 .replay { margin: 10px 0 6px 0; }
 /* Header row above the table — format/depth chip on the left, optional
