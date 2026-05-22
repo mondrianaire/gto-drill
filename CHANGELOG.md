@@ -36,11 +36,11 @@ lobby delete button silently no-op until the rules are live.
   renders as one consistent framed tag — a run of cards wrapped in a
   frame whose right side extends into a band carrying a one-letter
   marker. Covers hand suitedness (suited "s" / offsuit "o") and board
-  texture (monotone "m" / two-tone "t" / rainbow "r"). The frame fill
-  encodes the suit count: solid blue = one suit, red/black diagonal =
-  two, four-colour diagonal = four (rainbow). Each tag is exactly 23px
-  — a standalone card glyph's height — so it costs no extra line
-  height.
+  texture (monotone "m" / two-tone "2" / rainbow 🌈). The frame fill
+  carries the texture: solid blue (suited / monotone), red/black
+  diagonal (offsuit), red/black horizontal stripes (two-tone), and a
+  four-colour diagonal (rainbow). Each tag is exactly 23px — a
+  standalone card glyph's height — so it costs no extra line height.
 
 ### Added
 - **Running pot per street.** Each street row in the spot summary now
