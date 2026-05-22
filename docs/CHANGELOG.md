@@ -48,6 +48,13 @@ lobby delete button silently no-op until the rules are live.
   JavaScript and have no page context to resolve a relative path.
 
 ### Fixed
+- **Explicit-suit cards now carry a tooltip** (v2026-05-22.129). In results-view
+  prose, the abstract card glyphs already had hover tooltips — `K — any suit`,
+  `K — suit unknown`, `Suited — same suit` — but a card rendered with a real
+  suit (e.g. `K♥` in the GTO read) had none: it was the one card type with no
+  tooltip. `cardEl()` now sets a `title` with the full card name (`King of
+  hearts`), so every card carries the same scout info, consistently — in prose
+  and on the table.
 - **Double-tap-to-zoom no longer fights navigation** (v2026-05-22.123). On iOS
   Safari, `touch-action: manipulation` (the CSS base patch) does not reliably
   suppress double-tap-to-zoom — a fast second tap in the same spot still
