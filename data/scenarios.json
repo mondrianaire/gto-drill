@@ -2026,7 +2026,7 @@
         ]
       }
     },
-    "gto_explanation": "At 12bb effective from the BTN A8 offsuit is a clear push in Nash open-shove tables. Min-raising at this depth creates terrible play decisions — you can't fold to a 3-bet shove but you put yourself in marginal flips for half your stack, and you let the blinds realize their equity. Shoving denies that equity and forces the blinds to call only with hands that dominate A8 or coin-flip with it. Folding A8o at 12bb on the BTN is a major Nash leak.",
+    "gto_explanation": "At 12bb effective from the BTN A8o is a clear push in Nash open-shove tables. Min-raising at this depth creates terrible play decisions — you can't fold to a 3-bet shove but you put yourself in marginal flips for half your stack, and you let the blinds realize their equity. Shoving denies that equity and forces the blinds to call only with hands that dominate A8 or coin-flip with it. Folding A8o at 12bb on the BTN is a major Nash leak.",
     "lesson_tag": "Push-fold A-high",
     "villain_ranges": [
       {
@@ -2431,7 +2431,7 @@
         ]
       }
     },
-    "gto_explanation": "89 suited is a strong isolating hand against a UTG limper because it makes nutted hands (straights, flushes) when it flops well, plays well IP heads-up against a capped limping range, and discourages the blinds from coming along cheaply. Limping behind invites multiway pots which dilute equity for a hand like 89s. Folding is far too tight on the button against a limper. The isolation size is bigger than a standard open (5bb instead of 2.5bb) to charge the limper for being out of position.",
+    "gto_explanation": "89s is a strong isolating hand against a UTG limper because it makes nutted hands (straights, flushes) when it flops well, plays well IP heads-up against a capped limping range, and discourages the blinds from coming along cheaply. Limping behind invites multiway pots which dilute equity for a hand like 89s. Folding is far too tight on the button against a limper. The isolation size is bigger than a standard open (5bb instead of 2.5bb) to charge the limper for being out of position.",
     "lesson_tag": "Iso-raise sizing vs limper",
     "villain_ranges": [
       {
@@ -4048,7 +4048,7 @@
       {
         "label": "SB's 4-bet flat range",
         "anchor": "SB's flat-calling range",
-        "summary": "TT-QQ (mixed), AK suited, AQs that flat the 4-bet, plus the odd suited broadway bluff-catcher",
+        "summary": "TT-QQ (mixed), AKs, AQs that flat the 4-bet, plus the odd suited broadway bluff-catcher",
         "classes": [
           "QQ",
           "JJ",
@@ -5273,7 +5273,7 @@
       {
         "label": "HJ's offsuit aces (the dominators)",
         "anchor": "HJ's offsuit aces",
-        "summary": "AK/AQ/AJ offsuit — the hands that dominate AJs and continue vs the squeeze",
+        "summary": "AKo/AQo/AJo — the hands that dominate AJs and continue vs the squeeze",
         "classes": [
           "AKo",
           "AQo",
