@@ -26,6 +26,12 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Fixed
+- **Reveal-screen gap before the Lesson pill.** The reveal body sat
+  flush against the hand-summary (replay table + spot-summary), so the
+  💡 Lesson pill read as overlapping the last spot-summary row. The
+  reveal now carries the same top-margin + hairline divider treatment
+  as the decide form, clearly separating the GTO reveal from the hand
+  summary above it.
 - **Replay table seat positions.** The four "corner" seats were anchored
   4 px from the table edges, but the table is a capsule with a 140 px
   corner radius — the felt curves sharply away there, so the 80 px-wide
