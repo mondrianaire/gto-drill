@@ -34,10 +34,19 @@ const STREETS = ["preflop", "flop", "turn", "river"];
 // Windows intermittently substitutes a colour-emoji glyph, which looks
 // wrong and ignores the card's red/black colour. SVG is deterministic.
 const SUITS = {
-  c: { red: false },
-  d: { red: true },
-  h: { red: true },
-  s: { red: false },
+  c: { red: false, name: "clubs" },
+  d: { red: true, name: "diamonds" },
+  h: { red: true, name: "hearts" },
+  s: { red: false, name: "spades" },
+};
+
+// Rank names for card tooltips — the card face shows the short rank;
+// the title spells the card out so an explicit-suit card carries the
+// same hover/scout info the abstract tok-anysuit cards already do.
+const RANK_NAMES = {
+  A: "Ace", K: "King", Q: "Queen", J: "Jack", T: "Ten",
+  "9": "Nine", "8": "Eight", "7": "Seven", "6": "Six",
+  "5": "Five", "4": "Four", "3": "Three", "2": "Two",
 };
 
 // -----------------------------------------------------------------------
@@ -119,9 +128,15 @@ export function cardEl(code, size) {
   const suitCode = code[1];
   const suit = SUITS[suitCode] || { red: false };
   const suitNode = suitSvg(suitCode) || document.createTextNode("?");
+  // Tooltip — the full card name. An explicit-suit card now carries the
+  // same hover info the abstract tok-anysuit cards already do (those
+  // show "K — any suit" / "K — suit unknown"); without this, real cards
+  // in results-view prose were the one card type with no tooltip.
+  const rankName = RANK_NAMES[code[0]] || rank;
+  const title = suit.name ? rankName + " of " + suit.name : rankName;
   return h(
     "div",
-    { class: cls + (suit.red ? " pcard-red" : "") },
+    { class: cls + (suit.red ? " pcard-red" : ""), title },
     h("span", { class: "pcard-rank" }, rank),
     h("span", { class: "pcard-suit" }, suitNode)
   );

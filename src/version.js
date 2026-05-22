@@ -8,4 +8,4 @@
 // will see the OLD version here even after a deploy — that's the signal
 // to hard-refresh (Ctrl+Shift+R / Cmd+Shift+R).
 
-export const APP_VERSION = "2026-05-22.128-compact-runout-strip";
+export const APP_VERSION = "2026-05-22.129-card-tooltips";
