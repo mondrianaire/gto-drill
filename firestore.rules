@@ -1,4 +1,4 @@
-// Firestore Security Rules for GTO Duel
+// Firestore Security Rules for GTO Drill
 //
 // Paste the contents of this file into your Firebase project's Firestore
 // Rules tab (Firebase Console > Firestore Database > Rules) and click

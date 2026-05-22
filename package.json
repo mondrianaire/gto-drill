@@ -1,9 +1,9 @@
 {
-  "name": "gto-poker-async-duel",
+  "name": "gto-drill",
   "version": "1.0.0",
   "private": true,
   "type": "module",
-  "description": "Asynchronous two-player head-to-head GTO poker quiz — static GitHub-Pages app.",
+  "description": "Crowd-powered GTO poker trainer — static GitHub-Pages app.",
   "scripts": {
     "start": "node scripts/dev-server.mjs",
     "dev": "node scripts/dev-server.mjs"

@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Design audit — GTO Duel mobile formatting</title>
+<title>Design audit — GTO Drill mobile formatting</title>
 <style>
   :root {
     --bg:#0c0e12; --panel:#14171d; --panel2:#1b1f27;
@@ -110,7 +110,7 @@
   </div>
 
   <span class="lbl">design audit</span>
-  <h1 class="lede">Mobile formatting — GTO Duel</h1>
+  <h1 class="lede">Mobile formatting — GTO Drill</h1>
   <p class="deck">The app is mobile-first by intent — two players, mostly on phones — but the rapid feature build pushed several surfaces past their comfortable mobile widths. This audit walks every screen at 375 px (the narrowest common iPhone) and flags every layout that's broken, cramped, or simply uncomfortable to thumb.</p>
 
   <div class="telos">
@@ -167,7 +167,7 @@
       <tr>
         <td class="id">L-1</td>
         <td><span class="sev sev-low">Low</span></td>
-        <td>Sign-in screen shows "GTO Duel" twice (header + appname)</td>
+        <td>Sign-in screen shows "GTO Drill" twice (header + appname)</td>
         <td>Sign-in screen</td>
         <td>Trivial</td>
       </tr>
@@ -488,11 +488,11 @@
   <div class="finding" id="l-1">
     <div class="finding-head">
       <span class="finding-id">L-1</span>
-      <h3>"GTO Duel" appears twice on the sign-in screen</h3>
+      <h3>"GTO Drill" appears twice on the sign-in screen</h3>
       <span class="sev sev-low">Low</span>
     </div>
     <div class="finding-where">
-      <b>Where:</b> Sign-in screen. The header at the top of the page already says "GTO Duel v…", and then the sign-in card has a huge <code>&lt;h1 class="appname"&gt;GTO Duel&lt;/h1&gt;</code> directly under it.
+      <b>Where:</b> Sign-in screen. The header at the top of the page already says "GTO Drill v…", and then the sign-in card has a huge <code>&lt;h1 class="appname"&gt;GTO Drill&lt;/h1&gt;</code> directly under it.
     </div>
     <div class="problem">The problem</div>
     <p class="desc">Visual stutter. The user sees the app name twice within ~80 px of vertical space. The landing screen for signed-in users hides the in-page appname via <code>.landing h1.appname { display:none; }</code> but the sign-in screen doesn't apply the same rule.</p>

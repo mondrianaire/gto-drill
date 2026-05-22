@@ -1,4 +1,4 @@
-# GTO Duel — Scenario Research & Curation
+# GTO Drill — Scenario Research & Curation
 
 A research pass over the current scenario library (`data/scenarios.json`,
 **45 scenarios**) plus a curated set of recommendations. Produced 2026-05-22.
@@ -8,7 +8,7 @@ Three deliverables:
 1. **Top 5 — most GTO information** — existing scenarios that teach the deepest,
    most transferable theory.
 2. **Top 5 — best feature showcases** — existing scenarios that best demonstrate
-   what the GTO Duel app does.
+   what the GTO Drill app does.
 3. **Top 20 — proposed new scenarios** — gaps worth filling, with reasoning.
 
 ---
@@ -112,7 +112,7 @@ advantage + low SPR = a small bet with everything.
 
 ---
 
-## 3. Top 5 — scenarios that best showcase GTO Duel's features
+## 3. Top 5 — scenarios that best showcase GTO Drill's features
 
 Chosen to demo distinct app capabilities, with **no overlap** with Section 2 —
 so these ten scenarios together surface the widest cross-section of the library.

@@ -1,7 +1,6 @@
 # Changelog
 
-All notable changes to GTO Duel after its promotion from AutoBuilder
-(2026-05-16) are recorded here.
+All notable changes to GTO Drill are recorded here.
 
 ## [Unreleased]
 
