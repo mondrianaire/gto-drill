@@ -87,6 +87,16 @@ as immutable unless you have a deliberate, tested migration plan.
      `scenario_id` for a materially different version of a spot.
    - ❌ Never: rename, delete, or reuse an existing `scenario_id`.
 
+   **Retiring a broken scenario** is the one sanctioned exception. On
+   2026-05-22 `donk-bet-decision-low-board-010` was retired: its analysis
+   described Hero's hand (`8h 4h` on a `7 6 5` flop) as a draw when it was a
+   flopped straight. It was removed from `data/scenarios.json` and replaced by
+   a corrected, materially different version under a **new** id,
+   `donk-bet-decision-low-board-046`. The retired id is never reused; its
+   responses stay in Firestore, orphaned — deliberately discarded, since they
+   were collected against incorrect analysis. This is retire-and-replace, not
+   rename-or-recycle: the data is left intact, just no longer surfaced.
+
 3. **The `responses` document id format is fixed:** `` `${scenario_id}__${uid}` ``.
    The `__` separator and this exact shape are assumed by the overwrite
    semantics. Don't change the key format.
