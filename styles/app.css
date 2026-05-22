@@ -3415,6 +3415,47 @@ form { margin-top: 8px; }
 }
 .runout-street-cards { display: flex; gap: 3px; }
 
+/* --- Compact-view hero strip (spec §6.1 / mockup M3) ------------------
+   One line — seat, hole cards, decision-point stack. The compact
+   layout's replacement for the oval table's hero seat. A hero-blue
+   left identity bar marks it as "you". */
+.hero-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--hero);
+  border-radius: var(--radius);
+}
+.hero-strip-seat {
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  flex: 0 0 auto;
+}
+.hero-strip-seat b { color: var(--hero); font-weight: 700; }
+.hero-strip-cards { display: flex; gap: 3px; flex: 0 0 auto; }
+.hero-strip-stack {
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  flex: 0 0 auto;
+}
+.hero-strip-stack-num {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  font-variant-numeric: tabular-nums;
+}
+.hero-strip-stack-label {
+  font-size: 0.58rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+}
+
 /* --- Poker-hand replay --- */
 .replay { margin: 10px 0 6px 0; }
 /* Header row above the table — format/depth chip on the left, optional

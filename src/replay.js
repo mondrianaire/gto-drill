@@ -295,6 +295,44 @@ export function buildRunoutStrip(replay) {
 }
 
 /**
+ * Compact one-line hero strip for the one-screen hand view (spec §6.1 /
+ * mockup M3): the hero's seat, hole cards, and decision-point stack —
+ * the compact layout's replacement for the oval table's hero seat.
+ * Returns null if the replay names no hero seat.
+ *
+ * @param {Object} replay
+ * @returns {HTMLElement|null}
+ */
+export function buildHeroStrip(replay) {
+  if (!replay || !replay.hero_seat) return null;
+  const seat = replay.hero_seat;
+  const cards = Array.isArray(replay.hero_cards) && replay.hero_cards.length === 2
+    ? replay.hero_cards
+    : null;
+  // Stack at the decision point — after every replay action is applied.
+  let stackBb = null;
+  try {
+    const { seats } = deriveState(replay, (replay.actions || []).length);
+    const heroSeat = seats[seat];
+    if (heroSeat && typeof heroSeat.stack === "number") {
+      stackBb = Math.round(heroSeat.stack * 10) / 10;
+    }
+  } catch { /* malformed replay — omit the stack */ }
+
+  return h("div", { class: "hero-strip" },
+    h("span", { class: "hero-strip-seat" }, h("b", null, seat), " · You"),
+    cards
+      ? h("div", { class: "hero-strip-cards" }, ...cards.map((c) => cardEl(c, "sm")))
+      : null,
+    stackBb != null
+      ? h("div", { class: "hero-strip-stack" },
+          h("span", { class: "hero-strip-stack-num" }, String(stackBb) + " bb"),
+          h("span", { class: "hero-strip-stack-label" }, "Your stack"))
+      : null
+  );
+}
+
+/**
  * Build a compact mini-display of the hand's INFLECTION points up to the
  * decision — replaces the verbose "spot in words" prose. Groups by
  * street and shows only the actions that meaningfully change state:
