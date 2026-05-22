@@ -25,6 +25,11 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Added
+- **Compact-view hero strip** (v2026-05-22.130). Second component of the compact
+  one-screen hand view (spec §6.1 / mockup M3): `buildHeroStrip` renders the
+  hero's seat, hole cards, and decision-point stack on one line — the compact
+  layout's replacement for the oval table's hero seat. Standalone component for
+  now; the compact assembly and the §7 view toggle follow.
 - **Compact-view board-runout strip** (v2026-05-22.128). First component of the
   compact one-screen hand view (spec §6.1 / mockup M3): `buildRunoutStrip`
   renders the flop/turn/river board dealt once as a compact strip with the
