@@ -25,6 +25,15 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Fixed
+- **Double-tap-to-zoom no longer fights navigation** (v2026-05-22.123). On iOS
+  Safari, `touch-action: manipulation` (the CSS base patch) does not reliably
+  suppress double-tap-to-zoom — a fast second tap in the same spot still
+  zoomed, which made the tightly-packed mobile UI awkward to use. A small
+  document-level `touchend` guard now cancels only a genuine double-tap (two
+  taps close in both time and position). Single taps, fast taps on different
+  controls, scrolling, and two-finger pinch-zoom — the accessibility zoom — are
+  all untouched. The CSS `touch-action` rule is kept as-is (it still earns its
+  place removing the 300 ms tap delay); the guard is an additive second layer.
 - **Hand notation now tokenizes everywhere** (v2026-05-22.122). The prose
   tokenizer only renders a hand as a card glyph when the suited/offsuit suffix
   is bound tight to the ranks (`A8o`, `KQs`) — never the spelled-out form
