@@ -447,6 +447,11 @@ export function mountReplay(container, replay, opts) {
     while (table.firstChild) table.removeChild(table.firstChild);
     const turn = nextActor(replay, step);
 
+    // Betting ring — the visual ellipse that bet chips are pushed onto
+    // (casino betting-line convention). Appended first so it sits
+    // behind the seats, bets, and pot.
+    table.appendChild(h("div", { class: "replay-ring", "aria-hidden": "true" }));
+
     // Place every seat around the oval. `ring` is the seats in table order;
     // it is rotated so the hero sits in slot 0 (bottom centre) and the rest
     // follow clockwise into slots 1–5.
@@ -465,6 +470,15 @@ export function mountReplay(container, replay, opts) {
         justActedHere
       ));
     });
+
+    // Dealer button — a table-level disc near the ring in front of the
+    // BTN seat. Rendered at table level (not as a seat child) so it
+    // does NOT dim when the BTN folds; positioned toward the ring.
+    const btnSlot = ordered.indexOf("BTN");
+    if (btnSlot >= 0) {
+      table.appendChild(h("div",
+        { class: "rdealer rdealer-slot-" + btnSlot, title: "Dealer button" }, "D"));
+    }
 
     // Board + pot in the middle.
     const shown = streetIdx(state.viewStreet);
@@ -508,13 +522,8 @@ export function mountReplay(container, replay, opts) {
         : [cardEl(null, "sm"), cardEl(null, "sm")];
       cardRow = h("div", { class: "rseat-cards" }, cards);
     }
-    // Dealer button — small "D" disc attached to whichever seat holds
-    // the BTN (regardless of whether that's the hero). Real-table cue
-    // that orients the eye to where the action started.
-    const isDealer = seatDef.pos === "BTN";
-    const dealerBtn = isDealer
-      ? h("div", { class: "rseat-dealer", title: "Dealer button" }, "D")
-      : null;
+    // (Dealer button is rendered at table level by renderTable — not
+    // a seat child — so it stays bright when the BTN folds.)
     // Just-acted badge: small floating chip naming the action that just
     // landed at this seat. CSS animates it in on each render, so when
     // the replay steps forward the badge "pops" briefly. Critical for
@@ -532,7 +541,6 @@ export function mountReplay(container, replay, opts) {
       cardRow,
       h("div", { class: "rseat-pos" }, seatDef.pos + (isHero ? " (you)" : "")),
       h("div", { class: "rseat-stack" }, bbChip(round1(st.stack))),
-      dealerBtn,
       actedBadge
     );
   }
