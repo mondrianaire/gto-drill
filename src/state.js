@@ -417,17 +417,27 @@ export async function recordResponse(scenarioId, action, confidence) {
  * about the spot and the GTO decision. Merge-written so it sits
  * alongside the existing action/confidence on the same response doc.
  *
+ * The action + confidence the comment was written about are snapshotted
+ * onto the doc (`noteAction` / `noteConfidence`) so the comment stays
+ * self-describing — a later answer change (a retest) can't misrepresent
+ * what the player meant. They are overwritten only when a new comment
+ * is saved.
+ *
  * @param {string} scenarioId
- * @param {string} note  free text (trimmed + capped at 280 chars).
+ * @param {string} note          free text (trimmed + capped at 280 chars).
+ * @param {string} [action]      the action selected when the comment was written.
+ * @param {number} [confidence]  the confidence (1–5) at that moment.
  * @returns {Promise<boolean>}
  */
-export async function saveResponseComment(scenarioId, note) {
+export async function saveResponseComment(scenarioId, note, action, confidence) {
   if (!_db) throw new Error("initFirebase() must be called first");
   const me = getCurrentUser();
   if (!me || !scenarioId) return false;
   const docId = scenarioId + "__" + me.uid;
   await setDoc(doc(_db, "responses", docId), {
     note: String(note || "").slice(0, 280),
+    noteAction: action || null,
+    noteConfidence: Number(confidence) || null,
     updatedAt: new Date().toISOString(),
   }, { merge: true });
   return true;

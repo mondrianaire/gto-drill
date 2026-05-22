@@ -118,7 +118,11 @@ function buildCommentBox(scen, draft) {
     saveBtn.disabled = true;
     status.textContent = "Saving…";
     try {
-      await saveResponseComment(scen.scenario_id, ta.value);
+      await saveResponseComment(scen.scenario_id, ta.value, draft.action, draft.confidence);
+      // The comment now describes the current selection — refresh the
+      // snapshot so a later retest compares against the right answer.
+      draft.noteAction = draft.action;
+      draft.noteConfidence = draft.confidence;
       status.textContent = "Saved ✓";
     } catch (err) {
       console.warn("saveResponseComment failed:", err);
@@ -133,11 +137,11 @@ function buildCommentBox(scen, draft) {
   // only the player can judge whether their reasoning still holds.
   const prior = draft.priorAnswer;
   let staleFlag = null;
-  if (prior && prior.note && prior.action && draft.action &&
-      prior.action !== draft.action) {
+  if (prior && prior.note && prior.noteAction && draft.action &&
+      prior.noteAction !== draft.action) {
     staleFlag = h("p", { class: "comment-stale-flag" },
-      "⚠ This note was written about your earlier answer (" + prior.action +
-      "). You have now answered " + draft.action +
+      "⚠ This note was written when you answered " + prior.noteAction +
+      ". You have now answered " + draft.action +
       " — update or clear it so it still fits this hand.");
   }
   return h("div", { class: "comment-box" },
@@ -256,8 +260,12 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
     // Commit the answer just given so a later replay of THIS scenario
     // compares its then-vs-now against the most recent attempt.
     if (currentScen && draft && draft.revealed && draft.action) {
-      priorById.set(currentScen.scenario_id,
-        { action: draft.action, confidence: draft.confidence, note: draft.note || "" });
+      priorById.set(currentScen.scenario_id, {
+        action: draft.action, confidence: draft.confidence,
+        note: draft.note || "",
+        noteAction: draft.noteAction || null,
+        noteConfidence: draft.noteConfidence || null,
+      });
     }
     currentScen = pickScenario();
     // priorAnswer — the user's recorded answer to this scenario BEFORE
@@ -270,6 +278,11 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
       // pass (retests) so it stays visible and editable instead of
       // silently vanishing. "" for a first-time scenario.
       note: (priorAnswer && priorAnswer.note) || "",
+      // The selection that seeded note was written about — carried so
+      // the reveal can flag a mismatch and a re-saved comment stays
+      // self-describing. Refreshed when the player saves a new comment.
+      noteAction: (priorAnswer && priorAnswer.noteAction) || null,
+      noteConfidence: (priorAnswer && priorAnswer.noteConfidence) || null,
       revealed: false,
       priorAnswer,
     };
@@ -617,8 +630,15 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
           for (const r of mine) {
             if (r && r.scenario_id) {
               completedIds.add(r.scenario_id);
-              priorById.set(r.scenario_id,
-                { action: r.action, confidence: r.confidence, note: r.note || "" });
+              priorById.set(r.scenario_id, {
+                action: r.action, confidence: r.confidence,
+                note: r.note || "",
+                // The selection the stored note was written about. Falls
+                // back to the recorded answer for comments saved before
+                // noteAction was tracked.
+                noteAction: r.noteAction || r.action || null,
+                noteConfidence: r.noteConfidence || r.confidence || null,
+              });
             }
           }
         }

@@ -757,6 +757,7 @@ export function buildCrowdBreakdown({ scen, responses, userAction }) {
       av.title = name;
       return av;
     }
+    const noteAction = r.noteAction && String(r.noteAction).trim();
     const wrap = h("div",
       { class: "crowd-avatar-wrap has-note", role: "button", tabindex: "0",
         "aria-label": name + " left a comment" },
@@ -764,6 +765,11 @@ export function buildCrowdBreakdown({ scen, responses, userAction }) {
       h("span", { class: "crowd-note-dot", "aria-hidden": "true" }),
       h("div", { class: "crowd-note-pop" },
         h("div", { class: "crowd-note-pop-name" }, name),
+        // The answer this comment was written about — keeps it honest
+        // even if the player later changed their answer on a retest.
+        noteAction
+          ? h("div", { class: "crowd-note-pop-ctx" }, "Answered “" + noteAction + "”")
+          : null,
         h("p", { class: "crowd-note-pop-text" }, "“" + note + "”")
       )
     );

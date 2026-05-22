@@ -30,13 +30,18 @@ point per player per scenario).
 | `photoURL`   | string \| null   | `recordResponse`          | Google avatar URL. |
 | `action`     | string           | `recordResponse`          | The action label the player picked. |
 | `confidence` | number \| null   | `recordResponse`          | 1–5. |
-| `note`       | string           | `saveResponseComment`     | Optional post-reveal hand comment, capped 280 chars. |
-| `updatedAt`  | string (ISO8601) | both writers              | Last write time. |
+| `note`          | string           | `saveResponseComment` | Optional post-reveal hand comment, capped 280 chars. |
+| `noteAction`    | string \| null   | `saveResponseComment` | The `action` selected when `note` was written — keeps the comment self-describing if the answer later changes on a retest. |
+| `noteConfidence`| number \| null   | `saveResponseComment` | The `confidence` (1–5) at the moment the comment was written. |
+| `updatedAt`     | string (ISO8601) | both writers          | Last write time. |
 
-Written by `recordResponse()` (full `setDoc` — replaces action/confidence) and
-`saveResponseComment()` (`setDoc` with `{ merge: true }` — adds `note` without
-disturbing the rest). Read by `readScenarioResponses`, `readResponsesByUid`,
-`readMyResponses`, `readAllResponses` in `src/state.js`.
+Both writers use `setDoc` with `{ merge: true }`. `recordResponse()` updates
+`action` / `confidence` and **preserves** any existing `note` — a re-answer on a
+retest must not destroy a comment. `saveResponseComment()` writes `note` plus the
+`noteAction` / `noteConfidence` snapshot of the selection the comment was about,
+so the comment is self-describing regardless of later answer changes. Read by
+`readScenarioResponses`, `readResponsesByUid`, `readMyResponses`,
+`readAllResponses` in `src/state.js`.
 
 ### `users/{uid}` — per-user profile
 
