@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown, buildScenarioInfo } from "./ui.js";
+import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown, buildScenarioInfo, buildRetestCompare } from "./ui.js";
 import { recordResponse, readScenarioResponses, readMyResponses, saveResponseComment, getCurrentUser } from "./state.js";
 
 // -----------------------------------------------------------------------
@@ -173,6 +173,12 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
   // The picker skips these so a player works through fresh hands;
   // once every scenario is completed it recycles (see pickScenario).
   const completedIds = new Set();
+  // The signed-in user's last recorded answer per scenario — { action,
+  // confidence }, keyed by scenario_id. Seeded from readMyResponses() on
+  // mount, refreshed on every Next hand. Drives the "retest" treatment:
+  // a scenario the player has answered before gets a Replay marker and a
+  // then-vs-now comparison on the reveal.
+  const priorById = new Map();
   let currentScen = null;
   // Per-hand state — gets reset on each Next hand.
   let draft = null;
@@ -233,8 +239,20 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
   }
 
   function nextHand() {
+    // Commit the answer just given so a later replay of THIS scenario
+    // compares its then-vs-now against the most recent attempt.
+    if (currentScen && draft && draft.revealed && draft.action) {
+      priorById.set(currentScen.scenario_id,
+        { action: draft.action, confidence: draft.confidence });
+    }
     currentScen = pickScenario();
-    draft = { action: null, confidence: null, note: "", revealed: false };
+    // priorAnswer — the user's recorded answer to this scenario BEFORE
+    // the current attempt, or null if they've never played it. Captured
+    // once here so the decide + reveal screens read a stable value.
+    draft = {
+      action: null, confidence: null, note: "", revealed: false,
+      priorAnswer: priorById.get(currentScen.scenario_id) || null,
+    };
     render();
   }
 
@@ -296,10 +314,17 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
     // table's CASH/TOURNAMENT context line. This is how a scenario is
     // referred to now that the share-link button is gone.
     const scenNum = String(scen.scenario_id || "").match(/(\d+)\s*$/);
+    // A "Replay" marker rides on the headline when the player has
+    // answered this scenario before — a heads-up that it's a retest.
+    // The prior answer itself stays hidden until the reveal.
+    const isReplay = !!(draft && draft.priorAnswer && draft.priorAnswer.action);
     const scenarioHeadline = scenNum
       ? h("div", { class: "scenario-headline" },
           "Scenario ",
-          h("span", { class: "scenario-headline-num" }, "#" + scenNum[1]))
+          h("span", { class: "scenario-headline-num" }, "#" + scenNum[1]),
+          isReplay
+            ? h("span", { class: "scenario-replay-tag", title: "You've answered this scenario before" }, "Replay")
+            : null)
       : null;
 
     // --- scenario INFO pane --------------------------------------------------
@@ -490,6 +515,11 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
       });
 
       const takeaway = buildLessonTakeaway({ scen });
+      // Retest comparison — only when the player has answered this
+      // scenario before: their previous answer + a then-vs-now verdict.
+      const retestCompare = buildRetestCompare({
+        scen, prior: draft.priorAnswer, currentAction: draft.action, gtoAction: gto,
+      });
       // Crowd breakdown mounts here — async: we record this answer and
       // read the scenario's full response pool, then fill the host.
       const crowdHost = h("div", { class: "crowd-host" });
@@ -503,6 +533,7 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
         takeaway,           // LEAD: one-line lesson takeaway
         gtoRead,            // GTO line: small blurb (the answer)
         result,             // verdict + compact comparison
+        retestCompare,      // then-vs-now (replays only; null otherwise)
         crowdHost,          // "how others played" crowd distribution
         gtoExplanation,     // preamble: strategic landscape + option impacts
         optionsAnalysis,    // matrix: every option's pros/cons
@@ -551,7 +582,10 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
         ]);
         if (Array.isArray(mine)) {
           for (const r of mine) {
-            if (r && r.scenario_id) completedIds.add(r.scenario_id);
+            if (r && r.scenario_id) {
+              completedIds.add(r.scenario_id);
+              priorById.set(r.scenario_id, { action: r.action, confidence: r.confidence });
+            }
           }
         }
       } catch (err) {

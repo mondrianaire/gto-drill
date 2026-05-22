@@ -65,6 +65,16 @@ lobby delete button silently no-op until the rules are live.
   Exit control is also now an always-rendered labelled button instead
   of a bare `←` arrow.
 
+### Added
+- **Retest workflow for replayed scenarios.** A scenario the player has
+  already answered is now a deliberate retest rather than a silent
+  re-serve. The decide screen shows a "Replay" marker on the headline
+  (the prior answer stays hidden, so it's a genuine re-test). On the
+  reveal, a then-vs-now panel shows the previous answer + confidence and
+  a verdict on whether the new answer moved toward the GTO line
+  (Improved / Slipped / Same / Still off), tinted green or red. The new
+  answer overwrites the old, as before. First plays are unchanged.
+
 ### Changed
 - **Per-action pot indicator.** The running pot total moved from a
   per-street tag to an inline, right-aligned indicator on every action
