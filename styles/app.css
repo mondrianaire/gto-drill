@@ -2922,7 +2922,10 @@ form { margin-top: 8px; }
   left: 12%;
   right: 12%;
   border: 2px dashed rgba(255, 255, 255, 0.13);
-  border-radius: 50%;
+  /* Capsule, not an ellipse — mirrors the table's own rounded-
+     rectangle outline (border-radius: 140px). A large radius caps
+     to a full pill on this wide-short box. */
+  border-radius: 999px;
   pointer-events: none;
 }
 

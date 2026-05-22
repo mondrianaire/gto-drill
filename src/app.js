@@ -124,6 +124,11 @@ function routeHome(root) {
   }
 }
 
+// The signed-in user's self-reported poker-knowledge level. Set on
+// sign-in (from their profile) or when they answer the first-time
+// question; threaded into the play loop to weight scenario difficulty.
+let knowledgeLevel = null;
+
 // Signed-in entry: read the user's profile. First time (no knowledge
 // level recorded) → the knowledge question. Returning → apply their
 // stored level to the dictionary-tooltip granularity, then play.
@@ -131,7 +136,8 @@ async function enterSignedIn(root) {
   let profile = null;
   try { profile = await readUserProfile(); } catch (err) { console.warn(err); }
   if (profile && profile.knowledgeLevel) {
-    try { setTooltipThreshold(knowledgeThreshold(profile.knowledgeLevel)); } catch (_) {}
+    knowledgeLevel = profile.knowledgeLevel;
+    try { setTooltipThreshold(knowledgeThreshold(knowledgeLevel)); } catch (_) {}
     goPlay(root);
   } else {
     goKnowledge(root);
@@ -139,10 +145,12 @@ async function enterSignedIn(root) {
 }
 
 // First-sign-in knowledge question. The pick seeds the dictionary
-// granularity and is saved to the user's profile, then → play.
+// granularity + scenario-difficulty weighting, is saved to the
+// user's profile, then → play.
 function goKnowledge(root) {
   renderHeaderUser();
   mountKnowledgeView(root, async (levelId) => {
+    knowledgeLevel = levelId;
     try { setTooltipThreshold(knowledgeThreshold(levelId)); } catch (_) {}
     try { await saveKnowledgeLevel(levelId); } catch (err) { console.warn(err); }
     goPlay(root);
@@ -153,6 +161,7 @@ function goKnowledge(root) {
 // decide → reveal flow; the reveal records the answer to the crowd
 // pool and shows the "How others played" breakdown. Exit signs out.
 // The Players button (signed-in only) opens the roster screen.
+// knowledgeLevel weights which scenarios surface.
 function goPlay(root) {
   renderHeaderUser();
   setTooltipOpenCallback((id) =>
@@ -164,7 +173,8 @@ function goPlay(root) {
       try { await signOutUser(); } catch (_) { /* ignore */ }
       location.assign(stripQuery());
     },
-    signedIn ? () => goPlayers(root) : null
+    signedIn ? () => goPlayers(root) : null,
+    knowledgeLevel
   );
 }
 
