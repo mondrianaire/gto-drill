@@ -799,60 +799,107 @@ export function buildCrowdBreakdown({ scen, responses, userAction }) {
     });
     return wrap;
   }
-  // Render every available action, plus any responded-to action that
-  // somehow isn't in available_actions (defensive — old data shapes).
+  // Per-action stats — count, %, average confidence, blind-spot flag.
+  function statsFor(opt) {
+    const group = byAction[opt] || [];
+    const count = group.length;
+    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
+    const confs = group.map((r) => Number(r.confidence)).filter((c) => c >= 1 && c <= 5);
+    const avgConf = confs.length ? confs.reduce((s, c) => s + c, 0) / confs.length : null;
+    const isGto = opt === gto;
+    // Crowd blind spot — a non-GTO option a meaningful slice picked
+    // with high average confidence.
+    const isBlindSpot = !isGto && pct >= 15 && avgConf != null && avgConf >= 3.5;
+    return { group, count, pct, avgConf, isGto, isBlindSpot };
+  }
+
+  // Every available action, plus any responded-to action not already in
+  // available_actions (defensive — old data shapes).
   const allActions = options.slice();
   for (const a of Object.keys(byAction)) {
     if (!allActions.includes(a)) allActions.push(a);
   }
-  // Most-picked first.
-  allActions.sort((a, b) => (byAction[b] || []).length - (byAction[a] || []).length);
+  // Hierarchy order (spec §8.2 / mockup M6): the two rows that carry the
+  // lesson lead — the GTO line, then the player's own pick — followed by
+  // every other action by descending share.
+  const lead = [];
+  if (allActions.includes(gto)) lead.push(gto);
+  if (userAction && userAction !== gto && allActions.includes(userAction)) {
+    lead.push(userAction);
+  }
+  const ordered = lead.concat(
+    allActions
+      .filter((a) => !lead.includes(a))
+      .sort((a, b) => (byAction[b] || []).length - (byAction[a] || []).length)
+  );
 
   const rows = h("div", { class: "crowd-rows" });
-  for (const opt of allActions) {
-    const group = byAction[opt] || [];
-    const count = group.length;
-    const pct = total > 0 ? Math.round((count / total) * 100) : 0;
-    const isGto = opt === gto;
+  for (const opt of ordered) {
+    const { group, count, pct, avgConf, isGto, isBlindSpot } = statsFor(opt);
     const isUser = opt === userAction;
 
-    // Average confidence over this group's valid 1–5 ratings.
-    const confs = group.map((r) => Number(r.confidence)).filter((c) => c >= 1 && c <= 5);
-    const avgConf = confs.length ? confs.reduce((s, c) => s + c, 0) / confs.length : null;
-    // Crowd blind spot — a non-GTO option a meaningful slice picked
-    // with high average confidence.
-    const isBlindSpot = !isGto && pct >= 15 && avgConf != null && avgConf >= 3.5;
-
-    const tags = h("div", { class: "crowd-row-tags" });
-    if (isGto) tags.appendChild(h("span", { class: "crowd-tag is-gto" }, "✓ GTO"));
-    if (isUser) tags.appendChild(h("span", { class: "crowd-tag is-user" }, "Your pick"));
-    if (isBlindSpot) {
-      tags.appendChild(h("span", {
-        class: "crowd-tag is-blindspot",
-        title: "A lot of players picked this confidently — but it's not the GTO line",
-      }, "⚠ Blind spot"));
+    // A row recedes to a thin dimmed line only when it carries nothing
+    // the player needs to see — never the GTO line, their own pick, or
+    // a crowd blind spot.
+    if (!isGto && !isUser && !isBlindSpot) {
+      rows.appendChild(h("div", { class: "crowd-row-receded" },
+        h("span", { class: "crowd-receded-action" }, richText(opt, scen, { asAction: true })),
+        h("span", { class: "crowd-receded-bar" },
+          h("span", { class: "crowd-receded-fill", style: "width:" + pct + "%" })),
+        h("span", { class: "crowd-receded-pct" }, pct + "%")
+      ));
+      continue;
     }
 
-    // Avatar row, capped with a "+N" overflow chip. Players who left
-    // a comment get a green dot + a hover/tap popover with the note.
+    // Full card. The tier drives the framing: green for the GTO line or
+    // a correct (merged) pick, red for a miss, amber for a blind spot
+    // the player avoided.
+    const isMerged = isGto && isUser;
+    let tier, marker = null;
+    if (isMerged) {
+      tier = "crowd-row-merged";
+      marker = h("span", { class: "crowd-marker is-gto" }, "✓ Your pick · GTO line");
+    } else if (isGto) {
+      tier = "crowd-row-gto";
+      marker = h("span", { class: "crowd-marker is-gto" }, "✓ GTO line");
+    } else if (isUser) {
+      tier = "crowd-row-pick";
+      marker = h("span", { class: "crowd-marker is-miss" }, "✗ Your pick");
+    } else {
+      tier = "crowd-row-spot";
+    }
+
+    const blindTag = isBlindSpot
+      ? h("span", {
+          class: "crowd-tag is-blindspot",
+          title: "A lot of players picked this confidently — but it's not the GTO line",
+        }, "⚠ Blind spot")
+      : null;
+
+    // Avatar row, capped with a "+N" overflow chip. Players who left a
+    // comment get a green dot + a hover/tap popover with the note.
     const CAP = 10;
     const avatarRow = h("div", { class: "crowd-avatars" });
-    group.slice(0, CAP).forEach((r) => {
-      avatarRow.appendChild(crowdAvatar(r));
-    });
+    group.slice(0, CAP).forEach((r) => avatarRow.appendChild(crowdAvatar(r)));
     if (count > CAP) {
       avatarRow.appendChild(h("span", { class: "crowd-avatar-more" }, "+" + (count - CAP)));
     }
 
-    rows.appendChild(h("div",
-      { class: "crowd-row" + (isGto ? " is-gto" : "") + (isBlindSpot ? " is-blindspot" : "") },
+    rows.appendChild(h("div", { class: "crowd-row-card " + tier },
+      (marker || blindTag)
+        ? h("div", { class: "crowd-row-markers" }, marker, blindTag)
+        : null,
       h("div", { class: "crowd-row-head" },
-        h("div", { class: "crowd-row-action" }, richText(opt, scen, { asAction: true })),
-        tags.children.length ? tags : null
+        h("div", { class: "crowd-row-action" }, richText(opt, scen, { asAction: true }))
       ),
       h("div", { class: "crowd-bar" },
-        h("div", { class: "crowd-bar-fill" + (isGto ? " is-gto" : ""), style: "width:" + pct + "%" }),
-        h("span", { class: "crowd-bar-label" }, pct + "% · " + count + (count === 1 ? " player" : " players"))
+        h("div", {
+          class: "crowd-bar-fill" + (isGto ? " is-gto" : "")
+            + (isUser && !isGto ? " is-miss" : ""),
+          style: "width:" + pct + "%",
+        }),
+        h("span", { class: "crowd-bar-label" },
+          pct + "% · " + count + (count === 1 ? " player" : " players"))
       ),
       h("div", { class: "crowd-row-foot" },
         avatarRow,

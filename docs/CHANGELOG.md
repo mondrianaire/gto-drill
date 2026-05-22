@@ -46,6 +46,16 @@ lobby delete button silently no-op until the rules are live.
   `scenario_id` changes.
 
 ### Changed
+- **Crowd breakdown restructured into a hierarchy** (v2026-05-22.124). "How
+  others played" was a flat list of look-alike rows — the player's own pick a
+  small sub-line tag, easily lost in the stack. It now follows the spec's
+  §8.2 / mockup M6 three-tier hierarchy: the player's pick is an elevated card
+  (tinted, left identity bar, lifted shadow, taller bar, a prominent ✓/✗ YOUR
+  PICK marker — green when it matched the GTO line, red when it missed); the
+  GTO line is its own green-flagged card; every other action recedes to a thin
+  dimmed line. A crowd blind spot the player avoided stays a full card so a
+  spot the crowd misreads is never hidden. First piece of the Wave 1
+  results-screen rebuild.
 - **Shape pass — tags and badges are boxes, not pills** (v2026-05-22.121). The
   visual language now uses shape to encode interactivity: a pill reads as
   pressable, a box reads as a static label. Seven status badges/tags that were
