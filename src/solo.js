@@ -144,12 +144,18 @@ function buildCommentBox(scen, draft) {
 // @param {() => void} onExit  Called when the user backs out to sign-in.
 // -----------------------------------------------------------------------
 
-export function mountSoloView(container, onExit, onPlayers) {
+export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
   const scenarios = listScenarios();
   if (scenarios.length === 0) {
     container.appendChild(h("p", { class: "muted" }, "No scenarios loaded — try refreshing."));
     return { unmount: () => clear(container) };
   }
+
+  // Ideal scenario complexity for the player's self-reported level —
+  // the weighted picker pulls toward this. Anonymous / unknown → a
+  // neutral mid-table 3.0.
+  const IDEAL_COMPLEXITY = { new: 1.8, some: 2.6, familiar: 3.6, master: 4.4 };
+  const idealComplexity = IDEAL_COMPLEXITY[knowledgeLevel] || 3.0;
 
   // Optional `?scenario=<id>` URL param pins solo to a specific scenario,
   // useful for sharing or for inspecting a particular spot. When pinned,
@@ -175,6 +181,33 @@ export function mountSoloView(container, onExit, onPlayers) {
   let handsCompleted = 0;
   let correctSoFar = 0;
 
+  // Selection weight for a scenario. priority^1.6 keeps the "golden
+  // example" scenarios (priority 5) surfacing ~2.4× their share of
+  // the library — they're guaranteed the most player-response data
+  // even though few users complete everything — without letting
+  // priority swamp the complexity match. complexityMatch pulls
+  // toward the player's level: exact match ×1.0, off by 3 still
+  // ×~0.18 — strongly deprioritised, never hard-excluded.
+  function scenarioWeight(s) {
+    const priority = s.priority || 3;
+    const complexity = s.complexity || 3;
+    const priorityWeight = Math.pow(priority, 1.6);
+    const complexityMatch = 1 / (1 + 1.5 * Math.abs(complexity - idealComplexity));
+    return priorityWeight * complexityMatch;
+  }
+
+  function weightedPick(pool) {
+    let total = 0;
+    for (const s of pool) total += scenarioWeight(s);
+    if (total <= 0) return pool[(Math.random() * pool.length) | 0];
+    let r = Math.random() * total;
+    for (const s of pool) {
+      r -= scenarioWeight(s);
+      if (r <= 0) return s;
+    }
+    return pool[pool.length - 1];
+  }
+
   function pickScenario() {
     if (pinned) return pinned;
     // Prefer scenarios that are neither completed nor recently shown.
@@ -192,7 +225,9 @@ export function mountSoloView(container, onExit, onPlayers) {
       pool = scenarios.filter((s) => !recent.includes(s.scenario_id));
     }
     if (pool.length === 0) pool = scenarios.slice();
-    const next = pool[(Math.random() * pool.length) | 0];
+    // Weighted by priority (golden examples surface most) and
+    // complexity match to the player's knowledge level.
+    const next = weightedPick(pool);
     recent.push(next.scenario_id);
     while (recent.length > recentWindow) recent.shift();
     return next;

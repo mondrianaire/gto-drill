@@ -192,7 +192,9 @@
     "concept_tags": [
       "range-reading",
       "pot-control"
-    ]
+    ],
+    "priority": 5,
+    "complexity": 4
   },
   {
     "scenario_id": "co-open-blind-defense-002",
@@ -331,7 +333,9 @@
     "concept_tags": [
       "preflop",
       "bluffing"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "small-blind-vs-button-srp-turn-overbet-003",
@@ -586,7 +590,9 @@
       "board-texture",
       "aggression",
       "range-reading"
-    ]
+    ],
+    "priority": 5,
+    "complexity": 5
   },
   {
     "scenario_id": "mid-stack-utg-rfi-pocket-pair-004",
@@ -706,7 +712,9 @@
     "concept_tags": [
       "preflop",
       "equity-realization"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "blind-vs-blind-river-thin-value-005",
@@ -935,7 +943,9 @@
     "concept_tags": [
       "value-betting",
       "aggression"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "ip-flop-overbet-on-paired-board-006",
@@ -1138,7 +1148,9 @@
     "concept_tags": [
       "bluff-catching",
       "range-reading"
-    ]
+    ],
+    "priority": 4,
+    "complexity": 4
   },
   {
     "scenario_id": "facing-river-overbet-with-bluff-catcher-007",
@@ -1344,7 +1356,9 @@
     "concept_tags": [
       "bluff-catching",
       "range-reading"
-    ]
+    ],
+    "priority": 5,
+    "complexity": 5
   },
   {
     "scenario_id": "small-pair-vs-3bet-set-mine-008",
@@ -1514,7 +1528,9 @@
     "concept_tags": [
       "preflop",
       "equity-realization"
-    ]
+    ],
+    "priority": 2,
+    "complexity": 2
   },
   {
     "scenario_id": "out-of-position-double-barrel-equity-realization-009",
@@ -1734,7 +1750,9 @@
     "concept_tags": [
       "bluff-catching",
       "equity-realization"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 4
   },
   {
     "scenario_id": "donk-bet-decision-low-board-010",
@@ -1884,7 +1902,9 @@
       "range-reading",
       "board-texture",
       "aggression"
-    ]
+    ],
+    "priority": 4,
+    "complexity": 4
   },
   {
     "scenario_id": "all-in-or-fold-short-stack-011",
@@ -2048,7 +2068,9 @@
     "concept_tags": [
       "icm",
       "preflop"
-    ]
+    ],
+    "priority": 2,
+    "complexity": 2
   },
   {
     "scenario_id": "bluff-catcher-with-blocker-012",
@@ -2284,7 +2306,9 @@
     ],
     "concept_tags": [
       "bluff-catching"
-    ]
+    ],
+    "priority": 4,
+    "complexity": 4
   },
   {
     "scenario_id": "isolation-vs-limper-013",
@@ -2451,7 +2475,9 @@
     "concept_tags": [
       "preflop",
       "aggression"
-    ]
+    ],
+    "priority": 2,
+    "complexity": 2
   },
   {
     "scenario_id": "4bet-bluff-spot-014",
@@ -2611,7 +2637,9 @@
     "concept_tags": [
       "preflop",
       "bluffing"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 4
   },
   {
     "scenario_id": "calling-station-river-thin-call-015",
@@ -2835,7 +2863,9 @@
     "concept_tags": [
       "pot-control",
       "value-betting"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "flush-draw-semibluff-c-bet-016",
@@ -3047,7 +3077,9 @@
       "bluffing",
       "aggression",
       "equity-realization"
-    ]
+    ],
+    "priority": 4,
+    "complexity": 3
   },
   {
     "scenario_id": "river-overpair-vs-check-raise-017",
@@ -3271,7 +3303,9 @@
     "concept_tags": [
       "bluff-catching",
       "board-texture"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "double-up-spot-set-vs-overpair-018",
@@ -3466,7 +3500,9 @@
     "concept_tags": [
       "value-betting",
       "board-texture"
-    ]
+    ],
+    "priority": 2,
+    "complexity": 2
   },
   {
     "scenario_id": "river-bluff-with-no-showdown-019",
@@ -3695,7 +3731,9 @@
     "concept_tags": [
       "bluffing",
       "range-reading"
-    ]
+    ],
+    "priority": 4,
+    "complexity": 4
   },
   {
     "scenario_id": "limp-reraise-trap-020",
@@ -3839,7 +3877,9 @@
     "concept_tags": [
       "preflop",
       "value-betting"
-    ]
+    ],
+    "priority": 2,
+    "complexity": 2
   },
   {
     "scenario_id": "four-bet-pot-range-cbet-021",
@@ -4024,7 +4064,9 @@
     "concept_tags": [
       "range-reading",
       "aggression"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 4
   },
   {
     "scenario_id": "river-bluff-busted-draw-blocker-022",
@@ -4262,7 +4304,9 @@
     "concept_tags": [
       "bluffing",
       "aggression"
-    ]
+    ],
+    "priority": 4,
+    "complexity": 4
   },
   {
     "scenario_id": "bb-monster-draw-check-raise-023",
@@ -4466,7 +4510,9 @@
       "bluffing",
       "aggression",
       "equity-realization"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "turn-probe-bet-vs-checked-flop-024",
@@ -4664,7 +4710,9 @@
     "concept_tags": [
       "range-reading",
       "aggression"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "delayed-cbet-after-flop-check-025",
@@ -4867,7 +4915,9 @@
     "concept_tags": [
       "range-reading",
       "aggression"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "flat-suited-connector-vs-3bet-ip-026",
@@ -5044,7 +5094,9 @@
     "concept_tags": [
       "preflop",
       "equity-realization"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "bb-squeeze-vs-open-and-caller-027",
@@ -5232,7 +5284,9 @@
     "concept_tags": [
       "preflop",
       "aggression"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "sb-vs-bb-raise-first-in-028",
@@ -5540,7 +5594,9 @@
     ],
     "concept_tags": [
       "preflop"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "top-two-vs-check-raise-wet-board-029",
@@ -5736,7 +5792,9 @@
     "concept_tags": [
       "bluff-catching",
       "board-texture"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "overpair-on-monotone-flop-030",
@@ -5958,7 +6016,9 @@
     "concept_tags": [
       "board-texture",
       "pot-control"
-    ]
+    ],
+    "priority": 4,
+    "complexity": 4
   },
   {
     "scenario_id": "turn-barrel-give-up-031",
@@ -6188,7 +6248,9 @@
     "concept_tags": [
       "bluffing",
       "pot-control"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "overbet-the-nuts-vs-capped-range-032",
@@ -6426,7 +6488,9 @@
       "value-betting",
       "aggression",
       "range-reading"
-    ]
+    ],
+    "priority": 5,
+    "complexity": 5
   },
   {
     "scenario_id": "tptk-vs-flop-min-raise-033",
@@ -6622,7 +6686,9 @@
     ],
     "concept_tags": [
       "bluff-catching"
-    ]
+    ],
+    "priority": 2,
+    "complexity": 2
   },
   {
     "scenario_id": "multiway-cbet-sizing-overpair-034",
@@ -6812,7 +6878,9 @@
     "concept_tags": [
       "aggression",
       "board-texture"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "nut-flush-draw-check-raise-3bet-pot-035",
@@ -7019,7 +7087,9 @@
       "bluffing",
       "aggression",
       "equity-realization"
-    ]
+    ],
+    "priority": 4,
+    "complexity": 4
   },
   {
     "scenario_id": "icm-bubble-fold-marginal-shove-036",
@@ -7146,7 +7216,9 @@
     "concept_tags": [
       "icm",
       "preflop"
-    ]
+    ],
+    "priority": 5,
+    "complexity": 5
   },
   {
     "scenario_id": "bb-flat-offsuit-broadway-vs-btn-037",
@@ -7311,7 +7383,9 @@
     "concept_tags": [
       "preflop",
       "equity-realization"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "middle-set-on-flush-turn-038",
@@ -7532,7 +7606,9 @@
     "concept_tags": [
       "pot-control",
       "board-texture"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "fold-ace-high-vs-donk-lead-039",
@@ -7727,7 +7803,9 @@
     "concept_tags": [
       "bluff-catching",
       "board-texture"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "river-blocker-no-bluff-check-040",
@@ -7956,7 +8034,9 @@
     ],
     "concept_tags": [
       "bluffing"
-    ]
+    ],
+    "priority": 4,
+    "complexity": 4
   },
   {
     "scenario_id": "call-5bet-shove-with-ak-041",
@@ -8122,7 +8202,9 @@
     "concept_tags": [
       "preflop",
       "bluff-catching"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "range-cbet-small-dry-ace-board-042",
@@ -8328,7 +8410,9 @@
       "range-reading",
       "board-texture",
       "aggression"
-    ]
+    ],
+    "priority": 4,
+    "complexity": 4
   },
   {
     "scenario_id": "turn-check-back-pot-control-043",
@@ -8542,7 +8626,9 @@
     "concept_tags": [
       "pot-control",
       "board-texture"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "flat-jj-vs-3bet-in-position-044",
@@ -8730,7 +8816,9 @@
     ],
     "concept_tags": [
       "preflop"
-    ]
+    ],
+    "priority": 3,
+    "complexity": 3
   },
   {
     "scenario_id": "raise-river-with-the-nuts-045",
@@ -8964,6 +9052,8 @@
     "concept_tags": [
       "value-betting",
       "aggression"
-    ]
+    ],
+    "priority": 2,
+    "complexity": 2
   }
 ]
