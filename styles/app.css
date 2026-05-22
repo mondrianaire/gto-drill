@@ -1207,6 +1207,19 @@ form { margin-top: 8px; }
   border: 1px dashed var(--border);
   border-radius: var(--radius);
 }
+/* Low-sample notice — shown above the crowd rows when only a handful of
+   players have answered, so a tiny sample (e.g. "100% · 1 player") is
+   not read as crowd wisdom. Soft amber "take this lightly" tone. */
+.crowd-lown {
+  margin: 0 0 10px 0;
+  padding: 7px 11px;
+  font-size: 0.82rem;
+  line-height: 1.5;
+  color: #ffd58a;
+  background: rgba(255, 213, 138, 0.08);
+  border: 1px solid rgba(255, 213, 138, 0.32);
+  border-radius: 8px;
+}
 .crowd-rows {
   display: flex;
   flex-direction: column;

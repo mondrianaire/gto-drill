@@ -26,6 +26,12 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Honest small-crowd state** (v2026-05-22.115). The "How others played"
+  breakdown showed percentage bars even when only one or two players had
+  answered — so "100% · 1 player" read as crowd wisdom when it was a
+  sample of one. With fewer than five answers the breakdown now leads
+  with a plain notice ("Just your answer so far…" / "Early sample — only
+  N answers…") so a thin sample isn't mistaken for a real crowd read.
 - **Renamed: GTO Duel → GTO Drill** (v2026-05-22.114). Finishes the pivot
   the app made long ago — from a private two-player duel to a crowdsourced
   GTO trainer — by making the name describe what the app actually is. The

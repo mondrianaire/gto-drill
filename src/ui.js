@@ -738,6 +738,18 @@ export function buildCrowdBreakdown({ scen, responses, userAction }) {
     );
   }
 
+  // Low-sample notice — with only a handful of answers a percentage
+  // split (especially "100% · 1 player") reads as crowd wisdom when it
+  // is really a sample of one or two. Reframe it honestly until the
+  // crowd is real.
+  const SMALL_SAMPLE = 5;
+  const lowSample = (total > 0 && total < SMALL_SAMPLE)
+    ? h("p", { class: "crowd-lown" },
+        total === 1
+          ? "Just your answer so far — this becomes a real crowd read once other players weigh in."
+          : "Early sample — only " + total + " answers so far. The split below firms up as the crowd grows.")
+    : null;
+
   // Group responses by action.
   const byAction = {};
   for (const r of list) {
@@ -851,7 +863,7 @@ export function buildCrowdBreakdown({ scen, responses, userAction }) {
     ));
   }
 
-  return h("div", { class: "crowd-breakdown" }, header, rows);
+  return h("div", { class: "crowd-breakdown" }, header, lowSample, rows);
 }
 
 /**
