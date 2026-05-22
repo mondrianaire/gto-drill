@@ -8,4 +8,4 @@
 // will see the OLD version here even after a deploy — that's the signal
 // to hard-refresh (Ctrl+Shift+R / Cmd+Shift+R).
 
-export const APP_VERSION = "2026-05-22.118-scenario-prose";
+export const APP_VERSION = "2026-05-22.119-spot-summary-a11y";
