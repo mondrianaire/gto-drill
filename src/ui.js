@@ -1036,6 +1036,57 @@ export function buildScenarioInfo({ scen }) {
 }
 
 /**
+ * Retest comparison — shown on the reveal ONLY when the player has
+ * answered this scenario before. Surfaces their previous answer next to
+ * a verdict on whether the new answer moved toward the GTO line.
+ * Returns null when there's no prior answer (the common first-play case).
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ * @param {?{action:string, confidence:(number|null)}} args.prior
+ * @param {string} args.currentAction
+ * @param {string} args.gtoAction
+ */
+export function buildRetestCompare({ scen, prior, currentAction, gtoAction }) {
+  if (!prior || !prior.action) return null;
+  const priorGto = prior.action === gtoAction;
+  const currGto = currentAction === gtoAction;
+  const same = prior.action === currentAction;
+  let verdict, tone;
+  if (same) {
+    verdict = currGto ? "Same as last time — still on the GTO line" : "Same answer as last time";
+    tone = currGto ? "good" : "bad";
+  } else if (!priorGto && currGto) {
+    verdict = "Improved — now on the GTO line";
+    tone = "good";
+  } else if (priorGto && !currGto) {
+    verdict = "Slipped — you were on the GTO line last time";
+    tone = "bad";
+  } else {
+    verdict = "Still off — a different choice this time";
+    tone = "bad";
+  }
+  // Prior confidence as filled/empty dots (1–5), matching the verdict
+  // block's confidence display.
+  let dotsEl = null;
+  const c = Number(prior.confidence);
+  if (c >= 1 && c <= 5) {
+    let dots = "";
+    for (let i = 1; i <= 5; i++) dots += i <= c ? "●" : "○";
+    dotsEl = h("span", { class: "retest-dots", title: "Your confidence last time" }, dots);
+  }
+  return h("div", { class: "retest-compare retest-" + tone },
+    h("span", { class: "retest-tag" }, "Replay"),
+    h("span", { class: "retest-prior" },
+      "Last time: ",
+      h("span", { class: "retest-prior-action" }, richText(prior.action, scen, { asAction: true })),
+      dotsEl
+    ),
+    h("span", { class: "retest-verdict" }, verdict)
+  );
+}
+
+/**
  * Build the reveal-result block — the educational moment of every hand.
  * Returns a compact comparison: when Hero matched the GTO line, a single
  * centred tile (the action is the answer). When Hero missed, a two-column

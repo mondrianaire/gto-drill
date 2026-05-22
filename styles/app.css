@@ -1639,6 +1639,52 @@ form { margin-top: 8px; }
    away a transferable concept before working through detail. Warm
    highlight color (vs the GTO line's cooler blue) to read as "the
    thing to remember" rather than "the answer". */
+/* Retest comparison — on the reveal when the player has answered this
+   scenario before: their previous answer + a then-vs-now verdict.
+   Tinted green when they held/improved, red when they slipped. */
+.retest-compare {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  font-size: 0.85rem;
+}
+.retest-compare.retest-good {
+  border-color: rgba(74, 222, 128, 0.4);
+  background: rgba(74, 222, 128, 0.07);
+}
+.retest-compare.retest-bad {
+  border-color: rgba(232, 120, 120, 0.38);
+  background: rgba(232, 120, 120, 0.06);
+}
+.retest-tag {
+  flex-shrink: 0;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(76, 182, 255, 0.14);
+  padding: 3px 7px;
+  border-radius: 4px;
+}
+.retest-prior { color: var(--text-dim); }
+.retest-prior-action { color: var(--text); font-weight: 600; }
+.retest-dots {
+  margin-left: 6px;
+  letter-spacing: 1px;
+  font-size: 0.7rem;
+  color: var(--accent);
+}
+.retest-verdict { margin-left: auto; font-weight: 600; }
+.retest-good .retest-verdict { color: var(--ok); }
+.retest-bad .retest-verdict { color: #e87878; }
+
 .lesson-takeaway {
   display: flex;
   align-items: baseline;
@@ -2883,6 +2929,20 @@ form { margin-top: 8px; }
 .scenario-headline-num {
   color: var(--accent);
   font-weight: 700;
+}
+/* "Replay" marker on the headline — flags a scenario the player has
+   answered before. The prior answer stays hidden until the reveal. */
+.scenario-replay-tag {
+  margin-left: 8px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: rgba(76, 182, 255, 0.14);
+  padding: 3px 7px;
+  border-radius: 4px;
+  vertical-align: middle;
 }
 
 /* Icon-only header buttons (used by solo + duel views). The text labels
