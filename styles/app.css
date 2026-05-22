@@ -224,6 +224,94 @@ form { margin-top: 8px; }
 .players-actions { margin-top: 16px; }
 .players-back { width: 100%; }
 
+/* Owner-only Database console — overview stats, comments table, and
+   per-scenario coverage. */
+.database-view h2 { margin-top: 4px; }
+.db-hint { font-size: 0.88rem; margin: 0 0 10px 0; }
+.db-status { font-size: 0.85rem; margin: 6px 0 12px 0; }
+.db-overview {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.db-stat {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 8px;
+  text-align: center;
+}
+.db-stat-num { font-size: 1.3rem; font-weight: 800; color: var(--accent); }
+.db-stat-label {
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-dim);
+  margin-top: 3px;
+}
+.db-section-h {
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  margin: 18px 0 8px 0;
+}
+.db-empty { font-size: 0.85rem; }
+.db-comments { display: flex; flex-direction: column; gap: 8px; }
+.db-comment {
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 9px 11px;
+}
+.db-comment-head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+.db-comment-link { font-weight: 700; font-size: 0.9rem; white-space: nowrap; }
+.db-comment-title { font-size: 0.82rem; color: var(--text-dim); }
+.db-comment-meta {
+  margin-left: auto;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+}
+.db-comment-text { margin: 0; font-size: 0.9rem; line-height: 1.45; }
+.db-coverage {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+.db-cov-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  font-size: 0.85rem;
+  color: var(--text);
+  text-decoration: none;
+  border-bottom: 1px solid var(--border);
+}
+.db-cov-row:last-child { border-bottom: none; }
+.db-cov-row:hover { background: var(--bg-elev); }
+.db-cov-row.is-empty { color: var(--text-dim); }
+.db-cov-num { flex: 0 0 auto; font-weight: 700; color: var(--accent); min-width: 42px; }
+.db-cov-row.is-empty .db-cov-num { color: var(--text-dim); }
+.db-cov-title { flex: 1 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.db-cov-count { flex: 0 0 auto; font-size: 0.78rem; color: var(--text-dim); white-space: nowrap; }
+.db-actions { margin-top: 18px; }
+.db-back { width: 100%; }
+/* The 4-across overview stats are too tight on a phone — stack 2×2. */
+@media (max-width: 480px) {
+  .db-overview { grid-template-columns: repeat(2, 1fr); }
+}
+
 /* Player profile — aggression bias, per-concept accuracy, confidence
    calibration, synthesised from a player's recorded responses. */
 .profile-header {
@@ -2897,10 +2985,11 @@ form { margin-top: 8px; }
 .solo-header h2 { margin: 0; font-size: 1.1rem; flex: 0 0 auto; }
 .solo-stats { font-size: 0.85rem; }
 
-/* Header controls (Players + Exit) — always-rendered labelled outlined
-   buttons, at every width (never a bare icon / emoji). */
+/* Header controls (Database + Players + Exit) — always-rendered labelled
+   outlined buttons, at every width (never a bare icon / emoji). */
 .solo-exit,
-.solo-players {
+.solo-players,
+.solo-database {
   flex: 0 0 auto;
   padding: 5px 12px;
   font: inherit;
@@ -2914,7 +3003,14 @@ form { margin-top: 8px; }
   cursor: pointer;
 }
 .solo-exit:hover,
-.solo-players:hover { background: var(--bg-elev); color: var(--text); }
+.solo-players:hover,
+.solo-database:hover { background: var(--bg-elev); color: var(--text); }
+/* The owner Database button gets a faint accent tint so it reads as a
+   distinct (owner) control among the header buttons. */
+.solo-database {
+  color: var(--accent);
+  border-color: rgba(76, 182, 255, 0.4);
+}
 
 /* Scenario headline — "Scenario #NNN", the atomic reference (the
    trailing number of the scenario slug). Sits at the top of the hand

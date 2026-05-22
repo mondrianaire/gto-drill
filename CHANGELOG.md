@@ -66,6 +66,15 @@ lobby delete button silently no-op until the rules are live.
   of a bare `←` arrow.
 
 ### Added
+- **Owner-only Database console.** A "Database" button appears in the
+  play header *only* for the owner — a survey of the live data: an
+  overview (total responses, comments, distinct players, scenarios with
+  data), a comments table (every comment, newest first, each linking
+  into its scenario), and per-scenario coverage. The owner is identified
+  by a SHA-256 hash of their email (`owner.js`) — the literal address is
+  never in the repo. This is a UX gate, not a security boundary: the
+  underlying data is readable by any signed-in user by Firestore-rules
+  design; the gate just keeps the console out of other users' UI.
 - **Retest workflow for replayed scenarios.** A scenario the player has
   already answered is now a deliberate retest rather than a silent
   re-serve. The decide screen shows a "Replay" marker on the headline

@@ -33,6 +33,8 @@ import {
 import { mountSoloView } from "./solo.js";
 import { mountPlayersView } from "./players.js";
 import { mountProfileView } from "./profile.js";
+import { mountDatabaseView } from "./database.js";
+import { isOwnerUser } from "./owner.js";
 import { mountEquityCalculator } from "./equity-calculator.js";
 import { loadDictionary, mountDictionaryView, setTooltipThreshold } from "./dictionary.js";
 import { setOpenCallback as setTooltipOpenCallback } from "./tooltip.js";
@@ -129,12 +131,17 @@ function routeHome(root) {
 // question; threaded into the play loop to weight scenario difficulty.
 let knowledgeLevel = null;
 
+// Whether the signed-in user is the app owner — resolved once on sign-in
+// (owner.js hashes their email). Gates the owner-only Database menu.
+let isOwner = false;
+
 // Signed-in entry: read the user's profile. First time (no knowledge
 // level recorded) → the knowledge question. Returning → apply their
 // stored level to the dictionary-tooltip granularity, then play.
 async function enterSignedIn(root) {
   let profile = null;
   try { profile = await readUserProfile(); } catch (err) { console.warn(err); }
+  try { isOwner = await isOwnerUser(getCurrentUser()); } catch (_) { isOwner = false; }
   if (profile && profile.knowledgeLevel) {
     knowledgeLevel = profile.knowledgeLevel;
     try { setTooltipThreshold(knowledgeThreshold(knowledgeLevel)); } catch (_) {}
@@ -174,8 +181,19 @@ function goPlay(root) {
       location.assign(stripQuery());
     },
     signedIn ? () => goPlayers(root) : null,
-    knowledgeLevel
+    knowledgeLevel,
+    (signedIn && isOwner) ? () => goDatabase(root) : null
   );
+}
+
+// Owner-only Database console — a survey of all recorded responses and
+// comments. Reachable from the play header for the owner; Back returns
+// to the play loop.
+function goDatabase(root) {
+  renderHeaderUser();
+  setTooltipOpenCallback((id) =>
+    mountDictionaryView(root, () => goDatabase(root), { initialTermId: id }));
+  mountDatabaseView(root, () => goPlay(root));
 }
 
 // The Players screen — every player's library completion + accuracy.
