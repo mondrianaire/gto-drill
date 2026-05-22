@@ -707,18 +707,61 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
       // shared with other players (shows on their crowd breakdown).
       const commentBox = buildCommentBox(scen, draft);
 
+      // "TAP TO GO DEEPER" accordion (spec §8.6 / mockup M3
+      // compressed-workflow pass). The above-fold view stays focused —
+      // takeaway + GTO answer + verdict + crowd. Anything heavier
+      // (strategic preamble, per-option matrix, villain range + equity
+      // tester, "your take" comment) is one tap away in a collapsed
+      // section. Defaults to closed; the user opens what interests
+      // them. `<details>` gives free keyboard / a11y / tap behavior.
+      const accordionItem = (label, content, opts) => {
+        if (!content) return null;
+        const o = opts || {};
+        const summary = h("summary", { class: "reveal-acc-summary" },
+          h("span", { class: "reveal-acc-label" }, label),
+          o.hint
+            ? h("span", { class: "reveal-acc-hint muted" }, o.hint)
+            : null,
+          h("span", { class: "reveal-acc-chevron", "aria-hidden": "true" }, "▾")
+        );
+        const det = h("details", { class: "reveal-acc-item" }, summary, content);
+        if (o.startOpen) det.open = true;
+        return det;
+      };
+
+      const optsCount = Array.isArray(scen.available_actions)
+        ? scen.available_actions.length : 0;
+      const optsLabel = optsCount > 0
+        ? "Your " + optsCount + " options compared"
+        : "Your options compared";
+
+      // The "Villain's range + equity" section groups villain-range
+      // cards + equity panel host + Test-it button — clicking a range
+      // card or Test-it opens the equity panel inline below, so they
+      // live in the same accordion section.
+      const villainEquitySection = (villainRangeBlock || equityHost || testBtn)
+        ? h("div", { class: "reveal-villain-equity" },
+            villainRangeBlock,
+            equityHost,
+            h("div", { class: "test-row" }, testBtn))
+        : null;
+
+      const accordion = h("div", { class: "reveal-accordion" },
+        h("div", { class: "reveal-accordion-heading", "aria-hidden": "true" },
+          "TAP TO GO DEEPER"),
+        accordionItem("Why this is the line", gtoExplanation),
+        accordionItem(optsLabel, optionsAnalysis),
+        accordionItem("Villain's range + equity", villainEquitySection),
+        accordionItem("Add your take", commentBox)
+      );
+
       body = h("div", { class: "hand-reveal" },
         takeaway,           // LEAD: one-line lesson takeaway
         gtoRead,            // GTO line: small blurb (the answer)
         result,             // verdict + compact comparison
         retestCompare,      // then-vs-now (replays only; null otherwise)
         crowdHost,          // "how others played" crowd distribution
-        gtoExplanation,     // preamble: strategic landscape + option impacts
-        optionsAnalysis,    // matrix: every option's pros/cons
-        villainRangeBlock,  // deduced villain range — into Test it
-        commentBox,         // "your take on this hand" comment box
-        equityHost,         // equity panel mounts here
-        h("div", { class: "test-row" }, testBtn)
+        accordion           // collapsible deeper-dive sections
       );
 
       primaryBtn = h("button", { type: "button", class: "primary hand-fwd" }, "Next hand →");

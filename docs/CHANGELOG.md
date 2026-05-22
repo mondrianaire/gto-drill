@@ -25,6 +25,17 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Reveal "TAP TO GO DEEPER" accordion** (v2026-05-22.136). The deeper-dive
+  reveal sections — strategic preamble, per-option matrix, villain range +
+  equity tester, "your take" comment — now sit in collapsible `<details>`
+  accordion items below a centered "TAP TO GO DEEPER" divider. Above-fold
+  stays focused: takeaway → GTO answer → verdict → crowd. Each accordion item
+  is one tap to open, defaults closed; the rotating chevron and dim/accent
+  open-state are pure CSS, the native `<details>` element handles tap +
+  keyboard + a11y. The villain-range + equity panel + Test-it row are
+  grouped into a single "Villain's range + equity" section so clicking a
+  range card or Test-it opens the equity panel inline within the same
+  accordion section. Mockup M3 §8.6 compressed-workflow pass.
 - **Compact decide-phase prompt + context chips** (v2026-05-22.135). On the
   compact-view DECIDE screen the action timeline now hides and is replaced by a
   one-line villain-action prompt ("BB raises to 7 bb on the flop — your move")
