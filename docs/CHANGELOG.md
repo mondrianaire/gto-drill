@@ -25,6 +25,16 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Fixed a mis-described scenario** (v2026-05-22.117). The donk-lead low-board
+  scenario gave Hero `8h 4h` on a `7 6 5` flop — a **flopped straight** — but
+  its framing, options analysis, and GTO explanation all described the hand as
+  a *draw* ("open-ended draw potential", "bigger pot if Hero turns the
+  straight", "donking bluff candidate"). Root cause: the analysis was written
+  in a later bulk pass, keyed off the lesson rather than re-deriving the hand
+  on the board. The scenario was retired and replaced by a corrected version
+  under a new `scenario_id` — Hero now holds `Th 8h` (a genuine open-ended
+  straight draw), which is the bluff the lesson always meant to teach. The old
+  scenario's recorded responses orphan harmlessly (see `docs/SCHEMA.md`).
 - **Rebrand cleanup** (v2026-05-22.116). Repo housekeeping that completes the
   GTO Drill rename: dev-facing AutoBuilder artifacts removed, the root
   documentation (changelog, schema, roadmap, scenarios) restructured into

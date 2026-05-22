@@ -1755,14 +1755,14 @@
     "complexity": 4
   },
   {
-    "scenario_id": "donk-bet-decision-low-board-010",
+    "scenario_id": "donk-bet-decision-low-board-046",
     "replay": {
       "format": "cash",
       "stack_depth_bb": 100,
       "hero_seat": "BB",
       "hero_cards": [
-        "8h",
-        "4h"
+        "Th",
+        "8h"
       ],
       "starting_pot_bb": 0,
       "seats": [
@@ -1847,7 +1847,7 @@
         }
       ]
     },
-    "description": "100bb. CO opens 2.5bb, BB (Hero) calls with 8h 4h. Flop 7c 6c 5d. Pot 5.5bb. Action on Hero.",
+    "description": "100bb. CO opens 2.5bb, BB (Hero) calls with Th 8h. Flop 7c 6c 5d. Pot 5.5bb. Action on Hero.",
     "board": "7c 6c 5d",
     "action_history": [
       "CO open 2.5bb",
@@ -1864,22 +1864,22 @@
       "Low connected boards (765, 654) are the canonical donk-lead textures for BB",
       "BB has all the small suited connectors (87s, 76s, 65s, 54s) that CO opens don't include",
       "CO's preflop range is broadway-heavy — many overcards that brick this flop",
-      "84o has open-ended draw potential and blocks one of the two key straight cards (87)",
+      "T8s is the bluff half of the donk range — an open-ended straight draw (a 4 or 9 completes it) plus a backdoor flush, with no showdown value to protect",
       "Pot 5.5bb — a small donk sizing leverages range advantage without committing"
     ],
     "action_analysis": {
       "Check": {
         "pros": [
-          "Lets CO c-bet and lose with the bluffing portion of their range"
+          "Realises T8s's draw equity for free and keeps CO's flop bluffs in"
         ],
         "cons": [
-          "Misses the EV gain from leading with nutted + equity combos"
+          "Passes up the donk-lead EV the BB's range edge on 765 is built to capture"
         ]
       },
       "Donk lead 2bb (~35%)": {
         "pros": [
-          "Hero's 84 combos block the nut straight and barrel cleanly on most turns",
-          "Folds out the part of CO's range that would otherwise see a free turn"
+          "A small size keeps Hero's donk range wide — T8s's open-ender barrels cleanly on most turns",
+          "Folds out the CO hands that would otherwise see a free turn"
         ],
         "cons": [
           "Off-meta line — exploitable opponents won't fold enough",
@@ -1888,15 +1888,15 @@
       },
       "Donk lead 4bb (~70%)": {
         "pros": [
-          "Bigger pot if Hero turns the straight"
+          "Builds a bigger pot for the turns where T8s completes the straight"
         ],
         "cons": [
-          "Polarizes too hard — 70% donks should be nutted",
-          "Single overcard turn leaves Hero face-up"
+          "A 70% donk should be the nutted part of the range — a bare draw over-bluffs at this size",
+          "A brick turn leaves Hero firing a busted draw into a range that has continued"
         ]
       }
     },
-    "gto_explanation": "On low connected boards like 765 the BB has a range advantage relative to the CO opener because BB calls all the small connectors (87, 76s, 65s, 54s, 87s for some constructions) that the CO does not open. Solvers have begun donking these boards at meaningful frequencies with the nutted part of the range (made straights) plus bluffs that have wheel equity. 84o is a strong donking bluff candidate here — it has clean equity to backdoor straight, blocks 87, and turns into a barrel target. Solvers donk lead BB on 765-type boards at ~25-40% frequency.",
+    "gto_explanation": "On low connected boards like 765 the BB has a range advantage over the CO opener: the BB defends all the small connectors (87s, 76s, 65s, 54s) that the CO never opens, while the CO's range is broadway-heavy and largely bricks this flop. Solvers donk-lead these boards at meaningful frequency with a polarized range — the nutted part (made straights) plus bluffs that carry a live straight draw. Th8h is a model bluff for that range: an open-ended straight draw (a 4 or 9 completes it), a backdoor flush draw, and no showdown value, so leading beats checking a hand that hates being check-called and gains from the fold equity. Solvers donk-lead the BB on 765-type boards at roughly 25-40% frequency.",
     "lesson_tag": "BB donk lead range advantage",
     "concept_tags": [
       "range-reading",
