@@ -3638,6 +3638,89 @@ form { margin-top: 8px; }
   color: var(--text-dim);
 }
 
+/* --- "TAP TO GO DEEPER" reveal accordion (spec §8.6 / mockup M3) ------
+   Collapsible sections under the above-fold reveal summary: Why this is
+   the line / Your options compared / Villain's range + equity / Add
+   your take. `<details>` gives free keyboard + a11y + tap behavior; we
+   only style chrome here. */
+.reveal-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 14px;
+}
+.reveal-accordion-heading {
+  font-size: 0.62rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+  text-align: center;
+  margin: 4px 0 6px 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.reveal-accordion-heading::before,
+.reveal-accordion-heading::after {
+  content: "";
+  flex: 1 1 auto;
+  height: 1px;
+  background: var(--border-interactive);
+  opacity: 0.45;
+}
+.reveal-acc-item {
+  border: 1px solid var(--border-interactive);
+  border-radius: var(--radius-box);
+  background: var(--bg-elev);
+  overflow: hidden;
+}
+.reveal-acc-item[open] {
+  background: var(--bg-elev-2);
+}
+.reveal-acc-summary {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 12px;
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  min-height: 44px;
+}
+.reveal-acc-summary::-webkit-details-marker { display: none; }
+.reveal-acc-summary::marker { content: ""; }
+.reveal-acc-label {
+  flex: 1 1 auto;
+  font-weight: 600;
+  font-size: 14px;
+  color: var(--text);
+}
+.reveal-acc-hint {
+  font-size: 11px;
+}
+.reveal-acc-chevron {
+  flex: 0 0 auto;
+  font-size: 14px;
+  color: var(--text-dim);
+  transition: transform 0.18s ease;
+}
+.reveal-acc-item[open] .reveal-acc-chevron {
+  transform: rotate(180deg);
+}
+/* Body padding for each open section's content. The inner blocks each
+   bring their own headings — inside the accordion those are visually
+   redundant with the summary label, so hide them. */
+.reveal-acc-item > :not(summary) {
+  padding: 0 12px 12px 12px;
+}
+.reveal-acc-item .gto-explanation-label,
+.reveal-acc-item .options-analysis-header {
+  display: none;
+}
+@media (hover: hover) {
+  .reveal-acc-summary:hover { background: rgba(76, 182, 255, 0.04); }
+}
+
 /* --- Poker-hand replay --- */
 .replay { margin: 10px 0 6px 0; }
 /* Header row above the table — format/depth chip on the left, optional
