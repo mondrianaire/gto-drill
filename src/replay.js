@@ -238,6 +238,48 @@ export function potAtDecisionBb(replay) {
 }
 
 /**
+ * Compact board-runout strip for the one-screen hand view (spec §6.1 /
+ * mockup M3). Shows flop / turn / river dealt ONCE — grouped, with a
+ * street tag per group — plus the decision-point pot. This replaces the
+ * oval table's felt board in the compact layout: the board is decision
+ * data, the animated table is a luxury. Returns null for a preflop spot
+ * (no board) — the caller simply omits the strip.
+ *
+ * @param {Object} replay
+ * @returns {HTMLElement|null}
+ */
+export function buildRunoutStrip(replay) {
+  if (!replay || !replay.board) return null;
+  const board = replay.board;
+  const streets = [
+    { tag: "Flop", cards: board.flop || [] },
+    { tag: "Turn", cards: board.turn || [] },
+    { tag: "River", cards: board.river || [] },
+  ].filter((s) => Array.isArray(s.cards) && s.cards.length > 0);
+  if (streets.length === 0) return null;
+
+  const pot = potAtDecisionBb(replay);
+  const head = h("div", { class: "runout-head" },
+    h("span", { class: "runout-label" }, "Runout"),
+    pot != null
+      ? h("span", { class: "runout-pot" },
+          "Pot ", h("b", null, String(Math.round(pot * 10) / 10)), " bb")
+      : null
+  );
+  const streetEls = streets.map((s) =>
+    h("div", { class: "runout-street" },
+      h("span", { class: "runout-street-tag" }, s.tag),
+      h("div", { class: "runout-street-cards" },
+        ...s.cards.map((c) => cardEl(c, "sm")))
+    )
+  );
+  return h("div", { class: "runout-strip" },
+    head,
+    h("div", { class: "runout-streets" }, ...streetEls)
+  );
+}
+
+/**
  * Build a compact mini-display of the hand's INFLECTION points up to the
  * decision — replaces the verbose "spot in words" prose. Groups by
  * street and shows only the actions that meaningfully change state:

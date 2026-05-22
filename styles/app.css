@@ -3362,6 +3362,59 @@ form { margin-top: 8px; }
   .link-btn:hover { background: none; color: #6cc4ff; }
 }
 
+/* --- Compact-view board-runout strip (spec §6.1 / mockup M3) ----------
+   The flop/turn/river board dealt once as a compact strip — the compact
+   layout's replacement for the oval table's felt board. */
+.runout-strip {
+  background: linear-gradient(180deg,
+    rgba(45, 106, 74, 0.22) 0%, rgba(23, 59, 45, 0.22) 100%);
+  border: 1px solid rgba(45, 106, 74, 0.5);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.runout-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 9px;
+}
+.runout-label {
+  font-size: 0.66rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #9fd9bc;
+}
+/* Pot badge — a chip skeuomorph, so it keeps the round pill shape. */
+.runout-pot {
+  font-size: 0.78rem;
+  color: var(--text);
+  background: rgba(0, 0, 0, 0.45);
+  padding: 3px 11px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.runout-pot b { font-weight: 700; }
+.runout-streets {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.runout-street {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.runout-street-tag {
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+.runout-street-cards { display: flex; gap: 3px; }
+
 /* --- Poker-hand replay --- */
 .replay { margin: 10px 0 6px 0; }
 /* Header row above the table — format/depth chip on the left, optional
