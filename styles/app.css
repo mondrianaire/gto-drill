@@ -2826,6 +2826,38 @@ form { margin-top: 8px; }
 .solo-header h2 { margin: 0; font-size: 1.1rem; flex: 0 0 auto; }
 .solo-stats { font-size: 0.85rem; }
 
+/* Exit control — an always-rendered labelled outlined button, at every
+   width (never a bare arrow / icon-only collapse). */
+.solo-exit {
+  flex: 0 0 auto;
+  padding: 5px 12px;
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  line-height: 1;
+  color: var(--text-dim);
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: pointer;
+}
+.solo-exit:hover { background: var(--bg-elev); color: var(--text); }
+
+/* Scenario headline — "Scenario #NNN", the atomic reference (the
+   trailing number of the scenario slug). Sits at the top of the hand
+   card, above the table's CASH/TOURNAMENT context line; it replaces the
+   old share-link button as the way to refer to a specific scenario. */
+.scenario-headline {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+}
+.scenario-headline-num {
+  color: var(--accent);
+  font-weight: 700;
+}
+
 /* Icon-only header buttons (used by solo + duel views). The text labels
    that used to live next to the icons were redundant with the title
    tooltips — and on narrow phones they kept pushing the title around.

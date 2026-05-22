@@ -25,6 +25,15 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Changed
+- **Scenario headline replaces the share-link button.** Each scenario
+  now shows a `Scenario #NNN` headline at the top of the hand card
+  (the number is the atomic reference — the trailing digits of the
+  scenario slug). The 🔗 permalink/copy-link icon is removed from the
+  solo-practice header; the scenario number is the reference now. The
+  Exit control is also now an always-rendered labelled button instead
+  of a bare `←` arrow.
+
 ### Fixed
 - **Playing-card suit glyphs rendering as broken emoji.** The card suits
   (♠♥♦♣) are Unicode characters that browsers — notably Chrome on
