@@ -2304,50 +2304,43 @@ form { margin-top: 8px; }
     #c0202a 50% 100%);
 }
 
-/* Hand-class group — the two doesn't-matter cards of "AKs" / "AKo" plus
-   a suited/offsuit marker, all wrapped in one bordered pill. The marker
-   compartment on the right is a small light panel (like a third card)
-   showing "s" (suited) or "o" (offsuit). Same border for both — only
-   the marker differs: the offsuit "o" is split diagonally red/black,
-   echoing "two different suits"; the suited "s" is a single solid mark. */
+/* Hand-class group — "AKs" / "AKo": the two doesn't-matter cards sit on
+   a red/black diagonal frame (red + black being the two playing-card
+   colours). The frame's RIGHT side extends into a band that carries the
+   suited/offsuit marker — "s" or "o" — so the marker is part of the
+   border itself, not a separate card-like cell. The whole tag is the
+   diagonal; the white cards cover the middle, leaving it visible as a
+   frame around them and a band on the right. */
 .tok-handclass {
+  position: relative;
   display: inline-flex;
   align-items: center;
   vertical-align: middle;
   margin: 0 3px;
-  padding: 2px;
   gap: 3px;
-  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  padding: 3px;
+  padding-right: 16px;
   border-radius: 5px;
-  background: rgba(255, 255, 255, 0.05);
+  background: linear-gradient(135deg, #c0202a 0 55%, #1a1a1a 55% 100%);
 }
 .tok-handclass .tok-anysuit { margin: 0; }
-.tok-handclass-mark {
-  display: inline-flex;
+/* The s/o marker — a letter sitting directly on the frame's extended
+   right band (no panel of its own). */
+.tok-handclass-glyph {
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 16px;
+  display: flex;
   align-items: center;
   justify-content: center;
-  align-self: stretch;
-  min-width: 16px;
-  padding: 0 4px;
-  background: #fdfdfb;
-  border-radius: 3px;
-}
-.tok-handclass-glyph {
   font-weight: 800;
   font-style: italic;
-  font-size: 0.78rem;
+  font-size: 0.74rem;
   line-height: 1;
-}
-/* Suited — one solid mark ("same suit"). */
-.tok-handclass-glyph-s { color: #1a1a1a; }
-/* Offsuit — the "o" filled by a diagonal red/black gradient clipped to
-   the glyph itself ("two different suits"). */
-.tok-handclass-glyph-o {
-  background-image: linear-gradient(125deg, #c0202a 0 50%, #1a1a1a 50% 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  color: transparent;
+  color: #fdfdfb;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.7);
 }
 
 /* Inline range chip — clickable anchor that pre-loads the equity panel. */
