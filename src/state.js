@@ -438,17 +438,29 @@ export async function readScenarioResponses(scenarioId) {
  * @returns {Promise<Array<{scenario_id,action,confidence,updatedAt}>>}
  */
 export async function readMyResponses() {
-  if (!_db) throw new Error("initFirebase() must be called first");
   const me = getCurrentUser();
-  if (!me) return [];
+  return me ? readResponsesByUid(me.uid) : [];
+}
+
+/**
+ * Read every response recorded by a specific player — the input for
+ * that player's profile (any player's profile is viewable, consistent
+ * with the crowd model). Returns [] when not signed in or on error.
+ *
+ * @param {string} uid
+ * @returns {Promise<Array<{scenario_id,uid,displayName,photoURL,action,confidence}>>}
+ */
+export async function readResponsesByUid(uid) {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  if (!getCurrentUser() || !uid) return [];
   try {
-    const q = query(collection(_db, "responses"), where("uid", "==", me.uid));
+    const q = query(collection(_db, "responses"), where("uid", "==", uid));
     const snap = await getDocs(q);
     const out = [];
     snap.forEach((d) => out.push(d.data()));
     return out;
   } catch (err) {
-    console.warn("readMyResponses failed:", err);
+    console.warn("readResponsesByUid failed:", err);
     return [];
   }
 }
