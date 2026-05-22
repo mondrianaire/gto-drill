@@ -1381,6 +1381,19 @@ form { margin-top: 8px; }
   color: var(--text);
 }
 .comment-hint { font-size: 0.8rem; margin: 3px 0 8px 0; }
+/* Stale-note flag — shown in the comment box on a retest when the
+   player's new answer differs from the one their saved note was
+   written about. Amber "needs attention" tone. */
+.comment-stale-flag {
+  margin: 0 0 8px 0;
+  padding: 7px 10px;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: #ffd58a;
+  background: rgba(255, 213, 138, 0.10);
+  border: 1px solid rgba(255, 213, 138, 0.45);
+  border-radius: 8px;
+}
 .comment-input {
   width: 100%;
   box-sizing: border-box;

@@ -127,10 +127,24 @@ function buildCommentBox(scen, draft) {
     saving = false;
     saveBtn.disabled = false;
   });
+  // Stale-note flag — the player wrote this note about a DIFFERENT
+  // answer on an earlier pass (recordResponse keeps the note via a
+  // merge write). Surface the mismatch rather than auto-deleting it:
+  // only the player can judge whether their reasoning still holds.
+  const prior = draft.priorAnswer;
+  let staleFlag = null;
+  if (prior && prior.note && prior.action && draft.action &&
+      prior.action !== draft.action) {
+    staleFlag = h("p", { class: "comment-stale-flag" },
+      "⚠ This note was written about your earlier answer (" + prior.action +
+      "). You have now answered " + draft.action +
+      " — update or clear it so it still fits this hand.");
+  }
   return h("div", { class: "comment-box" },
     h("div", { class: "comment-label" }, "💬 Your take on this hand"),
     h("p", { class: "comment-hint muted" },
       "A comment on the spot and the GTO decision. Other players see it on the crowd breakdown."),
+    staleFlag,
     ta,
     h("div", { class: "comment-actions" }, saveBtn, status)
   );
@@ -243,15 +257,21 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
     // compares its then-vs-now against the most recent attempt.
     if (currentScen && draft && draft.revealed && draft.action) {
       priorById.set(currentScen.scenario_id,
-        { action: draft.action, confidence: draft.confidence });
+        { action: draft.action, confidence: draft.confidence, note: draft.note || "" });
     }
     currentScen = pickScenario();
     // priorAnswer — the user's recorded answer to this scenario BEFORE
     // the current attempt, or null if they've never played it. Captured
     // once here so the decide + reveal screens read a stable value.
+    const priorAnswer = priorById.get(currentScen.scenario_id) || null;
     draft = {
-      action: null, confidence: null, note: "", revealed: false,
-      priorAnswer: priorById.get(currentScen.scenario_id) || null,
+      action: null, confidence: null,
+      // Seed the comment box with the note the player left on an earlier
+      // pass (retests) so it stays visible and editable instead of
+      // silently vanishing. "" for a first-time scenario.
+      note: (priorAnswer && priorAnswer.note) || "",
+      revealed: false,
+      priorAnswer,
     };
     render();
   }
@@ -597,7 +617,8 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
           for (const r of mine) {
             if (r && r.scenario_id) {
               completedIds.add(r.scenario_id);
-              priorById.set(r.scenario_id, { action: r.action, confidence: r.confidence });
+              priorById.set(r.scenario_id,
+                { action: r.action, confidence: r.confidence, note: r.note || "" });
             }
           }
         }

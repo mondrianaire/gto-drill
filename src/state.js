@@ -395,6 +395,11 @@ export async function recordResponse(scenarioId, action, confidence) {
   const me = getCurrentUser();
   if (!me || !scenarioId || !action) return false;
   const docId = scenarioId + "__" + me.uid;
+  // Merge-written so a re-answer (the retest flow) overwrites action /
+  // confidence but PRESERVES any `note` the player attached on an
+  // earlier pass. A plain setDoc would silently delete that comment;
+  // instead the note is kept and the reveal flags it as stale when the
+  // new action differs from the one the note was written about.
   await setDoc(doc(_db, "responses", docId), {
     scenario_id: scenarioId,
     uid: me.uid,
@@ -403,7 +408,7 @@ export async function recordResponse(scenarioId, action, confidence) {
     action: action,
     confidence: Number(confidence) || null,
     updatedAt: new Date().toISOString(),
-  });
+  }, { merge: true });
   return true;
 }
 

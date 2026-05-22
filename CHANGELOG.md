@@ -26,6 +26,16 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Retest comments no longer silently lost** (v2026-05-22.112). Re-
+  answering a scenario you had already played (the retest flow)
+  overwrote the whole response document — deleting any note you had
+  attached on the earlier pass — and the comment box never showed that
+  earlier note in the first place. Now: `recordResponse` is a merge
+  write, so the note survives a re-answer; the comment box pre-fills
+  with your prior note on a retest; and when your new answer differs
+  from the one the note was written about, the box shows an amber flag
+  prompting you to update or clear it. The note is never auto-deleted,
+  and never silently left on a mismatched answer.
 - **Mobile touch affordance — interaction-system pass** (v2026-05-22.111).
   A consolidated pass over every interactive control so each reads as
   obviously tappable on a phone, without changing app layout or
