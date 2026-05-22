@@ -43,6 +43,7 @@ import {
   query,
   where,
   getDocs,
+  getDoc,
 } from "https://www.gstatic.com/firebasejs/10.12.5/firebase-firestore.js";
 
 import { sampleNScenarioIds } from "./scenarios.js";
@@ -463,6 +464,48 @@ export async function readResponsesByUid(uid) {
     console.warn("readResponsesByUid failed:", err);
     return [];
   }
+}
+
+// -----------------------------------------------------------------------
+// Per-user profile doc — users/{uid}
+// -----------------------------------------------------------------------
+//
+// Holds account-level settings, currently the poker-knowledge level
+// captured on first sign-in (which seeds the dictionary-tooltip
+// granularity). One doc per user, read on every sign-in.
+
+/**
+ * Read the signed-in user's profile doc, or null if they don't have
+ * one yet (first sign-in) / not signed in / error.
+ * @returns {Promise<Object|null>}
+ */
+export async function readUserProfile() {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  const me = getCurrentUser();
+  if (!me) return null;
+  try {
+    const snap = await getDoc(doc(_db, "users", me.uid));
+    return snap.exists() ? snap.data() : null;
+  } catch (err) {
+    console.warn("readUserProfile failed:", err);
+    return null;
+  }
+}
+
+/**
+ * Persist the user's self-reported poker-knowledge level. Merged into
+ * the users/{uid} doc so it can sit alongside future settings.
+ * @param {string} level  one of the KNOWLEDGE_LEVELS ids.
+ */
+export async function saveKnowledgeLevel(level) {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  const me = getCurrentUser();
+  if (!me || !level) return;
+  await setDoc(doc(_db, "users", me.uid), {
+    uid: me.uid,
+    knowledgeLevel: level,
+    updatedAt: new Date().toISOString(),
+  }, { merge: true });
 }
 
 /**

@@ -159,6 +159,66 @@ export function mountSignInView(container, onSignedIn, onSolo, onCalculator, onD
 }
 
 // -----------------------------------------------------------------------
+// Knowledge-level onboarding
+// -----------------------------------------------------------------------
+//
+// Asked once, on first sign-in. The chosen level seeds the dictionary-
+// tooltip granularity (newer players get more terms underlined). Each
+// level maps to a tooltip threshold (1 = underline everything …
+// 3 = advanced terms only).
+
+export const KNOWLEDGE_LEVELS = [
+  { id: "new", label: "New to Texas Hold'em Poker",
+    sub: "We'll underline every poker term — tap any to learn it.",
+    threshold: 1 },
+  { id: "some", label: "Some previous poker experience",
+    sub: "We'll skip the basics and explain the trickier terms.",
+    threshold: 2 },
+  { id: "familiar", label: "Familiar with Hold'em, new to GTO",
+    sub: "We'll surface the solver-era vocabulary you're here to learn.",
+    threshold: 2 },
+  { id: "master", label: "GTO Master",
+    sub: "Minimal underlines — only the most advanced terms.",
+    threshold: 3 },
+];
+
+/** Map a knowledge-level id to its dictionary-tooltip threshold. */
+export function knowledgeThreshold(levelId) {
+  const lvl = KNOWLEDGE_LEVELS.find((l) => l.id === levelId);
+  return lvl ? lvl.threshold : 3;
+}
+
+/**
+ * The first-sign-in knowledge question. Four big options; picking one
+ * calls onPick(levelId).
+ */
+export function mountKnowledgeView(container, onPick) {
+  clear(container);
+  let busy = false;
+  const options = KNOWLEDGE_LEVELS.map((lvl) => {
+    const btn = h("button", { type: "button", class: "knowledge-option" },
+      h("span", { class: "knowledge-option-label" }, lvl.label),
+      h("span", { class: "knowledge-option-sub muted" }, lvl.sub)
+    );
+    btn.addEventListener("click", () => {
+      if (busy) return;
+      busy = true;
+      Array.from(container.querySelectorAll(".knowledge-option")).forEach((b) => { b.disabled = true; });
+      onPick(lvl.id);
+    });
+    return btn;
+  });
+  const root = h("section", { class: "knowledge-view" },
+    h("h2", null, "How well do you know poker?"),
+    h("p", { class: "muted knowledge-hint" },
+      "This tailors how much the app explains as you play. You can change it any time from the dictionary."),
+    h("div", { class: "knowledge-options" }, ...options)
+  );
+  container.appendChild(root);
+  return { unmount: () => clear(container) };
+}
+
+// -----------------------------------------------------------------------
 // mountLandingView
 // -----------------------------------------------------------------------
 

@@ -21,13 +21,20 @@ import {
   initAuth,
   getCurrentUser,
   signOutUser,
+  readUserProfile,
+  saveKnowledgeLevel,
 } from "./state.js";
-import { mountSignInView, buildAvatar } from "./onboarding.js";
+import {
+  mountSignInView,
+  buildAvatar,
+  mountKnowledgeView,
+  knowledgeThreshold,
+} from "./onboarding.js";
 import { mountSoloView } from "./solo.js";
 import { mountPlayersView } from "./players.js";
 import { mountProfileView } from "./profile.js";
 import { mountEquityCalculator } from "./equity-calculator.js";
-import { loadDictionary, mountDictionaryView } from "./dictionary.js";
+import { loadDictionary, mountDictionaryView, setTooltipThreshold } from "./dictionary.js";
 import { setOpenCallback as setTooltipOpenCallback } from "./tooltip.js";
 import { FIREBASE_CONFIG } from "./config.js";
 import { APP_VERSION } from "./version.js";
@@ -106,14 +113,40 @@ async function boot() {
   }
 }
 
-// Route to the home experience: signed-in users go straight into the
-// play loop; everyone else gets the sign-in gate.
+// Route to the home experience: signed-in users go into the play
+// loop (via the knowledge-onboarding gate on first sign-in);
+// everyone else gets the sign-in gate.
 function routeHome(root) {
   if (getCurrentUser()) {
-    goPlay(root);
+    enterSignedIn(root);
   } else {
     goSignIn(root);
   }
+}
+
+// Signed-in entry: read the user's profile. First time (no knowledge
+// level recorded) → the knowledge question. Returning → apply their
+// stored level to the dictionary-tooltip granularity, then play.
+async function enterSignedIn(root) {
+  let profile = null;
+  try { profile = await readUserProfile(); } catch (err) { console.warn(err); }
+  if (profile && profile.knowledgeLevel) {
+    try { setTooltipThreshold(knowledgeThreshold(profile.knowledgeLevel)); } catch (_) {}
+    goPlay(root);
+  } else {
+    goKnowledge(root);
+  }
+}
+
+// First-sign-in knowledge question. The pick seeds the dictionary
+// granularity and is saved to the user's profile, then → play.
+function goKnowledge(root) {
+  renderHeaderUser();
+  mountKnowledgeView(root, async (levelId) => {
+    try { setTooltipThreshold(knowledgeThreshold(levelId)); } catch (_) {}
+    try { await saveKnowledgeLevel(levelId); } catch (err) { console.warn(err); }
+    goPlay(root);
+  });
 }
 
 // The play loop — the whole app. mountSoloView runs the per-hand
@@ -166,7 +199,7 @@ function goSignIn(root) {
   setTooltipOpenCallback((id) => goDict(id));
   mountSignInView(
     root,
-    () => goPlay(root),
+    () => enterSignedIn(root),
     () => mountSoloView(root, () => goSignIn(root)),
     () => mountEquityCalculator(root, () => goSignIn(root)),
     (termId) => goDict(termId)

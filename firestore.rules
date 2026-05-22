@@ -57,6 +57,15 @@ service cloud.firestore {
                         || resource.data.participantUids.size() < 1);
     }
 
+    // users/{uid} — per-user profile doc (poker-knowledge level, and
+    // future account-level settings). A user may only read and write
+    // their OWN doc; the doc id IS their uid.
+    match /users/{userId} {
+      allow read: if request.auth != null && request.auth.uid == userId;
+      allow create, update: if request.auth != null && request.auth.uid == userId;
+      allow delete: if false;
+    }
+
     // responses/{scenarioId__uid} — one doc per (scenario, player).
     // Powers the crowd-distribution model: every player's answer to a
     // scenario is recorded, and the reveal aggregates them into a
