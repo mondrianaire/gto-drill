@@ -85,6 +85,27 @@ function suitSvg(suitCode) {
   return svg;
 }
 
+// Build a replay-control icon as an inline <svg> (viewBox 0 0 100 100).
+// Same rationale as suitSvg — the Unicode media glyphs (⏮ ◀ ▶ ❚❚)
+// render as inconsistent colour emoji in some browsers.
+function iconSvg(name) {
+  const svg = svgNode("svg", {
+    viewBox: "0 0 100 100", class: "replay-ctl-icon", "aria-hidden": "true",
+  });
+  if (name === "prev") {
+    svg.appendChild(svgNode("path", { d: "M60 20 L60 80 L24 50 Z" }));
+  } else if (name === "next" || name === "play") {
+    svg.appendChild(svgNode("path", { d: "M40 20 L40 80 L76 50 Z" }));
+  } else if (name === "pause") {
+    svg.appendChild(svgNode("rect", { x: "32", y: "22", width: "13", height: "56", rx: "2" }));
+    svg.appendChild(svgNode("rect", { x: "55", y: "22", width: "13", height: "56", rx: "2" }));
+  } else if (name === "rewind") {
+    svg.appendChild(svgNode("rect", { x: "22", y: "22", width: "12", height: "56", rx: "2" }));
+    svg.appendChild(svgNode("path", { d: "M82 22 L82 78 L44 50 Z" }));
+  }
+  return svg;
+}
+
 /**
  * A single playing card. `code` like "Kd"/"Tc"; null/undefined = face down.
  * `size` is "sm" (small table card), "inline" (text-flow card) or default.
@@ -492,10 +513,10 @@ export function mountReplay(container, replay, opts) {
   // Fast-rewind to the start of the hand (right after SB/BB posts —
   // posts are baked into `minStep` so this is the cleanest "from the
   // top" state). Sits at the leftmost position.
-  const rewindBtn = h("button", { type: "button", class: "replay-ctl" }, "⏮");
-  const prevBtn = h("button", { type: "button", class: "replay-ctl" }, "◀");
-  const playBtn = h("button", { type: "button", class: "replay-ctl" }, "▶");
-  const nextBtn = h("button", { type: "button", class: "replay-ctl" }, "▶");
+  const rewindBtn = h("button", { type: "button", class: "replay-ctl" }, iconSvg("rewind"));
+  const prevBtn = h("button", { type: "button", class: "replay-ctl" }, iconSvg("prev"));
+  const playBtn = h("button", { type: "button", class: "replay-ctl" }, iconSvg("play"));
+  const nextBtn = h("button", { type: "button", class: "replay-ctl" }, iconSvg("next"));
   rewindBtn.setAttribute("aria-label", "Rewind to start of hand");
   prevBtn.setAttribute("aria-label", "Previous action");
   nextBtn.setAttribute("aria-label", "Next action");
@@ -637,7 +658,8 @@ export function mountReplay(container, replay, opts) {
     rewindBtn.disabled = step <= minStep;
     prevBtn.disabled = step <= minStep;
     nextBtn.disabled = step === decisionStep;
-    playBtn.textContent = (playTimer || autoplayTimer) ? "❚❚" : "▶";
+    while (playBtn.firstChild) playBtn.removeChild(playBtn.firstChild);
+    playBtn.appendChild(iconSvg((playTimer || autoplayTimer) ? "pause" : "play"));
     if (onStep) {
       try { onStep(step); } catch (_) { /* swallow — highlight is cosmetic */ }
     }

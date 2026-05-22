@@ -273,8 +273,8 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
     // identity to be meaningful).
     const playersBtn = onPlayers
       ? h("button",
-          { type: "button", class: "link-btn solo-players icon-btn", title: "See all players", "aria-label": "See all players" },
-          h("span", { "aria-hidden": "true" }, "👥"))
+          { type: "button", class: "solo-players", title: "See all players", "aria-label": "See all players" },
+          "Players")
       : null;
     if (playersBtn) {
       playersBtn.addEventListener("click", () => {

@@ -2835,9 +2835,10 @@ form { margin-top: 8px; }
 .solo-header h2 { margin: 0; font-size: 1.1rem; flex: 0 0 auto; }
 .solo-stats { font-size: 0.85rem; }
 
-/* Exit control — an always-rendered labelled outlined button, at every
-   width (never a bare arrow / icon-only collapse). */
-.solo-exit {
+/* Header controls (Players + Exit) — always-rendered labelled outlined
+   buttons, at every width (never a bare icon / emoji). */
+.solo-exit,
+.solo-players {
   flex: 0 0 auto;
   padding: 5px 12px;
   font: inherit;
@@ -2850,7 +2851,8 @@ form { margin-top: 8px; }
   border-radius: 8px;
   cursor: pointer;
 }
-.solo-exit:hover { background: var(--bg-elev); color: var(--text); }
+.solo-exit:hover,
+.solo-players:hover { background: var(--bg-elev); color: var(--text); }
 
 /* Scenario headline — "Scenario #NNN", the atomic reference (the
    trailing number of the scenario slug). Sits at the top of the hand
@@ -3334,7 +3336,22 @@ form { margin-top: 8px; }
   gap: 8px;
   margin-top: 10px;
 }
-.replay-ctl { min-height: 34px; min-width: 44px; padding: 4px 8px; }
+.replay-ctl {
+  min-height: 34px;
+  min-width: 44px;
+  padding: 4px 8px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+/* Control icons are inline SVG (see iconSvg in replay.js) — the Unicode
+   media glyphs (⏮ ◀ ▶ ❚❚) render as inconsistent colour emoji. */
+.replay-ctl-icon {
+  width: 14px;
+  height: 14px;
+  display: block;
+  fill: currentColor;
+}
 .replay-steplabel { font-size: 0.82rem; color: var(--text-dim); flex: 1 1 auto; }
 
 /* .replay-history / .replay-log* removed — the standalone Action history
