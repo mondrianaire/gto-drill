@@ -318,7 +318,17 @@ form { margin-top: 8px; }
   border-radius: var(--radius);
   overflow: hidden;
 }
+/* Each coverage row = the scenario link + an optional owner "Solver"
+   export button beside it; the wrapper carries the row divider. */
+.db-cov-rowwrap {
+  display: flex;
+  align-items: stretch;
+  border-bottom: 1px solid var(--border);
+}
+.db-cov-rowwrap:last-child { border-bottom: none; }
 .db-cov-row {
+  flex: 1 1 auto;
+  min-width: 0;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -326,11 +336,28 @@ form { margin-top: 8px; }
   font-size: 0.85rem;
   color: var(--text);
   text-decoration: none;
-  border-bottom: 1px solid var(--border);
 }
-.db-cov-row:last-child { border-bottom: none; }
 @media (hover: hover) {
   .db-cov-row:hover { background: var(--bg-elev); }
+}
+/* Owner export — the per-scenario TexasSolver-config download button. */
+.db-cov-solver {
+  flex: 0 0 auto;
+  align-self: stretch;
+  min-height: 0;
+  padding: 0 11px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-dim);
+  background: none;
+  border: none;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+@media (hover: hover) {
+  .db-cov-solver:hover { background: var(--bg-elev); color: var(--accent); }
 }
 .db-cov-row.is-empty { color: var(--text-dim); }
 .db-cov-num { flex: 0 0 auto; font-weight: 700; color: var(--accent); min-width: 42px; }
