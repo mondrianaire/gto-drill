@@ -74,16 +74,16 @@ function knownCards(scen) {
 //   4 = "Nbb" / "N.Nbb" → stylized bb chip
 //   5 = "K?" → unknown-suit card (suit not yet determined)
 //   6 = "Kx" → doesn't-matter-suit card (analyst says suit irrelevant)
-//   7 = "K72" board run (3-5 ranks) — rendered as N default doesn't-matter
-//       cards; the OPTIONAL group-8 modifier appends a board-modifier glyph.
-//   8 = board modifier suffix: "r" / " rainbow" / "m" / "mono" / " monotone"
-//       / "tt" / " two-tone" / " two-toned". Group 7's ranks render as
-//       cards, then group 8 (if present) renders the appropriate modifier
-//       glyph alongside, so the math composes: (K72) + (rainbow) glyph.
+//   7 = "K72" board run (3-5 ranks) — rendered as N doesn't-matter cards.
+//   8 = OPTIONAL board-texture modifier on group 7: "r" / " rainbow" /
+//       "m" / "mono" / " monotone" / "tt" / " two-tone" / " two-toned".
+//       When present, group 7's cards are wrapped in a modifier-tag
+//       frame (.tok-modtag) with the texture marker in the border band.
 //   9 = "KK" / "AA" / "AK" / "JT" → 2-rank hand-class shorthand
-//  10 = optional suited/offsuit suffix on group 9: "s" or "o" — tightly
+//  10 = OPTIONAL suited/offsuit suffix on group 9: "s" or "o" — tightly
 //       bound (no space) per poker convention ("AKs", not "AK s"). When
-//       present, a small suited/offsuit marker pill sits next to the cards.
+//       present, the cards are wrapped in the same .tok-modtag frame
+//       with the suited/offsuit marker in the border band.
 // Order matters for regex alternation: longer/more-specific patterns first.
 // Group 9's negative lookahead prevents "75% pot" / "25-40% frequency" /
 // "25/40% mix" from rendering "75" or "25" as a 2-rank hand class:
@@ -191,30 +191,35 @@ function tokenizeProse(text, scen, opts) {
       frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: rank + " — any suit" },
         h("span", { class: "tok-anysuit-rank" }, rank === "T" ? "10" : rank)));
     } else if (m[7]) {
-      // 3-5 rank board run — render as N default doesn't-matter cards,
-      // then append a board-modifier glyph if a suffix was captured.
-      // Composition: (K72)(rainbow) = three default cards + rainbow bar.
+      // 3-5 rank board run — N doesn't-matter cards. If group 8 captured
+      // a board-texture modifier, the cards are wrapped in a modifier-tag
+      // frame with the texture marker in the border band; with no
+      // modifier the cards render plain.
       const ranks = m[7];
+      const cards = [];
       for (let i = 0; i < ranks.length; i++) {
         const r = ranks[i];
-        frag.appendChild(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
+        cards.push(h("span", { class: "tok-anysuit tok-anysuit-doesntmatter", title: r + " — any suit" },
           h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r)));
       }
       const modRaw = m[8];
+      let modTag = null;
       if (modRaw) {
         const mod = modRaw.trim().toLowerCase();
-        let kind = null;
-        let label = null;
-        if (mod === "rainbow" || mod === "r") { kind = "rainbow"; label = "Rainbow — all suits different"; }
-        else if (mod === "monotone" || mod === "m" || mod === "mono") { kind = "monotone"; label = "Monotone — all one suit"; }
-        else if (mod === "two-tone" || mod === "two-toned" || mod === "tt") { kind = "twotone"; label = "Two-tone — two suits"; }
-        if (kind) {
-          frag.appendChild(h("span", {
-            class: "tok-modifier tok-modifier-" + kind,
-            title: label,
-            "aria-label": label,
-          }));
-        }
+        if (mod === "rainbow" || mod === "r") modTag = { fill: "rainbow", mark: "r", label: "Rainbow — all four suits different" };
+        else if (mod === "monotone" || mod === "m" || mod === "mono") modTag = { fill: "solid", mark: "m", label: "Monotone — all one suit" };
+        else if (mod === "two-tone" || mod === "two-toned" || mod === "tt") modTag = { fill: "split", mark: "t", label: "Two-tone — two suits" };
+      }
+      if (modTag) {
+        frag.appendChild(h("span", {
+          class: "tok-modtag tok-modtag-" + modTag.fill,
+          title: modTag.label,
+        },
+          ...cards,
+          h("span", { class: "tok-modtag-glyph", "aria-hidden": "true" }, modTag.mark)
+        ));
+      } else {
+        for (const c of cards) frag.appendChild(c);
       }
     } else if (m[9]) {
       // 2-rank hand-class shorthand ("KK", "AA", "AK", "JT", etc.) —
@@ -236,15 +241,15 @@ function tokenizeProse(text, scen, opts) {
           h("span", { class: "tok-anysuit-rank" }, r === "T" ? "10" : r)));
       }
       if (hasSuffix) {
-        // The two cards sit on a red/black diagonal frame; the frame's
-        // right side extends into a band carrying the suited/offsuit
-        // "s" / "o" marker — the marker is part of the border itself.
+        // The cards are wrapped in a modifier-tag frame; the "s" / "o"
+        // marker sits in the frame's extended right band. Suited gets a
+        // solid (one-suit) frame; offsuit a red/black (two-suit) one.
         frag.appendChild(h("span", {
-          class: "tok-handclass tok-handclass-" + (isSuited ? "s" : "o"),
+          class: "tok-modtag tok-modtag-" + (isSuited ? "solid" : "split"),
           title: isSuited ? "Suited — same suit" : "Offsuit — different suits",
         },
           ...cards,
-          h("span", { class: "tok-handclass-glyph", "aria-hidden": "true" }, isSuited ? "s" : "o")
+          h("span", { class: "tok-modtag-glyph", "aria-hidden": "true" }, isSuited ? "s" : "o")
         ));
       } else {
         for (const c of cards) frag.appendChild(c);
