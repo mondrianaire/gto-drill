@@ -1224,32 +1224,108 @@ form { margin-top: 8px; }
 .crowd-rows {
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 8px;
 }
-.crowd-row {
+/* Three-tier hierarchy (spec §8.2 / mockup M6). A full card carries the
+   lesson — the GTO line, the player's pick, or a crowd blind spot;
+   every other action recedes to a thin dimmed line below. */
+.crowd-row-card {
   padding: 10px 12px;
   background: rgba(255, 255, 255, 0.02);
   border: 1px solid var(--border);
   border-radius: var(--radius);
 }
-.crowd-row.is-gto {
-  background: rgba(76, 200, 130, 0.06);
-  border-color: rgba(76, 200, 130, 0.4);
+/* GTO line — green flag. Also the merged card (pick matched GTO). */
+.crowd-row-gto,
+.crowd-row-merged {
+  background: rgba(76, 200, 130, 0.07);
+  border-color: rgba(76, 200, 130, 0.45);
 }
-.crowd-row.is-blindspot {
+/* The player's pick — elevated so it reads unmistakably as "this is
+   you": a left identity bar + a lifted shadow. Red when it missed the
+   GTO line, green when it matched (the merged card). */
+.crowd-row-pick {
+  background: rgba(240, 100, 100, 0.06);
+  border-color: rgba(240, 100, 100, 0.45);
+  border-left: 3px solid var(--miss);
+  box-shadow: var(--shadow-2);
+}
+.crowd-row-merged {
+  border-left: 3px solid var(--ok);
+  box-shadow: var(--shadow-2);
+}
+/* A crowd blind spot the player did NOT pick — amber; it stays a card
+   so a spot the crowd misreads is never lost among the receded rows. */
+.crowd-row-spot {
   background: rgba(255, 213, 138, 0.05);
   border-color: rgba(255, 213, 138, 0.4);
 }
-.crowd-row-head {
+/* Marker row — the prominent YOUR PICK / GTO LINE label at the top of a
+   card; the blind-spot tag rides the right edge. */
+.crowd-row-markers {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  gap: 10px;
+  gap: 8px;
   flex-wrap: wrap;
-  margin-bottom: 6px;
+  margin-bottom: 7px;
 }
-.crowd-row-action { font-size: 0.95rem; font-weight: 600; }
-.crowd-row-tags { display: inline-flex; gap: 6px; flex-wrap: wrap; }
+.crowd-row-markers .crowd-tag { margin-left: auto; }
+.crowd-marker {
+  font-size: 0.7rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 3px 9px;
+  border-radius: var(--radius-box);
+  white-space: nowrap;
+}
+.crowd-marker.is-gto {
+  color: #6fd9a0;
+  background: rgba(76, 200, 130, 0.16);
+  border: 1px solid rgba(76, 200, 130, 0.5);
+}
+.crowd-marker.is-miss {
+  color: #f3c0c0;
+  background: rgba(240, 100, 100, 0.16);
+  border: 1px solid rgba(240, 100, 100, 0.5);
+}
+.crowd-row-head { margin-bottom: 6px; }
+.crowd-row-action { font-size: 0.98rem; font-weight: 600; }
+/* Receded row — a non-GTO, non-pick, non-blind-spot action. One thin
+   dimmed line: there for completeness, kept out of the way. */
+.crowd-row-receded {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 5px 12px;
+  opacity: 0.62;
+}
+.crowd-receded-action {
+  font-size: 0.86rem;
+  color: var(--text-dim);
+  flex: 0 0 auto;
+}
+.crowd-receded-bar {
+  position: relative;
+  flex: 1 1 auto;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.crowd-receded-fill {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.22);
+}
+.crowd-receded-pct {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  flex: 0 0 auto;
+  font-variant-numeric: tabular-nums;
+}
 .crowd-tag {
   font-size: 0.68rem;
   font-weight: 700;
@@ -1292,6 +1368,13 @@ form { margin-top: 8px; }
   transition: width 0.3s ease;
 }
 .crowd-bar-fill.is-gto { background: rgba(76, 200, 130, 0.34); }
+.crowd-bar-fill.is-miss { background: rgba(240, 100, 100, 0.34); }
+/* The player's pick gets a taller bar + heavier label — its share reads
+   bigger than the rest, the spec's "this is the row that matters" cue. */
+.crowd-row-pick .crowd-bar,
+.crowd-row-merged .crowd-bar { height: 26px; }
+.crowd-row-pick .crowd-bar-label,
+.crowd-row-merged .crowd-bar-label { font-size: 0.82rem; font-weight: 700; }
 .crowd-bar-label {
   position: absolute;
   top: 0;
