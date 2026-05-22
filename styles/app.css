@@ -181,6 +181,49 @@ form { margin-top: 8px; }
 /* Create / Join */
 .create-game h2, .join-game h2, .waiting h2 { margin-top: 4px; }
 
+/* Players screen — roster of everyone with their library completion
+   and GTO accuracy. */
+.players-view h2 { margin-top: 4px; }
+.players-hint { font-size: 0.88rem; margin: 0 0 6px 0; }
+.players-status { font-size: 0.85rem; margin: 6px 0 12px 0; }
+.players-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.players-card {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 10px 12px;
+}
+.players-card.is-me {
+  border-color: rgba(120, 180, 255, 0.5);
+  background: rgba(120, 180, 255, 0.06);
+}
+.players-card.is-clickable { cursor: pointer; }
+.players-card.is-clickable:hover,
+.players-card.is-clickable:focus {
+  background: var(--bg-elev-2);
+  outline: none;
+}
+.players-card.is-me.is-clickable:hover { background: rgba(120, 180, 255, 0.1); }
+.players-avatar { flex: 0 0 auto; }
+.players-main { flex: 1 1 auto; min-width: 0; }
+.players-name { font-weight: 700; font-size: 0.98rem; }
+.players-stats { font-size: 0.84rem; margin-top: 2px; }
+.players-go {
+  flex: 0 0 auto;
+  font-size: 1.4rem;
+  color: var(--text-dim);
+  line-height: 1;
+}
+.players-actions { margin-top: 16px; }
+.players-back { width: 100%; }
+
 /* Lobby list (Join screen) */
 .lobby-list {
   display: flex;

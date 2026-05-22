@@ -100,7 +100,7 @@ async function loadCrowd(scen, draft, host) {
 // @param {() => void} onExit  Called when the user backs out to sign-in.
 // -----------------------------------------------------------------------
 
-export function mountSoloView(container, onExit) {
+export function mountSoloView(container, onExit, onPlayers) {
   const scenarios = listScenarios();
   if (scenarios.length === 0) {
     container.appendChild(h("p", { class: "muted" }, "No scenarios loaded — try refreshing."));
@@ -197,10 +197,24 @@ export function mountSoloView(container, onExit) {
       title: "Copy share link for this hand",
       className: "solo-share",
     });
+    // Players button — opens the roster screen. Only present when the
+    // caller wired onPlayers (signed-in users; the crowd pool needs an
+    // identity to be meaningful).
+    const playersBtn = onPlayers
+      ? h("button",
+          { type: "button", class: "link-btn solo-players icon-btn", title: "See all players", "aria-label": "See all players" },
+          h("span", { "aria-hidden": "true" }, "👥"))
+      : null;
+    if (playersBtn) {
+      playersBtn.addEventListener("click", () => {
+        if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
+        onPlayers();
+      });
+    }
     const header = h("div", { class: "solo-header" },
       h("div", { class: "solo-header-top" },
         h("h2", null, "Solo practice"),
-        h("div", { class: "solo-header-actions" }, shareBtn, exitBtn)
+        h("div", { class: "solo-header-actions" }, playersBtn, shareBtn, exitBtn)
       ),
       stats
     );

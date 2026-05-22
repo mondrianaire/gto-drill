@@ -24,6 +24,7 @@ import {
 } from "./state.js";
 import { mountSignInView, buildAvatar } from "./onboarding.js";
 import { mountSoloView } from "./solo.js";
+import { mountPlayersView } from "./players.js";
 import { mountEquityCalculator } from "./equity-calculator.js";
 import { loadDictionary, mountDictionaryView } from "./dictionary.js";
 import { setOpenCallback as setTooltipOpenCallback } from "./tooltip.js";
@@ -117,14 +118,29 @@ function routeHome(root) {
 // The play loop — the whole app. mountSoloView runs the per-hand
 // decide → reveal flow; the reveal records the answer to the crowd
 // pool and shows the "How others played" breakdown. Exit signs out.
+// The Players button (signed-in only) opens the roster screen.
 function goPlay(root) {
   renderHeaderUser();
   setTooltipOpenCallback((id) =>
     mountDictionaryView(root, () => goPlay(root), { initialTermId: id }));
-  mountSoloView(root, async () => {
-    try { await signOutUser(); } catch (_) { /* ignore */ }
-    location.assign(stripQuery());
-  });
+  const signedIn = !!getCurrentUser();
+  mountSoloView(
+    root,
+    async () => {
+      try { await signOutUser(); } catch (_) { /* ignore */ }
+      location.assign(stripQuery());
+    },
+    signedIn ? () => goPlayers(root) : null
+  );
+}
+
+// The Players screen — every player's library completion + accuracy.
+// Reachable from the play header; Back returns to the play loop.
+function goPlayers(root) {
+  renderHeaderUser();
+  setTooltipOpenCallback((id) =>
+    mountDictionaryView(root, () => goPlayers(root), { initialTermId: id }));
+  mountPlayersView(root, () => goPlay(root));
 }
 
 // The sign-in gate. Once signed in → the play loop. Escape hatches for
