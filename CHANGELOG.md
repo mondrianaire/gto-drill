@@ -85,6 +85,10 @@ lobby delete button silently no-op until the rules are live.
   answer overwrites the old, as before. First plays are unchanged.
 
 ### Changed
+- **Card runs never break across a line.** Whenever 2+ cards are
+  rendered together inline in prose — a board, a hand — they're wrapped
+  in a no-wrap run, so the line breaks before the run rather than
+  splitting it across two lines. The run reads as a single entity.
 - **Per-action pot indicator.** The running pot total moved from a
   per-street tag to an inline, right-aligned indicator on every action
   that moves chips (bet / raise / call) in the spot summary — each shows

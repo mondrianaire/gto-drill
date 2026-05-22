@@ -3506,6 +3506,12 @@ form { margin-top: 8px; }
   border-color: #1c3e5e;
 }
 
+/* A run of 2+ inline cards (a board, a hand) rendered in prose — kept on
+   one line as a single entity. white-space: nowrap suppresses the line
+   break BETWEEN the cards, so the run wraps as a whole to the next line
+   rather than splitting across two. */
+.cardrun { white-space: nowrap; }
+
 .replay-controls {
   display: flex;
   align-items: center;
