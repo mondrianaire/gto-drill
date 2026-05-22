@@ -1673,10 +1673,35 @@ form { margin-top: 8px; }
   border-radius: 8px;
   background: rgba(255, 255, 255, 0.025);
   display: flex;
-  flex-direction: column;
-  gap: 4px;
+  flex-direction: row;
+  align-items: flex-start;
+  gap: 12px;
   transition: transform 0.08s ease, background 0.15s ease,
               border-color 0.15s ease, box-shadow 0.15s ease;
+}
+/* Mini range-grid thumbnail — a non-interactive 13×13 heat grid showing
+   the range's SHAPE at a glance (spec §8.4 / mockup M9). */
+.vr-minigrid {
+  flex: 0 0 auto;
+  display: grid;
+  grid-template-columns: repeat(13, 1fr);
+  gap: 1px;
+  width: 52px;
+  height: 52px;
+  margin-top: 1px;
+}
+.vr-minicell {
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 1px;
+}
+.vr-minicell.is-on { background: var(--villain); }
+/* Text column — label, summary, combo count — beside the thumbnail. */
+.villain-range-card-body {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 /* Tier-4 "explore" surface — solid panel fill, a villain-amber identity
    bar on the left edge (not a full amber border, which reads as a
@@ -1711,6 +1736,12 @@ form { margin-top: 8px; }
   font-size: 0.9rem;
   color: var(--text);
   line-height: 1.4;
+}
+.villain-range-card-combos {
+  font-size: 0.74rem;
+  color: var(--text-dim);
+  font-variant-numeric: tabular-nums;
+  margin-top: 1px;
 }
 
 /* The equity panel mounts into this host (formerly .test-host). Lives
