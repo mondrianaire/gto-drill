@@ -26,6 +26,34 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Changed
+- **Mobile touch affordance — interaction-system pass** (v2026-05-22.111).
+  A consolidated pass over every interactive control so each reads as
+  obviously tappable on a phone, without changing app layout or
+  structure:
+  - Added affordance design tokens (`--border-interactive`,
+    `--border-tap`, shadow/glow scales, `--tap-min`). The dim `--border`
+    (#243646) is now reserved for dividers; tappable elements use a
+    higher-contrast border that clears the 3:1 WCAG non-text-contrast
+    minimum.
+  - Every interactive element now gives press feedback (a scale-down on
+    `:active`) and shows a visible keyboard focus ring (`:focus-visible`).
+  - All `:hover` rules are gated behind `@media (hover: hover)`, so a
+    hover style never sticks after a tap on a touch device.
+  - Secondary controls (range-picker Customize / Clear, the replay
+    playback buttons, the equity trials selector) gained a solid fill, a
+    visible border and a full 44px tap target — they previously read as
+    disabled.
+  - The 13×13 range matrix now reads as editable — raised cells, a
+    visible cell border, a 5px radius, and an accent glow on selected
+    hands.
+  - Villain-range cards became Tier-4 "explore" surfaces — a solid panel
+    with a villain-amber identity bar and depth, instead of a full amber
+    border (which read as a warning).
+  - Honoured the OS "reduce motion" setting app-wide.
+
+  Structural items from the design spec (a compact one-screen hand view,
+  an expanded⇄compact view toggle, a fullscreen matrix editor) are
+  intentionally deferred to the in-progress redesign.
 - **Dealer button pinned to the BTN seat.** The "D" disc was floating
   in an ambiguous spot on the felt. It's now rendered as a child of the
   BTN seat, hugging the seat corner that faces table centre — so it's

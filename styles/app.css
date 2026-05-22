@@ -19,6 +19,20 @@
   --gap: 12px;
   --pad: 16px;
   --font-stack: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, Roboto, "Helvetica Neue", Arial, sans-serif;
+
+  /* Mobile-affordance tokens. --border (#243646) is reserved for
+     DIVIDERS only — it measures ~1.3:1 against the panels, below the
+     3:1 WCAG non-text-contrast minimum, so anything tappable must use
+     --border-interactive instead. */
+  --border-interactive: #3a5670; /* visible border for tappable elements */
+  --border-tap: #2f4658;         /* cell-level border (matrix cells) */
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --shadow-2: 0 2px 6px rgba(0, 0, 0, 0.35);
+  --shadow-3: 0 4px 12px rgba(0, 0, 0, 0.45);
+  --glow-accent: 0 0 8px rgba(76, 182, 255, 0.45);
+  --glow-villain: 0 0 8px rgba(232, 169, 63, 0.40);
+  --press: transform 0.08s ease;
+  --tap-min: 44px;
 }
 
 * { box-sizing: border-box; }
@@ -110,20 +124,27 @@ button {
   cursor: pointer;
   background: var(--bg-elev-2);
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-interactive);
   border-radius: var(--radius);
   padding: 10px 14px;
   min-height: 44px;
-  transition: background 0.12s ease, border-color 0.12s ease;
+  transition: transform 0.08s ease, filter 0.12s ease,
+              background 0.12s ease, border-color 0.12s ease;
 }
-button:hover { background: var(--bg-elev); }
+@media (hover: hover) {
+  button:hover { background: var(--bg-elev); }
+}
 button.primary {
   background: var(--accent);
   color: #061018;
   font-weight: 600;
   border-color: var(--accent);
+  /* Tier-3 depth — the primary action lifts off the panel. */
+  box-shadow: 0 2px 8px rgba(76, 182, 255, 0.25);
 }
-button.primary:hover { background: #6cc4ff; }
+@media (hover: hover) {
+  button.primary:hover { background: #6cc4ff; }
+}
 button.secondary {
   background: transparent;
   border-color: var(--accent);
@@ -205,12 +226,14 @@ form { margin-top: 8px; }
   background: rgba(120, 180, 255, 0.06);
 }
 .players-card.is-clickable { cursor: pointer; }
-.players-card.is-clickable:hover,
 .players-card.is-clickable:focus {
   background: var(--bg-elev-2);
   outline: none;
 }
-.players-card.is-me.is-clickable:hover { background: rgba(120, 180, 255, 0.1); }
+@media (hover: hover) {
+  .players-card.is-clickable:hover { background: var(--bg-elev-2); }
+  .players-card.is-me.is-clickable:hover { background: rgba(120, 180, 255, 0.1); }
+}
 .players-avatar { flex: 0 0 auto; }
 .players-main { flex: 1 1 auto; min-width: 0; }
 .players-name { font-weight: 700; font-size: 0.98rem; }
@@ -299,7 +322,9 @@ form { margin-top: 8px; }
   border-bottom: 1px solid var(--border);
 }
 .db-cov-row:last-child { border-bottom: none; }
-.db-cov-row:hover { background: var(--bg-elev); }
+@media (hover: hover) {
+  .db-cov-row:hover { background: var(--bg-elev); }
+}
 .db-cov-row.is-empty { color: var(--text-dim); }
 .db-cov-num { flex: 0 0 auto; font-weight: 700; color: var(--accent); min-width: 42px; }
 .db-cov-row.is-empty .db-cov-num { color: var(--text-dim); }
@@ -465,7 +490,9 @@ form { margin-top: 8px; }
   background: var(--bg-elev);
   border: 1px solid var(--border);
 }
-.lobby-card:hover { background: var(--bg-elev-2); }
+@media (hover: hover) {
+  .lobby-card:hover { background: var(--bg-elev-2); }
+}
 .lobby-delete {
   flex: 0 0 auto;
   width: 38px;
@@ -479,10 +506,12 @@ form { margin-top: 8px; }
   border-radius: var(--radius);
   transition: background 0.12s, color 0.12s, border-color 0.12s;
 }
-.lobby-delete:hover {
-  background: rgba(240, 100, 100, 0.12);
-  border-color: rgba(240, 100, 100, 0.5);
-  color: #f3c0c0;
+@media (hover: hover) {
+  .lobby-delete:hover {
+    background: rgba(240, 100, 100, 0.12);
+    border-color: rgba(240, 100, 100, 0.5);
+    color: #f3c0c0;
+  }
 }
 .lobby-delete:disabled { opacity: 0.5; cursor: not-allowed; }
 .lobby-main {
@@ -624,7 +653,7 @@ form { margin-top: 8px; }
   padding: 8px 12px;
   border-radius: var(--radius);
   background: var(--bg-elev-2);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-interactive);
   min-height: 44px;
 }
 .action-btn.selected, .conf-btn.selected {
@@ -632,6 +661,8 @@ form { margin-top: 8px; }
   color: #061018;
   border-color: var(--accent);
   font-weight: 600;
+  /* Tier-3 — the chosen move/confidence reads as the committed action. */
+  box-shadow: 0 2px 8px rgba(76, 182, 255, 0.25);
 }
 .conf-btn { min-width: 44px; }
 
@@ -753,14 +784,16 @@ form { margin-top: 8px; }
 .spot-summary.is-clickable .spot-sum-yourturn {
   cursor: pointer;
 }
-.spot-summary.is-clickable .spot-sum-action:hover {
-  background: rgba(120, 180, 255, 0.08);
-}
-.spot-summary.is-clickable .spot-sum-action.is-current:hover {
-  background: rgba(120, 180, 255, 0.2);
-}
-.spot-summary.is-clickable .spot-sum-yourturn:hover {
-  text-decoration: underline;
+@media (hover: hover) {
+  .spot-summary.is-clickable .spot-sum-action:hover {
+    background: rgba(120, 180, 255, 0.08);
+  }
+  .spot-summary.is-clickable .spot-sum-action.is-current:hover {
+    background: rgba(120, 180, 255, 0.2);
+  }
+  .spot-summary.is-clickable .spot-sum-yourturn:hover {
+    text-decoration: underline;
+  }
 }
 .spot-sum-yourturn {
   font-weight: 600;
@@ -1313,10 +1346,12 @@ form { margin-top: 8px; }
   z-index: 20;
   display: none;
 }
-.crowd-avatar-wrap:hover .crowd-note-pop,
 .crowd-avatar-wrap:focus-visible .crowd-note-pop,
 .crowd-avatar-wrap.pop-open .crowd-note-pop {
   display: block;
+}
+@media (hover: hover) {
+  .crowd-avatar-wrap:hover .crowd-note-pop { display: block; }
 }
 .crowd-note-pop-name {
   font-size: 0.78rem;
@@ -1394,11 +1429,16 @@ form { margin-top: 8px; }
   transition: background 0.12s, border-color 0.12s;
 }
 .spot-range-chip.is-clickable { cursor: pointer; }
-.spot-range-chip.is-clickable:hover,
 .spot-range-chip.is-clickable:focus {
   background: rgba(74, 138, 204, 0.22);
   border-color: var(--accent);
   outline: none;
+}
+@media (hover: hover) {
+  .spot-range-chip.is-clickable:hover {
+    background: rgba(74, 138, 204, 0.22);
+    border-color: var(--accent);
+  }
 }
 .spot-range-chip-icon { font-size: 0.9rem; line-height: 1; }
 
@@ -1512,14 +1552,25 @@ form { margin-top: 8px; }
   display: flex;
   flex-direction: column;
   gap: 4px;
-  transition: background 0.12s, border-color 0.12s;
+  transition: transform 0.08s ease, background 0.15s ease,
+              border-color 0.15s ease, box-shadow 0.15s ease;
 }
-.villain-range-card.is-clickable { cursor: pointer; }
-.villain-range-card.is-clickable:hover,
-.villain-range-card.is-clickable:focus {
-  background: rgba(232, 169, 63, 0.10);
-  border-color: rgba(232, 169, 63, 0.55);
-  outline: none;
+/* Tier-4 "explore" surface — solid panel fill, a villain-amber identity
+   bar on the left edge (not a full amber border, which reads as a
+   warning), and depth so the card reads as openable. :active and
+   :focus-visible are handled by the global base patch. */
+.villain-range-card.is-clickable {
+  cursor: pointer;
+  background: var(--bg-elev-2);
+  border-color: var(--border-interactive);
+  border-left: 3px solid var(--villain);
+  box-shadow: var(--shadow-2);
+}
+@media (hover: hover) {
+  .villain-range-card.is-clickable:hover {
+    border-color: var(--villain);
+    box-shadow: var(--shadow-3);
+  }
 }
 .villain-range-card-header {
   display: flex;
@@ -1930,9 +1981,10 @@ form { margin-top: 8px; }
 .eq-run { flex: 1 1 auto; }
 .eq-trials-sel {
   flex: 0 0 auto;
-  background: var(--bg-elev);
+  min-height: var(--tap-min);
+  background: var(--bg-elev-2);
   color: var(--text);
-  border: 1px solid var(--border);
+  border: 1px solid var(--border-interactive);
   border-radius: var(--radius);
   padding: 0 10px;
   font-size: 0.88rem;
@@ -1948,7 +2000,9 @@ form { margin-top: 8px; }
   border: none;
   padding: 0;
 }
-.eq-reset:hover { color: var(--text); }
+@media (hover: hover) {
+  .eq-reset:hover { color: var(--text); }
+}
 .eq-result {
   font-size: 0.92rem;
   padding: 8px 10px;
@@ -2016,7 +2070,9 @@ form { margin-top: 8px; }
   background: transparent;
   padding: 1px;
 }
-.hero-pick-slot.is-empty:hover { border-color: var(--text-dim); }
+@media (hover: hover) {
+  .hero-pick-slot.is-empty:hover { border-color: var(--text-dim); }
+}
 .hero-pick-grid {
   display: grid;
   grid-template-columns: repeat(13, 1fr);
@@ -2033,7 +2089,9 @@ form { margin-top: 8px; }
   align-items: center;
   justify-content: center;
 }
-.hero-pick-cell:hover { filter: brightness(1.15); }
+@media (hover: hover) {
+  .hero-pick-cell:hover { filter: brightness(1.15); }
+}
 .hero-pick-cell.is-selected { box-shadow: 0 0 0 2px var(--hero); }
 .hero-pick-cell.is-dead {
   opacity: 0.25;
@@ -2067,14 +2125,22 @@ form { margin-top: 8px; }
   margin-right: 6px;
 }
 .rp-playable-flag { color: var(--villain); }
+/* Tier-2 secondary control — solid fill + visible border so it never
+   reads as disabled, and a real 44px tap target. */
 .rp-customize-btn {
-  background: transparent; border: 1px solid var(--border);
-  color: var(--text-dim); font-size: 0.82rem; font-weight: 600;
-  padding: 6px 12px; border-radius: 8px; min-height: 0;
+  background: var(--bg-elev-2); border: 1px solid var(--border-interactive);
+  color: var(--text); font-size: 0.82rem; font-weight: 600;
+  padding: 6px 12px; border-radius: 8px; min-height: var(--tap-min);
+  box-shadow: var(--shadow-1);
   cursor: pointer; display: inline-flex; align-items: center; gap: 6px;
   flex: 0 0 auto;
 }
-.rp-customize-btn:hover { color: var(--text); border-color: var(--accent); }
+@media (hover: hover) {
+  .rp-customize-btn:hover { border-color: var(--accent); }
+}
+.rp-customize-btn.is-open {
+  border-color: var(--accent); color: var(--accent); background: var(--accent-soft);
+}
 .rp-customize-btn .chev {
   display: inline-block; transition: transform 0.18s;
   font-size: 0.7rem; opacity: 0.7;
@@ -2097,22 +2163,33 @@ form { margin-top: 8px; }
   border-radius: var(--radius); padding: 6px;
 }
 .rp-matrix {
-  display: grid; grid-template-columns: repeat(13, 1fr); gap: 2px;
+  display: grid; grid-template-columns: repeat(13, 1fr); gap: 3px;
 }
+/* Tier-1 tap surface — visible cell border, raised radius, an inset
+   bevel and brighter text so the matrix reads as editable rather than
+   a static data table. (Selected cells get an accent glow below.) */
 .rp-cell {
   font-family: var(--font-stack); font-size: 0.62rem; font-weight: 700;
   padding: 0; aspect-ratio: 1;
   min-height: 0; min-width: 0;
-  border-radius: 2px;
-  background: var(--bg-elev-2); border: 1px solid var(--border);
-  color: var(--text-dim); cursor: pointer;
+  border-radius: 5px;
+  background: var(--bg-elev-2); border: 1px solid var(--border-tap);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  color: #9fb3c2; cursor: pointer;
+  transition: transform 0.08s ease, background 0.12s ease,
+              border-color 0.12s ease, box-shadow 0.12s ease;
 }
-.rp-cell:hover { filter: brightness(1.2); }
+@media (hover: hover) {
+  .rp-cell:hover { filter: brightness(1.2); }
+}
+/* Faint pair / suited / offsuit tints — the matrix diagonal cue. Kept
+   (informative) but layered over the solid Tier-1 base above. */
 .rp-pair    { background: rgba(76, 182, 255, 0.08); }
 .rp-suited  { background: rgba(74, 222, 128, 0.06); }
 .rp-offsuit { background: rgba(248, 113, 113, 0.04); }
 .rp-cell.is-on {
-  background: var(--accent); color: #061018; border-color: var(--accent);
+  background: var(--accent); color: #061018; font-weight: 700;
+  border-color: #6cc4ff; box-shadow: var(--glow-accent);
 }
 
 /* Collapsible controls (Customize disclosure) */
@@ -2139,13 +2216,16 @@ form { margin-top: 8px; }
 }
 
 .rp-clear-btn {
-  background: transparent; border: 1px solid var(--border);
-  color: var(--text-dim); font-size: 0.78rem; font-weight: 500;
-  padding: 6px 10px; border-radius: 8px; min-height: 0;
+  background: var(--bg-elev-2); border: 1px solid var(--border-interactive);
+  color: var(--text); font-size: 0.78rem; font-weight: 600;
+  padding: 6px 12px; border-radius: 8px; min-height: var(--tap-min);
+  box-shadow: var(--shadow-1);
   cursor: pointer; flex: 0 0 auto;
 }
-.rp-clear-btn:hover {
-  color: var(--miss); border-color: var(--miss); background: rgba(248, 113, 113, 0.06);
+@media (hover: hover) {
+  .rp-clear-btn:hover {
+    color: var(--miss); border-color: var(--miss); background: rgba(248, 113, 113, 0.06);
+  }
 }
 
 /* Top % slider + jump-to preselects */
@@ -2168,14 +2248,16 @@ form { margin-top: 8px; }
   color: var(--text-dim); font-size: 11.5px; font-weight: 600;
   cursor: pointer; border-radius: 3px;
 }
-.rp-jump:hover { color: var(--accent); background: rgba(76, 182, 255, 0.08); }
+@media (hover: hover) {
+  .rp-jump:hover { color: var(--accent); background: rgba(76, 182, 255, 0.08); }
+}
 .rp-jump.is-on { color: var(--accent); background: rgba(76, 182, 255, 0.18); }
 
 /* Category chips */
 .rp-cats { display: flex; flex-wrap: wrap; gap: 5px; }
 .rp-cat {
   font-size: 0.74rem; padding: 5px 10px; border-radius: 999px;
-  background: var(--bg-elev-2); border: 1px solid var(--border);
+  background: var(--bg-elev-2); border: 1px solid var(--border-interactive);
   color: var(--text); min-height: 0;
 }
 .rp-cat.is-on {
@@ -2474,8 +2556,10 @@ form { margin-top: 8px; }
   border-radius: 3px;
   transition: background 0.12s;
 }
-.tok-range:hover,
 .tok-range:focus { background: var(--villain-soft); outline: none; }
+@media (hover: hover) {
+  .tok-range:hover { background: var(--villain-soft); }
+}
 .tok-range-icon {
   margin-left: 4px;
   font-size: 0.82em;
@@ -2671,7 +2755,9 @@ form { margin-top: 8px; }
   line-height: 1;
   padding: 6px 8px;
 }
-.history-remove:hover { color: var(--miss); }
+@media (hover: hover) {
+  .history-remove:hover { color: var(--miss); }
+}
 
 /* Wrap-up actions */
 .wrap-actions {
@@ -2706,7 +2792,9 @@ form { margin-top: 8px; }
   font-weight: 600;
   min-height: 48px;
 }
-.google-btn:hover { background: #f4f6f8; }
+@media (hover: hover) {
+  .google-btn:hover { background: #f4f6f8; }
+}
 .google-btn svg { display: block; flex: 0 0 auto; }
 /* Anonymous escape hatches on the sign-in screen (Practice solo + Equity
    calculator) — bold action label + muted subtext (M-2). Same overall size
@@ -2727,9 +2815,11 @@ form { margin-top: 8px; }
   padding: 8px 14px;
   text-align: center;
 }
-.solo-btn:hover {
-  background: var(--bg-elev);
-  border-color: var(--text-dim);
+@media (hover: hover) {
+  .solo-btn:hover {
+    background: var(--bg-elev);
+    border-color: var(--text-dim);
+  }
 }
 .alt-btn-label {
   font-size: 1rem;
@@ -2771,9 +2861,11 @@ form { margin-top: 8px; }
   cursor: pointer;
   transition: background 0.12s, border-color 0.12s;
 }
-.knowledge-option:hover:not(:disabled) {
-  background: var(--bg-elev-2);
-  border-color: var(--accent);
+@media (hover: hover) {
+  .knowledge-option:hover:not(:disabled) {
+    background: var(--bg-elev-2);
+    border-color: var(--accent);
+  }
 }
 .knowledge-option:disabled { opacity: 0.5; cursor: default; }
 .knowledge-option-label { font-size: 1rem; font-weight: 600; }
@@ -2833,16 +2925,17 @@ form { margin-top: 8px; }
   display: inline;
   color: var(--accent);
   border-bottom: 1px dotted var(--accent);
-  cursor: help;
-  padding: 0 1px;
+  cursor: pointer;
+  padding: 2px 1px;
   border-radius: 3px;
   transition: background 0.12s ease;
 }
-.term-trigger:hover,
 .term-trigger:focus,
 .term-trigger.term-tip-active {
   background: rgba(76, 182, 255, 0.12);
-  outline: none;
+}
+@media (hover: hover) {
+  .term-trigger:hover { background: rgba(76, 182, 255, 0.12); }
 }
 
 .term-tip {
@@ -2879,7 +2972,9 @@ form { margin-top: 8px; }
   text-decoration: underline;
   cursor: pointer;
 }
-.term-tip-link:hover { color: #6cc4ff; background: none; }
+@media (hover: hover) {
+  .term-tip-link:hover { color: #6cc4ff; background: none; }
+}
 
 /* Dictionary view */
 .dict-view {
@@ -2901,7 +2996,9 @@ form { margin-top: 8px; }
   cursor: pointer;
   flex: 0 0 auto;
 }
-.dict-threshold:hover { border-color: var(--accent); }
+@media (hover: hover) {
+  .dict-threshold:hover { border-color: var(--accent); }
+}
 .dict-search {
   width: 100%; margin-bottom: 0;
   padding: 10px 14px;
@@ -2961,7 +3058,9 @@ form { margin-top: 8px; }
   font: inherit;
   text-decoration: underline;
 }
-.dict-term-link:hover { color: #6cc4ff; background: none; }
+@media (hover: hover) {
+  .dict-term-link:hover { color: #6cc4ff; background: none; }
+}
 
 /* ----- Solo practice view ---------------------------------------------- */
 /* H-1: two-row header — title + action buttons on row 1, stats on row 2. */
@@ -3002,9 +3101,11 @@ form { margin-top: 8px; }
   border-radius: 8px;
   cursor: pointer;
 }
-.solo-exit:hover,
-.solo-players:hover,
-.solo-database:hover { background: var(--bg-elev); color: var(--text); }
+@media (hover: hover) {
+  .solo-exit:hover,
+  .solo-players:hover,
+  .solo-database:hover { background: var(--bg-elev); color: var(--text); }
+}
 /* The owner Database button gets a faint accent tint so it reads as a
    distinct (owner) control among the header buttons. */
 .solo-database {
@@ -3103,7 +3204,9 @@ form { margin-top: 8px; }
   text-decoration: underline;
   cursor: pointer;
 }
-.link-btn:hover { background: none; color: #6cc4ff; }
+@media (hover: hover) {
+  .link-btn:hover { background: none; color: #6cc4ff; }
+}
 
 /* --- Poker-hand replay --- */
 .replay { margin: 10px 0 6px 0; }
@@ -3518,10 +3621,13 @@ form { margin-top: 8px; }
   gap: 8px;
   margin-top: 10px;
 }
+/* Tier-2 — playback controls. Bumped to a full 44px tap target with
+   the standard secondary depth so they don't read as static glyphs. */
 .replay-ctl {
-  min-height: 34px;
+  min-height: var(--tap-min);
   min-width: 44px;
   padding: 4px 8px;
+  box-shadow: var(--shadow-1);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3618,15 +3724,17 @@ form { margin-top: 8px; }
     min-width: 40px;
     text-align: center;
     text-decoration: none;
-    border: 1px solid var(--border);
+    border: 1px solid var(--border-interactive);
     border-radius: 8px;
     color: var(--text-dim);
     line-height: 1;
   }
-  .icon-btn:hover,
-  .share-icon-btn:hover {
-    background: var(--bg-elev);
-    color: var(--text);
+  @media (hover: hover) {
+    .icon-btn:hover,
+    .share-icon-btn:hover {
+      background: var(--bg-elev);
+      color: var(--text);
+    }
   }
   .share-icon-btn.is-copied { color: var(--ok); border-color: var(--ok); }
 
@@ -3635,4 +3743,54 @@ form { margin-top: 8px; }
      stay as-is on mobile. On the audience's devices (iPhone 15 /
      iPhone 17 Pro Max), the original cells are tight but tappable;
      the horizontal-scroll workaround was worse than the problem. */
+}
+
+/* ===== Mobile-affordance base interaction patch ========================
+   Universal press feedback, keyboard focus rings, and removal of the
+   mobile tap-highlight flash. (touch-action: manipulation is already
+   applied to every element at the top of this file — it kills the
+   300ms double-tap delay.) Placed last in the file so the
+   :focus-visible rings reliably win the cascade over any earlier
+   :focus rule; all :hover rules elsewhere are gated under
+   @media (hover: hover) so they never stick on a touch device. */
+button, [role="button"], .rp-cell, .villain-range-card,
+.spot-sum-action, .spot-sum-yourturn, .term-trigger {
+  -webkit-tap-highlight-color: transparent;
+}
+/* Press feedback — a quick scale-down on every tappable element. */
+button:active,
+[role="button"]:active,
+.villain-range-card.is-clickable:active,
+.spot-summary.is-clickable .spot-sum-action:active,
+.spot-summary.is-clickable .spot-sum-yourturn:active {
+  transform: scale(0.97);
+  filter: brightness(1.06);
+}
+/* Matrix cells are small — a deeper squash makes the press read. */
+.rp-cell:active { transform: scale(0.88); }
+/* Disabled controls must not appear to respond to a press. */
+button:disabled:active { transform: none; filter: none; }
+/* Keyboard focus — a visible ring on every interactive element. Never
+   removed without a replacement (WCAG 2.2 SC 2.4.7). */
+button:focus-visible,
+[role="button"]:focus-visible,
+.rp-cell:focus-visible,
+.villain-range-card:focus-visible,
+.spot-sum-action:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.rp-cell:focus-visible { outline-offset: -1px; }
+
+/* Reduced-motion — honour the OS "reduce motion" setting app-wide.
+   GTO Duel is a serious analysis tool; none of its motion is essential,
+   so all of it collapses to near-instant when the user has asked for
+   less. (A narrower rule above already covers the confidence pulse.) */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }
