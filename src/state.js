@@ -408,6 +408,27 @@ export async function recordResponse(scenarioId, action, confidence) {
 }
 
 /**
+ * Save (or clear) the user's comment on a hand — a post-reveal note
+ * about the spot and the GTO decision. Merge-written so it sits
+ * alongside the existing action/confidence on the same response doc.
+ *
+ * @param {string} scenarioId
+ * @param {string} note  free text (trimmed + capped at 280 chars).
+ * @returns {Promise<boolean>}
+ */
+export async function saveResponseComment(scenarioId, note) {
+  if (!_db) throw new Error("initFirebase() must be called first");
+  const me = getCurrentUser();
+  if (!me || !scenarioId) return false;
+  const docId = scenarioId + "__" + me.uid;
+  await setDoc(doc(_db, "responses", docId), {
+    note: String(note || "").slice(0, 280),
+    updatedAt: new Date().toISOString(),
+  }, { merge: true });
+  return true;
+}
+
+/**
  * Read every recorded response for a scenario — the raw crowd pool the
  * reveal aggregates. Returns [] when not signed in or on error (the
  * reveal degrades gracefully to a no-crowd-data state).

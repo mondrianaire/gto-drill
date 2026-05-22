@@ -11,7 +11,7 @@ import { mountReplay, buildSpotSummary } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
 import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown } from "./ui.js";
 import { buildShareLinkButton, shareUrlForScenario } from "./share.js";
-import { recordResponse, readScenarioResponses, readMyResponses, getCurrentUser } from "./state.js";
+import { recordResponse, readScenarioResponses, readMyResponses, saveResponseComment, getCurrentUser } from "./state.js";
 
 // -----------------------------------------------------------------------
 // Tiny DOM helper (local; intentionally duplicated to keep this module
@@ -91,6 +91,50 @@ async function loadCrowd(scen, draft, host) {
   clear(host);
   const block = buildCrowdBreakdown({ scen, responses, userAction: draft.action });
   if (block) host.appendChild(block);
+}
+
+/**
+ * Post-reveal comment box — a comment on the hand and the GTO
+ * decision (not a pre-decision note). Saved to the user's response
+ * doc; other players see it as a note indicator on the crowd
+ * breakdown. Returns null for anonymous users (no doc to attach to).
+ */
+function buildCommentBox(scen, draft) {
+  if (!getCurrentUser()) return null;
+  const ta = h("textarea", {
+    class: "comment-input", maxlength: "280", rows: "3",
+    placeholder: "Your take on this spot and the GTO call… (optional — other players see it)",
+  });
+  ta.value = draft.note || "";
+  const status = h("span", { class: "comment-status muted" });
+  const saveBtn = h("button", { type: "button", class: "secondary comment-save" }, "Save comment");
+  let saving = false;
+  ta.addEventListener("input", () => {
+    draft.note = ta.value.slice(0, 280);
+    status.textContent = "";
+  });
+  saveBtn.addEventListener("click", async () => {
+    if (saving) return;
+    saving = true;
+    saveBtn.disabled = true;
+    status.textContent = "Saving…";
+    try {
+      await saveResponseComment(scen.scenario_id, ta.value);
+      status.textContent = "Saved ✓";
+    } catch (err) {
+      console.warn("saveResponseComment failed:", err);
+      status.textContent = "Couldn't save — try again.";
+    }
+    saving = false;
+    saveBtn.disabled = false;
+  });
+  return h("div", { class: "comment-box" },
+    h("div", { class: "comment-label" }, "💬 Your take on this hand"),
+    h("p", { class: "comment-hint muted" },
+      "A comment on the spot and the GTO decision. Other players see it on the crowd breakdown."),
+    ta,
+    h("div", { class: "comment-actions" }, saveBtn, status)
+  );
 }
 
 // -----------------------------------------------------------------------
@@ -289,17 +333,8 @@ export function mountSoloView(container, onExit, onPlayers) {
         confRow.appendChild(btn);
       }
 
-      const noteInput = h("textarea", {
-        class: "note-input", maxlength: "280", rows: "2",
-        placeholder: "What's your read here? (optional)",
-      });
-      noteInput.value = draft.note || "";
-      noteInput.addEventListener("input", () => { draft.note = noteInput.value.slice(0, 280); });
-      const noteToggle = h("details", { class: "note-toggle" },
-        h("summary", null, draft.note ? "Note added ✓" : "Add a note"),
-        noteInput
-      );
-      if (draft.note) noteToggle.open = true;
+      // (The hand comment moved to AFTER the reveal — it's a comment
+      // on the spot + GTO decision, not a pre-decision note.)
 
       lockInBtn.addEventListener("click", () => {
         if (!draft.action) { errorBox.textContent = "Pick your move."; return; }
@@ -319,7 +354,6 @@ export function mountSoloView(container, onExit, onPlayers) {
         actionRow,
         h("span", { class: "decide-label decide-label-sub" }, "How sure?  (1 = guess, 5 = certain)"),
         confRow,
-        noteToggle,
         lockInBtn
       );
 
@@ -416,6 +450,10 @@ export function mountSoloView(container, onExit, onPlayers) {
       const crowdHost = h("div", { class: "crowd-host" });
       loadCrowd(scen, draft, crowdHost);
 
+      // Post-reveal comment box — a comment on the spot + GTO decision,
+      // shared with other players (shows on their crowd breakdown).
+      const commentBox = buildCommentBox(scen, draft);
+
       body = h("div", { class: "hand-reveal" },
         takeaway,           // LEAD: one-line lesson takeaway
         gtoRead,            // GTO line: small blurb (the answer)
@@ -424,6 +462,7 @@ export function mountSoloView(container, onExit, onPlayers) {
         gtoExplanation,     // preamble: strategic landscape + option impacts
         optionsAnalysis,    // matrix: every option's pros/cons
         villainRangeBlock,  // deduced villain range — into Test it
+        commentBox,         // "your take on this hand" comment box
         equityHost,         // equity panel mounts here
         h("div", { class: "test-row" }, testBtn)
       );
