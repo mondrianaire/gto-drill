@@ -689,23 +689,19 @@ form { margin-top: 8px; }
   background: rgba(120, 180, 255, 0.14);
   box-shadow: inset 3px 0 0 var(--accent);
 }
-/* Running total pot per street — a small right-aligned tag (light grey
-   on a dark pill) so the reader watches the pot grow street by street.
-   margin-left:auto pins it to the row's right edge. */
-.spot-sum-pot {
-  flex: 0 0 auto;
-  align-self: flex-start;
+/* Per-action pot indicator — the running pot total AFTER an action that
+   moved chips (bet / raise / call), right-aligned on that action's own
+   line. margin-left:auto pins it to the line's right edge. */
+.spot-sum-actpot {
   margin-left: auto;
-  margin-top: 2px;
-  font-size: 0.66rem;
+  flex-shrink: 0;
+  font-size: 0.62rem;
   font-weight: 600;
   letter-spacing: 0.02em;
   white-space: nowrap;
-  color: rgba(255, 255, 255, 0.45);
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 4px;
-  padding: 3px 7px;
+  color: rgba(255, 255, 255, 0.38);
 }
+.spot-sum-actpot-val { color: rgba(255, 255, 255, 0.62); }
 
 .decide {
   margin-top: 16px;

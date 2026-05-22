@@ -285,16 +285,16 @@ export function buildSpotSummary(replay, opts) {
     river: board.river || [],
   };
 
-  // Actor naming — match the wrap-up convention: hero → "HERO", the
-  // single non-hero actor → "VILLAIN". For the rare multi-villain
-  // scenarios (2 of 45) keep positions so the reader can tell which
-  // opponent is acting.
+  // Actor naming — hero → "HERO"; a lone opponent → "VILLAIN". But when
+  // MULTIPLE opponents are live at the decision, OR more than one
+  // distinct opponent appears in the action log, "VILLAIN" is ambiguous
+  // — fall back to position names so the reader can tell opponents apart.
   const villainSeats = new Set();
   for (const a of actions) {
     if (a.type === "post" || a.type === "fold") continue;
     if (a.actor !== heroSeat) villainSeats.add(a.actor);
   }
-  const singleVillain = villainSeats.size === 1;
+  const singleVillain = liveVillains(replay).length <= 1 && villainSeats.size <= 1;
 
   // Build the actor identity as a styled chip matching the same
   // tok-pos.is-hero / tok-pos.is-villain visual idiom the rest of the
@@ -368,7 +368,19 @@ export function buildSpotSummary(replay, opts) {
       // effects are on the table (setStep(N) applies actions[0..N-1]).
       // The replay component drives highlight via spotSummary.setStep().
       const stepValue = actions.indexOf(a) + 1;
-      const actionEl = h("div", { class: "spot-sum-action" }, ...actionNodes(a));
+      const nodes = actionNodes(a);
+      // Pot indicator — for every action that moves chips into the pot
+      // (bet / raise / call), show the running pot total AFTER this
+      // action, right-aligned on the line. Checks don't change the pot.
+      if (a.type === "bet" || a.type === "raise" || a.type === "call") {
+        const potBb = deriveState(replay, stepValue).displayPot;
+        if (potBb > 0) {
+          nodes.push(h("span", { class: "spot-sum-actpot" },
+            "pot ",
+            h("span", { class: "spot-sum-actpot-val" }, round1(potBb) + "bb")));
+        }
+      }
+      const actionEl = h("div", { class: "spot-sum-action" }, ...nodes);
       actionEl.setAttribute("data-step", String(stepValue));
       actionsEl.appendChild(actionEl);
     });
@@ -387,20 +399,10 @@ export function buildSpotSummary(replay, opts) {
       yourTurnEl.setAttribute("data-step", String(actions.length + 1));
       actionsEl.appendChild(yourTurnEl);
     }
-    // Running total pot at the END of this street — a small right-aligned
-    // tag so the reader sees the pot grow street by street.
-    const potThrough = actions.filter(
-      (a) => STREETS.indexOf(a.street) <= STREETS.indexOf(street)
-    ).length;
-    const potBb = deriveState(replay, potThrough).displayPot;
-    const potEl = potBb > 0
-      ? h("div", { class: "spot-sum-pot" }, "Pot " + round1(potBb) + "bb")
-      : null;
     rows.push(h("div", { class: "spot-sum-row" + (isDecision ? " is-decision" : "") },
       h("span", { class: "spot-sum-street" }, streetLabel(street)),
       cardsEl,
-      actionsEl,
-      potEl
+      actionsEl
     ));
   }
 

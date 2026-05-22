@@ -160,13 +160,15 @@ function tokenizeProse(text, scen, opts) {
       const isHero = pos === heroPos;
       const isVillain = villains.includes(pos);
       const role = isHero ? " is-hero" : isVillain ? " is-villain" : "";
-      // In actor-label mode, replace the position name with HERO/VILLAIN
-      // for the actors. Folded / non-actor positions keep their position
-      // name (they're contextual, not the actors we're discussing).
+      // In actor-label mode, replace the position name with HERO for the
+      // hero. A villain becomes "VILLAIN" only when there is exactly ONE
+      // opponent live at the decision — with multiple opponents that
+      // label is ambiguous, so each keeps its own position name. Folded
+      // / non-actor positions always keep their position name.
       let label = pos;
       if (actorLabels) {
         if (isHero) label = "HERO";
-        else if (isVillain) label = "VILLAIN";
+        else if (isVillain && villains.length === 1) label = "VILLAIN";
       }
       frag.appendChild(h("span", { class: "tok-pos" + role }, label));
     } else if (m[3]) {
