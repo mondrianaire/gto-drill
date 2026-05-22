@@ -25,6 +25,19 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Changed
+- **Dealer button pinned to the BTN seat.** The "D" disc was floating
+  in an ambiguous spot on the felt. It's now rendered as a child of the
+  BTN seat, hugging the seat corner that faces table centre — so it's
+  unambiguously that seat's button on desktop and mobile alike. It
+  stays bright when the BTN folds (folded seats now dim their content,
+  not the whole seat box).
+- **Suited / offsuit hand-classes as a bordered group.** "AKs" / "AKo"
+  in prose now render as the two cards plus an "s"/"o" marker wrapped
+  in one bordered pill, instead of a loose card-card-pill sequence. The
+  offsuit "o" is split diagonally red/black (echoing "two different
+  suits"); the suited "s" is a single solid mark.
+
 ### Added
 - **Running pot per street.** Each street row in the spot summary now
   shows a small right-aligned "Pot Nbb" tag (light grey on a dark pill)

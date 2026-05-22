@@ -557,24 +557,28 @@ export function mountReplay(container, replay, opts) {
     let heroIdx = ring.indexOf(replay.hero_seat);
     if (heroIdx < 0) heroIdx = 0;
     const ordered = ring.slice(heroIdx).concat(ring.slice(0, heroIdx));
+    let btnSeatEl = null;
+    let btnSlot = -1;
     ordered.forEach((pos, slot) => {
       const seatDef = replay.seats.find((s) => s.pos === pos);
       const isHero = pos === replay.hero_seat;
       const justActedHere = justActed && justActed.actor === pos ? justActed : null;
-      table.appendChild(seatEl(
+      const el = seatEl(
         seatDef, state.seats[pos], isHero, turn === pos,
         "rseat rslot-" + slot + (isHero ? " rseat-hero" : "") +
           (justActedHere ? " rseat-just-acted" : ""),
         justActedHere
-      ));
+      );
+      table.appendChild(el);
+      if (pos === "BTN") { btnSeatEl = el; btnSlot = slot; }
     });
 
-    // Dealer button — a table-level disc near the ring in front of the
-    // BTN seat. Rendered at table level (not as a seat child) so it
-    // does NOT dim when the BTN folds; positioned toward the ring.
-    const btnSlot = ordered.indexOf("BTN");
-    if (btnSlot >= 0) {
-      table.appendChild(h("div",
+    // Dealer button — appended INTO the BTN seat so it is unambiguously
+    // that seat's button, sitting on the seat corner toward table centre.
+    // It stays bright when the BTN folds: folded seats dim their content
+    // (cards / labels), not the seat box, and the disc is not content.
+    if (btnSeatEl && btnSlot >= 0) {
+      btnSeatEl.appendChild(h("div",
         { class: "rdealer rdealer-slot-" + btnSlot, title: "Dealer button" }, "D"));
     }
 

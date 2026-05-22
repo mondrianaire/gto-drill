@@ -2304,33 +2304,51 @@ form { margin-top: 8px; }
     #c0202a 50% 100%);
 }
 
-/* Hand-class suited/offsuit marker — small lettered pill sitting next to
-   the two doesn't-matter cards from group 9 ("AKs", "AKo"). Using the
-   letters "s" / "o" is the poker-idiomatic shorthand — players read it
-   instantly. Tinted background carries the secondary "matched / mixed"
-   signal: blue-violet for suited (cool / together), warm gray for offsuit
-   (neutral / apart). The font is bold tabular-num so the two badges have
-   identical width regardless of which letter shows. */
-.tok-suit-suffix {
-  display: inline-block;
+/* Hand-class group — the two doesn't-matter cards of "AKs" / "AKo" plus
+   a suited/offsuit marker, all wrapped in one bordered pill. The marker
+   compartment on the right is a small light panel (like a third card)
+   showing "s" (suited) or "o" (offsuit). Same border for both — only
+   the marker differs: the offsuit "o" is split diagonally red/black,
+   echoing "two different suits"; the suited "s" is a single solid mark. */
+.tok-handclass {
+  display: inline-flex;
+  align-items: center;
   vertical-align: middle;
-  min-width: 14px;
-  padding: 1px 4px;
-  margin: 0 2px 0 3px;
-  font-size: 0.62rem;
-  font-weight: 700;
-  line-height: 1;
-  text-align: center;
-  border-radius: 3px;
-  color: #fdfdfb;
-  cursor: help;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.35);
-  font-variant-numeric: tabular-nums;
+  margin: 0 3px;
+  padding: 2px;
+  gap: 3px;
+  border: 1.5px solid rgba(255, 255, 255, 0.5);
+  border-radius: 5px;
+  background: rgba(255, 255, 255, 0.05);
 }
-.tok-suit-suffix-s::before { content: "s"; }
-.tok-suit-suffix-o::before { content: "o"; }
-.tok-suit-suffix-s { background: #4a6fa5; }   /* cool blue: same-suit / together */
-.tok-suit-suffix-o { background: #6b6359; }   /* warm gray: mixed-suit / apart */
+.tok-handclass .tok-anysuit { margin: 0; }
+.tok-handclass-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  align-self: stretch;
+  min-width: 16px;
+  padding: 0 4px;
+  background: #fdfdfb;
+  border-radius: 3px;
+}
+.tok-handclass-glyph {
+  font-weight: 800;
+  font-style: italic;
+  font-size: 0.78rem;
+  line-height: 1;
+}
+/* Suited — one solid mark ("same suit"). */
+.tok-handclass-glyph-s { color: #1a1a1a; }
+/* Offsuit — the "o" filled by a diagonal red/black gradient clipped to
+   the glyph itself ("two different suits"). */
+.tok-handclass-glyph-o {
+  background-image: linear-gradient(125deg, #c0202a 0 50%, #1a1a1a 50% 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  color: transparent;
+}
 
 /* Inline range chip — clickable anchor that pre-loads the equity panel. */
 .tok-range {
@@ -3043,36 +3061,36 @@ form { margin-top: 8px; }
   pointer-events: none;
 }
 
-/* Dealer button — small white "D" disc, rendered at TABLE level (not
-   a seat child) so it stays bright when the BTN folds. Positioned by
-   slot, toward the betting ring in front of the BTN seat. */
+/* Dealer button — small white "D" disc. Rendered as a CHILD of the BTN
+   seat so it's unambiguously that seat's button, pinned to the seat
+   corner that faces the table centre. It stays bright when the BTN
+   folds because folded seats dim their content, not the seat box, and
+   the disc is positioned (not flow) content the dim selectors skip. */
 .rdealer {
   position: absolute;
-  width: 19px;
-  height: 19px;
+  width: 18px;
+  height: 18px;
   border-radius: 50%;
   background: linear-gradient(180deg, #fafafa 0%, #d8d8d8 100%);
   color: #1a1a1a;
-  font-size: 0.72rem;
+  font-size: 0.66rem;
   font-weight: 800;
   display: flex;
   align-items: center;
   justify-content: center;
   border: 1px solid rgba(0, 0, 0, 0.4);
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.6);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.55), inset 0 1px 0 rgba(255, 255, 255, 0.6);
   line-height: 1;
-  transform: translate(-50%, -50%);
-  z-index: 3;
+  z-index: 4;
 }
-/* Dealer disc rides on the betting ring, just toward table-centre of
-   that seat's bet chip — clear of the (tall) seat box, clear of the
-   bet pill. */
-.rdealer-slot-0 { top: 68%; left: 61%; }
-.rdealer-slot-1 { top: 63%; left: 36%; }
-.rdealer-slot-2 { top: 37%; left: 36%; }
-.rdealer-slot-3 { top: 32%; left: 61%; }
-.rdealer-slot-4 { top: 37%; left: 64%; }
-.rdealer-slot-5 { top: 63%; left: 64%; }
+/* Per-slot: the disc hugs the seat corner pointing toward table centre
+   (centre seats: just above/below; corner seats: the inward corner). */
+.rdealer-slot-0 { top: -10px; left: 50%; transform: translateX(-50%); }
+.rdealer-slot-3 { bottom: -10px; left: 50%; transform: translateX(-50%); }
+.rdealer-slot-1 { top: -8px; right: -8px; }
+.rdealer-slot-2 { bottom: -8px; right: -8px; }
+.rdealer-slot-4 { bottom: -8px; left: -8px; }
+.rdealer-slot-5 { top: -8px; left: -8px; }
 /* Seat anchors. Slots 0/3 (hero centre + top centre) sit on the table's
    straight top/bottom edges. Slots 1/2/4/5 are the four "corner" seats —
    they CANNOT hug the table corners (left/right: 4px) because the table
@@ -3089,13 +3107,17 @@ form { margin-top: 8px; }
 .rseat-turn { background: rgba(76, 182, 255, 0.16); box-shadow: 0 0 0 2px var(--accent); }
 .rseat-villain:not(.rseat-turn) { box-shadow: 0 0 0 1.5px rgba(232, 169, 63, 0.6); }
 /* Folded seats keep a bounding box — a faint grey container + ring — so
-   the seat's position on the table stays visible (rather than collapsing
-   to floating dimmed text). Still dimmed, so it clearly reads as a seat
-   that has folded out of the hand. */
+   the seat's position on the table stays visible. The DIM is applied to
+   the seat's content (cards, labels) rather than the whole seat, so the
+   box stays crisp AND a child dealer disc isn't dragged dim with it. */
 .rseat-folded {
-  opacity: 0.62;
   background: rgba(255, 255, 255, 0.05);
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.16);
+}
+.rseat-folded .rseat-cards,
+.rseat-folded .rseat-pos,
+.rseat-folded .rseat-stack {
+  opacity: 0.5;
 }
 .rseat-mucked {
   min-height: 36px;
