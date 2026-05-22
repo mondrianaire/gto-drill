@@ -46,6 +46,13 @@ lobby delete button silently no-op until the rules are live.
   `scenario_id` changes.
 
 ### Changed
+- **Villain-range cards show the range shape** (v2026-05-22.125). Each card in
+  the "Villain's range" section now leads with a mini 13×13 heat-grid
+  thumbnail — the range's shape at a glance — plus a combo count, in the spec's
+  §8.4 / mockup M9 layout (thumbnail, then label + summary + count). The data
+  was already there: every villain range carries its hand `classes`. The
+  card's launch affordance is now an ↗ arrow, per the spec's expand-vs-launch
+  convention. Second piece of the Wave 1 results-screen rebuild.
 - **Crowd breakdown restructured into a hierarchy** (v2026-05-22.124). "How
   others played" was a flat list of look-alike rows — the player's own pick a
   small sub-line tag, easily lost in the stack. It now follows the spec's

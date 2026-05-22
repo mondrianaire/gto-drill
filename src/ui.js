@@ -480,6 +480,46 @@ function confidenceDots(confidence, who) {
  * @param {Object} args.scen
  * @param {(range:Object)=>void} [args.onRangeClick]
  */
+// 13×13 hand-matrix rank order — pairs on the diagonal, suited above it,
+// offsuit below (standard poker convention, mirrors range-picker.js).
+const MINI_RANKS = ["A", "K", "Q", "J", "T", "9", "8", "7", "6", "5", "4", "3", "2"];
+
+/**
+ * A non-interactive 13×13 heat grid showing a range's SHAPE at a glance
+ * (spec §8.4 / mockup M9) — every cell whose hand class is in `classes`
+ * lights up. Decorative: the card's summary already states the range in
+ * words, so the grid is aria-hidden.
+ */
+function buildMiniRangeGrid(classes) {
+  const set = new Set(Array.isArray(classes) ? classes : []);
+  const grid = h("div", { class: "vr-minigrid", "aria-hidden": "true" });
+  for (let r = 0; r < 13; r++) {
+    for (let c = 0; c < 13; c++) {
+      const lbl = r === c ? MINI_RANKS[r] + MINI_RANKS[c]
+        : c > r ? MINI_RANKS[r] + MINI_RANKS[c] + "s"
+        : MINI_RANKS[c] + MINI_RANKS[r] + "o";
+      grid.appendChild(h("span", {
+        class: "vr-minicell" + (set.has(lbl) ? " is-on" : ""),
+      }));
+    }
+  }
+  return grid;
+}
+
+/**
+ * Combo count for a list of hand classes — pair 6, suited 4, offsuit 12
+ * (the standard 1326-combo deck breakdown).
+ */
+function rangeComboCount(classes) {
+  let n = 0;
+  for (const lbl of (Array.isArray(classes) ? classes : [])) {
+    if (lbl.length === 2) n += 6;
+    else if (lbl.endsWith("s")) n += 4;
+    else if (lbl.endsWith("o")) n += 12;
+  }
+  return n;
+}
+
 export function buildVillainRangeBlock({ scen, onRangeClick }) {
   if (!scen) return null;
   const ranges = Array.isArray(scen.villain_ranges) ? scen.villain_ranges : [];
@@ -494,17 +534,26 @@ export function buildVillainRangeBlock({ scen, onRangeClick }) {
   // Clicking pops the equity panel pre-loaded.
   const list = h("div", { class: "villain-range-list" });
   for (const range of ranges) {
+    const classes = Array.isArray(range.classes) ? range.classes : [];
     const card = h(
       "div",
       { class: "villain-range-card" + (onRangeClick ? " is-clickable" : ""),
         role: onRangeClick ? "button" : null,
         tabindex: onRangeClick ? "0" : null,
         title: onRangeClick ? "Tap to test equity vs this range" : null },
-      h("div", { class: "villain-range-card-header" },
-        h("span", { class: "villain-range-card-label" }, range.label ? richText(range.label, scen, { actorLabels: true }) : "Range"),
-        onRangeClick ? h("span", { class: "villain-range-card-icon", "aria-hidden": "true" }, "🎲") : null
-      ),
-      range.summary ? h("div", { class: "villain-range-card-summary" }, richText(range.summary, scen, { actorLabels: true })) : null
+      classes.length ? buildMiniRangeGrid(classes) : null,
+      h("div", { class: "villain-range-card-body" },
+        h("div", { class: "villain-range-card-header" },
+          h("span", { class: "villain-range-card-label" }, range.label ? richText(range.label, scen, { actorLabels: true }) : "Range"),
+          onRangeClick ? h("span", { class: "villain-range-card-icon", "aria-hidden": "true" }, "↗") : null
+        ),
+        range.summary ? h("div", { class: "villain-range-card-summary" }, richText(range.summary, scen, { actorLabels: true })) : null,
+        classes.length
+          ? h("div", { class: "villain-range-card-combos" },
+              rangeComboCount(classes) + " combos · " + classes.length + " hand "
+                + (classes.length === 1 ? "class" : "classes"))
+          : null
+      )
     );
     if (onRangeClick) {
       card.addEventListener("click", (ev) => { ev.preventDefault(); onRangeClick(range); });
