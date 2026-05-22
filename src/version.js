@@ -8,4 +8,4 @@
 // will see the OLD version here even after a deploy — that's the signal
 // to hard-refresh (Ctrl+Shift+R / Cmd+Shift+R).
 
-export const APP_VERSION = "2026-05-22.130-compact-hero-strip";
+export const APP_VERSION = "2026-05-22.131-compact-view-toggle";

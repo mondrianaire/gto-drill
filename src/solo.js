@@ -7,7 +7,7 @@
 // a fresh hand on "Next hand".
 
 import { listScenarios } from "./scenarios.js";
-import { mountReplay, buildSpotSummary } from "./replay.js";
+import { mountReplay, buildSpotSummary, buildRunoutStrip, buildHeroStrip } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
 import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown, buildScenarioInfo, buildRetestCompare } from "./ui.js";
 import { recordResponse, readScenarioResponses, readMyResponses, saveResponseComment, getCurrentUser } from "./state.js";
@@ -216,6 +216,15 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
   let replayCleanup = null;
   let handsCompleted = 0;
   let correctSoFar = 0;
+  // Hand-display layout: "expanded" — the animated oval table — or
+  // "compact" — the one-screen runout strip + hero strip + timeline
+  // (spec §6.1 / mockup M3). The table is the default; a toggle in the
+  // scenario headline switches, and the choice persists per device.
+  let viewMode = "expanded";
+  try {
+    const saved = window.localStorage.getItem("gto-drill.viewMode");
+    if (saved === "compact" || saved === "expanded") viewMode = saved;
+  } catch { /* private mode — keep the expanded default */ }
 
   // Selection weight for a scenario. priority^1.6 keeps the "golden
   // example" scenarios (priority 5) surfacing ~2.4× their share of
@@ -379,13 +388,34 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
     // answered this scenario before — a heads-up that it's a retest.
     // The prior answer itself stays hidden until the reveal.
     const isReplay = !!(draft && draft.priorAnswer && draft.priorAnswer.action);
-    const scenarioHeadline = scenNum
-      ? h("div", { class: "scenario-headline" },
-          "Scenario ",
-          h("span", { class: "scenario-headline-num" }, "#" + scenNum[1]),
-          isReplay
-            ? h("span", { class: "scenario-replay-tag", title: "You've answered this scenario before" }, "Replay")
-            : null)
+    // View toggle — switches the hand display between the animated
+    // table and the compact one-screen layout (spec §6.1 / §7). Only
+    // shown when the scenario has a replay to render either way.
+    let viewToggleBtn = null;
+    if (scen.replay) {
+      const goCompact = viewMode === "expanded";
+      viewToggleBtn = h("button", {
+        type: "button",
+        class: "view-toggle",
+        "aria-pressed": String(viewMode === "compact"),
+        title: goCompact
+          ? "Switch to the compact one-screen view"
+          : "Switch to the animated table view",
+      }, goCompact ? "Compact view" : "Table view");
+      viewToggleBtn.addEventListener("click", () => {
+        viewMode = goCompact ? "compact" : "expanded";
+        try { window.localStorage.setItem("gto-drill.viewMode", viewMode); } catch {}
+        render();
+      });
+    }
+    const headlineMain = h("span", { class: "scenario-headline-main" },
+      scenNum ? "Scenario " : null,
+      scenNum ? h("span", { class: "scenario-headline-num" }, "#" + scenNum[1]) : null,
+      (scenNum && isReplay)
+        ? h("span", { class: "scenario-replay-tag", title: "You've answered this scenario before" }, "Replay")
+        : null);
+    const scenarioHeadline = (scenNum || viewToggleBtn)
+      ? h("div", { class: "scenario-headline" }, headlineMain, viewToggleBtn)
       : null;
 
     // --- scenario INFO pane --------------------------------------------------
@@ -396,7 +426,20 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
 
     // --- the spot ------------------------------------------------------------
     const spot = h("div", { class: "hand-spot" });
-    if (scen.replay) {
+    if (scen.replay && viewMode === "compact") {
+      // Compact one-screen layout (spec §6.1 / mockup M3): the oval
+      // table collapses to a board-runout strip + a hero strip; the
+      // spot-summary timeline carries the action history. No animated
+      // table here, so the summary is a static display — built without
+      // onJumpToStep (there is nothing to scrub).
+      const runout = buildRunoutStrip(scen.replay);
+      const hero = buildHeroStrip(scen.replay);
+      if (runout) spot.appendChild(runout);
+      if (hero) spot.appendChild(hero);
+      const summary = buildSpotSummary(scen.replay);
+      if (summary) spot.appendChild(summary);
+    } else if (scen.replay) {
+      // Expanded layout (the default) — the animated oval table.
       const replayHost = h("div", { class: "replay-host" });
       spot.appendChild(replayHost);
       // Build the spot-summary BEFORE mounting the replay. Two-way sync:
