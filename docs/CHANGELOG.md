@@ -24,6 +24,15 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Fixed
+- **Completion count clamped to the live library** (v2026-05-22.120). The
+  solo stats line could read `46/45 scenarios done` — over 100%. A retired
+  `scenario_id` (one replaced under a new id, e.g. the corrected flopped-straight
+  spot) leaves an orphaned response in Firestore; the completed-set loader
+  counted it even though the scenario is no longer in the library. The loader
+  now intersects the player's answered `scenario_id`s with the live library, so
+  the tally can never exceed the scenario count.
+
 ### Changed
 - **Keyboard access for the spot-summary** (v2026-05-22.119). The replay's
   spot-summary action rows can be tapped to drive the replay table, but the
