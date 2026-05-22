@@ -143,7 +143,7 @@ function buildCommentBox(scen, draft) {
 // @param {() => void} onExit  Called when the user backs out to sign-in.
 // -----------------------------------------------------------------------
 
-export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
+export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDatabase) {
   const scenarios = listScenarios();
   if (scenarios.length === 0) {
     container.appendChild(h("p", { class: "muted" }, "No scenarios loaded — try refreshing."));
@@ -300,10 +300,23 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel) {
         onPlayers();
       });
     }
+    // Database button — the owner-only console. Only present when the
+    // caller wired onDatabase (the signed-in owner; see owner.js).
+    const databaseBtn = onDatabase
+      ? h("button",
+          { type: "button", class: "solo-database", title: "Owner database console", "aria-label": "Owner database console" },
+          "Database")
+      : null;
+    if (databaseBtn) {
+      databaseBtn.addEventListener("click", () => {
+        if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
+        onDatabase();
+      });
+    }
     const header = h("div", { class: "solo-header" },
       h("div", { class: "solo-header-top" },
         h("h2", null, "Solo practice"),
-        h("div", { class: "solo-header-actions" }, playersBtn, exitBtn)
+        h("div", { class: "solo-header-actions" }, databaseBtn, playersBtn, exitBtn)
       ),
       stats
     );
