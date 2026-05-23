@@ -1,0 +1,7496 @@
+{
+  "_meta": {
+    "version": "1.0",
+    "stack_depth_bb": 100,
+    "format": "6-max cash",
+    "sources": [
+      {
+        "name": "greenline",
+        "origin": "GreenCharts2024_01.pdf (Greenline Poker)",
+        "url": "https://github.com/AHTOOOXA/poker-charts/blob/main/src/data/ranges/greenline.ts"
+      },
+      {
+        "name": "pekarstas",
+        "origin": "Pekarstas charts",
+        "url": "https://github.com/AHTOOOXA/poker-charts/blob/main/src/data/ranges/pekarstas.ts"
+      },
+      {
+        "name": "tyloo",
+        "origin": "tyloo/poker-range-analyzer (RFI per position)",
+        "url": "https://github.com/tyloo/poker-range-analyzer/tree/main/lib/ranges"
+      }
+    ],
+    "consensus_method": "Cell included only if >= 2 sources agree. Per-action freq is mean across including sources. Single-source-only inclusions noted but excluded from consensus.",
+    "schema_note": "HJ in our scenarios.json = MP in charts (same 6-max seat)."
+  },
+  "scenarios": {
+    "BB-ISO": {
+      "hands": {
+        "22": {
+          "raise": 100
+        },
+        "33": {
+          "raise": 100
+        },
+        "44": {
+          "raise": 100
+        },
+        "55": {
+          "raise": 100
+        },
+        "66": {
+          "raise": 100
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A8s": {
+          "raise": 100
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "K8s": {
+          "raise": 100
+        },
+        "K7s": {
+          "raise": 100
+        },
+        "K6s": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "raise": 100
+        },
+        "QJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 100
+        },
+        "ATo": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "A9o": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "54s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "greenline"
+      ],
+      "notes": []
+    },
+    "BB-vs-4bet-BTN": {
+      "hands": {
+        "77": {
+          "call": 50,
+          "allin": 50
+        },
+        "88": {
+          "call": 50,
+          "allin": 50
+        },
+        "99": {
+          "call": 50,
+          "allin": 50
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "JJ": {
+          "allin": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "98s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "AQo only-in-greenline",
+        "QJs only-in-greenline",
+        "87s only-in-greenline",
+        "76s only-in-greenline",
+        "66 only-in-greenline",
+        "55 only-in-greenline"
+      ]
+    },
+    "BB-vs-4bet-CO": {
+      "hands": {
+        "99": {
+          "call": 50,
+          "allin": 50
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "JJ": {
+          "call": 50,
+          "allin": 50
+        },
+        "TT": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "KQs only-in-pekarstas",
+        "AQo only-in-greenline",
+        "98s only-in-pekarstas",
+        "88 only-in-pekarstas",
+        "87s only-in-pekarstas",
+        "76s only-in-pekarstas"
+      ]
+    },
+    "BB-vs-4bet-MP": {
+      "hands": {
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AKo": {
+          "call": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "QQ": {
+          "allin": 50,
+          "call": 50
+        },
+        "JJ": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "AQs only-in-greenline",
+        "99 only-in-greenline"
+      ]
+    },
+    "BB-vs-4bet-SB": {
+      "hands": {
+        "66": {
+          "call": 50,
+          "allin": 50
+        },
+        "77": {
+          "call": 50,
+          "allin": 50
+        },
+        "88": {
+          "call": 50,
+          "allin": 50
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 50,
+          "call": 50
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "AQo": {
+          "call": 100
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "JJ": {
+          "allin": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        },
+        "65s": {
+          "call": 100
+        },
+        "54s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "KJs only-in-pekarstas"
+      ]
+    },
+    "BB-vs-4bet-UTG": {
+      "hands": {
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AKo": {
+          "call": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "QQ": {
+          "call": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "BB-vs-open-BTN": {
+      "hands": {
+        "22": {
+          "call": 100
+        },
+        "33": {
+          "call": 100
+        },
+        "44": {
+          "call": 100
+        },
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "raise": 33.3,
+          "allin": 33.3,
+          "call": 33.3
+        },
+        "88": {
+          "raise": 41.7,
+          "allin": 33.3,
+          "call": 25
+        },
+        "99": {
+          "raise": 41.7,
+          "allin": 33.3,
+          "call": 25
+        },
+        "AA": {
+          "raise": 66.7,
+          "allin": 33.3
+        },
+        "AKs": {
+          "raise": 58.3,
+          "allin": 33.3,
+          "call": 8.3
+        },
+        "AQs": {
+          "raise": 83.3,
+          "call": 16.7
+        },
+        "AJs": {
+          "raise": 83.3,
+          "call": 16.7
+        },
+        "ATs": {
+          "raise": 75,
+          "call": 25
+        },
+        "A9s": {
+          "call": 91.7,
+          "raise": 8.3
+        },
+        "A8s": {
+          "call": 91.7,
+          "raise": 8.3
+        },
+        "A7s": {
+          "call": 91.7,
+          "raise": 8.3
+        },
+        "A6s": {
+          "call": 91.7,
+          "raise": 8.3
+        },
+        "A5s": {
+          "raise": 83.3,
+          "call": 16.7
+        },
+        "A4s": {
+          "raise": 83.3,
+          "call": 16.7
+        },
+        "A3s": {
+          "call": 91.7,
+          "raise": 8.3
+        },
+        "A2s": {
+          "call": 91.7,
+          "raise": 8.3
+        },
+        "AKo": {
+          "raise": 58.3,
+          "allin": 33.3,
+          "call": 8.3
+        },
+        "KK": {
+          "raise": 66.7,
+          "allin": 33.3
+        },
+        "KQs": {
+          "raise": 83.3,
+          "call": 16.7
+        },
+        "KJs": {
+          "raise": 75,
+          "call": 25
+        },
+        "KTs": {
+          "raise": 75,
+          "call": 25
+        },
+        "K9s": {
+          "call": 100
+        },
+        "K8s": {
+          "call": 100
+        },
+        "K7s": {
+          "call": 100
+        },
+        "K6s": {
+          "call": 100
+        },
+        "K5s": {
+          "call": 100
+        },
+        "K4s": {
+          "call": 100
+        },
+        "K3s": {
+          "call": 100
+        },
+        "K2s": {
+          "call": 100
+        },
+        "AQo": {
+          "raise": 83.3,
+          "call": 16.7
+        },
+        "KQo": {
+          "raise": 41.7,
+          "call": 58.3
+        },
+        "QQ": {
+          "raise": 66.7,
+          "allin": 33.3
+        },
+        "QJs": {
+          "raise": 75,
+          "call": 25
+        },
+        "QTs": {
+          "raise": 75,
+          "call": 25
+        },
+        "Q9s": {
+          "call": 100
+        },
+        "Q8s": {
+          "call": 100
+        },
+        "Q7s": {
+          "call": 100
+        },
+        "Q6s": {
+          "call": 100
+        },
+        "Q5s": {
+          "call": 100
+        },
+        "Q4s": {
+          "call": 100
+        },
+        "Q3s": {
+          "call": 91.7
+        },
+        "Q2s": {
+          "call": 91.7
+        },
+        "AJo": {
+          "raise": 75,
+          "call": 25
+        },
+        "KJo": {
+          "call": 100
+        },
+        "QJo": {
+          "call": 100
+        },
+        "JJ": {
+          "raise": 58.3,
+          "allin": 33.3,
+          "call": 8.3
+        },
+        "JTs": {
+          "raise": 75,
+          "call": 25
+        },
+        "J9s": {
+          "raise": 66.7,
+          "call": 33.3
+        },
+        "J8s": {
+          "call": 100
+        },
+        "J7s": {
+          "call": 100
+        },
+        "J6s": {
+          "call": 91.7
+        },
+        "J5s": {
+          "call": 91.7
+        },
+        "J4s": {
+          "call": 83.3
+        },
+        "J3s": {
+          "call": 100
+        },
+        "J2s": {
+          "call": 100
+        },
+        "ATo": {
+          "call": 100
+        },
+        "KTo": {
+          "call": 100
+        },
+        "QTo": {
+          "call": 100
+        },
+        "JTo": {
+          "call": 100
+        },
+        "TT": {
+          "raise": 83.3,
+          "call": 16.7
+        },
+        "T9s": {
+          "raise": 75,
+          "call": 25
+        },
+        "T8s": {
+          "raise": 66.7,
+          "call": 33.3
+        },
+        "T7s": {
+          "call": 100
+        },
+        "T6s": {
+          "call": 91.7
+        },
+        "T5s": {
+          "call": 100
+        },
+        "T4s": {
+          "call": 100
+        },
+        "A9o": {
+          "call": 100
+        },
+        "K9o": {
+          "call": 100
+        },
+        "Q9o": {
+          "call": 100
+        },
+        "J9o": {
+          "call": 100
+        },
+        "T9o": {
+          "call": 100
+        },
+        "98s": {
+          "raise": 75,
+          "call": 25
+        },
+        "97s": {
+          "raise": 66.7,
+          "call": 33.3
+        },
+        "96s": {
+          "call": 100
+        },
+        "95s": {
+          "call": 83.3
+        },
+        "A8o": {
+          "call": 100
+        },
+        "K8o": {
+          "call": 91.7
+        },
+        "Q8o": {
+          "call": 91.7
+        },
+        "J8o": {
+          "call": 91.7
+        },
+        "T8o": {
+          "call": 100
+        },
+        "98o": {
+          "call": 100
+        },
+        "87s": {
+          "raise": 75,
+          "call": 25
+        },
+        "86s": {
+          "raise": 66.7,
+          "call": 33.3
+        },
+        "85s": {
+          "call": 91.7
+        },
+        "A7o": {
+          "call": 100
+        },
+        "K7o": {
+          "call": 91.7
+        },
+        "87o": {
+          "call": 100
+        },
+        "76s": {
+          "raise": 75,
+          "call": 25
+        },
+        "75s": {
+          "call": 100
+        },
+        "74s": {
+          "call": 83.3
+        },
+        "A6o": {
+          "call": 100
+        },
+        "76o": {
+          "call": 100
+        },
+        "65s": {
+          "raise": 75,
+          "call": 25
+        },
+        "64s": {
+          "call": 100
+        },
+        "63s": {
+          "call": 100
+        },
+        "A5o": {
+          "call": 100
+        },
+        "54s": {
+          "raise": 75,
+          "call": 25
+        },
+        "53s": {
+          "call": 100
+        },
+        "52s": {
+          "call": 100
+        },
+        "A4o": {
+          "call": 100
+        },
+        "43s": {
+          "call": 100
+        },
+        "42s": {
+          "call": 83.3
+        },
+        "A3o": {
+          "call": 100
+        },
+        "32s": {
+          "call": 91.7
+        },
+        "A2o": {
+          "call": 100
+        }
+      },
+      "providerCount": 3,
+      "providers": [
+        "greenline",
+        "pekarstas",
+        "tyloo"
+      ],
+      "notes": [
+        "Q7o only-in-tyloo",
+        "J7o only-in-tyloo",
+        "T7o only-in-tyloo",
+        "97o only-in-tyloo",
+        "K6o only-in-tyloo",
+        "Q6o only-in-tyloo",
+        "86o only-in-tyloo",
+        "K5o only-in-tyloo",
+        "75o only-in-tyloo",
+        "65o only-in-tyloo",
+        "K4o only-in-tyloo",
+        "64o only-in-tyloo",
+        "54o only-in-tyloo",
+        "K3o only-in-tyloo",
+        "53o only-in-tyloo",
+        "43o only-in-tyloo",
+        "K2o only-in-tyloo"
+      ]
+    },
+    "BB-vs-open-CO": {
+      "hands": {
+        "22": {
+          "call": 100
+        },
+        "33": {
+          "call": 100
+        },
+        "44": {
+          "call": 100
+        },
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 50,
+          "allin": 50
+        },
+        "99": {
+          "call": 50,
+          "allin": 50
+        },
+        "AA": {
+          "raise": 50,
+          "allin": 50
+        },
+        "AKs": {
+          "raise": 50,
+          "allin": 50
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A8s": {
+          "call": 100
+        },
+        "A7s": {
+          "call": 100
+        },
+        "A6s": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "call": 100
+        },
+        "A2s": {
+          "call": 100
+        },
+        "AKo": {
+          "raise": 50,
+          "allin": 50
+        },
+        "KK": {
+          "raise": 50,
+          "allin": 50
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "call": 50,
+          "raise": 50
+        },
+        "K9s": {
+          "call": 100
+        },
+        "K8s": {
+          "call": 100
+        },
+        "K7s": {
+          "call": 100
+        },
+        "K6s": {
+          "call": 100
+        },
+        "K5s": {
+          "call": 100
+        },
+        "K4s": {
+          "call": 100
+        },
+        "K3s": {
+          "call": 100
+        },
+        "K2s": {
+          "call": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 50,
+          "allin": 50
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "call": 50,
+          "raise": 50
+        },
+        "Q9s": {
+          "call": 100
+        },
+        "Q8s": {
+          "call": 100
+        },
+        "Q7s": {
+          "call": 100
+        },
+        "Q6s": {
+          "call": 100
+        },
+        "Q5s": {
+          "call": 100
+        },
+        "Q4s": {
+          "call": 100
+        },
+        "Q3s": {
+          "call": 100
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "call": 100
+        },
+        "QJo": {
+          "call": 100
+        },
+        "JJ": {
+          "raise": 50,
+          "allin": 50
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "call": 100
+        },
+        "J8s": {
+          "call": 100
+        },
+        "J7s": {
+          "call": 100
+        },
+        "J6s": {
+          "call": 100
+        },
+        "J5s": {
+          "call": 100
+        },
+        "ATo": {
+          "call": 100
+        },
+        "KTo": {
+          "call": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "T8s": {
+          "call": 100
+        },
+        "T7s": {
+          "call": 100
+        },
+        "A9o": {
+          "call": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "97s": {
+          "call": 100
+        },
+        "96s": {
+          "call": 100
+        },
+        "95s": {
+          "call": 100
+        },
+        "A8o": {
+          "call": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "call": 100
+        },
+        "85s": {
+          "call": 100
+        },
+        "84s": {
+          "call": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "call": 100
+        },
+        "74s": {
+          "call": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "64s": {
+          "call": 100
+        },
+        "63s": {
+          "call": 100
+        },
+        "54s": {
+          "call": 100
+        },
+        "53s": {
+          "call": 100
+        },
+        "43s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "Q2s only-in-pekarstas",
+        "J4s only-in-pekarstas",
+        "J3s only-in-pekarstas",
+        "J2s only-in-pekarstas",
+        "QTo only-in-pekarstas",
+        "T6s only-in-greenline"
+      ]
+    },
+    "BB-vs-open-MP": {
+      "hands": {
+        "22": {
+          "call": 100
+        },
+        "33": {
+          "call": 100
+        },
+        "44": {
+          "call": 100
+        },
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "raise": 50,
+          "allin": 50
+        },
+        "AKs": {
+          "raise": 50,
+          "allin": 50
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "call": 50,
+          "raise": 50
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A8s": {
+          "call": 100
+        },
+        "A7s": {
+          "call": 100
+        },
+        "A6s": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "call": 100
+        },
+        "A2s": {
+          "call": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 50,
+          "allin": 50
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "call": 50,
+          "raise": 50
+        },
+        "KTs": {
+          "call": 100
+        },
+        "K9s": {
+          "call": 100
+        },
+        "K8s": {
+          "call": 100
+        },
+        "K7s": {
+          "call": 100
+        },
+        "K6s": {
+          "call": 100
+        },
+        "K5s": {
+          "call": 100
+        },
+        "K4s": {
+          "call": 100
+        },
+        "K3s": {
+          "call": 100
+        },
+        "K2s": {
+          "call": 100
+        },
+        "AQo": {
+          "raise": 50,
+          "call": 50
+        },
+        "KQo": {
+          "call": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "call": 50,
+          "raise": 50
+        },
+        "QTs": {
+          "call": 100
+        },
+        "Q9s": {
+          "call": 100
+        },
+        "Q8s": {
+          "call": 100
+        },
+        "Q7s": {
+          "call": 100
+        },
+        "AJo": {
+          "call": 100
+        },
+        "KJo": {
+          "call": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "J9s": {
+          "call": 100
+        },
+        "J8s": {
+          "call": 100
+        },
+        "ATo": {
+          "call": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "T8s": {
+          "call": 100
+        },
+        "T7s": {
+          "call": 100
+        },
+        "98s": {
+          "call": 100
+        },
+        "97s": {
+          "call": 100
+        },
+        "96s": {
+          "call": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "call": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "call": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "64s": {
+          "call": 100
+        },
+        "54s": {
+          "raise": 100
+        },
+        "53s": {
+          "call": 100
+        },
+        "43s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "Q6s only-in-greenline",
+        "QJo only-in-pekarstas",
+        "J7s only-in-greenline",
+        "85s only-in-greenline",
+        "74s only-in-greenline"
+      ]
+    },
+    "BB-vs-open-SB": {
+      "hands": {
+        "22": {
+          "raise": 50,
+          "call": 50
+        },
+        "33": {
+          "raise": 50,
+          "call": 50
+        },
+        "44": {
+          "raise": 50,
+          "call": 50
+        },
+        "55": {
+          "raise": 50,
+          "call": 50
+        },
+        "66": {
+          "raise": 50,
+          "allin": 50
+        },
+        "77": {
+          "raise": 50,
+          "allin": 50
+        },
+        "88": {
+          "raise": 50,
+          "allin": 50
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 50,
+          "allin": 50
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 50,
+          "call": 50
+        },
+        "A8s": {
+          "raise": 50,
+          "call": 50
+        },
+        "A7s": {
+          "raise": 50,
+          "call": 50
+        },
+        "A6s": {
+          "raise": 50,
+          "call": 50
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 50,
+          "allin": 50
+        },
+        "KK": {
+          "raise": 50,
+          "allin": 50
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 50,
+          "call": 50
+        },
+        "K8s": {
+          "raise": 50,
+          "call": 50
+        },
+        "K7s": {
+          "raise": 50,
+          "call": 50
+        },
+        "K6s": {
+          "raise": 50,
+          "call": 50
+        },
+        "K5s": {
+          "raise": 50,
+          "call": 50
+        },
+        "K4s": {
+          "raise": 50,
+          "call": 50
+        },
+        "K3s": {
+          "raise": 50,
+          "call": 50
+        },
+        "K2s": {
+          "raise": 50,
+          "call": 50
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 50,
+          "allin": 50
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 50,
+          "call": 50
+        },
+        "Q8s": {
+          "raise": 50,
+          "call": 50
+        },
+        "Q7s": {
+          "raise": 50,
+          "call": 50
+        },
+        "Q6s": {
+          "raise": 50,
+          "call": 50
+        },
+        "Q5s": {
+          "raise": 50,
+          "call": 50
+        },
+        "Q4s": {
+          "raise": 50,
+          "call": 50
+        },
+        "Q3s": {
+          "raise": 50,
+          "call": 50
+        },
+        "Q2s": {
+          "raise": 50,
+          "call": 50
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "raise": 50,
+          "call": 50
+        },
+        "QJo": {
+          "raise": 50,
+          "call": 50
+        },
+        "JJ": {
+          "raise": 50,
+          "allin": 50
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 50,
+          "call": 50
+        },
+        "J8s": {
+          "raise": 50,
+          "call": 50
+        },
+        "J7s": {
+          "raise": 50,
+          "call": 50
+        },
+        "J6s": {
+          "raise": 50,
+          "call": 50
+        },
+        "J5s": {
+          "raise": 50,
+          "call": 50
+        },
+        "J4s": {
+          "raise": 50,
+          "call": 50
+        },
+        "J3s": {
+          "raise": 50,
+          "call": 50
+        },
+        "ATo": {
+          "raise": 50,
+          "call": 50
+        },
+        "KTo": {
+          "raise": 50,
+          "call": 50
+        },
+        "QTo": {
+          "raise": 50,
+          "call": 50
+        },
+        "JTo": {
+          "raise": 50,
+          "call": 50
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "T8s": {
+          "raise": 50,
+          "call": 50
+        },
+        "T7s": {
+          "raise": 100
+        },
+        "T6s": {
+          "raise": 100
+        },
+        "T5s": {
+          "raise": 50,
+          "call": 50
+        },
+        "T4s": {
+          "raise": 50,
+          "call": 50
+        },
+        "T3s": {
+          "raise": 50,
+          "call": 50
+        },
+        "A9o": {
+          "raise": 50,
+          "call": 50
+        },
+        "K9o": {
+          "raise": 50,
+          "call": 50
+        },
+        "Q9o": {
+          "raise": 50,
+          "call": 50
+        },
+        "J9o": {
+          "raise": 50,
+          "call": 50
+        },
+        "T9o": {
+          "call": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "97s": {
+          "raise": 100
+        },
+        "96s": {
+          "raise": 100
+        },
+        "95s": {
+          "raise": 50,
+          "call": 50
+        },
+        "94s": {
+          "raise": 50,
+          "call": 50
+        },
+        "93s": {
+          "raise": 50,
+          "call": 50
+        },
+        "A8o": {
+          "call": 100
+        },
+        "K8o": {
+          "call": 100
+        },
+        "Q8o": {
+          "call": 100
+        },
+        "J8o": {
+          "call": 100
+        },
+        "T8o": {
+          "call": 100
+        },
+        "98o": {
+          "call": 50,
+          "raise": 50
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "raise": 100
+        },
+        "85s": {
+          "raise": 100
+        },
+        "84s": {
+          "raise": 50,
+          "call": 50
+        },
+        "83s": {
+          "call": 100
+        },
+        "A7o": {
+          "call": 100
+        },
+        "K7o": {
+          "call": 100
+        },
+        "Q7o": {
+          "call": 100
+        },
+        "J7o": {
+          "call": 100
+        },
+        "97o": {
+          "call": 100
+        },
+        "87o": {
+          "call": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "raise": 100
+        },
+        "74s": {
+          "raise": 50,
+          "call": 50
+        },
+        "73s": {
+          "call": 100
+        },
+        "A6o": {
+          "call": 100
+        },
+        "K6o": {
+          "call": 100
+        },
+        "Q6o": {
+          "call": 100
+        },
+        "86o": {
+          "call": 100
+        },
+        "76o": {
+          "call": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "64s": {
+          "raise": 100
+        },
+        "63s": {
+          "call": 100
+        },
+        "A5o": {
+          "call": 50,
+          "raise": 50
+        },
+        "K5o": {
+          "call": 100
+        },
+        "75o": {
+          "call": 100
+        },
+        "65o": {
+          "call": 100
+        },
+        "54s": {
+          "raise": 100
+        },
+        "53s": {
+          "raise": 50,
+          "call": 50
+        },
+        "52s": {
+          "call": 100
+        },
+        "A4o": {
+          "call": 50,
+          "raise": 50
+        },
+        "K4o": {
+          "call": 50,
+          "raise": 50
+        },
+        "54o": {
+          "call": 100
+        },
+        "43s": {
+          "raise": 50,
+          "call": 50
+        },
+        "42s": {
+          "call": 100
+        },
+        "A3o": {
+          "call": 50,
+          "raise": 50
+        },
+        "32s": {
+          "call": 100
+        },
+        "A2o": {
+          "call": 50,
+          "raise": 50
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "J2s only-in-pekarstas",
+        "T2s only-in-pekarstas",
+        "92s only-in-pekarstas",
+        "82s only-in-pekarstas",
+        "T7o only-in-pekarstas",
+        "72s only-in-pekarstas",
+        "62s only-in-pekarstas"
+      ]
+    },
+    "BB-vs-open-UTG": {
+      "hands": {
+        "22": {
+          "call": 100
+        },
+        "33": {
+          "call": 100
+        },
+        "44": {
+          "call": 100
+        },
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "raise": 50,
+          "allin": 50
+        },
+        "AKs": {
+          "raise": 50,
+          "allin": 50
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "call": 50,
+          "raise": 50
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A8s": {
+          "call": 100
+        },
+        "A7s": {
+          "call": 100
+        },
+        "A6s": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "call": 100
+        },
+        "A2s": {
+          "call": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 50,
+          "allin": 50
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "call": 50,
+          "raise": 50
+        },
+        "KTs": {
+          "call": 100
+        },
+        "K9s": {
+          "call": 100
+        },
+        "K8s": {
+          "call": 100
+        },
+        "K7s": {
+          "call": 100
+        },
+        "K6s": {
+          "call": 100
+        },
+        "K5s": {
+          "call": 100
+        },
+        "K4s": {
+          "call": 100
+        },
+        "K3s": {
+          "call": 100
+        },
+        "K2s": {
+          "call": 100
+        },
+        "AQo": {
+          "raise": 50,
+          "call": 50
+        },
+        "KQo": {
+          "call": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "call": 50,
+          "raise": 50
+        },
+        "QTs": {
+          "call": 100
+        },
+        "Q9s": {
+          "call": 100
+        },
+        "Q8s": {
+          "call": 100
+        },
+        "AJo": {
+          "call": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "J9s": {
+          "call": 100
+        },
+        "J8s": {
+          "call": 100
+        },
+        "ATo": {
+          "call": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "T8s": {
+          "call": 100
+        },
+        "T7s": {
+          "call": 100
+        },
+        "98s": {
+          "call": 100
+        },
+        "97s": {
+          "call": 100
+        },
+        "96s": {
+          "call": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "call": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "call": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "64s": {
+          "call": 100
+        },
+        "54s": {
+          "raise": 100
+        },
+        "53s": {
+          "call": 100
+        },
+        "43s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "Q7s only-in-greenline",
+        "KJo only-in-pekarstas",
+        "QJo only-in-pekarstas",
+        "QTo only-in-pekarstas",
+        "JTo only-in-pekarstas",
+        "85s only-in-greenline",
+        "74s only-in-greenline"
+      ]
+    },
+    "BTN-ISO": {
+      "hands": {
+        "22": {
+          "raise": 100
+        },
+        "33": {
+          "raise": 100
+        },
+        "44": {
+          "raise": 100
+        },
+        "55": {
+          "raise": 100
+        },
+        "66": {
+          "raise": 100
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A8s": {
+          "raise": 100
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "K8s": {
+          "raise": 100
+        },
+        "K7s": {
+          "raise": 100
+        },
+        "K6s": {
+          "raise": 100
+        },
+        "K5s": {
+          "raise": 100
+        },
+        "K4s": {
+          "raise": 100
+        },
+        "K3s": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "Q8s": {
+          "raise": 100
+        },
+        "Q7s": {
+          "raise": 100
+        },
+        "Q6s": {
+          "raise": 100
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "raise": 100
+        },
+        "QJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 100
+        },
+        "J8s": {
+          "raise": 100
+        },
+        "J7s": {
+          "raise": 100
+        },
+        "J6s": {
+          "raise": 100
+        },
+        "ATo": {
+          "raise": 100
+        },
+        "KTo": {
+          "raise": 100
+        },
+        "QTo": {
+          "raise": 100
+        },
+        "JTo": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "T8s": {
+          "raise": 100
+        },
+        "T7s": {
+          "raise": 100
+        },
+        "T6s": {
+          "raise": 100
+        },
+        "A9o": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "97s": {
+          "raise": 100
+        },
+        "96s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "raise": 100
+        },
+        "85s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "raise": 100
+        },
+        "74s": {
+          "raise": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "64s": {
+          "raise": 100
+        },
+        "54s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "greenline"
+      ],
+      "notes": []
+    },
+    "BTN-RFI": {
+      "hands": {
+        "22": {
+          "raise": 100
+        },
+        "33": {
+          "raise": 100
+        },
+        "44": {
+          "raise": 100
+        },
+        "55": {
+          "raise": 100
+        },
+        "66": {
+          "raise": 100
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A8s": {
+          "raise": 100
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "K8s": {
+          "raise": 100
+        },
+        "K7s": {
+          "raise": 100
+        },
+        "K6s": {
+          "raise": 100
+        },
+        "K5s": {
+          "raise": 100
+        },
+        "K4s": {
+          "raise": 91.7
+        },
+        "K3s": {
+          "raise": 91.7
+        },
+        "K2s": {
+          "raise": 83.3
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "Q8s": {
+          "raise": 100
+        },
+        "Q7s": {
+          "raise": 91.7
+        },
+        "Q6s": {
+          "raise": 91.7
+        },
+        "Q5s": {
+          "raise": 83.3
+        },
+        "Q4s": {
+          "raise": 83.3
+        },
+        "Q3s": {
+          "raise": 100
+        },
+        "Q2s": {
+          "raise": 100
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "raise": 100
+        },
+        "QJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 100
+        },
+        "J8s": {
+          "raise": 100
+        },
+        "J7s": {
+          "raise": 91.7
+        },
+        "J6s": {
+          "raise": 83.3
+        },
+        "J5s": {
+          "raise": 100
+        },
+        "ATo": {
+          "raise": 100
+        },
+        "KTo": {
+          "raise": 100
+        },
+        "QTo": {
+          "raise": 100
+        },
+        "JTo": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "T8s": {
+          "raise": 100
+        },
+        "T7s": {
+          "raise": 91.7
+        },
+        "T6s": {
+          "raise": 100
+        },
+        "A9o": {
+          "raise": 100
+        },
+        "K9o": {
+          "raise": 100
+        },
+        "Q9o": {
+          "raise": 100
+        },
+        "J9o": {
+          "raise": 100
+        },
+        "T9o": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "97s": {
+          "raise": 100
+        },
+        "96s": {
+          "raise": 91.7
+        },
+        "A8o": {
+          "raise": 100
+        },
+        "K8o": {
+          "raise": 58.3,
+          "fold": 33.3
+        },
+        "Q8o": {
+          "raise": 83.3
+        },
+        "J8o": {
+          "raise": 83.3
+        },
+        "T8o": {
+          "raise": 91.7
+        },
+        "98o": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "raise": 100
+        },
+        "85s": {
+          "raise": 50,
+          "fold": 33.3
+        },
+        "A7o": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "raise": 100
+        },
+        "74s": {
+          "raise": 50,
+          "fold": 33.3
+        },
+        "A6o": {
+          "raise": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "64s": {
+          "raise": 91.7
+        },
+        "63s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A5o": {
+          "raise": 100
+        },
+        "54s": {
+          "raise": 100
+        },
+        "53s": {
+          "raise": 58.3,
+          "fold": 33.3
+        },
+        "A4o": {
+          "raise": 100
+        },
+        "43s": {
+          "raise": 58.3,
+          "fold": 33.3
+        }
+      },
+      "providerCount": 3,
+      "providers": [
+        "greenline",
+        "pekarstas",
+        "tyloo"
+      ],
+      "notes": [
+        "K7o only-in-tyloo",
+        "97o only-in-tyloo",
+        "87o only-in-tyloo",
+        "76o only-in-tyloo",
+        "65o only-in-tyloo",
+        "A3o only-in-tyloo",
+        "32s only-in-tyloo",
+        "A2o only-in-tyloo"
+      ]
+    },
+    "BTN-vs-3bet-BB": {
+      "hands": {
+        "22": {
+          "call": 100
+        },
+        "33": {
+          "call": 100
+        },
+        "44": {
+          "call": 100
+        },
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A8s": {
+          "call": 100
+        },
+        "A7s": {
+          "call": 100
+        },
+        "A6s": {
+          "call": 100
+        },
+        "A5s": {
+          "call": 100
+        },
+        "A4s": {
+          "call": 100
+        },
+        "A3s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A2s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "call": 100
+        },
+        "K9s": {
+          "call": 100
+        },
+        "K8s": {
+          "call": 100
+        },
+        "K7s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "K6s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "call": 100
+        },
+        "KQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "call": 100
+        },
+        "Q9s": {
+          "call": 100
+        },
+        "AJo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "allin": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "J9s": {
+          "call": 100
+        },
+        "J8s": {
+          "call": 100
+        },
+        "ATo": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "T8s": {
+          "call": 100
+        },
+        "98s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        },
+        "65s": {
+          "call": 100
+        },
+        "54s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "BTN-vs-3bet-SB": {
+      "hands": {
+        "22": {
+          "call": 100
+        },
+        "33": {
+          "call": 100
+        },
+        "44": {
+          "call": 100
+        },
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A8s": {
+          "call": 100
+        },
+        "A7s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A6s": {
+          "call": 100
+        },
+        "A5s": {
+          "call": 100
+        },
+        "A4s": {
+          "call": 100
+        },
+        "A3s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A2s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "call": 100
+        },
+        "K9s": {
+          "call": 100
+        },
+        "K8s": {
+          "call": 100
+        },
+        "K7s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "K6s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "call": 100
+        },
+        "KQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "call": 100
+        },
+        "Q9s": {
+          "call": 100
+        },
+        "Q8s": {
+          "call": 100
+        },
+        "AJo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "allin": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "J9s": {
+          "call": 100
+        },
+        "J8s": {
+          "call": 100
+        },
+        "ATo": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "T8s": {
+          "call": 100
+        },
+        "98s": {
+          "call": 100
+        },
+        "97s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        },
+        "65s": {
+          "call": 100
+        },
+        "54s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "BTN-vs-4bet-CO": {
+      "hands": {
+        "66": {
+          "call": 50,
+          "fold": 50
+        },
+        "77": {
+          "allin": 100
+        },
+        "88": {
+          "allin": 100
+        },
+        "99": {
+          "allin": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A8s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A7s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "allin": 100
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "call": 100
+        },
+        "K9s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "call": 50,
+          "fold": 50
+        },
+        "KQo": {
+          "call": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "call": 100
+        },
+        "Q9s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AJo": {
+          "call": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "J9s": {
+          "call": 50,
+          "fold": 50
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "T8s": {
+          "call": 50,
+          "fold": 50
+        },
+        "98s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "BTN-vs-4bet-UTG": {
+      "hands": {
+        "77": {
+          "call": 50,
+          "fold": 50
+        },
+        "88": {
+          "call": 50,
+          "fold": 50
+        },
+        "99": {
+          "call": 50,
+          "fold": 50
+        },
+        "AA": {
+          "call": 100
+        },
+        "AKs": {
+          "call": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A3s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A2s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "call": 100
+        },
+        "KK": {
+          "call": 100
+        },
+        "KQs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "call": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "call": 100
+        },
+        "QJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "QTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "98s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "BTN-vs-open-CO": {
+      "hands": {
+        "44": {
+          "raise": 25,
+          "fold": 50,
+          "call": 25
+        },
+        "55": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "66": {
+          "raise": 100
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A8s": {
+          "raise": 100
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "T8s": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "A6s only-in-greenline",
+        "A4s only-in-greenline",
+        "A3s only-in-greenline",
+        "A2s only-in-greenline",
+        "K8s only-in-greenline",
+        "K7s only-in-greenline",
+        "K6s only-in-greenline",
+        "K5s only-in-greenline",
+        "Q8s only-in-greenline",
+        "Q7s only-in-greenline",
+        "Q6s only-in-greenline",
+        "KJo only-in-greenline",
+        "QJo only-in-greenline",
+        "J8s only-in-greenline",
+        "J7s only-in-greenline",
+        "ATo only-in-greenline",
+        "KTo only-in-greenline",
+        "T7s only-in-greenline",
+        "A9o only-in-greenline",
+        "97s only-in-greenline",
+        "96s only-in-greenline",
+        "86s only-in-greenline",
+        "85s only-in-greenline",
+        "75s only-in-greenline",
+        "65s only-in-greenline",
+        "64s only-in-greenline",
+        "54s only-in-greenline"
+      ]
+    },
+    "BTN-vs-open-MP": {
+      "hands": {
+        "44": {
+          "raise": 100
+        },
+        "55": {
+          "raise": 100
+        },
+        "66": {
+          "raise": 100
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "T8s": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "97s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "raise": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "54s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "greenline"
+      ],
+      "notes": []
+    },
+    "BTN-vs-open-UTG": {
+      "hands": {
+        "55": {
+          "raise": 25,
+          "fold": 50,
+          "call": 25
+        },
+        "66": {
+          "raise": 25,
+          "fold": 50,
+          "call": 25
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "CO-ISO": {
+      "hands": {
+        "22": {
+          "raise": 100
+        },
+        "33": {
+          "raise": 100
+        },
+        "44": {
+          "raise": 100
+        },
+        "55": {
+          "raise": 100
+        },
+        "66": {
+          "raise": 100
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A8s": {
+          "raise": 100
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "K8s": {
+          "raise": 100
+        },
+        "K7s": {
+          "raise": 100
+        },
+        "K6s": {
+          "raise": 100
+        },
+        "K5s": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "Q8s": {
+          "raise": 100
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "raise": 100
+        },
+        "QJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 100
+        },
+        "J8s": {
+          "raise": 100
+        },
+        "ATo": {
+          "raise": 100
+        },
+        "KTo": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "T8s": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "97s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "raise": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "64s": {
+          "raise": 100
+        },
+        "54s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "greenline"
+      ],
+      "notes": []
+    },
+    "CO-RFI": {
+      "hands": {
+        "22": {
+          "raise": 83.3
+        },
+        "33": {
+          "raise": 83.3
+        },
+        "44": {
+          "raise": 91.7
+        },
+        "55": {
+          "raise": 100
+        },
+        "66": {
+          "raise": 100
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A8s": {
+          "raise": 100
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 91.7
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "K8s": {
+          "raise": 83.3
+        },
+        "K7s": {
+          "raise": 75
+        },
+        "K6s": {
+          "raise": 100
+        },
+        "K5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "Q8s": {
+          "raise": 83.3
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "raise": 100
+        },
+        "QJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 100
+        },
+        "J8s": {
+          "raise": 83.3
+        },
+        "J7s": {
+          "raise": 100
+        },
+        "ATo": {
+          "raise": 100
+        },
+        "KTo": {
+          "raise": 91.7
+        },
+        "QTo": {
+          "raise": 83.3
+        },
+        "JTo": {
+          "raise": 91.7
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "T8s": {
+          "raise": 91.7
+        },
+        "T7s": {
+          "raise": 100
+        },
+        "A9o": {
+          "raise": 58.3,
+          "fold": 33.3
+        },
+        "T9o": {
+          "raise": 50,
+          "fold": 50
+        },
+        "98s": {
+          "raise": 100
+        },
+        "97s": {
+          "raise": 83.3
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "raise": 83.3
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "raise": 75
+        },
+        "65s": {
+          "raise": 91.7
+        },
+        "64s": {
+          "raise": 100
+        },
+        "54s": {
+          "raise": 83.3
+        }
+      },
+      "providerCount": 3,
+      "providers": [
+        "greenline",
+        "pekarstas",
+        "tyloo"
+      ],
+      "notes": [
+        "A8o only-in-tyloo",
+        "A7o only-in-tyloo"
+      ]
+    },
+    "CO-vs-3bet-BB": {
+      "hands": {
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A8s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "call": 100
+        },
+        "K9s": {
+          "call": 100
+        },
+        "K8s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "call": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        },
+        "65s": {
+          "call": 100
+        },
+        "54s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "AQo only-in-pekarstas"
+      ]
+    },
+    "CO-vs-3bet-BTN": {
+      "hands": {
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A8s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A7s": {
+          "call": 100
+        },
+        "A6s": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "call": 100
+        },
+        "K9s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "KQo": {
+          "call": 100
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "call": 100
+        },
+        "AJo": {
+          "call": 100
+        },
+        "JJ": {
+          "allin": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "J9s": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "98s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        },
+        "65s": {
+          "call": 100
+        },
+        "54s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "CO-vs-3bet-SB": {
+      "hands": {
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A8s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "call": 100
+        },
+        "AQo": {
+          "call": 100
+        },
+        "KQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "call": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "98s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        },
+        "65s": {
+          "call": 100
+        },
+        "54s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "CO-vs-4bet-UTG": {
+      "hands": {
+        "77": {
+          "call": 50,
+          "fold": 50
+        },
+        "88": {
+          "call": 50,
+          "fold": 50
+        },
+        "99": {
+          "call": 50,
+          "fold": 50
+        },
+        "AA": {
+          "call": 100
+        },
+        "AKs": {
+          "call": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "call": 100
+        },
+        "KK": {
+          "call": 100
+        },
+        "KQs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "call": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "call": 100
+        },
+        "QJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "QTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "TT": {
+          "call": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "CO-vs-open-UTG": {
+      "hands": {
+        "66": {
+          "call": 50,
+          "fold": 50
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "call": 50,
+          "fold": 50
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "MP-ISO": {
+      "hands": {
+        "22": {
+          "raise": 100
+        },
+        "33": {
+          "raise": 100
+        },
+        "44": {
+          "raise": 100
+        },
+        "55": {
+          "raise": 100
+        },
+        "66": {
+          "raise": 100
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A8s": {
+          "raise": 100
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "K8s": {
+          "raise": 100
+        },
+        "K7s": {
+          "raise": 100
+        },
+        "K6s": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "ATo": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "65s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "greenline"
+      ],
+      "notes": []
+    },
+    "MP-RFI": {
+      "hands": {
+        "22": {
+          "raise": 50,
+          "fold": 50
+        },
+        "33": {
+          "raise": 100
+        },
+        "44": {
+          "raise": 75
+        },
+        "55": {
+          "raise": 83.3
+        },
+        "66": {
+          "raise": 91.7
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 91.7
+        },
+        "A8s": {
+          "raise": 83.3
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 91.7
+        },
+        "A4s": {
+          "raise": 83.3
+        },
+        "A3s": {
+          "raise": 75
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 75
+        },
+        "K8s": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 91.7
+        },
+        "Q9s": {
+          "raise": 75
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "raise": 83.3
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 75
+        },
+        "ATo": {
+          "raise": 91.7
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 83.3
+        },
+        "T8s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "98s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "65s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 3,
+      "providers": [
+        "greenline",
+        "pekarstas",
+        "tyloo"
+      ],
+      "notes": [
+        "QJo only-in-tyloo"
+      ]
+    },
+    "MP-vs-3bet-BB": {
+      "hands": {
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        },
+        "65s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "MP-vs-3bet-BTN": {
+      "hands": {
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "call": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        },
+        "65s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "MP-vs-3bet-CO": {
+      "hands": {
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "call": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "MP-vs-3bet-SB": {
+      "hands": {
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "call": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "raise": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        },
+        "65s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "MP-vs-4bet-UTG": {
+      "hands": {
+        "77": {
+          "call": 50,
+          "fold": 50
+        },
+        "88": {
+          "call": 50,
+          "fold": 50
+        },
+        "99": {
+          "call": 50,
+          "fold": 50
+        },
+        "AA": {
+          "call": 100
+        },
+        "AKs": {
+          "call": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "ATs": {
+          "call": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "call": 100
+        },
+        "KK": {
+          "call": 100
+        },
+        "KQs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "call": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "call": 100
+        },
+        "QJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "QTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "TT": {
+          "call": 50,
+          "fold": 50
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "MP-vs-open-UTG": {
+      "hands": {
+        "66": {
+          "call": 50,
+          "fold": 50
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "SB-ISO": {
+      "hands": {
+        "22": {
+          "raise": 100
+        },
+        "33": {
+          "raise": 100
+        },
+        "44": {
+          "raise": 100
+        },
+        "55": {
+          "raise": 100
+        },
+        "66": {
+          "raise": 100
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A8s": {
+          "raise": 100
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "K8s": {
+          "raise": 100
+        },
+        "K7s": {
+          "raise": 100
+        },
+        "K6s": {
+          "raise": 100
+        },
+        "K5s": {
+          "raise": 100
+        },
+        "K4s": {
+          "raise": 100
+        },
+        "K3s": {
+          "raise": 100
+        },
+        "K2s": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "Q8s": {
+          "raise": 100
+        },
+        "Q7s": {
+          "raise": 100
+        },
+        "Q6s": {
+          "raise": 100
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 100
+        },
+        "J8s": {
+          "raise": 100
+        },
+        "ATo": {
+          "raise": 100
+        },
+        "KTo": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "T8s": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "97s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "raise": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "64s": {
+          "raise": 100
+        },
+        "54s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "greenline"
+      ],
+      "notes": []
+    },
+    "SB-RFI": {
+      "hands": {
+        "22": {
+          "raise": 100
+        },
+        "33": {
+          "raise": 100
+        },
+        "44": {
+          "raise": 100
+        },
+        "55": {
+          "raise": 100
+        },
+        "66": {
+          "raise": 100
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A8s": {
+          "raise": 100
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "K8s": {
+          "raise": 100
+        },
+        "K7s": {
+          "raise": 100
+        },
+        "K6s": {
+          "raise": 100
+        },
+        "K5s": {
+          "raise": 100
+        },
+        "K4s": {
+          "raise": 100
+        },
+        "K3s": {
+          "raise": 100
+        },
+        "K2s": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "Q8s": {
+          "raise": 100
+        },
+        "Q7s": {
+          "raise": 100
+        },
+        "Q6s": {
+          "raise": 100
+        },
+        "Q5s": {
+          "raise": 91.7
+        },
+        "Q4s": {
+          "raise": 91.7
+        },
+        "Q3s": {
+          "raise": 83.3
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "raise": 100
+        },
+        "QJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 100
+        },
+        "J8s": {
+          "raise": 100
+        },
+        "J7s": {
+          "raise": 100
+        },
+        "J6s": {
+          "raise": 91.7
+        },
+        "J5s": {
+          "raise": 83.3
+        },
+        "ATo": {
+          "raise": 100
+        },
+        "KTo": {
+          "raise": 100
+        },
+        "QTo": {
+          "raise": 100
+        },
+        "JTo": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "T8s": {
+          "raise": 100
+        },
+        "T7s": {
+          "raise": 100
+        },
+        "T6s": {
+          "raise": 83.3
+        },
+        "A9o": {
+          "raise": 100
+        },
+        "K9o": {
+          "raise": 100
+        },
+        "Q9o": {
+          "raise": 100
+        },
+        "J9o": {
+          "raise": 100
+        },
+        "T9o": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "97s": {
+          "raise": 100
+        },
+        "96s": {
+          "raise": 91.7
+        },
+        "A8o": {
+          "raise": 100
+        },
+        "K8o": {
+          "raise": 75,
+          "fold": 25
+        },
+        "Q8o": {
+          "raise": 87.5
+        },
+        "J8o": {
+          "raise": 91.7
+        },
+        "T8o": {
+          "raise": 91.7
+        },
+        "98o": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "raise": 100
+        },
+        "A7o": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        },
+        "75s": {
+          "raise": 100
+        },
+        "A6o": {
+          "raise": 100
+        },
+        "65s": {
+          "raise": 100
+        },
+        "64s": {
+          "raise": 100
+        },
+        "A5o": {
+          "raise": 100
+        },
+        "54s": {
+          "raise": 100
+        },
+        "53s": {
+          "raise": 91.7
+        },
+        "A4o": {
+          "raise": 100
+        },
+        "43s": {
+          "raise": 91.7
+        }
+      },
+      "providerCount": 3,
+      "providers": [
+        "greenline",
+        "pekarstas",
+        "tyloo"
+      ],
+      "notes": [
+        "Q2s only-in-tyloo",
+        "85s only-in-tyloo",
+        "K7o only-in-tyloo",
+        "87o only-in-tyloo",
+        "K6o only-in-tyloo",
+        "76o only-in-tyloo",
+        "K5o only-in-tyloo",
+        "65o only-in-tyloo",
+        "A3o only-in-tyloo",
+        "A2o only-in-tyloo"
+      ]
+    },
+    "SB-vs-3bet-BB": {
+      "hands": {
+        "22": {
+          "call": 100
+        },
+        "33": {
+          "call": 100
+        },
+        "44": {
+          "call": 100
+        },
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 100
+        },
+        "A8s": {
+          "call": 100
+        },
+        "A7s": {
+          "call": 100
+        },
+        "A6s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "call": 100
+        },
+        "A4s": {
+          "call": 100
+        },
+        "A3s": {
+          "call": 100
+        },
+        "A2s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "call": 100
+        },
+        "K9s": {
+          "call": 100
+        },
+        "K8s": {
+          "call": 100
+        },
+        "K7s": {
+          "call": 100
+        },
+        "K6s": {
+          "call": 100
+        },
+        "AQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "KQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "call": 100
+        },
+        "Q9s": {
+          "call": 100
+        },
+        "Q8s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AJo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "KJo": {
+          "call": 100
+        },
+        "JJ": {
+          "allin": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "J9s": {
+          "call": 100
+        },
+        "J8s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "ATo": {
+          "call": 100
+        },
+        "TT": {
+          "allin": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "T8s": {
+          "call": 100
+        },
+        "98s": {
+          "call": 100
+        },
+        "97s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        },
+        "65s": {
+          "call": 100
+        },
+        "54s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "SB-vs-4bet-BTN": {
+      "hands": {
+        "77": {
+          "call": 50,
+          "fold": 50
+        },
+        "88": {
+          "allin": 100
+        },
+        "99": {
+          "allin": 100
+        },
+        "AA": {
+          "call": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A8s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A7s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A6s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A3s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A2s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "K9s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "call": 100
+        },
+        "KQo": {
+          "call": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "QTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "Q9s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AJo": {
+          "call": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "allin": 100
+        },
+        "JTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "J9s": {
+          "call": 50,
+          "fold": 50
+        },
+        "ATo": {
+          "call": 50,
+          "fold": 50
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "T8s": {
+          "call": 50,
+          "fold": 50
+        },
+        "98s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        },
+        "76s": {
+          "call": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "SB-vs-4bet-CO": {
+      "hands": {
+        "88": {
+          "allin": 100
+        },
+        "99": {
+          "allin": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A9s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "call": 50,
+          "fold": 50
+        },
+        "KQo": {
+          "call": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "QTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "AJo": {
+          "call": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "allin": 100
+        },
+        "JTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 50,
+          "fold": 50
+        },
+        "T8s": {
+          "call": 50,
+          "fold": 50
+        },
+        "98s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "SB-vs-4bet-MP": {
+      "hands": {
+        "88": {
+          "call": 50,
+          "fold": 50
+        },
+        "99": {
+          "call": 50,
+          "fold": 50
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "ATs": {
+          "call": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "call": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "call": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "call": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "call": 100
+        },
+        "QJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "QTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "TT": {
+          "call": 100
+        },
+        "87s": {
+          "call": 50,
+          "fold": 50
+        },
+        "76s": {
+          "call": 50,
+          "fold": 50
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "SB-vs-4bet-UTG": {
+      "hands": {
+        "99": {
+          "call": 50,
+          "fold": 50
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "ATs": {
+          "call": 50,
+          "fold": 50
+        },
+        "A5s": {
+          "call": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "call": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 50,
+          "fold": 50
+        },
+        "KJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "AQo": {
+          "call": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "call": 100
+        },
+        "QJs": {
+          "call": 50,
+          "fold": 50
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 50,
+          "fold": 50
+        },
+        "TT": {
+          "call": 100
+        }
+      },
+      "providerCount": 1,
+      "providers": [
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "SB-vs-open-BTN": {
+      "hands": {
+        "44": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "55": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "66": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A8s": {
+          "raise": 100
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 100
+        },
+        "K8s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "K7s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 100
+        },
+        "Q8s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "Q7s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "KJo": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "QJo": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 100
+        },
+        "J8s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "ATo": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "T8s": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "K6s only-in-greenline",
+        "K5s only-in-greenline",
+        "K4s only-in-greenline",
+        "K3s only-in-greenline",
+        "K2s only-in-greenline",
+        "Q6s only-in-greenline",
+        "Q5s only-in-greenline",
+        "J7s only-in-greenline",
+        "J6s only-in-greenline",
+        "KTo only-in-greenline",
+        "JTo only-in-pekarstas",
+        "T7s only-in-greenline",
+        "T6s only-in-greenline",
+        "A9o only-in-greenline",
+        "97s only-in-greenline",
+        "96s only-in-greenline",
+        "86s only-in-greenline",
+        "85s only-in-greenline",
+        "75s only-in-greenline",
+        "74s only-in-greenline",
+        "65s only-in-greenline",
+        "64s only-in-greenline",
+        "54s only-in-greenline",
+        "33 only-in-greenline",
+        "22 only-in-greenline"
+      ]
+    },
+    "SB-vs-open-CO": {
+      "hands": {
+        "66": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "77": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "A2s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "K9s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "Q9s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "J9s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 100
+        },
+        "86s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "76s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "A8s only-in-greenline",
+        "A7s only-in-greenline",
+        "A6s only-in-greenline",
+        "K8s only-in-greenline",
+        "K7s only-in-greenline",
+        "K6s only-in-greenline",
+        "K5s only-in-greenline",
+        "Q8s only-in-greenline",
+        "KJo only-in-greenline",
+        "J8s only-in-greenline",
+        "ATo only-in-greenline",
+        "T8s only-in-greenline",
+        "T7s only-in-greenline",
+        "97s only-in-greenline",
+        "96s only-in-greenline",
+        "85s only-in-greenline",
+        "75s only-in-greenline",
+        "65s only-in-greenline",
+        "64s only-in-greenline",
+        "55 only-in-greenline",
+        "54s only-in-greenline",
+        "44 only-in-greenline",
+        "33 only-in-greenline",
+        "22 only-in-greenline"
+      ]
+    },
+    "SB-vs-open-MP": {
+      "hands": {
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 100
+        },
+        "A3s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "A2s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "98s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "87s": {
+          "raise": 100
+        },
+        "76s": {
+          "raise": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "A8s only-in-greenline",
+        "A7s only-in-greenline",
+        "A6s only-in-greenline",
+        "K9s only-in-greenline",
+        "K8s only-in-greenline",
+        "K7s only-in-greenline",
+        "K6s only-in-greenline",
+        "KQo only-in-greenline",
+        "Q9s only-in-greenline",
+        "AJo only-in-greenline",
+        "J9s only-in-greenline",
+        "T8s only-in-greenline",
+        "97s only-in-greenline",
+        "86s only-in-greenline",
+        "77 only-in-greenline",
+        "75s only-in-greenline",
+        "66 only-in-greenline",
+        "65s only-in-greenline",
+        "64s only-in-greenline",
+        "55 only-in-greenline",
+        "54s only-in-greenline",
+        "44 only-in-greenline",
+        "33 only-in-greenline",
+        "22 only-in-greenline"
+      ]
+    },
+    "SB-vs-open-UTG": {
+      "hands": {
+        "88": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "A5s": {
+          "raise": 100
+        },
+        "A4s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "A3s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "A2s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "98s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        },
+        "87s": {
+          "raise": 50,
+          "call": 25,
+          "fold": 25
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "A8s only-in-greenline",
+        "A7s only-in-greenline",
+        "A6s only-in-greenline",
+        "KTs only-in-greenline",
+        "QTs only-in-greenline",
+        "AJo only-in-greenline",
+        "77 only-in-greenline",
+        "76s only-in-greenline",
+        "66 only-in-greenline",
+        "65s only-in-greenline",
+        "55 only-in-greenline",
+        "54s only-in-greenline",
+        "44 only-in-greenline",
+        "33 only-in-greenline",
+        "22 only-in-greenline"
+      ]
+    },
+    "UTG-RFI": {
+      "hands": {
+        "22": {
+          "raise": 50,
+          "fold": 50
+        },
+        "33": {
+          "raise": 50,
+          "fold": 50
+        },
+        "44": {
+          "raise": 50,
+          "fold": 50
+        },
+        "55": {
+          "raise": 75
+        },
+        "66": {
+          "raise": 83.3
+        },
+        "77": {
+          "raise": 100
+        },
+        "88": {
+          "raise": 100
+        },
+        "99": {
+          "raise": 100
+        },
+        "AA": {
+          "raise": 100
+        },
+        "AKs": {
+          "raise": 100
+        },
+        "AQs": {
+          "raise": 100
+        },
+        "AJs": {
+          "raise": 100
+        },
+        "ATs": {
+          "raise": 100
+        },
+        "A9s": {
+          "raise": 83.3
+        },
+        "A8s": {
+          "raise": 75
+        },
+        "A7s": {
+          "raise": 100
+        },
+        "A6s": {
+          "raise": 100
+        },
+        "A5s": {
+          "raise": 83.3
+        },
+        "A4s": {
+          "raise": 75
+        },
+        "A3s": {
+          "raise": 100
+        },
+        "A2s": {
+          "raise": 100
+        },
+        "AKo": {
+          "raise": 100
+        },
+        "KK": {
+          "raise": 100
+        },
+        "KQs": {
+          "raise": 100
+        },
+        "KJs": {
+          "raise": 100
+        },
+        "KTs": {
+          "raise": 91.7
+        },
+        "AQo": {
+          "raise": 100
+        },
+        "KQo": {
+          "raise": 91.7
+        },
+        "QQ": {
+          "raise": 100
+        },
+        "QJs": {
+          "raise": 100
+        },
+        "QTs": {
+          "raise": 83.3
+        },
+        "AJo": {
+          "raise": 100
+        },
+        "JJ": {
+          "raise": 100
+        },
+        "JTs": {
+          "raise": 100
+        },
+        "ATo": {
+          "raise": 50,
+          "fold": 33.3
+        },
+        "TT": {
+          "raise": 100
+        },
+        "T9s": {
+          "raise": 100
+        },
+        "98s": {
+          "raise": 100
+        },
+        "87s": {
+          "raise": 50,
+          "fold": 50
+        }
+      },
+      "providerCount": 3,
+      "providers": [
+        "greenline",
+        "pekarstas",
+        "tyloo"
+      ],
+      "notes": []
+    },
+    "UTG-vs-3bet-BB": {
+      "hands": {
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "UTG-vs-3bet-BTN": {
+      "hands": {
+        "55": {
+          "call": 100
+        },
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "A4s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "call": 100
+        },
+        "AQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "QTs": {
+          "call": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "UTG-vs-3bet-CO": {
+      "hands": {
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "call": 100
+        },
+        "AQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "UTG-vs-3bet-MP": {
+      "hands": {
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "A5s": {
+          "raise": 50,
+          "fold": 50
+        },
+        "AKo": {
+          "allin": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "KTs": {
+          "call": 100
+        },
+        "AQo": {
+          "raise": 50,
+          "fold": 50
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": []
+    },
+    "UTG-vs-3bet-SB": {
+      "hands": {
+        "66": {
+          "call": 100
+        },
+        "77": {
+          "call": 100
+        },
+        "88": {
+          "call": 100
+        },
+        "99": {
+          "call": 100
+        },
+        "AA": {
+          "allin": 100
+        },
+        "AKs": {
+          "allin": 100
+        },
+        "AQs": {
+          "call": 100
+        },
+        "AJs": {
+          "call": 100
+        },
+        "ATs": {
+          "call": 100
+        },
+        "AKo": {
+          "call": 100
+        },
+        "KK": {
+          "allin": 100
+        },
+        "KQs": {
+          "call": 100
+        },
+        "KJs": {
+          "call": 100
+        },
+        "QQ": {
+          "allin": 100
+        },
+        "QJs": {
+          "call": 100
+        },
+        "JJ": {
+          "call": 100
+        },
+        "JTs": {
+          "call": 100
+        },
+        "TT": {
+          "call": 100
+        },
+        "T9s": {
+          "call": 100
+        },
+        "87s": {
+          "call": 100
+        }
+      },
+      "providerCount": 2,
+      "providers": [
+        "greenline",
+        "pekarstas"
+      ],
+      "notes": [
+        "A5s only-in-pekarstas",
+        "A4s only-in-pekarstas",
+        "KTs only-in-pekarstas"
+      ]
+    }
+  }
+}
