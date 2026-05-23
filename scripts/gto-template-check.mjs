@@ -97,8 +97,9 @@ function parseTemplate(buf) {
 
   // Walk atoms: find the two length-prefixed range strings
   // Strings of the form `02 <uint32 LE length> <bytes>`
-  // The first long string after the 16-byte sub-header is hero range,
-  // the second long string is villain range.
+  // The first range-shaped string is hero range, the second is villain range.
+  // Range-shape gate matches gto-batch-generate.mjs's locator (≥10 chars,
+  // ≥2 commas, valid hand-class chars including suit letters c|d|h).
   const strings = [];
   let i = 16;       // skip sub-header
   while (i < content.length) {
@@ -113,12 +114,28 @@ function parseTemplate(buf) {
     }
     i += 1;
   }
-  // Hero range is typically the first string >= 4 chars, villain the second
-  const candidates = strings.filter((s) => s.len >= 2);
+  const isRangeStr = (s) =>
+    s.len >= 10 &&
+    (s.str.match(/,/g) || []).length >= 2 &&
+    /^[AKQJT2-9,+\-shdco]+$/.test(s.str);
+  const candidates = strings.filter(isRangeStr);
   const heroRange = candidates[0]?.str || "(none)";
   const villRange = candidates[1]?.str || "(none)";
   return { heroRange, villRange, contentLen: content.length };
 }
+
+// Byte-18 / byte-23 are uint8 sibling pointers in HEADER region B:
+//   byte 18 = template_hero_string_len + 17 + scenario_hero_delta
+//   byte 23 = template_vill_string_len + 4  + scenario_vill_delta
+// Both fields are single byte (verified — no adjacent high-byte field), so the
+// final value must fit in [0, 255]. The cap is on the post-substitution
+// scenario string length, not the template's:
+//   scenario_hero_string_len must satisfy (len + 17) <= 255  →  len <= 238
+//   scenario_vill_string_len must satisfy (len + 4)  <= 255  →  len <= 251
+// gto-batch-generate.mjs wraps overflow with `& 0xff` so a too-long string
+// silently produces a corrupted pointer rather than a hard error.
+const HERO_LEN_CAP = 238;
+const VILL_LEN_CAP = 251;
 
 // === Scenario combo demands ===
 
@@ -127,7 +144,14 @@ function scenarioRanges(scen) {
   const hero = d.hero_range?.classes?.join(",") || "";
   const auth = scen.villain_ranges?.[0]?.classes?.join(",") || "";
   const vill = auth || d.villain_range?.classes?.join(",") || "";
-  return { hero, vill, heroCombos: countCombos(hero), villCombos: countCombos(vill) };
+  return {
+    hero,
+    vill,
+    heroCombos: countCombos(hero),
+    villCombos: countCombos(vill),
+    heroLen: hero.length,
+    villLen: vill.length,
+  };
 }
 
 // === Main ===
@@ -140,8 +164,10 @@ const tmplVillCombos = countCombos(tmpl.villRange);
 console.log(`## Template: ${templatePath}\n`);
 console.log(`  Hero range:    ${tmpl.heroRange.slice(0, 80)}${tmpl.heroRange.length > 80 ? "..." : ""}`);
 console.log(`  Hero combos:   ${tmplHeroCombos}`);
+console.log(`  Hero str len:  ${tmpl.heroRange.length} chars`);
 console.log(`  Vill range:    ${tmpl.villRange.slice(0, 80)}${tmpl.villRange.length > 80 ? "..." : ""}`);
 console.log(`  Vill combos:   ${tmplVillCombos}`);
+console.log(`  Vill str len:  ${tmpl.villRange.length} chars`);
 console.log(`  HEADER content: ${tmpl.contentLen} bytes`);
 console.log("");
 
@@ -172,13 +198,53 @@ if (overVill.length) {
   if (overVill.length > 10) console.log(`    ...+${overVill.length - 10} more`);
 }
 
+// === Byte-18 / byte-23 single-byte pointer cap ===
+//
+// Independent of combo budget: the scenario's range STRING LENGTH (not combo
+// count) determines whether bytes 18/23 stay in [0,255]. See parseTemplate()
+// for the formula. Long ranges with specific suited combos (e.g. AcKc, KhQh)
+// can blow this cap on widely-substituted scenarios even when the combo
+// budget is fine.
+
+const overHeroLen = demands.filter((d) => d.heroLen > HERO_LEN_CAP);
+const overVillLen = demands.filter((d) => d.villLen > VILL_LEN_CAP);
+const heroLenCapOK = overHeroLen.length === 0;
+const villLenCapOK = overVillLen.length === 0;
+
+console.log("## Byte-pointer cap (independent of combo budget)\n");
+console.log(`  Max hero string length demanded:  ${Math.max(...demands.map((d) => d.heroLen))} chars  (cap ${HERO_LEN_CAP})  ${heroLenCapOK ? "✅" : "❌"}`);
+console.log(`  Max vill string length demanded:  ${Math.max(...demands.map((d) => d.villLen))} chars  (cap ${VILL_LEN_CAP})  ${villLenCapOK ? "✅" : "❌"}`);
 console.log("");
-if (maxHero <= tmplHeroCombos && maxVill <= tmplVillCombos) {
+
+if (overHeroLen.length) {
+  console.log(`  ${overHeroLen.length} scenarios exceed hero string-length cap (would corrupt byte 18):`);
+  for (const d of overHeroLen.slice(0, 10)) console.log(`    ${d.id.padEnd(45)} hero string = ${d.heroLen} chars > ${HERO_LEN_CAP}`);
+  if (overHeroLen.length > 10) console.log(`    ...+${overHeroLen.length - 10} more`);
+}
+if (overVillLen.length) {
+  console.log(`  ${overVillLen.length} scenarios exceed vill string-length cap (would corrupt byte 23):`);
+  for (const d of overVillLen.slice(0, 10)) console.log(`    ${d.id.padEnd(45)} vill string = ${d.villLen} chars > ${VILL_LEN_CAP}`);
+  if (overVillLen.length > 10) console.log(`    ...+${overVillLen.length - 10} more`);
+}
+
+console.log("");
+const comboOK = maxHero <= tmplHeroCombos && maxVill <= tmplVillCombos;
+const lenCapOK = heroLenCapOK && villLenCapOK;
+if (comboOK && lenCapOK) {
   console.log("✅ Template covers all 45 scenarios — safe for batch generation.");
 } else {
-  console.log("⚠ Template is too narrow for some scenarios — see lists above.");
-  console.log("  Re-save the template in GTO+ with wider hero+villain ranges:");
-  if (maxHero > tmplHeroCombos) console.log(`    hero  ≥ ${maxHero} combos`);
-  if (maxVill > tmplVillCombos) console.log(`    vill  ≥ ${maxVill} combos`);
+  if (!comboOK) {
+    console.log("⚠ Template is too narrow for some scenarios — see combo-budget lists above.");
+    console.log("  Re-save the template in GTO+ with wider hero+villain ranges:");
+    if (maxHero > tmplHeroCombos) console.log(`    hero  ≥ ${maxHero} combos`);
+    if (maxVill > tmplVillCombos) console.log(`    vill  ≥ ${maxVill} combos`);
+  }
+  if (!lenCapOK) {
+    console.log("⚠ Some scenarios exceed the byte-18 / byte-23 single-byte pointer cap.");
+    console.log("  These scenarios cannot be batch-generated cleanly with the current substitution scheme.");
+    console.log("  Workarounds: shorten the affected scenarios' range definitions in data/scenarios.json");
+    console.log("  (e.g. consolidate specific combos into broader hand classes), or rerun the");
+    console.log("  controlled-corpus experiment (tpl-C series) to find a multi-byte length field.");
+  }
   process.exit(1);
 }

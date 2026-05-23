@@ -127,16 +127,17 @@ function locateMainTree() {
 }
 const TEMPLATE_MAIN_TREE = locateMainTree();
 
-// Locate the two length-prefixed range strings + board + pot/stack atoms in the
-// template by scanning the HEADER content for `02 <len>` atoms in order.
-function locateSlots() {
+// Walk a HEADER content buffer collecting all `02 <uint32 LE len> <bytes>`
+// length-prefixed string atoms. Used by both the template locator and the
+// post-generation verification.
+function walkLpStrings(content) {
   const strs = [];
   let i = 16;
-  while (i < TEMPLATE_HDR_CONTENT.length) {
-    if (TEMPLATE_HDR_CONTENT[i] === 0x02 && i + 5 <= TEMPLATE_HDR_CONTENT.length) {
-      const len = TEMPLATE_HDR_CONTENT.readUInt32LE(i + 1);
-      if (i + 5 + len <= TEMPLATE_HDR_CONTENT.length && len < 500) {
-        const str = TEMPLATE_HDR_CONTENT.slice(i + 5, i + 5 + len).toString("utf8");
+  while (i < content.length) {
+    if (content[i] === 0x02 && i + 5 <= content.length) {
+      const len = content.readUInt32LE(i + 1);
+      if (i + 5 + len <= content.length && len < 500) {
+        const str = content.slice(i + 5, i + 5 + len).toString("utf8");
         strs.push({ off: i, len, str });
         i += 5 + len;
         continue;
@@ -144,6 +145,27 @@ function locateSlots() {
     }
     i += 1;
   }
+  return strs;
+}
+
+// Range-shaped string detector. Stricter than the original `s` / `o`-only
+// regex — accepts the suit letters `c|d|h` so specific suited combos like
+// `AcKc`, `KhQh`, `9c8c` match. Also enforces:
+//   - length >= 10 chars (a real range has multiple hand classes)
+//   - at least 2 commas (rejects bet-tree atoms like "75" or "0.5%")
+// Without these constraints the locator silently picked bet-size atoms as
+// the villain-range slot for 12 of 45 scenarios (see PR for the diagnosis).
+const isRangeStr = (s) =>
+  s.len >= 10 &&
+  (s.str.match(/,/g) || []).length >= 2 &&
+  /^[AKQJT2-9,+\-shdco]+$/.test(s.str);
+const isBoardStr = (s) => /^([2-9TJQKA][shdc]){3,5}$/.test(s.str);
+const isNumericText = (s) => /^[0-9.]+$/.test(s.str);
+
+// Locate the two length-prefixed range strings + board + pot/stack atoms in the
+// template by scanning the HEADER content for `02 <len>` atoms in order.
+function locateSlots() {
+  const strs = walkLpStrings(TEMPLATE_HDR_CONTENT);
   // Atom ordering (per binary analysis):
   //   1. hero range  (typically 4-200 chars, hand-class notation)
   //   2. villain range  (same)
@@ -152,13 +174,18 @@ function locateSlots() {
   //   5. pot display text ("29.00" etc)
   //   6. stack display text ("100.0" etc)
   //   ... then various small ints, bet sizes, etc.
-  const isRangeStr = (s) => /^[AKQJT2-9,+\-so]+$/.test(s.str) && s.len >= 2;
-  const isBoardStr = (s) => /^([2-9TJQKA][shdc]){3,5}$/.test(s.str);
-  const isNumericText = (s) => /^[0-9.]+$/.test(s.str);
 
-  const hero = strs.find(isRangeStr);
-  const vill = strs.find((s) => isRangeStr(s) && s.off > hero.off);
+  const rangeCandidates = strs.filter(isRangeStr);
+  if (rangeCandidates.length < 2) {
+    throw new Error(
+      `Locator: expected ≥2 range-shaped strings in template HEADER, found ${rangeCandidates.length}. ` +
+      `Strings seen: ${strs.slice(0, 8).map((s) => `"${s.str.slice(0, 20)}"`).join(", ")}`,
+    );
+  }
+  const hero = rangeCandidates[0];
+  const vill = rangeCandidates[1];
   const board = strs.find(isBoardStr);
+  if (!board) throw new Error("Locator: no board-shaped string in template HEADER");
   const numerics = strs.filter(isNumericText).filter((s) => s.off > board.off);
   // Skip rake ("0.5%" — has % so not pure numeric), then take first two numerics
   const potTxt = numerics[0];
@@ -195,6 +222,49 @@ function doubleBytes(v) {
   const b = Buffer.alloc(8);
   b.writeDoubleLE(v);
   return b;
+}
+
+// Re-parse a generated file's HEADER and assert that the length-prefixed atoms
+// at the hero and villain slot offsets contain exactly the intended ranges.
+// Catches:
+//   - locator slot-picking errors (substitution landed at wrong offset)
+//   - splice / offset arithmetic errors (cumulative shift miscounted)
+//   - any future regression that corrupts the substituted content
+// Does NOT catch:
+//   - byte-18 / byte-23 pointer corruption (the atom strings are intact even
+//     when those pointers overflow). That class is gated by gto-template-check.
+//
+// Uses exact-offset readout rather than range-shape filtering so dealt-hand
+// fallback ranges (e.g. "55,66" — see SOLVER-PIPELINE.md known caveats) don't
+// trigger a false positive.
+function verifyGenerated(outFile, expectedHero, expectedVill) {
+  const hdrSecLen = outFile.readUInt32LE(0);
+  const content = outFile.slice(24, 24 + hdrSecLen - 17);
+  // After substitution, the new HEADER content layout is:
+  //   - bytes before hero slot: unchanged from template
+  //   - hero lp-string at SLOTS.hero.off
+  //   - bytes between hero and vill: unchanged from template
+  //   - vill lp-string at (SLOTS.vill.off + heroLpDelta)
+  const heroOff = SLOTS.hero.off;
+  const heroLpDelta = expectedHero.length - SLOTS.hero.len;
+  const villOff = SLOTS.vill.off + heroLpDelta;
+
+  function readLp(off) {
+    if (off + 5 > content.length || content[off] !== 0x02) return null;
+    const len = content.readUInt32LE(off + 1);
+    if (off + 5 + len > content.length) return null;
+    return content.slice(off + 5, off + 5 + len).toString("utf8");
+  }
+
+  const foundHero = readLp(heroOff);
+  if (foundHero !== expectedHero) {
+    return `verify: hero slot @${heroOff} mismatch — expected "${expectedHero.slice(0, 30)}..." got "${(foundHero || "(no lp-string)").slice(0, 30)}..."`;
+  }
+  const foundVill = readLp(villOff);
+  if (foundVill !== expectedVill) {
+    return `verify: vill slot @${villOff} mismatch — expected "${expectedVill.slice(0, 30)}..." got "${(foundVill || "(no lp-string)").slice(0, 30)}..."`;
+  }
+  return null;
 }
 
 function generateForScenario(scen) {
@@ -304,6 +374,8 @@ function generateForScenario(scen) {
 
   return {
     file: outFile,
+    expectedHero: heroRange,
+    expectedVill: villRange,
     summary: {
       heroRange: heroRange.length + " chars",
       villRange: villRange.length + " chars",
@@ -346,6 +418,15 @@ for (const scen of targets) {
     continue;
   }
   if (!result) { failed++; continue; }
+  // Re-parse what we just built and assert the substituted ranges landed in
+  // the slots a future locator would pick. Catches both slot-picking errors
+  // and byte-pointer arithmetic errors before the bad file reaches disk.
+  const verifyErr = verifyGenerated(result.file, result.expectedHero, result.expectedVill);
+  if (verifyErr) {
+    failed++; failures.push({ id: scen.scenario_id, error: verifyErr });
+    console.log(`  ❌ ${scen.scenario_id.padEnd(45)} ${verifyErr}`);
+    continue;
+  }
   const outPath = join(OUT_DIR, `${scen.scenario_id}.gto2`);
   try {
     writeFileSync(outPath, result.file);

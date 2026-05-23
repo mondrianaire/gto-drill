@@ -166,10 +166,21 @@ Total active human time once template is built: **~3 clicks per batch run.**
 
 - Templates that lack a `template_max.gto2` style wide-range setup will OOM the
   solver on wide scenarios. The template-check script catches this preemptively.
-- The binary substitution recomputes the `@12` forward pointer for shifts but
-  assumes the template's region B (bet-tree abstraction) is independent of range
-  size. This held in our minimal tests; if a real generation crashes GTO+ on
-  load (not solve), we'd need to investigate region B further.
+- The binary substitution recomputes the `@12` forward pointer for shifts and
+  the byte 18 / byte 23 sibling pointers in region B. Both byte 18 and byte 23
+  are **single-byte** fields (verified — no adjacent high-byte field), so the
+  scenario's substituted range string length is capped:
+    - hero string ≤ 238 chars (else byte 18 overflows)
+    - villain string ≤ 251 chars (else byte 23 overflows)
+  `gto-template-check.mjs` reports any scenario that violates the cap as part
+  of its standard pre-flight output. The script's exit-1 verdict now covers
+  both the combo-budget check and the string-length cap.
+- `gto-batch-generate.mjs` now re-parses every generated file before writing
+  and asserts that the first two range-shaped strings in the new HEADER equal
+  the intended hero/villain. A scenario that fails this verify step is
+  reported as `❌ verify: ...` and skipped — the bad file never lands on disk.
+  This catches both locator slot-picking errors and byte-pointer arithmetic
+  errors before they reach PROCESS FILES.
 - For scenarios where `deriveRanges` falls back to the dealt-hand class (5/45
   edge cases: limped pots, ICM, BB-vs-SB), the solver gets a single-combo
   "range" and the equilibrium is degenerate. These need authored
