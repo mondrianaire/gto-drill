@@ -24,6 +24,24 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Added
+- **Preflop range library + GTO+ solver pipeline** (v2026-05-22.137). Three-source
+  consensus preflop range data (`data/preflop-ranges.json`, 52 scenario keys,
+  6 RFI ranges + all major defense scenarios at 100bb 6-max cash) aggregated from
+  greenline, pekarstas, and tyloo (each cell requires ≥2 source agreement to be
+  included). `src/preflop-ranges.js` exports `deriveRanges(scen)` which walks the
+  scenario's preflop action chain, identifies hero + villain archetypes
+  (RFI / vs-open / vs-3bet / etc), and returns derived ranges for the decision
+  point — 76% of our 45 scenarios resolve cleanly to chart-cited ranges, the rest
+  fall back to the dealt-hand class (limped pots, ICM short-stacks, BB-vs-SB
+  heads-up). New scripts: `scripts/gto-pastepack.mjs` generates per-scenario
+  GTO+ setup sheets to `solver-input/<id>.gtopaste.txt` (chart-derived hero range
+  + authored postflop villain range or chart-derived preflop fallback);
+  `scripts/gto-extract.mjs` connects to GTO+'s socket interface (TCP 55143,
+  auth via `tmp/customconnect.txt`) and extracts per-action FREQ + EV per combo
+  from solved `.gto2` files into `solver-output/solver-data.json` — the input
+  for the §8.1 GTO Summary Card.
+
 ### Changed
 - **Reveal "TAP TO GO DEEPER" accordion** (v2026-05-22.136). The deeper-dive
   reveal sections — strategic preamble, per-option matrix, villain range +

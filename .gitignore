@@ -1,0 +1,8 @@
+
+# Solver pipeline — paste-packs are generated, .gto2 files are local artifacts
+solver-input/
+solver-output/
+data/MINIMAL-*.gto2
+data/*.gto2
+!data/test32.gto2
+!data/test332.gto2
