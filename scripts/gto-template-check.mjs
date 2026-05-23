@@ -17,6 +17,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { deriveRanges } from "../src/preflop-ranges.js";
+import { canonicalize as canonicalizeRange } from "../src/range-canonicalize.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "..");
@@ -155,9 +156,14 @@ const VILL_LEN_CAP = 251;
 
 function scenarioRanges(scen) {
   const d = deriveRanges(scen);
-  const hero = d.hero_range?.classes?.join(",") || "";
+  const heroVerbose = d.hero_range?.classes?.join(",") || "";
   const auth = scen.villain_ranges?.[0]?.classes?.join(",") || "";
-  const vill = auth || d.villain_range?.classes?.join(",") || "";
+  const villVerbose = auth || d.villain_range?.classes?.join(",") || "";
+  // gto-batch-generate.mjs canonicalizes before substitution, so the actual
+  // string that lands in the .gto2 file is the canonical form — that's what
+  // counts against the byte-18 / byte-23 caps.
+  const hero = heroVerbose ? canonicalizeRange(heroVerbose) : "";
+  const vill = villVerbose ? canonicalizeRange(villVerbose) : "";
   return {
     hero,
     vill,

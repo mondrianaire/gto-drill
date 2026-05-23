@@ -38,6 +38,7 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { deriveRanges } from "../src/preflop-ranges.js";
+import { canonicalize as canonicalizeRange } from "../src/range-canonicalize.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "..");
@@ -350,18 +351,28 @@ function generateForScenario(scen) {
   if (!replay) return null;
 
   const derived = deriveRanges(scen);
-  const heroRange = derived.hero_range?.classes?.join(",") || "";
+  const heroVerbose = derived.hero_range?.classes?.join(",") || "";
   const authoredVill = scen.villain_ranges?.[0]?.classes?.join(",") || "";
-  const villRange = authoredVill || derived.villain_range?.classes?.join(",") || "";
+  const villVerbose = authoredVill || derived.villain_range?.classes?.join(",") || "";
 
-  if (!heroRange || !villRange) {
-    return { error: `missing range — hero=${heroRange.length} vill=${villRange.length}` };
+  if (!heroVerbose || !villVerbose) {
+    return { error: `missing range — hero=${heroVerbose.length} vill=${villVerbose.length}` };
   }
+
+  // Canonicalize ranges to GTO+'s on-save form before substitution. The
+  // tpl-C controlled-corpus experiment confirmed that GTO+ rewrites long
+  // verbose ranges into a compact canonical form on save (max ~224 chars),
+  // so we mirror that here to keep substituted strings under the byte-18 /
+  // byte-23 single-byte caps. The canonicalizer's self-check guarantees the
+  // combo set is preserved exactly. See src/range-canonicalize.js.
+  const heroRange = canonicalizeRange(heroVerbose);
+  const villRange = canonicalizeRange(villVerbose);
+
   if (heroRange.length > HERO_LEN_CAP) {
-    return { error: `hero string len ${heroRange.length} > ${HERO_LEN_CAP} cap (byte-18 uint8 overflow — would hard-crash GTO+)` };
+    return { error: `hero string len ${heroRange.length} > ${HERO_LEN_CAP} cap (byte-18 uint8 overflow — would hard-crash GTO+; canonicalization couldn't compress enough)` };
   }
   if (villRange.length > VILL_LEN_CAP) {
-    return { error: `vill string len ${villRange.length} > ${VILL_LEN_CAP} cap (byte-23 uint8 overflow — would hard-crash GTO+)` };
+    return { error: `vill string len ${villRange.length} > ${VILL_LEN_CAP} cap (byte-23 uint8 overflow — would hard-crash GTO+; canonicalization couldn't compress enough)` };
   }
 
   const board = []
