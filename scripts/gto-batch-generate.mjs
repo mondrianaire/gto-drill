@@ -93,6 +93,40 @@ const TEMPLATE = readFileSync(templatePath);
 const TEMPLATE_HDR_SEC_LEN = TEMPLATE.readUInt32LE(0);
 const TEMPLATE_HDR_CONTENT = TEMPLATE.slice(24, 24 + TEMPLATE_HDR_SEC_LEN - 17);
 
+// Empty MAIN TREE section + preamble (62 bytes total) — captured from an
+// unsolved template (test.gto2). We use this in place of the user's template's
+// MAIN TREE so GTO+ will re-solve from scratch for each scenario. Otherwise the
+// generated files inherit the template's solved-for-wide-ranges strategy data
+// and PROCESS FILES either skips them (sees them as solved) or uses stale
+// solve data inconsistent with the per-scenario substituted ranges.
+const EMPTY_MAIN_TREE = Buffer.from([
+  // preamble: section_length=46 (uint32 LE), padding, bytesum=211 (uint32 LE), padding
+  0x2e, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  0xd3, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+  // [MAIN TREE]
+  0x5b, 0x4d, 0x41, 0x49, 0x4e, 0x20, 0x54, 0x52, 0x45, 0x45, 0x5d,
+  // 23 bytes of "empty tree" content
+  0x03, 0x00, 0x00, 0x00, 0x10, 0x00, 0x00, 0x00,
+  0x01, 0x00, 0x00, 0x00, 0x06, 0x00, 0x00, 0x00,
+  0x00, 0xb9, 0x00, 0x00, 0x00, 0x00, 0x00,
+  // [/MAIN TREE]
+  0x5b, 0x2f, 0x4d, 0x41, 0x49, 0x4e, 0x20, 0x54, 0x52, 0x45, 0x45, 0x5d,
+]);
+
+// Locate the template's MAIN TREE section so we can replace it.
+function locateMainTree() {
+  const tag = Buffer.from("[MAIN TREE]");
+  const closeTag = Buffer.from("[/MAIN TREE]");
+  const tagAt = TEMPLATE.indexOf(tag);
+  const closeAt = TEMPLATE.indexOf(closeTag);
+  if (tagAt < 0 || closeAt < 0) throw new Error("Template missing MAIN TREE section");
+  // Preamble is 16 bytes before the open tag
+  const preambleStart = tagAt - 16;
+  const sectionEnd = closeAt + closeTag.length;
+  return { preambleStart, sectionEnd, sectionLen: TEMPLATE.readUInt32LE(preambleStart) };
+}
+const TEMPLATE_MAIN_TREE = locateMainTree();
+
 // Locate the two length-prefixed range strings + board + pot/stack atoms in the
 // template by scanning the HEADER content for `02 <len>` atoms in order.
 function locateSlots() {
@@ -236,10 +270,17 @@ function generateForScenario(scen) {
   newPreamble.writeUInt32LE(newSection.length, 0);
   newPreamble.writeUInt32LE(bytesum(newContent), 8);
 
-  // Assemble file: new preamble + new HEADER + tail (everything after old HEADER)
-  const tailStart = 16 + TEMPLATE_HDR_SEC_LEN;
-  const tail = TEMPLATE.slice(tailStart);
-  const outFile = Buffer.concat([newPreamble, newSection, tail]);
+  // Assemble file:
+  //   new preamble + new HEADER         (substituted scenario data)
+  //   + bytes from end-of-template-HEADER up to template's MAIN TREE preamble
+  //                                       (any sections between HEADER and MAIN TREE — currently none, but defensive)
+  //   + EMPTY_MAIN_TREE                  (62 bytes — forces GTO+ to re-solve)
+  //   + bytes from end of template's MAIN TREE to end of file
+  //                                       (the 5 static sections after MAIN TREE)
+  const hdrEnd = 16 + TEMPLATE_HDR_SEC_LEN;
+  const preMainTree = TEMPLATE.slice(hdrEnd, TEMPLATE_MAIN_TREE.preambleStart);
+  const postMainTree = TEMPLATE.slice(TEMPLATE_MAIN_TREE.sectionEnd);
+  const outFile = Buffer.concat([newPreamble, newSection, preMainTree, EMPTY_MAIN_TREE, postMainTree]);
 
   return {
     file: outFile,
