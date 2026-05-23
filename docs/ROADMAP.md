@@ -55,8 +55,8 @@ Status key: ✅ done · ◑ mostly done · ⏳ open · 🔒 blocked on an owner 
 |------|--------|--------|
 | Hand matrix *looks* editable — Tier-1 cell styling | §4.3 | ✅ PR #115 |
 | Hand matrix fullscreen editor — real 44px cells | §5 | ⏳ open · structural · the actual touch-target fix (cells are still ~20px inline) |
-| Compressed four-stage workflow — board strip, action timeline, decision panel | §6 / M2–M3 | ⏳ open · structural |
-| View toggle (expanded ⇄ compact) + first-run coach mark | §7 / M4 | ⏳ open · structural |
+| Compressed four-stage workflow — board strip, action timeline, decision panel | §6 / M2–M3 | ✅ v.128 (runout strip) → v.130 (hero strip) → v.131 (assembly) → v.134 (dividers + street dots) → v.135 (decide prompt + Pot/To call/Pot odds chips) → v.143 (+SPR chip, villain seat, confidence reveal-after-action) |
+| View toggle (expanded ⇄ compact) + first-run coach mark | §7 / M4 | ✅ v.131 (toggle) → v.132 (coach mark on overflow) → v.143 (icon glyph polish) |
 | Secondary controls → Tier 2, 44px | §4.2 | ✅ PR #115 |
 | Accessibility layer — focus rings, contrast, reduced-motion, ARIA | §3 | ✅ focus rings / contrast / reduced-motion (#115); spot-summary keyboard role + Enter/Space (#127) closed the last ARIA gap |
 | Shape pass — boxes for tags/badges | §2.4 / M8 | ✅ PR #129 — 7 static badges/tags moved off the 999px pill onto a `--radius-box` token; buttons left as-is per owner call (consistency-only scope) |
@@ -70,7 +70,7 @@ Status key: ✅ done · ◑ mostly done · ⏳ open · 🔒 blocked on an owner 
 | Chip-and-felt vocabulary propagation | Finding 05 | 🔒 Decision 2 |
 | Duel mode, opt-in (off by default) | Spec §8.8 | ⏳ open · the retired duel code still exists (task #79) — this is partly a revive, not a from-scratch build |
 
-**Tally:** ~18 items — 6 done, 1 mostly done, 9 open, 2 decision-blocked.
+**Tally:** ~18 items — 8 done, 1 mostly done, 7 open, 2 decision-blocked.
 
 ---
 
