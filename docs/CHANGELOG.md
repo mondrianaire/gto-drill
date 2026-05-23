@@ -25,6 +25,19 @@ into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
 ### Added
+- **GTO+ batch-solve infrastructure** (v2026-05-22.138). Two new scripts that
+  close the gap between paste-pack-by-hand and fully-batch-solved scenarios:
+  `scripts/gto-batch-generate.mjs` takes a max-budget `.gto2` template and emits
+  one ready-to-batch-solve `.gto2` per scenario (45 files) into `solver-output/`,
+  substituting per-scenario hero range / villain range / board / pot / stack
+  into the template's HEADER section and recomputing section length, content
+  bytesum, and the `@12` forward pointer per the binary spec we reverse-
+  engineered earlier. `scripts/gto-template-check.mjs` validates that a template
+  has enough combo budget for the widest scenario (688 hero combos / 1326 villain
+  combos across our 45) — prevents the OOM-during-solve failure mode we hit
+  empirically. New runbook at `docs/SOLVER-PIPELINE.md` covers the full
+  four-step workflow: generate → PROCESS FILES batch solve → socket extract →
+  merge to scenarios.json.
 - **Preflop range library + GTO+ solver pipeline** (v2026-05-22.137). Three-source
   consensus preflop range data (`data/preflop-ranges.json`, 52 scenario keys,
   6 RFI ranges + all major defense scenarios at 100bb 6-max cash) aggregated from
