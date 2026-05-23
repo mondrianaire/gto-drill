@@ -327,9 +327,20 @@ for (const scen of targets) {
   }
   if (!result) { failed++; continue; }
   const outPath = join(OUT_DIR, `${scen.scenario_id}.gto2`);
-  writeFileSync(outPath, result.file);
-  written++;
-  console.log(`  ✅ ${scen.scenario_id.padEnd(45)} board=${result.summary.board} pot=${result.summary.pot}bb stack=${result.summary.stack}bb hero=${result.summary.heroRange} vill=${result.summary.villRange} delta=${result.summary.headerDelta >= 0 ? "+" : ""}${result.summary.headerDelta}`);
+  try {
+    writeFileSync(outPath, result.file);
+    written++;
+    console.log(`  ✅ ${scen.scenario_id.padEnd(45)} board=${result.summary.board} pot=${result.summary.pot}bb stack=${result.summary.stack}bb hero=${result.summary.heroRange} vill=${result.summary.villRange} delta=${result.summary.headerDelta >= 0 ? "+" : ""}${result.summary.headerDelta}`);
+  } catch (err) {
+    failed++;
+    const reason = err.code === "EBUSY"
+      ? "file locked by another process (likely GTO+ — close it first)"
+      : err.code === "EACCES"
+      ? "permission denied"
+      : err.message;
+    failures.push({ id: scen.scenario_id, error: reason });
+    console.log(`  ⚠  ${scen.scenario_id.padEnd(45)} write failed: ${reason}`);
+  }
 }
 
 console.log("");
