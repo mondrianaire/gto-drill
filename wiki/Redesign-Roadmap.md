@@ -2,6 +2,8 @@
 
 The four-wave redesign plan, reconciled with what has shipped. Source: the UX meta-deliverable (design audit × Mobile Redesign Master Spec, 2026-05-22).
 
+> **Visual reference:** See [[Redesign Mockups]] for screenshots of all 10 interactive mockups, or open `wiki/GTO-Duel-Master-Redesign-Package.html` for the full interactive spec.
+
 ---
 
 ## Status key

@@ -19,6 +19,7 @@
 
 **Design**
 - [[Redesign Roadmap]]
+- [[Redesign Mockups]]
 - [[Design Audit Summary]]
 - [[Design Decisions]]
 

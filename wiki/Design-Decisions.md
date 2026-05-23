@@ -1,6 +1,6 @@
 # Design Decisions
 
-Key design choices in GTO Drill and the reasoning behind them.
+Key design choices in GTO Drill and the reasoning behind them. For the visual redesign direction, see [[Redesign Mockups]].
 
 ---
 

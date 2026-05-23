@@ -38,6 +38,7 @@ GTO Drill is a crowd-powered poker training app. Sign in, play solver-verified s
 
 ### Design
 - [[Redesign Roadmap]] — The four-wave redesign plan
+- [[Redesign Mockups]] — All 10 interactive mockups from the Master Redesign Spec
 - [[Design Audit Summary]] — UX audit findings and reports
 - [[Design Decisions]] — Key design choices and their rationale
 
