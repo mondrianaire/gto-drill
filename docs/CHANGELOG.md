@@ -24,6 +24,18 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Fixed
+- **Batch generator: strip template's solved MAIN TREE** (v2026-05-22.139).
+  `gto-batch-generate.mjs` was inheriting the template's MAIN TREE section
+  verbatim, so if the template was saved *after* a solve (which it typically is —
+  you set up wide ranges, hit solve, then save), the per-scenario `.gto2` files
+  carried the template's stale 500+ KB strategy data alongside the substituted
+  HEADER. GTO+ would then either skip them in PROCESS FILES (sees them as
+  already-solved) or use the stale wide-range solve data with the wrong HEADER
+  ranges. Fix: replace MAIN TREE with the 62-byte empty stub (captured from
+  `test.gto2`) during generation, so GTO+ re-solves from scratch. Output size
+  drops from ~545 KB per file to ~1.5 KB per file.
+
 ### Added
 - **GTO+ batch-solve infrastructure** (v2026-05-22.138). Two new scripts that
   close the gap between paste-pack-by-hand and fully-batch-solved scenarios:
