@@ -35,7 +35,7 @@
 //   node scripts/gto-batch-generate.mjs <template.gto2> [scenario_id]
 
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { deriveRanges } from "../src/preflop-ranges.js";
 
@@ -47,6 +47,15 @@ if (!existsSync(OUT_DIR)) mkdirSync(OUT_DIR, { recursive: true });
 
 if (process.argv.length < 3) {
   console.error("Usage: node scripts/gto-batch-generate.mjs <template.gto2> [scenario_id]");
+  console.error("");
+  console.error("Optional per-street templates (auto-detected next to <template.gto2>):");
+  console.error("  <stem>-flop.gto2   — used for scenarios whose decision is on the flop (3-card board)");
+  console.error("  <stem>-turn.gto2   — used for scenarios whose decision is on the turn (4-card board)");
+  console.error("  <stem>-river.gto2  — used for scenarios whose decision is on the river (5-card board)");
+  console.error("");
+  console.error("If a per-street template is missing, <template.gto2> is used as the fallback");
+  console.error("for that street. GTO+ OOMs at load when the saved street doesn't match the");
+  console.error("substituted board length, so per-street templates are required for full coverage.");
   process.exit(1);
 }
 const templatePath = process.argv[2];
@@ -89,10 +98,6 @@ function decisionState(replay) {
 
 // === Template parsing ===
 
-const TEMPLATE = readFileSync(templatePath);
-const TEMPLATE_HDR_SEC_LEN = TEMPLATE.readUInt32LE(0);
-const TEMPLATE_HDR_CONTENT = TEMPLATE.slice(24, 24 + TEMPLATE_HDR_SEC_LEN - 17);
-
 // Empty MAIN TREE section + preamble (62 bytes total) — captured from an
 // unsolved template (test.gto2). We use this in place of the user's template's
 // MAIN TREE so GTO+ will re-solve from scratch for each scenario. Otherwise the
@@ -112,20 +117,6 @@ const EMPTY_MAIN_TREE = Buffer.from([
   // [/MAIN TREE]
   0x5b, 0x2f, 0x4d, 0x41, 0x49, 0x4e, 0x20, 0x54, 0x52, 0x45, 0x45, 0x5d,
 ]);
-
-// Locate the template's MAIN TREE section so we can replace it.
-function locateMainTree() {
-  const tag = Buffer.from("[MAIN TREE]");
-  const closeTag = Buffer.from("[/MAIN TREE]");
-  const tagAt = TEMPLATE.indexOf(tag);
-  const closeAt = TEMPLATE.indexOf(closeTag);
-  if (tagAt < 0 || closeAt < 0) throw new Error("Template missing MAIN TREE section");
-  // Preamble is 16 bytes before the open tag
-  const preambleStart = tagAt - 16;
-  const sectionEnd = closeAt + closeTag.length;
-  return { preambleStart, sectionEnd, sectionLen: TEMPLATE.readUInt32LE(preambleStart) };
-}
-const TEMPLATE_MAIN_TREE = locateMainTree();
 
 // Walk a HEADER content buffer collecting all `02 <uint32 LE len> <bytes>`
 // length-prefixed string atoms. Used by both the template locator and the
@@ -162,10 +153,10 @@ const isRangeStr = (s) =>
 const isBoardStr = (s) => /^([2-9TJQKA][shdc]){3,5}$/.test(s.str);
 const isNumericText = (s) => /^[0-9.]+$/.test(s.str);
 
-// Locate the two length-prefixed range strings + board + pot/stack atoms in the
-// template by scanning the HEADER content for `02 <len>` atoms in order.
-function locateSlots() {
-  const strs = walkLpStrings(TEMPLATE_HDR_CONTENT);
+// Locate the two length-prefixed range strings + board + pot/stack atoms in a
+// template's HEADER content by scanning for `02 <len>` atoms in order.
+function locateSlots(hdrContent) {
+  const strs = walkLpStrings(hdrContent);
   // Atom ordering (per binary analysis):
   //   1. hero range  (typically 4-200 chars, hand-class notation)
   //   2. villain range  (same)
@@ -195,7 +186,7 @@ function locateSlots() {
   // sequences that decode to reasonable poker numbers
   let potDouble = -1, stackDouble = -1;
   for (let off = board.off + 5 + board.len; off + 8 <= potTxt.off; off++) {
-    const v = TEMPLATE_HDR_CONTENT.readDoubleLE(off);
+    const v = hdrContent.readDoubleLE(off);
     if (Number.isFinite(v) && v > 0.4 && v < 1e6 && Math.abs(v - Math.round(v * 2) / 2) < 1e-9) {
       if (potDouble < 0) potDouble = off;
       else if (stackDouble < 0) { stackDouble = off; break; }
@@ -205,7 +196,83 @@ function locateSlots() {
   return { hero, vill, board, potTxt, stackTxt, potDouble, stackDouble };
 }
 
-const SLOTS = locateSlots();
+// Locate a template's MAIN TREE section so we can replace it.
+function locateMainTreeIn(buf) {
+  const tag = Buffer.from("[MAIN TREE]");
+  const closeTag = Buffer.from("[/MAIN TREE]");
+  const tagAt = buf.indexOf(tag);
+  const closeAt = buf.indexOf(closeTag);
+  if (tagAt < 0 || closeAt < 0) throw new Error("Template missing MAIN TREE section");
+  const preambleStart = tagAt - 16;
+  const sectionEnd = closeAt + closeTag.length;
+  return { preambleStart, sectionEnd, sectionLen: buf.readUInt32LE(preambleStart) };
+}
+
+// Read a template file from disk and parse it into the structure we need for
+// substitution: buffer, HEADER section length & content, MAIN TREE locator,
+// and per-template slot offsets (hero/vill/board/pot/stack).
+function loadTemplate(path) {
+  const buf = readFileSync(path);
+  const hdrSecLen = buf.readUInt32LE(0);
+  const hdrContent = buf.slice(24, 24 + hdrSecLen - 17);
+  const mainTree = locateMainTreeIn(buf);
+  const slots = locateSlots(hdrContent);
+  return { path, buf, hdrSecLen, hdrContent, mainTree, slots };
+}
+
+// Resolve per-street template paths from a supplied template path.
+// E.g. /path/to/template-max.gto2 → look for:
+//   /path/to/template-max-flop.gto2
+//   /path/to/template-max-turn.gto2
+//   /path/to/template-max-river.gto2
+// The supplied path always serves as the "fallback" for any street whose
+// dedicated template is missing. The stem-stripping handles being passed
+// any of the per-street variants directly (so `gto-batch-generate
+// template-max-river.gto2` still scans for the flop and turn siblings).
+function resolvePerStreetTemplatePaths(suppliedPath) {
+  const dir = dirname(suppliedPath);
+  const stemRaw = basename(suppliedPath, ".gto2");
+  const stem = stemRaw.replace(/-(flop|turn|river)$/, "");
+  return {
+    flop: join(dir, `${stem}-flop.gto2`),
+    turn: join(dir, `${stem}-turn.gto2`),
+    river: join(dir, `${stem}-river.gto2`),
+  };
+}
+
+// Load whatever per-street templates exist alongside the supplied template.
+// Returns a TEMPLATES object where:
+//   - TEMPLATES.fallback is always loaded (the supplied path)
+//   - TEMPLATES.flop / turn / river are loaded if the sibling files exist
+// generateForScenario then picks per-scenario by board length, falling
+// through to TEMPLATES.fallback if the matching street has no dedicated file.
+function loadAllTemplates(suppliedPath) {
+  const out = { fallback: loadTemplate(suppliedPath), perStreet: {} };
+  const variants = resolvePerStreetTemplatePaths(suppliedPath);
+  for (const street of ["flop", "turn", "river"]) {
+    if (existsSync(variants[street])) {
+      out.perStreet[street] = loadTemplate(variants[street]);
+    }
+  }
+  return out;
+}
+
+const TEMPLATES = loadAllTemplates(templatePath);
+
+// Map a board length to a street tag. Boards are concatenated 2-char card
+// strings (`Td9d6h` = 6 chars = flop). Returns null for preflop / no-flop.
+function streetForBoard(board) {
+  if (board.length === 6) return "flop";
+  if (board.length === 8) return "turn";
+  if (board.length === 10) return "river";
+  return null;
+}
+
+// Choose the template object for a given street. If a dedicated per-street
+// template exists, use it; otherwise fall back to the supplied template.
+function templateForStreet(street) {
+  return TEMPLATES.perStreet[street] || TEMPLATES.fallback;
+}
 
 // === Per-scenario substitution ===
 
@@ -237,17 +304,17 @@ function doubleBytes(v) {
 // Uses exact-offset readout rather than range-shape filtering so dealt-hand
 // fallback ranges (e.g. "55,66" — see SOLVER-PIPELINE.md known caveats) don't
 // trigger a false positive.
-function verifyGenerated(outFile, expectedHero, expectedVill) {
+function verifyGenerated(outFile, expectedHero, expectedVill, slots) {
   const hdrSecLen = outFile.readUInt32LE(0);
   const content = outFile.slice(24, 24 + hdrSecLen - 17);
   // After substitution, the new HEADER content layout is:
   //   - bytes before hero slot: unchanged from template
-  //   - hero lp-string at SLOTS.hero.off
+  //   - hero lp-string at slots.hero.off
   //   - bytes between hero and vill: unchanged from template
-  //   - vill lp-string at (SLOTS.vill.off + heroLpDelta)
-  const heroOff = SLOTS.hero.off;
-  const heroLpDelta = expectedHero.length - SLOTS.hero.len;
-  const villOff = SLOTS.vill.off + heroLpDelta;
+  //   - vill lp-string at (slots.vill.off + heroLpDelta)
+  const heroOff = slots.hero.off;
+  const heroLpDelta = expectedHero.length - slots.hero.len;
+  const villOff = slots.vill.off + heroLpDelta;
 
   function readLp(off) {
     if (off + 5 > content.length || content[off] !== 0x02) return null;
@@ -306,18 +373,35 @@ function generateForScenario(scen) {
     return { error: `no flop — board=${board}` };
   }
 
+  // Pick the per-street template whose saved board length matches this
+  // scenario's. Substituting a 5-card river board into a 3-card-flop template
+  // OOMs GTO+ at load (the bet-tree shape doesn't match the implied street).
+  // If a dedicated template for this street isn't saved alongside the
+  // supplied template, we fall back to the supplied template and warn.
+  const street = streetForBoard(board);
+  if (!street) {
+    return { error: `unrecognized board length ${board.length} — board=${board}` };
+  }
+  const chosen = templateForStreet(street);
+  // Warn only when we fell back AND the fallback's saved street differs from
+  // the scenario's. A fallback that happens to be a flop template is fine for
+  // a flop scenario — that's the common single-template case.
+  const fallbackBoardStreet = streetForBoard(TEMPLATES.fallback.slots.board.str);
+  const usedFallback = !TEMPLATES.perStreet[street];
+  const streetMismatch = usedFallback && fallbackBoardStreet !== street;
+
   const ds = decisionState(replay);
 
   // Build new HEADER content by splicing the substitutions in order
   // (offsets MUST be processed in order so we can track cumulative shift)
   const substitutions = [
-    { slot: SLOTS.hero, repl: lpString(heroRange) },
-    { slot: SLOTS.vill, repl: lpString(villRange) },
-    { slot: SLOTS.board, repl: lpString(board) },
-    { slot: { off: SLOTS.potDouble, atomLen: 8 }, repl: doubleBytes(ds.potBb) },
-    { slot: { off: SLOTS.stackDouble, atomLen: 8 }, repl: doubleBytes(ds.effStackBb) },
-    { slot: SLOTS.potTxt, repl: lpString(ds.potBb.toFixed(2)) },
-    { slot: SLOTS.stackTxt, repl: lpString(ds.effStackBb.toFixed(1)) },
+    { slot: chosen.slots.hero, repl: lpString(heroRange) },
+    { slot: chosen.slots.vill, repl: lpString(villRange) },
+    { slot: chosen.slots.board, repl: lpString(board) },
+    { slot: { off: chosen.slots.potDouble, atomLen: 8 }, repl: doubleBytes(ds.potBb) },
+    { slot: { off: chosen.slots.stackDouble, atomLen: 8 }, repl: doubleBytes(ds.effStackBb) },
+    { slot: chosen.slots.potTxt, repl: lpString(ds.potBb.toFixed(2)) },
+    { slot: chosen.slots.stackTxt, repl: lpString(ds.effStackBb.toFixed(1)) },
   ];
   // Annotate each slot with its full byte-span in the template
   for (const s of substitutions) {
@@ -335,16 +419,16 @@ function generateForScenario(scen) {
   const pieces = [];
   let cursor = 0;
   for (const sub of substitutions) {
-    if (sub.spanStart > cursor) pieces.push(TEMPLATE_HDR_CONTENT.slice(cursor, sub.spanStart));
+    if (sub.spanStart > cursor) pieces.push(chosen.hdrContent.slice(cursor, sub.spanStart));
     pieces.push(sub.repl);
     cursor = sub.spanEnd;
   }
-  if (cursor < TEMPLATE_HDR_CONTENT.length) pieces.push(TEMPLATE_HDR_CONTENT.slice(cursor));
+  if (cursor < chosen.hdrContent.length) pieces.push(chosen.hdrContent.slice(cursor));
   let newContent = Buffer.concat(pieces);
 
   // Net delta across all substitutions — used for @12 forward pointer and the
   // HEADER section length / bytesum.
-  const netDelta = newContent.length - TEMPLATE_HDR_CONTENT.length;
+  const netDelta = newContent.length - chosen.hdrContent.length;
   // Per-substitution deltas — used for the two sibling pointers inside region B.
   // Region B has a 3-byte record per range with a length/offset byte that
   // tracks ONLY that range's length, independent of other substitutions.
@@ -357,12 +441,12 @@ function generateForScenario(scen) {
   // Critical: byte 18 must track hero_delta only, NOT net delta. Using net
   // delta corrupts the hero range display (we tested this and GTO+ showed
   // bogus hands added to hero when byte 18 was over-incremented).
-  const heroDelta = heroRange.length - SLOTS.hero.len;
-  const villDelta = villRange.length - SLOTS.vill.len;
-  const oldAt12 = TEMPLATE_HDR_CONTENT.readUInt32LE(12);
+  const heroDelta = heroRange.length - chosen.slots.hero.len;
+  const villDelta = villRange.length - chosen.slots.vill.len;
+  const oldAt12 = chosen.hdrContent.readUInt32LE(12);
   newContent.writeUInt32LE(oldAt12 + netDelta, 12);
-  newContent[18] = (TEMPLATE_HDR_CONTENT[18] + heroDelta) & 0xff;
-  newContent[23] = (TEMPLATE_HDR_CONTENT[23] + villDelta) & 0xff;
+  newContent[18] = (chosen.hdrContent[18] + heroDelta) & 0xff;
+  newContent[23] = (chosen.hdrContent[23] + villDelta) & 0xff;
   // Single-byte arithmetic is safe for typical scenario deltas (< 256);
   // wider scenarios (e.g., 1326-combo vill) would need uint16 handling, but
   // we cap at template's range budget anyway via gto-template-check.
@@ -384,15 +468,19 @@ function generateForScenario(scen) {
   //   + EMPTY_MAIN_TREE                  (62 bytes — forces GTO+ to re-solve)
   //   + bytes from end of template's MAIN TREE to end of file
   //                                       (the 5 static sections after MAIN TREE)
-  const hdrEnd = 16 + TEMPLATE_HDR_SEC_LEN;
-  const preMainTree = TEMPLATE.slice(hdrEnd, TEMPLATE_MAIN_TREE.preambleStart);
-  const postMainTree = TEMPLATE.slice(TEMPLATE_MAIN_TREE.sectionEnd);
+  const hdrEnd = 16 + chosen.hdrSecLen;
+  const preMainTree = chosen.buf.slice(hdrEnd, chosen.mainTree.preambleStart);
+  const postMainTree = chosen.buf.slice(chosen.mainTree.sectionEnd);
   const outFile = Buffer.concat([newPreamble, newSection, preMainTree, EMPTY_MAIN_TREE, postMainTree]);
 
   return {
     file: outFile,
     expectedHero: heroRange,
     expectedVill: villRange,
+    chosenTemplate: chosen,
+    street,
+    usedFallback,
+    streetMismatch,
     summary: {
       heroRange: heroRange.length + " chars",
       villRange: villRange.length + " chars",
@@ -413,15 +501,26 @@ if (filter && !targets.length) {
   process.exit(1);
 }
 
-console.log(`Template: ${templatePath} (${TEMPLATE.length} bytes)`);
-console.log(`Template slot layout:`);
-console.log(`  hero @${SLOTS.hero.off} (${SLOTS.hero.len} chars: "${SLOTS.hero.str.slice(0, 40)}${SLOTS.hero.str.length > 40 ? "..." : ""}")`);
-console.log(`  vill @${SLOTS.vill.off} (${SLOTS.vill.len} chars)`);
-console.log(`  board @${SLOTS.board.off} ("${SLOTS.board.str}")`);
-console.log(`  pot double @${SLOTS.potDouble} (${TEMPLATE_HDR_CONTENT.readDoubleLE(SLOTS.potDouble)})`);
-console.log(`  stack double @${SLOTS.stackDouble} (${TEMPLATE_HDR_CONTENT.readDoubleLE(SLOTS.stackDouble)})`);
-console.log(`  pot text @${SLOTS.potTxt.off} ("${SLOTS.potTxt.str}")`);
-console.log(`  stack text @${SLOTS.stackTxt.off} ("${SLOTS.stackTxt.str}")`);
+function describeTemplate(tpl, label) {
+  console.log(`${label}: ${tpl.path} (${tpl.buf.length} bytes)`);
+  console.log(`  hero  @${tpl.slots.hero.off} (${tpl.slots.hero.len} chars: "${tpl.slots.hero.str.slice(0, 40)}${tpl.slots.hero.str.length > 40 ? "..." : ""}")`);
+  console.log(`  vill  @${tpl.slots.vill.off} (${tpl.slots.vill.len} chars)`);
+  console.log(`  board @${tpl.slots.board.off} ("${tpl.slots.board.str}" — ${tpl.slots.board.len === 6 ? "flop" : tpl.slots.board.len === 8 ? "turn" : tpl.slots.board.len === 10 ? "river" : "?"})`);
+  console.log(`  pot   ${tpl.hdrContent.readDoubleLE(tpl.slots.potDouble)} / stack ${tpl.hdrContent.readDoubleLE(tpl.slots.stackDouble)}`);
+}
+
+const fallbackStreet = streetForBoard(TEMPLATES.fallback.slots.board.str) || "?";
+describeTemplate(TEMPLATES.fallback, `Fallback template (saved board street: ${fallbackStreet})`);
+for (const street of ["flop", "turn", "river"]) {
+  console.log("");
+  if (TEMPLATES.perStreet[street]) {
+    describeTemplate(TEMPLATES.perStreet[street], `Per-street template (${street})`);
+  } else if (street === fallbackStreet) {
+    console.log(`Per-street template (${street}): not found, but fallback template is a ${street} template — OK for ${street} scenarios.`);
+  } else {
+    console.log(`Per-street template (${street}): NOT FOUND — fallback is a ${fallbackStreet}, so ${street} scenarios will likely OOM GTO+ at load. Save a ${street} template next to the supplied template (with a ${street === "turn" ? "4-card" : "5-card"} board) to fix.`);
+  }
+}
 console.log("");
 console.log(`Generating ${targets.length} scenario file(s) → ${OUT_DIR}/\n`);
 
@@ -438,7 +537,7 @@ for (const scen of targets) {
   // Re-parse what we just built and assert the substituted ranges landed in
   // the slots a future locator would pick. Catches both slot-picking errors
   // and byte-pointer arithmetic errors before the bad file reaches disk.
-  const verifyErr = verifyGenerated(result.file, result.expectedHero, result.expectedVill);
+  const verifyErr = verifyGenerated(result.file, result.expectedHero, result.expectedVill, result.chosenTemplate.slots);
   if (verifyErr) {
     failed++; failures.push({ id: scen.scenario_id, error: verifyErr });
     console.log(`  ❌ ${scen.scenario_id.padEnd(45)} ${verifyErr}`);
@@ -448,7 +547,12 @@ for (const scen of targets) {
   try {
     writeFileSync(outPath, result.file);
     written++;
-    console.log(`  ✅ ${scen.scenario_id.padEnd(45)} board=${result.summary.board} pot=${result.summary.pot}bb stack=${result.summary.stack}bb hero=${result.summary.heroRange} vill=${result.summary.villRange} delta=${result.summary.headerDelta >= 0 ? "+" : ""}${result.summary.headerDelta}`);
+    const streetTag = result.streetMismatch
+      ? `${result.street}⚠OOM-risk`
+      : result.usedFallback
+        ? `${result.street}-fallback`
+        : result.street;
+    console.log(`  ✅ ${scen.scenario_id.padEnd(45)} [${streetTag.padEnd(15)}] board=${result.summary.board} pot=${result.summary.pot}bb stack=${result.summary.stack}bb hero=${result.summary.heroRange} vill=${result.summary.villRange} delta=${result.summary.headerDelta >= 0 ? "+" : ""}${result.summary.headerDelta}`);
   } catch (err) {
     failed++;
     const reason = err.code === "EBUSY"
