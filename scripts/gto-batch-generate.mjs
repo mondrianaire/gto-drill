@@ -267,6 +267,17 @@ function verifyGenerated(outFile, expectedHero, expectedVill) {
   return null;
 }
 
+// Byte 18 / byte 23 are uint8 sibling pointers in HEADER region B:
+//   byte 18 = hero_string_len + 17
+//   byte 23 = vill_string_len  + 4
+// Both single-byte. Overflow wraps with `& 0xff` and GTO+ then dereferences a
+// corrupt pointer, leading to a HARD CRASH at file open (confirmed empirically:
+// bb-monster-draw-check-raise-023 with hero_len=417 wraps byte 18 to 178 and
+// kills GTO+). Reject overflow scenarios at generation time so they cannot
+// reach PROCESS FILES. Same caps as scripts/gto-template-check.mjs.
+const HERO_LEN_CAP = 238;
+const VILL_LEN_CAP = 251;
+
 function generateForScenario(scen) {
   const replay = scen.replay;
   if (!replay) return null;
@@ -278,6 +289,12 @@ function generateForScenario(scen) {
 
   if (!heroRange || !villRange) {
     return { error: `missing range — hero=${heroRange.length} vill=${villRange.length}` };
+  }
+  if (heroRange.length > HERO_LEN_CAP) {
+    return { error: `hero string len ${heroRange.length} > ${HERO_LEN_CAP} cap (byte-18 uint8 overflow — would hard-crash GTO+)` };
+  }
+  if (villRange.length > VILL_LEN_CAP) {
+    return { error: `vill string len ${villRange.length} > ${VILL_LEN_CAP} cap (byte-23 uint8 overflow — would hard-crash GTO+)` };
   }
 
   const board = []
