@@ -29,6 +29,8 @@ Open http://localhost:8000/. Requires Node 18+. No install step needed — the d
 
 ## Documentation
 
+**[Wiki](https://github.com/mondrianaire/gto-drill/wiki)** — the full knowledge base: how to play, GTO concepts, architecture, design decisions, and contributing guide.
+
 | Document | Description |
 |----------|-------------|
 | [docs/CHANGELOG.md](docs/CHANGELOG.md) | Release history |
