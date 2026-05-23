@@ -4,6 +4,14 @@
 // scenarios.js) as a poker table that can be stepped through action-by-action
 // up to the quiz decision point. Pure DOM + CSS — no framework, no assets:
 // cards are drawn with CSS so nothing extra has to load.
+//
+// Also exports buildSolverConfig(scen) which produces a TexasSolver console
+// config for that scenario. The hero range is filled in from
+// deriveRanges() + the canonicalizer so the config is solve-ready straight
+// out of the Database console download (no manual paste step).
+
+import { deriveRanges } from "./preflop-ranges.js";
+import { canonicalize as canonicalizeRange } from "./range-canonicalize.js";
 
 // -----------------------------------------------------------------------
 // Tiny DOM helper (kept local, like the other view modules).
@@ -487,16 +495,30 @@ export function buildDecidePrompt(replay) {
 /**
  * Build a TexasSolver console config (the .txt body) for a scenario's
  * decision spot — owner tooling, exported per scenario from the Database
- * console. Fills board, decision-point pot + effective stack, the
- * villain range, and the static bet-tree / solve block. The HERO range
- * is a marked placeholder (PASTE_HERO_RANGE_HERE): scenario data stores
- * only the dealt hand, not a hero range. Returns null for a preflop
- * spot (no board to solve).
+ * console and from the texas-batch-generate.mjs batch runner. Fills board,
+ * decision-point pot + effective stack, hero+villain ranges, and the
+ * bet-tree / solve block.
+ *
+ * Hero range comes from deriveRanges(scen) + canonicalize() so the config
+ * is solve-ready as-is. If deriveRanges fails for this scenario (the 5
+ * limped/ICM/BB-vs-SB edge cases), HERO becomes a PASTE_HERO_RANGE_HERE
+ * placeholder so the user knows to fill it in.
+ *
+ * Villain range is authored data from scen.villain_ranges[].classes by
+ * default; if that's empty AND deriveRanges produced a villain range,
+ * the derived one is used.
+ *
+ * Returns null for a preflop spot (no board to solve).
  *
  * @param {Object} scen  a scenario object
+ * @param {Object} [opts]
+ * @param {string} [opts.heroRange]    override the derived hero range
+ * @param {string} [opts.villRange]    override the derived/authored vill range
+ * @param {string} [opts.dumpName]     override the dump_result filename
+ *                                     (defaults to <scenario_id>.json)
  * @returns {string|null}
  */
-export function buildSolverConfig(scen) {
+export function buildSolverConfig(scen, opts = {}) {
   const replay = scen && scen.replay;
   if (!replay || !replay.board) return null;
   const board = []
@@ -518,28 +540,60 @@ export function buildSolverConfig(scen) {
     ? seats[villPos].stack : heroStack;
   const effStack = Math.min(heroStack, villStack);
 
-  // Villain range — every villain_ranges[].classes merged and deduped.
-  const villClasses = [];
+  // Derived ranges from the 3-source consensus chart library. The walk
+  // is silent (never throws); it returns nulls + a warnings array we
+  // can ignore for config-build purposes — the fallback handling below
+  // catches null cases.
+  let derived = { hero_range: null, villain_range: null };
+  try {
+    derived = deriveRanges(scen) || derived;
+  } catch { /* preflop-ranges miss — degrade to placeholder */ }
+  const derivedHero = derived.hero_range && derived.hero_range.classes
+    ? derived.hero_range.classes.join(",")
+    : null;
+  const derivedVill = derived.villain_range && derived.villain_range.classes
+    ? derived.villain_range.classes.join(",")
+    : null;
+
+  // Authored villain range — scen.villain_ranges[].classes merged + deduped.
+  const authoredVillClasses = [];
   for (const vr of (scen.villain_ranges || [])) {
     for (const c of (vr.classes || [])) {
-      if (c && !villClasses.includes(c)) villClasses.push(c);
+      if (c && !authoredVillClasses.includes(c)) authoredVillClasses.push(c);
     }
   }
-  const villRange = villClasses.length ? villClasses.join(",") : "PASTE_VILLAIN_RANGE_HERE";
+  const authoredVill = authoredVillClasses.length ? authoredVillClasses.join(",") : null;
 
-  // OOP = whoever acts first postflop (the earlier seat). The hero's
-  // range is always the placeholder — it isn't in the scenario data.
+  // Pick ranges. Caller overrides > derived/authored > placeholder.
+  // Canonicalize anything we resolved to a real string so the config stays
+  // compact and matches GTO+'s vocabulary.
+  function canonOrNull(s) {
+    if (!s) return null;
+    try { return canonicalizeRange(s); } catch { return s; }
+  }
+  const heroRange =
+    canonOrNull(opts.heroRange) ||
+    canonOrNull(derivedHero) ||
+    "PASTE_HERO_RANGE_HERE";
+  const villRange =
+    canonOrNull(opts.villRange) ||
+    canonOrNull(authoredVill) ||
+    canonOrNull(derivedVill) ||
+    "PASTE_VILLAIN_RANGE_HERE";
+
+  // OOP = whoever acts first postflop (the earlier seat).
   const ORDER = ["SB", "BB", "UTG", "UTG1", "UTG2", "MP", "LJ", "HJ", "CO", "BTN"];
   const rank = (p) => { const i = ORDER.indexOf(p); return i < 0 ? 99 : i; };
   const heroOop = villPos ? rank(heroPos) < rank(villPos) : true;
-  const HERO = "PASTE_HERO_RANGE_HERE";
+
+  const dumpName = opts.dumpName || (scen.scenario_id + ".json");
 
   return [
     "set_pot " + chips(pot),
     "set_effective_stack " + chips(effStack),
     "set_board " + board.join(","),
-    "set_range_oop " + (heroOop ? HERO : villRange),
-    "set_range_ip " + (heroOop ? villRange : HERO),
+    "set_range_oop " + (heroOop ? heroRange : villRange),
+    "set_range_ip " + (heroOop ? villRange : heroRange),
     "set_bet_sizes oop,flop,bet,50",
     "set_bet_sizes oop,flop,raise,60",
     "set_bet_sizes oop,flop,allin",
@@ -570,7 +624,7 @@ export function buildSolverConfig(scen) {
     "set_use_isomorphism 1",
     "start_solve",
     "set_dump_rounds 2",
-    "dump_result " + scen.scenario_id + ".json",
+    "dump_result " + dumpName,
   ].join("\n") + "\n";
 }
 
