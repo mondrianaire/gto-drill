@@ -13,10 +13,11 @@
 // Usage:
 //   node scripts/gto-template-check.mjs <template.gto2>
 
-import { readFileSync } from "node:fs";
-import { dirname, join } from "node:path";
+import { readFileSync, existsSync } from "node:fs";
+import { basename, dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { deriveRanges } from "../src/preflop-ranges.js";
+import { canonicalize as canonicalizeRange } from "../src/range-canonicalize.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "..");
@@ -27,6 +28,17 @@ if (process.argv.length < 3) {
   process.exit(1);
 }
 const templatePath = process.argv[2];
+
+// Same per-street resolution as gto-batch-generate.mjs — keep in sync.
+function resolvePerStreetTemplatePaths(suppliedPath) {
+  const dir = dirname(suppliedPath);
+  const stem = basename(suppliedPath, ".gto2").replace(/-(flop|turn|river)$/, "");
+  return {
+    flop: join(dir, `${stem}-flop.gto2`),
+    turn: join(dir, `${stem}-turn.gto2`),
+    river: join(dir, `${stem}-river.gto2`),
+  };
+}
 
 // === Range parsing ===
 
@@ -97,8 +109,9 @@ function parseTemplate(buf) {
 
   // Walk atoms: find the two length-prefixed range strings
   // Strings of the form `02 <uint32 LE length> <bytes>`
-  // The first long string after the 16-byte sub-header is hero range,
-  // the second long string is villain range.
+  // The first range-shaped string is hero range, the second is villain range.
+  // Range-shape gate matches gto-batch-generate.mjs's locator (≥10 chars,
+  // ≥2 commas, valid hand-class chars including suit letters c|d|h).
   const strings = [];
   let i = 16;       // skip sub-header
   while (i < content.length) {
@@ -113,21 +126,52 @@ function parseTemplate(buf) {
     }
     i += 1;
   }
-  // Hero range is typically the first string >= 4 chars, villain the second
-  const candidates = strings.filter((s) => s.len >= 2);
+  const isRangeStr = (s) =>
+    s.len >= 10 &&
+    (s.str.match(/,/g) || []).length >= 2 &&
+    /^[AKQJT2-9,+\-shdco]+$/.test(s.str);
+  const isBoardStr = (s) => /^([2-9TJQKA][shdc]){3,5}$/.test(s.str);
+  const candidates = strings.filter(isRangeStr);
   const heroRange = candidates[0]?.str || "(none)";
   const villRange = candidates[1]?.str || "(none)";
-  return { heroRange, villRange, contentLen: content.length };
+  const boardStr = strings.find(isBoardStr)?.str || "";
+  const boardStreet = boardStr.length === 6 ? "flop" : boardStr.length === 8 ? "turn" : boardStr.length === 10 ? "river" : null;
+  return { heroRange, villRange, contentLen: content.length, boardStr, boardStreet };
 }
+
+// Byte-18 / byte-23 are uint8 sibling pointers in HEADER region B:
+//   byte 18 = template_hero_string_len + 17 + scenario_hero_delta
+//   byte 23 = template_vill_string_len + 4  + scenario_vill_delta
+// Both fields are single byte (verified — no adjacent high-byte field), so the
+// final value must fit in [0, 255]. The cap is on the post-substitution
+// scenario string length, not the template's:
+//   scenario_hero_string_len must satisfy (len + 17) <= 255  →  len <= 238
+//   scenario_vill_string_len must satisfy (len + 4)  <= 255  →  len <= 251
+// gto-batch-generate.mjs wraps overflow with `& 0xff` so a too-long string
+// silently produces a corrupted pointer rather than a hard error.
+const HERO_LEN_CAP = 238;
+const VILL_LEN_CAP = 251;
 
 // === Scenario combo demands ===
 
 function scenarioRanges(scen) {
   const d = deriveRanges(scen);
-  const hero = d.hero_range?.classes?.join(",") || "";
+  const heroVerbose = d.hero_range?.classes?.join(",") || "";
   const auth = scen.villain_ranges?.[0]?.classes?.join(",") || "";
-  const vill = auth || d.villain_range?.classes?.join(",") || "";
-  return { hero, vill, heroCombos: countCombos(hero), villCombos: countCombos(vill) };
+  const villVerbose = auth || d.villain_range?.classes?.join(",") || "";
+  // gto-batch-generate.mjs canonicalizes before substitution, so the actual
+  // string that lands in the .gto2 file is the canonical form — that's what
+  // counts against the byte-18 / byte-23 caps.
+  const hero = heroVerbose ? canonicalizeRange(heroVerbose) : "";
+  const vill = villVerbose ? canonicalizeRange(villVerbose) : "";
+  return {
+    hero,
+    vill,
+    heroCombos: countCombos(hero),
+    villCombos: countCombos(vill),
+    heroLen: hero.length,
+    villLen: vill.length,
+  };
 }
 
 // === Main ===
@@ -140,8 +184,11 @@ const tmplVillCombos = countCombos(tmpl.villRange);
 console.log(`## Template: ${templatePath}\n`);
 console.log(`  Hero range:    ${tmpl.heroRange.slice(0, 80)}${tmpl.heroRange.length > 80 ? "..." : ""}`);
 console.log(`  Hero combos:   ${tmplHeroCombos}`);
+console.log(`  Hero str len:  ${tmpl.heroRange.length} chars`);
 console.log(`  Vill range:    ${tmpl.villRange.slice(0, 80)}${tmpl.villRange.length > 80 ? "..." : ""}`);
 console.log(`  Vill combos:   ${tmplVillCombos}`);
+console.log(`  Vill str len:  ${tmpl.villRange.length} chars`);
+console.log(`  Board:         "${tmpl.boardStr}" (${tmpl.boardStreet || "unrecognized"})`);
 console.log(`  HEADER content: ${tmpl.contentLen} bytes`);
 console.log("");
 
@@ -172,13 +219,123 @@ if (overVill.length) {
   if (overVill.length > 10) console.log(`    ...+${overVill.length - 10} more`);
 }
 
+// === Byte-18 / byte-23 single-byte pointer cap ===
+//
+// Independent of combo budget: the scenario's range STRING LENGTH (not combo
+// count) determines whether bytes 18/23 stay in [0,255]. See parseTemplate()
+// for the formula. Long ranges with specific suited combos (e.g. AcKc, KhQh)
+// can blow this cap on widely-substituted scenarios even when the combo
+// budget is fine.
+
+const overHeroLen = demands.filter((d) => d.heroLen > HERO_LEN_CAP);
+const overVillLen = demands.filter((d) => d.villLen > VILL_LEN_CAP);
+const heroLenCapOK = overHeroLen.length === 0;
+const villLenCapOK = overVillLen.length === 0;
+
+console.log("## Byte-pointer cap (independent of combo budget)\n");
+console.log(`  Max hero string length demanded:  ${Math.max(...demands.map((d) => d.heroLen))} chars  (cap ${HERO_LEN_CAP})  ${heroLenCapOK ? "✅" : "❌"}`);
+console.log(`  Max vill string length demanded:  ${Math.max(...demands.map((d) => d.villLen))} chars  (cap ${VILL_LEN_CAP})  ${villLenCapOK ? "✅" : "❌"}`);
 console.log("");
-if (maxHero <= tmplHeroCombos && maxVill <= tmplVillCombos) {
-  console.log("✅ Template covers all 45 scenarios — safe for batch generation.");
+
+if (overHeroLen.length) {
+  console.log(`  ${overHeroLen.length} scenarios exceed hero string-length cap (would corrupt byte 18):`);
+  for (const d of overHeroLen.slice(0, 10)) console.log(`    ${d.id.padEnd(45)} hero string = ${d.heroLen} chars > ${HERO_LEN_CAP}`);
+  if (overHeroLen.length > 10) console.log(`    ...+${overHeroLen.length - 10} more`);
+}
+if (overVillLen.length) {
+  console.log(`  ${overVillLen.length} scenarios exceed vill string-length cap (would corrupt byte 23):`);
+  for (const d of overVillLen.slice(0, 10)) console.log(`    ${d.id.padEnd(45)} vill string = ${d.villLen} chars > ${VILL_LEN_CAP}`);
+  if (overVillLen.length > 10) console.log(`    ...+${overVillLen.length - 10} more`);
+}
+
+// === Per-street template coverage ===
+//
+// gto-batch-generate.mjs auto-detects per-street sibling templates next to the
+// supplied one (<stem>-flop.gto2, <stem>-turn.gto2, <stem>-river.gto2) and
+// routes scenarios by board length. A scenario whose board street doesn't
+// match its template's saved street OOMs GTO+ at file open. Report which
+// streets are covered.
+
+const perStreetPaths = resolvePerStreetTemplatePaths(templatePath);
+const streetCoverage = {};
+for (const street of ["flop", "turn", "river"]) {
+  if (existsSync(perStreetPaths[street])) {
+    const t = parseTemplate(readFileSync(perStreetPaths[street]));
+    streetCoverage[street] = {
+      present: true,
+      path: perStreetPaths[street],
+      actualStreet: t.boardStreet,
+      mismatch: t.boardStreet !== street,
+    };
+  } else {
+    streetCoverage[street] = {
+      present: false,
+      coveredByFallback: tmpl.boardStreet === street,
+    };
+  }
+}
+
+// Bucket the in-scope scenarios (those that can be batch-generated at all)
+// by street. Anything not in {flop, turn, river} is preflop / no-flop and
+// excluded from batch-generation anyway.
+const scenariosByStreet = { flop: 0, turn: 0, river: 0 };
+for (const s of SCENARIOS) {
+  const cards = []
+    .concat(s.replay?.board?.flop || [])
+    .concat(s.replay?.board?.turn || [])
+    .concat(s.replay?.board?.river || []);
+  const totalLen = cards.join("").length;
+  if (totalLen === 6) scenariosByStreet.flop++;
+  else if (totalLen === 8) scenariosByStreet.turn++;
+  else if (totalLen === 10) scenariosByStreet.river++;
+}
+
+console.log("## Per-street template coverage\n");
+let anyStreetUncovered = false;
+for (const street of ["flop", "turn", "river"]) {
+  const c = streetCoverage[street];
+  const n = scenariosByStreet[street];
+  if (n === 0) {
+    console.log(`  ${street.padEnd(5)} — no scenarios on this street; coverage moot`);
+    continue;
+  }
+  if (c.present && !c.mismatch) {
+    console.log(`  ${street.padEnd(5)} — ✅  ${n} scenario(s); dedicated template at ${c.path}`);
+  } else if (c.present && c.mismatch) {
+    console.log(`  ${street.padEnd(5)} — ❌  ${n} scenario(s); per-street file exists but its saved board is a ${c.actualStreet}, not a ${street} — rename or re-save`);
+    anyStreetUncovered = true;
+  } else if (c.coveredByFallback) {
+    console.log(`  ${street.padEnd(5)} — ✅  ${n} scenario(s); covered by fallback template (same street)`);
+  } else {
+    console.log(`  ${street.padEnd(5)} — ❌  ${n} scenario(s); NO matching template — fallback is a ${tmpl.boardStreet}. These scenarios will OOM GTO+ at load. Save ${perStreetPaths[street]} (with a ${street === "turn" ? "4-card" : "5-card"} board).`);
+    anyStreetUncovered = true;
+  }
+}
+
+console.log("");
+const comboOK = maxHero <= tmplHeroCombos && maxVill <= tmplVillCombos;
+const lenCapOK = heroLenCapOK && villLenCapOK;
+const streetOK = !anyStreetUncovered;
+if (comboOK && lenCapOK && streetOK) {
+  console.log("✅ Template (and per-street siblings) cover all 45 scenarios — safe for batch generation.");
 } else {
-  console.log("⚠ Template is too narrow for some scenarios — see lists above.");
-  console.log("  Re-save the template in GTO+ with wider hero+villain ranges:");
-  if (maxHero > tmplHeroCombos) console.log(`    hero  ≥ ${maxHero} combos`);
-  if (maxVill > tmplVillCombos) console.log(`    vill  ≥ ${maxVill} combos`);
+  if (!comboOK) {
+    console.log("⚠ Template is too narrow for some scenarios — see combo-budget lists above.");
+    console.log("  Re-save the template in GTO+ with wider hero+villain ranges:");
+    if (maxHero > tmplHeroCombos) console.log(`    hero  ≥ ${maxHero} combos`);
+    if (maxVill > tmplVillCombos) console.log(`    vill  ≥ ${maxVill} combos`);
+  }
+  if (!lenCapOK) {
+    console.log("⚠ Some scenarios exceed the byte-18 / byte-23 single-byte pointer cap.");
+    console.log("  These scenarios cannot be batch-generated cleanly with the current substitution scheme.");
+    console.log("  Workarounds: shorten the affected scenarios' range definitions in data/scenarios.json");
+    console.log("  (e.g. consolidate specific combos into broader hand classes), or rerun the");
+    console.log("  controlled-corpus experiment (tpl-C series) to find a multi-byte length field.");
+  }
+  if (!streetOK) {
+    console.log("⚠ Some streets have no matching template — see per-street coverage above.");
+    console.log("  Save the missing per-street templates in GTO+ (same wide ranges + bet tree as the");
+    console.log("  fallback, just with the right board length).");
+  }
   process.exit(1);
 }

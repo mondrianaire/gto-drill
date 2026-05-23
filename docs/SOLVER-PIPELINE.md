@@ -38,33 +38,67 @@ Set-Content -Path "C:\Program Files\GTO\tmp\customconnect.txt" -Value "override"
 Then restart GTO+. On the next launch, `tmp/connect_log.txt` will show
 `Custom connect in ON`.
 
-**Save a max-budget template.** Step 1 (binary generation) substitutes per-scenario
-ranges into a template `.gto2`, but the template's bet-tree allocation must be
-sized for the WIDEST combo count any scenario will inject — else GTO+ OOM-crashes
-during solve.
+**Save per-street max-budget templates.** Step 1 (binary generation) substitutes
+per-scenario ranges into a template `.gto2`, but two template constraints
+must be satisfied:
 
-In GTO+:
+1. **Combo budget** — the template's saved hero+villain ranges must be at
+   least as wide (combo count) as the widest scenario we'll inject. Else GTO+
+   OOM-crashes during solve.
+2. **Street match** — the template's saved board length must match the
+   scenario's board length. A 5-card-river board substituted into a 3-card-
+   flop template OOMs GTO+ at file open (the bet-tree was shaped for a flop
+   decision with turn+river chance subtrees, and the file says we're on the
+   river — GTO+ doesn't reconcile). So we need separate templates per
+   street: flop / turn / river.
+
+In GTO+, save **three** templates by repeating these steps for each street:
+
 1. Open Run Solver
 2. Set hero range to **the widest possible** (~700+ combos):
    `22+,A2s+,A2o+,K2s+,K2o+,Q2s+,Q2o+,J2s+,J2o+,T2s+,T2o+,92s+,92o+,82s+,82o+,72s+,72o+,62s+,62o+,52s+,52o+,42s+,42o+,32s,32o`
-   (essentially "play anything")
-3. Set villain range to **all hands** (1326 combos):
-   Same wide range as hero
-4. Set board: any flop (e.g. `Td9d6h` — board gets overwritten per scenario)
+3. Set villain range to **all hands** (1326 combos): same wide range as hero
+4. Set board:
+   - For the flop template: 3 cards (e.g. `Td 9d 6h`)
+   - For the turn template: 4 cards (e.g. `Td 9d 6h 2s`)
+   - For the river template: 5 cards (e.g. `Td 9d 6h 2s 3c`)
 5. Set pot/stack: any values (overwritten per scenario)
 6. **IMPORTANT**: configure your preferred bet sizing tree — every generated
    `.gto2` carries this tree.
-7. **Save** as `template-max.gto2` somewhere (e.g. next to `test32.gto2`).
+7. **Save** with the matching suffix:
+   - `template-max-flop.gto2`
+   - `template-max-turn.gto2`
+   - `template-max-river.gto2`
+   (all in the same directory)
 8. Don't solve — we want an unsolved template (MAIN TREE empty) so the
    substituted files get solved cleanly.
 
-Validate the template before generation:
+`gto-batch-generate.mjs` auto-detects the per-street siblings next to the
+template path you pass on the command line, and routes each scenario to the
+matching template by board length. If a sibling is missing for a street that
+has scenarios, you'll see a clear `⚠OOM-risk` tag in the per-scenario output
+and an explicit "fallback is a {flop|turn|river}, scenarios for {turn|river}
+will likely OOM" warning at startup.
+
+Backward compatibility: if you pass a single template path with no per-street
+siblings, the script falls back to using that one template for everything
+(same as before). Useful for spot-tests of a single flop scenario, but won't
+work for full coverage.
+
+Validate the templates before generation:
 
 ```bash
 node scripts/gto-template-check.mjs path/to/template-max.gto2
 ```
 
-Should print `✅ Template covers all 45 scenarios — safe for batch generation.`
+This now reports three things:
+1. **Combo budget** — hero/vill combo counts vs widest scenario demand
+2. **Byte-pointer cap** — list of scenarios whose substituted range strings
+   would overflow byte 18 (hero) or byte 23 (vill); see "Known caveats" below
+3. **Per-street coverage** — whether dedicated `-flop` / `-turn` / `-river`
+   sibling templates exist, and which streets they cover
+
+A green verdict requires all three. The script exits 1 if any check fails.
 
 ## The four steps
 
@@ -166,10 +200,30 @@ Total active human time once template is built: **~3 clicks per batch run.**
 
 - Templates that lack a `template_max.gto2` style wide-range setup will OOM the
   solver on wide scenarios. The template-check script catches this preemptively.
-- The binary substitution recomputes the `@12` forward pointer for shifts but
-  assumes the template's region B (bet-tree abstraction) is independent of range
-  size. This held in our minimal tests; if a real generation crashes GTO+ on
-  load (not solve), we'd need to investigate region B further.
+- The binary substitution recomputes the `@12` forward pointer for shifts and
+  the byte 18 / byte 23 sibling pointers in region B. Both byte 18 and byte 23
+  are **single-byte** fields (verified — no adjacent high-byte field), so the
+  scenario's substituted range string length is capped:
+    - hero string ≤ 238 chars (else byte 18 overflows)
+    - villain string ≤ 251 chars (else byte 23 overflows)
+  `gto-template-check.mjs` reports any scenario that violates the cap as part
+  of its standard pre-flight output. The script's exit-1 verdict now covers
+  both the combo-budget check and the string-length cap.
+- `gto-batch-generate.mjs` now re-parses every generated file before writing
+  and asserts that the first two range-shaped strings in the new HEADER equal
+  the intended hero/villain. A scenario that fails this verify step is
+  reported as `❌ verify: ...` and skipped — the bad file never lands on disk.
+  This catches both locator slot-picking errors and byte-pointer arithmetic
+  errors before they reach PROCESS FILES.
+- **River-vs-flop tree mismatch.** A scenario whose board length doesn't
+  match the template's saved board length OOMs GTO+ at file open (confirmed
+  empirically: scenarios 007 and 045, both 5-card rivers loaded into a
+  3-card-flop template, both crashed; flop scenarios into the same template
+  loaded fine). Mitigation: save per-street templates (`-flop.gto2`,
+  `-turn.gto2`, `-river.gto2`) and `gto-batch-generate.mjs` routes per
+  scenario. Until the per-street files exist, the script tags
+  street-mismatched scenarios with `⚠OOM-risk` in its per-line output so
+  they're easy to spot.
 - For scenarios where `deriveRanges` falls back to the dealt-hand class (5/45
   edge cases: limped pots, ICM, BB-vs-SB), the solver gets a single-combo
   "range" and the equilibrium is degenerate. These need authored
