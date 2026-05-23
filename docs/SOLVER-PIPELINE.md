@@ -113,7 +113,41 @@ template ranges with chart-derived hero range + authored villain range (or
 preflop-derived fallback), updates board/pot/stack, recomputes section length +
 bytesum + the @12 forward pointer.
 
-### 2. GTO+ PROCESS FILES batch solve
+### 2. (Optional) Verify every generated file opens in GTO+
+
+Before kicking off a multi-hour PROCESS FILES run, sanity-check that every
+`.gto2` actually loads — a file that crashes GTO+ at load also blocks the
+batch, but the batch UI gives no per-file diagnostic.
+
+```bash
+node scripts/gto-verify-loads.mjs
+```
+
+GTO+ must be running with socket auth enabled (see One-time setup). The
+script:
+- Connects to TCP `localhost:55143`
+- For each `.gto2` in `solver-output/`: sends `~Load file: <abs path>~` and
+  waits for the `~successfully loaded~` reply (or socket death)
+- On a crash, reconnects automatically and continues with the next file —
+  so one bad scenario doesn't poison the run
+- Writes `solver-output/load-verify-report.json` and a per-file table:
+  - ✅ `loaded cleanly` — GTO+ confirmed the load
+  - ❌ `rejected` — GTO+ replied but didn't accept the file
+  - ⚠ `timed out` — no reply in 20 s (load may still be in flight)
+  - 💥 `crashed GTO+` — socket dropped mid-load; the file kills GTO+
+
+If GTO+ doesn't auto-respawn after a crash (it sometimes does, sometimes
+doesn't), the reconnect waits up to 30 s before giving up — at which point
+the script aborts cleanly and you can relaunch GTO+ to cover the rest.
+
+Common failure-mode mappings:
+- Crash on a **5-card-river** scenario → the file was generated against a
+  flop template; save a per-street river template (see One-time setup).
+- Crash on a flop scenario that previously loaded → check whether
+  `template-max-15k.gto2` (or whichever fallback template was used) is
+  still present and matches the scenarios' combo demands.
+
+### 3. GTO+ PROCESS FILES batch solve
 
 1. Open GTO+
 2. Folder icon → select `solver-output/`
@@ -122,7 +156,7 @@ bytesum + the @12 forward pointer.
 5. Each file's MAIN TREE section grows from ~25 bytes (empty stub) to ~20-80 KB
    (solved strategy data)
 
-### 3. Extract solver data via socket
+### 4. Extract solver data via socket
 
 GTO+ must be running and you must have set up `customconnect.txt` already.
 
@@ -138,7 +172,7 @@ The script:
 - Picks out hero's dealt-hand specific strategy
 - Writes `solver-output/solver-data.json`
 
-### 4. Merge into scenarios.json
+### 5. Merge into scenarios.json
 
 *(Not built yet — small follow-up script. The data file format is:*
 
@@ -191,7 +225,11 @@ Total active human time once template is built: **~3 clicks per batch run.**
   paste sheets so you can set up each scenario manually in GTO+ instead of
   using the binary template path. Useful if the template approach hits a wall.
 - `scripts/gto-template-check.mjs` — combo budget validator for a template.
-- `scripts/gto-extract.mjs` — step 3 socket-driven extractor.
+- `scripts/gto-verify-loads.mjs` — step 2 (optional) socket-driven load test;
+  per-file ✅/❌ table plus a JSON report at
+  `solver-output/load-verify-report.json`. Crash-resilient: reconnects to GTO+
+  after each crash so one bad scenario doesn't poison the run.
+- `scripts/gto-extract.mjs` — step 4 socket-driven extractor.
 - `src/preflop-ranges.js` — shared `deriveRanges(scen)` used by both
   generators.
 - `data/preflop-ranges.json` — 3-source consensus chart library.
