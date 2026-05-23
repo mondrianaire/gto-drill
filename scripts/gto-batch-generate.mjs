@@ -255,22 +255,30 @@ function generateForScenario(scen) {
   if (cursor < TEMPLATE_HDR_CONTENT.length) pieces.push(TEMPLATE_HDR_CONTENT.slice(cursor));
   let newContent = Buffer.concat(pieces);
 
-  // Update @12 forward pointer (offset to post-tree config) by total shift
-  const delta = newContent.length - TEMPLATE_HDR_CONTENT.length;
+  // Net delta across all substitutions — used for @12 forward pointer and the
+  // HEADER section length / bytesum.
+  const netDelta = newContent.length - TEMPLATE_HDR_CONTENT.length;
+  // Per-substitution deltas — used for the two sibling pointers inside region B.
+  // Region B has a 3-byte record per range with a length/offset byte that
+  // tracks ONLY that range's length, independent of other substitutions.
+  // Empirically discovered:
+  //   byte 18 = hero_len + 17     (hero sibling pointer)
+  //   byte 23 = vill_len + 4      (vill sibling pointer)
+  // Verified by:
+  //   tpl-A1/A2/A3 controlled diff (hero-only varied) → only byte 18 changed
+  //   test-vill-only-v2 (vill-only varied) → byte 23 += vill_delta loaded cleanly
+  // Critical: byte 18 must track hero_delta only, NOT net delta. Using net
+  // delta corrupts the hero range display (we tested this and GTO+ showed
+  // bogus hands added to hero when byte 18 was over-incremented).
+  const heroDelta = heroRange.length - SLOTS.hero.len;
+  const villDelta = villRange.length - SLOTS.vill.len;
   const oldAt12 = TEMPLATE_HDR_CONTENT.readUInt32LE(12);
-  newContent.writeUInt32LE(oldAt12 + delta, 12);
-
-  // Update HEADER content byte 18 — second forward pointer inside region B's
-  // bet-tree spec. Discovered empirically: this single byte tracks the hero
-  // range length (or net atom shift). When we substitute a longer range, this
-  // byte must += the same delta as @12, or GTO+ reads garbage from a stale
-  // length value and either OOMs or freezes during tree validation.
-  // See PR analysis: tpl-A1/A2/A3 controlled diff showed byte 18 going
-  // 19 → 25 → 35 as hero range went 2 → 8 → 18 chars (deltas +6, +16 match).
-  const oldByte18 = TEMPLATE_HDR_CONTENT[18];
-  newContent[18] = (oldByte18 + delta) & 0xff;
-  // (If delta exceeds what fits in a byte, this overflow needs handling — but
-  // our deltas are typically < 256 so single-byte arithmetic is safe.)
+  newContent.writeUInt32LE(oldAt12 + netDelta, 12);
+  newContent[18] = (TEMPLATE_HDR_CONTENT[18] + heroDelta) & 0xff;
+  newContent[23] = (TEMPLATE_HDR_CONTENT[23] + villDelta) & 0xff;
+  // Single-byte arithmetic is safe for typical scenario deltas (< 256);
+  // wider scenarios (e.g., 1326-combo vill) would need uint16 handling, but
+  // we cap at template's range budget anyway via gto-template-check.
 
   // Build full HEADER section + preamble
   const newSection = Buffer.concat([
@@ -302,7 +310,7 @@ function generateForScenario(scen) {
       board,
       pot: ds.potBb,
       stack: ds.effStackBb,
-      headerDelta: delta,
+      headerDelta: netDelta,
       newSize: outFile.length,
     },
   };
