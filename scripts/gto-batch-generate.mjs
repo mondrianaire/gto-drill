@@ -260,6 +260,18 @@ function generateForScenario(scen) {
   const oldAt12 = TEMPLATE_HDR_CONTENT.readUInt32LE(12);
   newContent.writeUInt32LE(oldAt12 + delta, 12);
 
+  // Update HEADER content byte 18 — second forward pointer inside region B's
+  // bet-tree spec. Discovered empirically: this single byte tracks the hero
+  // range length (or net atom shift). When we substitute a longer range, this
+  // byte must += the same delta as @12, or GTO+ reads garbage from a stale
+  // length value and either OOMs or freezes during tree validation.
+  // See PR analysis: tpl-A1/A2/A3 controlled diff showed byte 18 going
+  // 19 → 25 → 35 as hero range went 2 → 8 → 18 chars (deltas +6, +16 match).
+  const oldByte18 = TEMPLATE_HDR_CONTENT[18];
+  newContent[18] = (oldByte18 + delta) & 0xff;
+  // (If delta exceeds what fits in a byte, this overflow needs handling — but
+  // our deltas are typically < 256 so single-byte arithmetic is safe.)
+
   // Build full HEADER section + preamble
   const newSection = Buffer.concat([
     Buffer.from("[HEADER]", "utf8"),
