@@ -2124,6 +2124,31 @@ form { margin-top: 8px; }
   padding: 2px 6px;
   white-space: nowrap;
 }
+/* Tap-to-define concept tag — Results-Header-v2 spec. When the tag
+   maps to a dictionary entry it renders as a real <button> with the
+   shared term-tooltip wired (hover desktop, tap mobile). Visually
+   inherits .gc-tag; this variant just turns the cursor and gives it
+   button-button semantics (no native button chrome). */
+button.gc-tag.gc-tag-term {
+  font: inherit;
+  line-height: 1;
+  cursor: help;
+  margin: 0;
+}
+button.gc-tag.gc-tag-term:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+@media (hover: hover) {
+  button.gc-tag.gc-tag-term:hover {
+    background: rgba(76, 182, 255, 0.2);
+    color: var(--text);
+  }
+}
+button.gc-tag.gc-tag-term.term-tip-active {
+  background: rgba(76, 182, 255, 0.22);
+  color: var(--text);
+}
 .gc-tag-more { opacity: 0.7; }
 /* Row 2 — solver mix bar */
 .gc-bar-block {
@@ -3631,6 +3656,165 @@ form { margin-top: 8px; }
   padding: 3px 7px;
   border-radius: var(--radius-box);
   vertical-align: middle;
+}
+/* Per-scenario flag tag — Special-Scenarios spec §5. A compact box
+   that sits in the scenario header beside the Replay marker. For major
+   flags this is a real <button> that re-opens the briefing modal in
+   review mode mid-hand; minor flags render as a static span. The tag
+   carries the ⚠ glyph + the flag's short label (e.g. "Hidden cards"). */
+.scenario-flag-tag {
+  margin-left: 8px;
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--accent);
+  background: var(--hero-soft);
+  border: 1px solid rgba(76, 182, 255, 0.4);
+  padding: 3px 7px;
+  border-radius: var(--radius-box);
+  vertical-align: middle;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-family: inherit;
+  line-height: 1;
+  cursor: pointer;
+}
+button.scenario-flag-tag {
+  appearance: none;
+}
+@media (hover: hover) {
+  button.scenario-flag-tag:hover {
+    background: rgba(76, 182, 255, 0.28);
+    border-color: var(--accent);
+  }
+}
+button.scenario-flag-tag:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+.scenario-flag-tag.scenario-flag-tag-static { cursor: default; }
+
+/* ----- Scenario briefing modal (Special-Scenarios spec §4) -----------
+   Fixed-position scrim covering the viewport, with a centered card
+   above it. The hand behind is non-interactive by virtue of the scrim
+   intercepting all pointer events. Gate mode is the default; the
+   modal stays until the user taps Start hand. Review mode (re-opened
+   via the header flag tag) also allows scrim-tap and Escape dismissal
+   — those paths are wired in JS, the styles here are shared. */
+.sb-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 9, 13, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 18px;
+  z-index: 1000;
+  animation: sb-scrim-in 140ms ease-out;
+}
+@keyframes sb-scrim-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.sb-modal {
+  width: 100%;
+  max-width: 320px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-interactive);
+  border-radius: 16px;
+  padding: 18px 17px 16px;
+  box-shadow: var(--shadow-3), 0 20px 50px rgba(0, 0, 0, 0.7);
+  text-align: center;
+  animation: sb-modal-in 180ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@keyframes sb-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.sb-icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  margin: 0 auto 11px;
+  background: var(--hero-soft);
+  border: 1px solid rgba(76, 182, 255, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 19px;
+  color: var(--accent);
+}
+.sb-eyebrow {
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  margin-bottom: 5px;
+}
+.sb-title {
+  font-size: 1.06rem;
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  line-height: 1.25;
+  margin: 0 0 8px;
+  color: var(--text);
+}
+.sb-body {
+  font-size: 0.78rem;
+  color: #c4d2dd;
+  line-height: 1.55;
+  margin: 0 0 12px;
+}
+.sb-flags {
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.sb-flag {
+  font-size: 0.56rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  background: var(--hero-soft);
+  color: var(--accent);
+  border: 1px solid rgba(76, 182, 255, 0.32);
+  border-radius: var(--radius-box);
+  padding: 3px 7px;
+}
+.sb-btn {
+  width: 100%;
+  min-height: 46px;
+  background: var(--accent);
+  color: #061018;
+  border: 0;
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.94rem;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 2px 10px rgba(76, 182, 255, 0.3);
+  transition: transform 80ms ease, filter 120ms ease;
+}
+.sb-btn:active {
+  transform: scale(0.97);
+  filter: brightness(1.08);
+}
+.sb-btn:focus-visible {
+  outline: 2px solid #fff;
+  outline-offset: 2px;
+}
+.sb-foot {
+  font-size: 0.6rem;
+  color: #6a8092;
+  margin-top: 9px;
+}
+@media (prefers-reduced-motion: reduce) {
+  .sb-scrim,
+  .sb-modal { animation: none; }
+  .sb-btn { transition: none; }
 }
 
 /* Icon-only header buttons (used by solo + duel views). The text labels

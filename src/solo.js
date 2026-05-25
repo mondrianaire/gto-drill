@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay, buildSpotSummary, buildRunoutStrip, buildHeroStrip, buildDecidePrompt } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoSummaryCard, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown, buildScenarioInfo, buildRetestCompare } from "./ui.js";
+import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoSummaryCard, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown, buildScenarioInfo, buildRetestCompare, getScenarioFlags, hasMajorScenarioFlag, buildScenarioFlagTag, buildScenarioBriefingModal } from "./ui.js";
 import { recordResponse, readScenarioResponses, readMyResponses, saveResponseComment, getCurrentUser } from "./state.js";
 
 // -----------------------------------------------------------------------
@@ -214,6 +214,15 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
   // Per-hand state — gets reset on each Next hand.
   let draft = null;
   let replayCleanup = null;
+  // Active briefing-modal handle, so a re-render can pick up the
+  // existing modal instead of mounting a duplicate, and a leaving render
+  // can tear it down. Owned by render() (its briefing-state machine).
+  let activeBriefing = null;
+  // Per-scenario record of whether the player has dismissed the major-
+  // flag briefing for the current hand. Reset on every Next hand. Re-
+  // entering the same scenario (via Replay) re-arms the briefing — that
+  // is the spec (§6 rule 1).
+  let briefingDismissedFor = null;
   let handsCompleted = 0;
   let correctSoFar = 0;
   // Hand-display layout: "expanded" — the animated oval table — or
@@ -290,6 +299,10 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
       });
     }
     currentScen = pickScenario();
+    // Re-arm the briefing modal — entering a new scenario (or re-entering
+    // one via Replay) always restarts the per-hand briefing flow per
+    // Special-Scenarios spec §6 rule 1.
+    briefingDismissedFor = null;
     // priorAnswer — the user's recorded answer to this scenario BEFORE
     // the current attempt, or null if they've never played it. Captured
     // once here so the decide + reveal screens read a stable value.
@@ -353,10 +366,46 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
 
   function render() {
     if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
+    // Tear down any open briefing modal from the prior render — render()
+    // is the rebuild path so the scrim mounted last time is now stale.
+    // Silent so the onDismiss gate-state side effect doesn't fire; the
+    // gate condition below re-evaluates and may legitimately re-open the
+    // briefing for this scenario.
+    if (activeBriefing) {
+      try { activeBriefing.destroy({ silent: true }); } catch {}
+      activeBriefing = null;
+    }
     clear(container);
 
     const scen = currentScen;
     const errorBox = h("div", { class: "error", role: "alert" });
+
+    // Briefing-modal helper, in scope for both the auto-open path
+    // (below, after the section is appended) and the header flag tag's
+    // re-open handler. Returns silently if there's nothing to brief on
+    // or if a modal is already open.
+    function openBriefing(mode) {
+      if (activeBriefing) return;
+      const flags = getScenarioFlags(scen);
+      if (flags.length === 0) return;
+      const m = buildScenarioBriefingModal({
+        scen, flags, mode,
+        onDismiss: () => {
+          activeBriefing = null;
+          // Gate-mode dismissal marks the briefing as cleared for this
+          // hand — the player can now act. Review-mode dismissal leaves
+          // the gate state alone (it was either never set or already
+          // cleared).
+          if (mode !== "review") {
+            briefingDismissedFor = scen && scen.scenario_id;
+          }
+        },
+      });
+      if (!m) return;
+      document.body.appendChild(m.root);
+      activeBriefing = m;
+      m.focus();
+    }
 
     // --- header strip --------------------------------------------------------
     // Two-row header: title + action buttons on row 1, stats on row 2.
@@ -448,12 +497,25 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
         render();
       });
     }
+    // Scenario flags — the Special-Scenarios spec §2 model. Every flag
+    // renders as a compact box in the header (§5); a major flag also
+    // triggers the briefing modal below.
+    const scenFlags = getScenarioFlags(scen);
+    const headerFlagTags = scenFlags.map((flag) => {
+      // Major flag → button that re-opens the briefing in review mode.
+      // Minor flag → static box (no popup behind it).
+      const onClick = flag.tier === "major"
+        ? (() => { openBriefing("review"); })
+        : null;
+      return buildScenarioFlagTag({ flag, onClick });
+    });
     const headlineMain = h("span", { class: "scenario-headline-main" },
       scenNum ? "Scenario " : null,
       scenNum ? h("span", { class: "scenario-headline-num" }, "#" + scenNum[1]) : null,
       (scenNum && isReplay)
         ? h("span", { class: "scenario-replay-tag", title: "You've answered this scenario before" }, "Replay")
-        : null);
+        : null,
+      ...headerFlagTags);
     // Four-dot PRE / FLOP / TURN / RIVER progress indicator (mockup M3 —
     // compressed-workflow pass). Dots before the decision street are
     // ".is-done" (dim), the decision street itself is ".is-now" (accent
@@ -833,6 +895,19 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
     // Once per device: nudge toward the compact layout if this decide
     // screen overflows the viewport.
     maybeShowCompactCoach(scenarioHeadline, viewToggleBtn);
+
+    // Gate-mode briefing — Special-Scenarios spec §4. Major-flag
+    // scenarios open the clickthrough briefing before the hand becomes
+    // interactive. Only re-arms per scenario entry (briefingDismissedFor
+    // is reset in nextHand()), so subsequent re-renders of the same
+    // hand (after a lock-in, etc.) skip it. Reveal screens skip it too:
+    // the player is no longer making a decision, just reading the
+    // breakdown.
+    if (!draft.revealed
+        && hasMajorScenarioFlag(scen)
+        && briefingDismissedFor !== scen.scenario_id) {
+      openBriefing("gate");
+    }
   }
 
   // Start: load the signed-in user's completed-scenario set first so
@@ -883,6 +958,15 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
     unmount: () => {
       unmounted = true;
       if (replayCleanup) { try { replayCleanup(); } catch {} replayCleanup = null; }
+      // Tear down any open briefing modal — it's a document-level
+      // overlay outside `container`, so clear(container) below won't
+      // touch it. Leaving it hanging would orphan the modal on top of
+      // whatever the user navigates to next. Silent because the player
+      // is leaving the view, not dismissing the briefing.
+      if (activeBriefing) {
+        try { activeBriefing.destroy({ silent: true }); } catch {}
+        activeBriefing = null;
+      }
       clear(container);
     },
   };
