@@ -14,8 +14,14 @@
 //   - Node data:  send `~Request node data~`, get per-combo COMBOS/EQUITY/WEIGHTS
 //   - Action data:`~Request action data~` → `~[N actions: A,B,C]~`
 //
-// Output: solver-output/solver-data.json — { [scenario_id]: { board, actions,
-// oop_per_hand, ip_per_hand, hero_hand_freq, hero_hand_ev, hero_hand_combos } }
+// Output: solver-output/solver-data-gto-plus.json — { [scenario_id]: { board,
+// actions, oop_per_hand, ip_per_hand, hero_hand_freq, hero_hand_ev, hero_hand_combos } }
+//
+// Until v.148 this wrote to a single solver-output/solver-data.json shared
+// with texas-extract.mjs, which meant running one lane after the other
+// clobbered the first's data. Lane-separated paths let TexasSolver freq +
+// GTO+ EV coexist per scenario, with gto-merge.mjs unioning both files
+// (GTO+ wins on overlap because it carries EV that TexasSolver does not).
 
 import net from "node:net";
 import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
@@ -227,6 +233,6 @@ for (const f of targets) {
 
 sock.end();
 
-const outPath = join(OUT_DIR, "solver-data.json");
+const outPath = join(OUT_DIR, "solver-data-gto-plus.json");
 writeFileSync(outPath, JSON.stringify(allData, null, 2));
 console.log(`\n✅ Wrote ${outPath} (${Object.keys(allData).length} scenarios)`);
