@@ -153,6 +153,28 @@ function pickHeroHandStrategy(perHandByPlayer, scen) {
   return null;
 }
 
+// Walk the whole solver tree depth-first, returning EVERY decision node
+// keyed by its action-path from the root (e.g. "" for root, "BET 28" for
+// root → BET 28, "CHECK.BET 28" for root → CHECK → BET 28). For
+// facing-bet scenarios the hero-response node lives at depth ≥1; the
+// merge step picks the right depth by matching scenario action shape.
+function collectDecisionNodes(dump) {
+  const out = [];
+  function walk(node, path) {
+    if (!node || typeof node !== "object") return;
+    const hasActions = Array.isArray(node.actions) && node.actions.length;
+    const hasStrategy = node.strategy || node.strategies || node.actions_strategy;
+    if (hasActions && hasStrategy) out.push({ path, node });
+    if (node.childrens) {
+      for (const [edge, child] of Object.entries(node.childrens)) {
+        walk(child, path ? path + "." + edge : edge);
+      }
+    }
+  }
+  walk(dump, "");
+  return out;
+}
+
 // ----- Main loop -----
 
 const out = {};
@@ -197,13 +219,34 @@ for (const f of files) {
       .toLowerCase().includes("ip") ? "ip" : "oop";
   }
   // TexasSolver dumps typically have only the next-to-act side's strategy
-  // populated at the root node. The "other" side stays absent.
+  // populated at any given node. The "other" side stays absent at that node.
   const actorHands = normalisePerHand(node);
   const perHand = { [nextPlayer + "_per_hand"]: actorHands };
   perHand[(nextPlayer === "ip" ? "oop" : "ip") + "_per_hand"] = {};
   const heroHand = scen
     ? pickHeroHandStrategy({ oop: perHand.oop_per_hand, ip: perHand.ip_per_hand }, scen)
     : null;
+
+  // Collect every dumped decision node into a `nodes` array keyed by
+  // action-path. For typical hero-opens-the-betting scenarios the merge
+  // only reads the root (path=""); for facing-bet scenarios (hero
+  // responds to villain's bet/raise) it walks to the matching depth.
+  const allDecisionNodes = collectDecisionNodes(dump);
+  const nodes = allDecisionNodes.map((entry) => {
+    const n = entry.node;
+    let playerSide = "oop";
+    if (typeof n.player === "number") {
+      playerSide = n.player === 1 ? "ip" : "oop";
+    }
+    const hands = normalisePerHand(n);
+    return {
+      path: entry.path,
+      player: playerSide,
+      actions: n.actions || [],
+      overall_freq: aggregateOverall(hands, n.actions || []),
+      hands,                                  // for hero_hand_strategy lookup
+    };
+  });
 
   out[id] = {
     board: node.board || (scen && [].concat(
@@ -217,11 +260,16 @@ for (const f of files) {
     oop_per_hand: perHand.oop_per_hand,
     ip_per_hand: perHand.ip_per_hand,
     hero_hand_strategy: heroHand,
+    // Facing-bet support: every decision node in the dumped tree, keyed
+    // by its path from root. The merge step picks the right one based
+    // on scenario action shape + hero position.
+    nodes,
   };
   parsed++;
   const freqStr = Object.entries(out[id].overall_freq)
     .map(([a, f]) => `${a}=${(f * 100).toFixed(1)}%`).join(", ");
-  console.log(`✅ ${actions.length} actions: ${freqStr || "(no freq aggregation)"}`);
+  const nodeStr = nodes.length > 1 ? ` (+${nodes.length - 1} child nodes)` : "";
+  console.log(`✅ ${actions.length} actions: ${freqStr || "(no freq aggregation)"}${nodeStr}`);
 }
 
 writeFileSync(OUT_FILE, JSON.stringify(out, null, 2));

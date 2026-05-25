@@ -79,6 +79,15 @@ function parseAction(label, sourceHint) {
   if (!s) return { raw: s, type: null };
   const low = s.toLowerCase();
   if (/^fold/.test(low)) return { raw: s, type: "fold" };
+  // "Check-raise to N", "3-bet to N", "Re-raise N" are all raise actions
+  // — match these explicitly so the generic "first numeric / contains-bet"
+  // logic below doesn't misclassify them (e.g. "3-bet to 38bb" was being
+  // parsed as a 3-chip BET instead of a 38-chip raise).
+  if (/^(check-?raise|re-?raise|\d+-?bet|shove|all-?in)/i.test(low)) {
+    const m = s.match(/to\s+(\d+(?:\.\d+)?)\s*bb/i)
+           || [...s.matchAll(/(\d+(?:\.\d+)?)/g)].filter((mm) => !/^\d+-bet/.test(mm[0])).pop();
+    return { raw: s, type: "raise", bb: m ? parseFloat(m[1]) : undefined };
+  }
   if (/^(check|x\b)/.test(low)) return { raw: s, type: "check" };
   // Find first numeric (bet/raise/call size). Bare integers in TexasSolver
   // ("BET 20") are bb*10; in GTO+ ("Bet 9.25") are floats in bb; in scenario
@@ -136,7 +145,89 @@ function mapSolverToScenario(scenarioActions, solverActions, sourceHint) {
       mapping[scenarioActions[i]] = solverActions[best.idx];
     }
   }
+  // Type-unique fallback: if a scenario action has TYPE = raise/bet and
+  // the solver has EXACTLY ONE matching-type action that hasn't been
+  // mapped yet, match them regardless of bb size mismatch. This handles
+  // the TexasSolver case where the dump's RAISE N differs from the
+  // scenario's "Raise to M bb" because TS's raise sizing semantics
+  // (% of post-bet pot) don't reproduce scenario-authored absolute sizes.
+  const mappedSolvers = new Set(Object.values(mapping));
+  for (let i = 0; i < parsedScen.length; i++) {
+    const scen = parsedScen[i];
+    if (mapping[scenarioActions[i]]) continue;        // already mapped
+    if (scen.type !== "raise" && scen.type !== "bet") continue;
+    const candidates = parsedSolv
+      .map((sv, idx) => ({ sv, idx }))
+      .filter(({ sv, idx }) => sv.type === scen.type && !mappedSolvers.has(solverActions[idx]));
+    if (candidates.length === 1) {
+      mapping[scenarioActions[i]] = solverActions[candidates[0].idx];
+      mappedSolvers.add(solverActions[candidates[0].idx]);
+    }
+  }
   return mapping;
+}
+
+// Determine whether this scenario is "hero responding to a pending bet"
+// vs "hero opening / continuing without facing a bet". The signal is the
+// shape of available_actions: facing-bet scenarios have Fold/Call (and
+// usually a Raise option), no plain Check or Bet options. The matching
+// solver node lives at depth ≥1 in the dumped tree (not at the root).
+//
+// Edge case: "Check-raise to N" labels begin with "check" but describe a
+// raise IN RESPONSE to a bet — these scenarios ARE facing-bet. The
+// exclusion regex requires a word boundary so "Check-raise" doesn't
+// disqualify while "Check back" / "Check" still do.
+function isFacingBetScenario(scen) {
+  const acts = (scen.available_actions || []).map((a) => a.toLowerCase().trim());
+  const hasFold = acts.some((a) => /^fold/.test(a));
+  const hasCall = acts.some((a) => /^call/.test(a));
+  const hasPlainCheck = acts.some((a) => /^check(?!-)/.test(a));
+  const hasPlainBet = acts.some((a) => /^bet/.test(a));
+  return hasFold && hasCall && !hasPlainCheck && !hasPlainBet;
+}
+
+// Compute which side hero is on (oop / ip) using the same heuristic as
+// buildSolverConfig: hero is OOP if their seat sorts earlier in the
+// position order than the primary villain's.
+function heroSide(scen) {
+  const replay = scen.replay || {};
+  const heroPos = replay.hero_seat;
+  const seats = (replay.seats || []).map((s) => s.pos);
+  const folded = new Set();
+  for (const a of (replay.actions || [])) {
+    if (a && a.type === "fold" && a.actor) folded.add(a.actor);
+  }
+  const villPos = seats.find((p) => p !== heroPos && !folded.has(p));
+  const ORDER = ["SB", "BB", "UTG", "UTG1", "UTG2", "MP", "LJ", "HJ", "CO", "BTN"];
+  const rank = (p) => { const i = ORDER.indexOf(p); return i < 0 ? 99 : i; };
+  return (villPos && rank(heroPos) < rank(villPos)) ? "oop" : "ip";
+}
+
+// For facing-bet scenarios, scan the dumped nodes for a hero-response
+// node — a node whose `player` matches hero's side AND whose actions
+// look like a fold/call/raise response (i.e. includes FOLD or CALL).
+// Picks the SHORTEST path among matches: hero's first response in the
+// solver tree (hero facing villain's bet), not a deeper node (hero
+// facing villain's raise after hero already acted). Without this
+// preference, scenarios like bluff-catcher pick the wrong depth and
+// surface fold/call freqs that aren't what the player is asking about.
+// Returns null if no matching node found.
+function findHeroResponseNode(solverEntry, scen) {
+  const hSide = heroSide(scen);
+  const nodes = solverEntry.nodes || [];
+  const candidates = nodes.filter((n) => {
+    if (n.player !== hSide) return false;
+    const acts = (n.actions || []).map((a) => a.toLowerCase());
+    return acts.some((a) => /^(fold|call)/.test(a));    // CALL/FOLD = response shape
+  });
+  if (!candidates.length) return null;
+  // Sort by path depth (segments separated by "."), shortest first.
+  candidates.sort((a, b) => {
+    const da = a.path ? a.path.split(".").length : 0;
+    const db = b.path ? b.path.split(".").length : 0;
+    return da - db;
+  });
+  return candidates[0];
 }
 
 // ===== Per-scenario merge =====
@@ -144,23 +235,48 @@ function mergeOne(scen, solverEntry) {
   if (!solverEntry || solverEntry.error || !solverEntry.actions) {
     return { skipped: true, reason: solverEntry?.error || "no solver data" };
   }
-  const actions = solverEntry.actions;
-  const heroStrat = solverEntry.hero_hand_strategy;
-  const dealt = (scen.replay?.hero_cards || []).join("");
+  // For facing-bet scenarios, pick the hero-response node (depth ≥1 in
+  // the tree). For typical scenarios, use the root (the existing default).
+  let activeActions = solverEntry.actions;
+  let activeOverallFreq = solverEntry.overall_freq || {};
+  let activeHands = null;                 // for hero-hand lookup when not at root
+  let usedNodePath = "";
+  if (isFacingBetScenario(scen)) {
+    const responseNode = findHeroResponseNode(solverEntry, scen);
+    if (responseNode) {
+      activeActions = responseNode.actions;
+      activeOverallFreq = responseNode.overall_freq || {};
+      activeHands = responseNode.hands || null;
+      usedNodePath = responseNode.path;
+    }
+  }
 
-  // Hero strategy array. If hero_hand_strategy is absent (extractor couldn't
-  // find hero's hand in either player block), fall back to overall_freq with
-  // nulls for EV.
+  const actions = activeActions;
+  const dealt = (scen.replay?.hero_cards || []).join("");
+  // Hero strategy array. Prefer hero_hand_strategy from root (if at root),
+  // else hand lookup from the active node's per-hand strategies, else
+  // overall_freq as fallback. EV stays null for TexasSolver (no EV in dumps).
+  const heroStratRoot = solverEntry.hero_hand_strategy;
+  function freqForAction(a) {
+    if (usedNodePath === "" && heroStratRoot && heroStratRoot[a] && heroStratRoot[a].FREQ != null) {
+      return (heroStratRoot[a].FREQ || 0) / 100;
+    }
+    if (activeHands && dealt && activeHands[dealt] && activeHands[dealt][a] && activeHands[dealt][a].FREQ != null) {
+      return (activeHands[dealt][a].FREQ || 0) / 100;
+    }
+    if (activeOverallFreq[a] != null) return activeOverallFreq[a];
+    return 0;
+  }
+  function evForAction(a) {
+    if (usedNodePath === "" && heroStratRoot && heroStratRoot[a]) return heroStratRoot[a].EV;
+    if (activeHands && dealt && activeHands[dealt] && activeHands[dealt][a]) return activeHands[dealt][a].EV;
+    return null;
+  }
   const heroStrategy = [];
   let maxEv = -Infinity;
   for (const a of actions) {
-    let freq = 0, ev = null;
-    if (heroStrat && heroStrat[a]) {
-      freq = (heroStrat[a].FREQ || 0) / 100;
-      ev = heroStrat[a].EV;
-    } else if (solverEntry.overall_freq && solverEntry.overall_freq[a] != null) {
-      freq = solverEntry.overall_freq[a];
-    }
+    const freq = freqForAction(a);
+    const ev = evForAction(a);
     if (ev != null && ev > maxEv) maxEv = ev;
     heroStrategy.push({ solver_action: a, freq, ev });
   }
@@ -212,6 +328,11 @@ function mergeOne(scen, solverEntry) {
       options,
       best_solver_action: bestSolver,
       best_scenario_action: bestScen,
+      // For facing-bet scenarios, the empty string "" means the root node
+      // was used (typical case); a non-empty path like "CHECK.BET 140"
+      // means the merge walked into a child node where hero's response
+      // lives. Useful for debugging mismatches.
+      picked_node_path: usedNodePath,
       solved_at: new Date().toISOString().slice(0, 10),
     },
   };

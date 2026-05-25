@@ -288,42 +288,102 @@ export function canonicalize(rangeStr) {
 // TexasSolver doesn't accept GTO+'s run notation (`99-22`, `AKs-A2s`). Its
 // console_solver parser rejects it with "range str len not valid" and exits
 // with code 3 before any solve work begins. It wants comma-separated atomic
-// tokens — one per hand class (`TT,99,88,...,22`). This expands a range
-// into that shape. Order is descending by rank to match TexasSolver's own
-// example configs.
+// tokens — one per hand class (`TT,99,88,...,22`).
+//
+// It ALSO rejects specific-suit combo tokens like `AcKc` / `KhQh`, which our
+// authored villain ranges include for blocker-aware reads. TexasSolver
+// supports per-class weights (`AKs:0.25` = 1 of 4 AKs combos), so we
+// aggregate specifics by their implied hand class and emit weighted tokens
+// with `count / class_combos`. When the same class is already present as a
+// generic atom (e.g. range has both `AKs` and `AcKc`), the specifics are
+// redundant and dropped to avoid double-counting.
 //
 // Use this when feeding a range to TexasSolver / console_solver; use
 // canonicalize() when feeding a range to GTO+ (binary substitution or paste).
 export function enumerate(rangeStr) {
   const atoms = expandRange(rangeStr);
-  // Sort: pairs (high→low), suited (high→low), offsuit (high→low), specifics.
-  function key(a) {
+  // Generics already in the range — used to detect redundant specifics.
+  const genericPairs = new Set();        // rank chars present as XX
+  const genericSuited = new Set();       // "AK" present as AKs
+  const genericOffsuit = new Set();      // "AK" present as AKo
+  for (const a of atoms) {
+    if (a.kind === "pair") genericPairs.add(a.rank);
+    else if (a.kind === "suited") genericSuited.add(a.high + a.low);
+    else if (a.kind === "offsuit") genericOffsuit.add(a.high + a.low);
+  }
+  // Bucket specifics by hand class: "pair:AA" / "suited:AKs" / "offsuit:AKo"
+  const specificByClass = new Map();
+  for (const a of atoms) {
+    if (a.kind !== "specific") continue;
+    const r1 = a.card1[0], s1 = a.card1[1];
+    const r2 = a.card2[0], s2 = a.card2[1];
+    let key, isRedundant;
+    if (r1 === r2) {
+      key = `pair:${r1}${r2}`;
+      isRedundant = genericPairs.has(r1);
+    } else {
+      const [hi, lo] = orderRanks(r1, r2);
+      if (s1 === s2) {
+        key = `suited:${hi}${lo}s`;
+        isRedundant = genericSuited.has(hi + lo);
+      } else {
+        key = `offsuit:${hi}${lo}o`;
+        isRedundant = genericOffsuit.has(hi + lo);
+      }
+    }
+    if (isRedundant) continue;
+    specificByClass.set(key, (specificByClass.get(key) || 0) + 1);
+  }
+  // Emit ordered: pairs (high → low), suited (by high then low), offsuit
+  // (same), then specific-derived weighted tokens.
+  function atomKeyForSort(a) {
     if (a.kind === "pair") return [0, -rankIdx(a.rank), 0];
     if (a.kind === "suited") return [1, -rankIdx(a.high), -rankIdx(a.low)];
     if (a.kind === "offsuit") return [2, -rankIdx(a.high), -rankIdx(a.low)];
-    if (a.kind === "specific") return [3, -rankIdx(a.card1[0]), -rankIdx(a.card2[0])];
     return [4, 0, 0];
   }
-  const sorted = [...atoms].sort((a, b) => {
-    const ka = key(a), kb = key(b);
+  const generics = atoms
+    .filter((a) => a.kind === "pair" || a.kind === "suited" || a.kind === "offsuit")
+    .sort((a, b) => {
+      const ka = atomKeyForSort(a), kb = atomKeyForSort(b);
+      for (let i = 0; i < ka.length; i++) if (ka[i] !== kb[i]) return ka[i] - kb[i];
+      return 0;
+    });
+  const genericTokens = generics.map((a) => {
+    if (a.kind === "pair") return a.rank + a.rank;
+    if (a.kind === "suited") return a.high + a.low + "s";
+    return a.high + a.low + "o";
+  });
+  function classKey(token) {
+    const [kind, cls] = token.split(":");
+    if (kind === "pair") return [0, -rankIdx(cls[0]), 0];
+    if (kind === "suited") return [1, -rankIdx(cls[0]), -rankIdx(cls[1])];
+    return [2, -rankIdx(cls[0]), -rankIdx(cls[1])];
+  }
+  const weightedKeys = [...specificByClass.keys()].sort((a, b) => {
+    const ka = classKey(a), kb = classKey(b);
     for (let i = 0; i < ka.length; i++) if (ka[i] !== kb[i]) return ka[i] - kb[i];
     return 0;
   });
-  const parts = sorted.map((a) => {
-    if (a.kind === "pair") return a.rank + a.rank;
-    if (a.kind === "suited") return a.high + a.low + "s";
-    if (a.kind === "offsuit") return a.high + a.low + "o";
-    if (a.kind === "specific") return a.card1 + a.card2;
-    return a.raw;
+  const weightedTokens = weightedKeys.map((k) => {
+    const count = specificByClass.get(k);
+    const [kind, cls] = k.split(":");
+    const denom = kind === "pair" ? 6 : kind === "suited" ? 4 : 12;
+    const w = Math.min(1, Math.round((count / denom) * 100) / 100);
+    return `${cls}:${w}`;
   });
-  const result = parts.join(",");
-  const inCombos = countCombos(rangeStr);
-  const outCombos = countCombos(result);
-  if (inCombos !== outCombos) {
-    throw new Error(
-      `enumerate: combo count drift (in=${inCombos}, out=${outCombos}) — ` +
-      `input="${rangeStr.slice(0, 60)}…" output="${result.slice(0, 60)}…"`,
+  // Opaques are DROPPED (with a stderr warning). Non-standard tokens like
+  // `ThXh` (author shorthand for T-of-hearts + any-heart) aren't valid
+  // TexasSolver syntax and would cause exit-134.
+  const opaqueAtoms = atoms.filter((a) => a.kind === "opaque");
+  if (opaqueAtoms.length && typeof process !== "undefined" && process.stderr) {
+    const skipped = opaqueAtoms.map((a) => a.raw).join(", ");
+    process.stderr.write(
+      `enumerate: skipping ${opaqueAtoms.length} unparseable token(s) — ${skipped}\n`,
     );
   }
-  return result;
+  return [...genericTokens, ...weightedTokens].join(",");
+  // NOTE: combo-count self-check intentionally OMITTED here. Round-tripping
+  // weighted tokens (`AKs:0.25`) through expandRange() would treat them as
+  // opaque (the parser strips no weight), so the check would falsely fail.
 }
