@@ -1463,66 +1463,117 @@ form { margin-top: 8px; }
 
 /* A crowd avatar whose player left a comment — green note-dot, plus
    a popover (hover on desktop, tap on mobile) showing the comment. */
+/* Comments-as-glow (Results-View-Spec §5, mockup
+   GTO-Duel-Results-Social-v2.html). A green glow ring on the avatar
+   itself signals a take is available; tooltip on hover / tap shows the
+   take text. The previous corner-dot indicator is gone — the ring is
+   quieter and reads as part of the avatar at a glance. */
 .crowd-avatar-wrap {
   position: relative;
   display: inline-flex;
   margin-right: -4px;
+  padding: 0;
+  background: transparent;
+  border: 0;
   cursor: pointer;
   outline: none;
+  font: inherit;
+  color: inherit;
 }
 .crowd-avatar-wrap .crowd-avatar { margin-right: 0; }
-.crowd-note-dot {
-  position: absolute;
-  right: -1px;
-  bottom: -1px;
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: #4ade80;
-  border: 1.5px solid var(--bg);
-  box-sizing: border-box;
+/* Glow ring on the avatar itself — replaces the v.117 corner dot. */
+.crowd-avatar-wrap.has-note .crowd-avatar {
+  box-shadow: 0 0 0 2px var(--ok), 0 0 6px rgba(74, 222, 128, 0.55);
+}
+.crowd-avatar-wrap:focus-visible .crowd-avatar {
+  box-shadow: 0 0 0 2px var(--ok), 0 0 6px rgba(74, 222, 128, 0.55),
+              0 0 0 4px rgba(76, 182, 255, 0.45);
 }
 .crowd-note-pop {
   position: absolute;
-  bottom: calc(100% + 7px);
+  bottom: calc(100% + 9px);
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) scale(0.96);
   width: 200px;
   max-width: 62vw;
   padding: 8px 10px;
-  background: var(--bg-elev-2);
-  border: 1px solid rgba(74, 222, 128, 0.45);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.55);
-  z-index: 20;
-  display: none;
+  background: #0a1219;
+  border: 1px solid var(--ok);
+  border-radius: 9px;
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.7);
+  z-index: 30;
+  opacity: 0;
+  pointer-events: none;
+  text-align: left;
+  transition: opacity 0.12s ease, transform 0.12s ease;
 }
-.crowd-avatar-wrap:focus-visible .crowd-note-pop,
+/* Notch pointing down to the avatar. */
+.crowd-note-pop::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  border: 6px solid transparent;
+  border-top-color: var(--ok);
+}
 .crowd-avatar-wrap.pop-open .crowd-note-pop {
-  display: block;
+  opacity: 1;
+  transform: translateX(-50%) scale(1);
+  pointer-events: auto;
 }
 @media (hover: hover) {
-  .crowd-avatar-wrap:hover .crowd-note-pop { display: block; }
+  .crowd-avatar-wrap:hover .crowd-note-pop {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
+    pointer-events: auto;
+  }
+}
+.crowd-note-pop-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 6px;
+  margin-bottom: 3px;
 }
 .crowd-note-pop-name {
   font-size: 0.78rem;
-  font-weight: 700;
-  color: #6fd9a0;
-  margin-bottom: 3px;
+  font-weight: 800;
+  color: #9ff0bd;
 }
-/* The answer a crowd comment was written about — keeps the comment
+/* The pick + confidence the take was written about — keeps the take
    honest if the player later changed their answer on a retest. */
 .crowd-note-pop-ctx {
-  font-size: 0.7rem;
+  font-size: 0.66rem;
+  font-weight: 700;
   color: var(--text-dim);
-  margin-bottom: 4px;
+  white-space: nowrap;
 }
 .crowd-note-pop-text {
   margin: 0;
-  font-size: 0.82rem;
-  line-height: 1.4;
-  color: var(--text);
-  font-style: italic;
+  font-size: 0.78rem;
+  line-height: 1.45;
+  color: #cdd9e3;
+}
+
+/* Hint line under the crowd block — Results-View-Spec §5: "Green ring
+   on an avatar = a take is available · tap to read." Shown only when at
+   least one response actually has a take to discover. */
+.crowd-hint {
+  margin: 8px 2px 0;
+  font-size: 0.7rem;
+  color: #6a8092;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.crowd-hint-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #2d4a63;
+  box-shadow: 0 0 0 2px var(--ok), 0 0 5px rgba(74, 222, 128, 0.55);
+  flex: 0 0 auto;
 }
 
 /* Post-reveal comment box — "your take on this hand". */

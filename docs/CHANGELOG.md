@@ -24,6 +24,27 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Changed
+- **Comments-as-glow on crowd avatars** (v2026-05-24.145). The green
+  corner dot from v.117 is gone; in its place the avatar itself gets a
+  green glow ring when the player has left a take — quieter, reads as
+  part of the avatar at a glance, and matches Results-View-Spec §5 /
+  mockup `GTO-Duel-Results-Social-v2.html`. The hover/tap tooltip now
+  shows the player's name + the pick they made + their confidence + the
+  take text (e.g. `Theo · Squeeze · conf 5 · "Range's capped — squeeze
+  just prints."`) so the take stays anchored to what they actually
+  answered at the time, not their current answer if they later
+  retested. A one-line hint appears under the crowd block ("Green ring
+  = left a take · tap an avatar to read it") only when at least one
+  response in the displayed pool actually has a take, so it doesn't
+  show up as noise on a take-less crowd.
+
+  The avatar wrap is now a real `<button>` with `aria-haspopup` /
+  `aria-expanded`, replacing the previous role=button div. Tooltip
+  enters with a 120 ms opacity+scale transition; clicking outside the
+  avatar closes any open tooltip (scoped to the crowd element — no
+  leaked global listener).
+
 ### Added
 - **M5 — GTO Summary Card** (v2026-05-25.146). The reveal screen now leads
   with a single ~84px card that replaces three previously stacked elements
