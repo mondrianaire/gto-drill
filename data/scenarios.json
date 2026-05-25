@@ -239,6 +239,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -694,6 +695,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -1104,6 +1106,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -1315,42 +1318,47 @@
       "source": "TexasSolver",
       "hero_hand": "9d9s",
       "solver_actions": [
-        "CHECK",
-        "BET 160.000000"
+        "CALL",
+        "RAISE 370.000000",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.023,
+          "solver_action": "CALL",
+          "freq": 0.212,
           "ev": null
         },
         {
-          "solver_action": "BET 160.000000",
-          "freq": 0.977,
+          "solver_action": "RAISE 370.000000",
+          "freq": 0.613,
+          "ev": null
+        },
+        {
+          "solver_action": "FOLD",
+          "freq": 0.175,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.175,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.212,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Raise to 16bb": {
-          "freq": 0.977,
+          "freq": 0.613,
           "ev": null,
           "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "CHECK.BET 89.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -1565,37 +1573,36 @@
       "source": "TexasSolver",
       "hero_hand": "TdJd",
       "solver_actions": [
-        "CHECK",
-        "BET 325.000000"
+        "CALL",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.795,
+          "solver_action": "CALL",
+          "freq": 0.123,
           "ev": null
         },
         {
-          "solver_action": "BET 325.000000",
-          "freq": 0.205,
+          "solver_action": "FOLD",
+          "freq": 0.877,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.877,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.123,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "CHECK.BET 325.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -1996,42 +2003,47 @@
       "source": "TexasSolver",
       "hero_hand": "KdJd",
       "solver_actions": [
-        "CHECK",
-        "BET 103.000000"
+        "CALL",
+        "RAISE 855.000000",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.559,
+          "solver_action": "CALL",
+          "freq": 0.843,
           "ev": null
         },
         {
-          "solver_action": "BET 103.000000",
-          "freq": 0.441,
+          "solver_action": "RAISE 855.000000",
+          "freq": 0.131,
+          "ev": null
+        },
+        {
+          "solver_action": "FOLD",
+          "freq": 0.026,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.026,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.843,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Check-raise to 28bb": {
-          "freq": 0.559,
+          "freq": 0.131,
           "ev": null,
           "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "BET 160.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -2191,7 +2203,8 @@
       "hero_hand": "Th8h",
       "solver_actions": [
         "CHECK",
-        "BET 28.000000"
+        "BET 20.000000",
+        "BET 40.000000"
       ],
       "hero_strategy": [
         {
@@ -2200,8 +2213,13 @@
           "ev": null
         },
         {
-          "solver_action": "BET 28.000000",
-          "freq": 1,
+          "solver_action": "BET 20.000000",
+          "freq": 0.585,
+          "ev": null
+        },
+        {
+          "solver_action": "BET 40.000000",
+          "freq": 0.414,
           "ev": null
         }
       ],
@@ -2212,18 +2230,19 @@
           "ev_cost": null
         },
         "Donk lead 2bb (~35%)": {
-          "freq": 1,
+          "freq": 0.585,
           "ev": null,
           "ev_cost": null
         },
         "Donk lead 4bb (~70%)": {
-          "freq": 1,
+          "freq": 0.414,
           "ev": null,
           "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -2634,42 +2653,47 @@
       "source": "TexasSolver",
       "hero_hand": "AhKc",
       "solver_actions": [
-        "CHECK",
-        "BET 250.000000"
+        "CALL",
+        "RAISE 875.000000",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.728,
+          "solver_action": "CALL",
+          "freq": 0.487,
           "ev": null
         },
         {
-          "solver_action": "BET 250.000000",
-          "freq": 0.272,
+          "solver_action": "RAISE 875.000000",
+          "freq": 0.072,
+          "ev": null
+        },
+        {
+          "solver_action": "FOLD",
+          "freq": 0.441,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.441,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.487,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Raise to 25bb": {
-          "freq": 0.272,
+          "freq": 0.072,
           "ev": null,
           "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "CHECK.BET 147.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -3273,6 +3297,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -3533,6 +3558,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -3765,33 +3791,31 @@
       "source": "TexasSolver",
       "hero_hand": "QcQd",
       "solver_actions": [
-        "CHECK",
-        "BET 545.000000"
+        "CALL",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.923,
+          "solver_action": "CALL",
+          "freq": 0.741,
           "ev": null
         },
         {
-          "solver_action": "BET 545.000000",
-          "freq": 0.077,
+          "solver_action": "FOLD",
+          "freq": 0.259,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.259,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.741,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Shove all-in": {
           "freq": null,
@@ -3802,6 +3826,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "BET 545.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -4005,43 +4030,47 @@
       "source": "TexasSolver",
       "hero_hand": "6c6d",
       "solver_actions": [
-        "CHECK",
-        "BET 78.000000"
+        "CALL",
+        "RAISE 895.000000",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.06,
+          "solver_action": "CALL",
+          "freq": 0.128,
           "ev": null
         },
         {
-          "solver_action": "BET 78.000000",
-          "freq": 0.94,
+          "solver_action": "RAISE 895.000000",
+          "freq": 0.296,
+          "ev": null
+        },
+        {
+          "solver_action": "FOLD",
+          "freq": 0.575,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.575,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.128,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Re-raise to 22bb": {
-          "freq": null,
+          "freq": 0.296,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "CHECK.BET 166.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -4319,6 +4348,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -4698,6 +4728,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -4984,6 +5015,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -5196,42 +5228,47 @@
       "source": "TexasSolver",
       "hero_hand": "JhTh",
       "solver_actions": [
-        "CHECK",
-        "BET 38.000000"
+        "CALL",
+        "RAISE 147.000000",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.516,
+          "solver_action": "CALL",
+          "freq": 0.022,
           "ev": null
         },
         {
-          "solver_action": "BET 38.000000",
-          "freq": 0.484,
+          "solver_action": "RAISE 147.000000",
+          "freq": 0.978,
+          "ev": null
+        },
+        {
+          "solver_action": "FOLD",
+          "freq": 0,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.022,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Check-raise to 9bb": {
-          "freq": 0.516,
+          "freq": 0.978,
           "ev": null,
           "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "BET 27.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -5439,40 +5476,46 @@
       "hero_hand": "8c7c",
       "solver_actions": [
         "CHECK",
-        "BET 28.000000"
+        "BET 30.000000",
+        "BET 60.000000"
       ],
       "hero_strategy": [
         {
           "solver_action": "CHECK",
-          "freq": 0.202,
+          "freq": 0.089,
           "ev": null
         },
         {
-          "solver_action": "BET 28.000000",
-          "freq": 0.798,
+          "solver_action": "BET 30.000000",
+          "freq": 0.528,
+          "ev": null
+        },
+        {
+          "solver_action": "BET 60.000000",
+          "freq": 0.383,
           "ev": null
         }
       ],
       "options": {
         "Check": {
-          "freq": 0.202,
+          "freq": 0.089,
           "ev": null,
           "ev_cost": null
         },
         "Probe bet 3bb (~50%)": {
-          "freq": 0.798,
+          "freq": 0.528,
           "ev": null,
           "ev_cost": null
         },
         "Probe bet 6bb (~100%)": {
-          "freq": null,
+          "freq": 0.383,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -5718,6 +5761,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -6601,43 +6645,47 @@
       "source": "TexasSolver",
       "hero_hand": "QsJs",
       "solver_actions": [
-        "CHECK",
-        "BET 118.000000"
+        "CALL",
+        "RAISE 835.000000",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.091,
+          "solver_action": "CALL",
+          "freq": 0.054,
           "ev": null
         },
         {
-          "solver_action": "BET 118.000000",
-          "freq": 0.909,
+          "solver_action": "RAISE 835.000000",
+          "freq": 0.504,
+          "ev": null
+        },
+        {
+          "solver_action": "FOLD",
+          "freq": 0.441,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.441,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.054,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "3-bet to 38bb": {
-          "freq": null,
+          "freq": 0.504,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "CHECK.BET 345.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -6908,6 +6956,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -7186,6 +7235,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -7434,50 +7484,56 @@
       "solver_actions": [
         "CHECK",
         "BET 60.000000",
-        "BET 120.000000"
+        "BET 120.000000",
+        "BET 200.000000"
       ],
       "hero_strategy": [
         {
           "solver_action": "CHECK",
-          "freq": 0.067,
+          "freq": 0.239,
           "ev": null
         },
         {
           "solver_action": "BET 60.000000",
-          "freq": 0.059,
+          "freq": 0.017,
           "ev": null
         },
         {
           "solver_action": "BET 120.000000",
-          "freq": 0.874,
+          "freq": 0.228,
+          "ev": null
+        },
+        {
+          "solver_action": "BET 200.000000",
+          "freq": 0.516,
           "ev": null
         }
       ],
       "options": {
         "Check": {
-          "freq": 0.067,
+          "freq": 0.239,
           "ev": null,
           "ev_cost": null
         },
         "Bet 6bb (~50%)": {
-          "freq": 0.059,
+          "freq": 0.017,
           "ev": null,
           "ev_cost": null
         },
         "Bet 12bb (~100%)": {
-          "freq": 0.874,
+          "freq": 0.228,
           "ev": null,
           "ev_cost": null
         },
         "Overbet 20bb (~165%)": {
-          "freq": null,
+          "freq": 0.516,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -7682,43 +7738,47 @@
       "source": "TexasSolver",
       "hero_hand": "AhKd",
       "solver_actions": [
-        "CHECK",
-        "BET 98.000000"
+        "CALL",
+        "RAISE 885.000000",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.435,
+          "solver_action": "CALL",
+          "freq": 0.365,
           "ev": null
         },
         {
-          "solver_action": "BET 98.000000",
-          "freq": 0.565,
+          "solver_action": "RAISE 885.000000",
+          "freq": 0.195,
+          "ev": null
+        },
+        {
+          "solver_action": "FOLD",
+          "freq": 0.441,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.441,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.365,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "3-bet to 24bb": {
-          "freq": null,
+          "freq": 0.195,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "BET 168.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -7957,6 +8017,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -8172,42 +8233,47 @@
       "source": "TexasSolver",
       "hero_hand": "AcTc",
       "solver_actions": [
-        "CHECK",
-        "BET 143.000000"
+        "CALL",
+        "RAISE 292.000000",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.067,
+          "solver_action": "CALL",
+          "freq": 0.597,
           "ev": null
         },
         {
-          "solver_action": "BET 143.000000",
-          "freq": 0.933,
+          "solver_action": "RAISE 292.000000",
+          "freq": 0.242,
+          "ev": null
+        },
+        {
+          "solver_action": "FOLD",
+          "freq": 0.161,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.161,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.597,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Check-raise to 20bb": {
-          "freq": 0.067,
+          "freq": 0.242,
           "ev": null,
           "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "BET 77.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -8773,6 +8839,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -8976,42 +9043,47 @@
       "source": "TexasSolver",
       "hero_hand": "AdKc",
       "solver_actions": [
-        "CHECK",
-        "BET 100.000000"
+        "CALL",
+        "RAISE 194.000000",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.215,
+          "solver_action": "CALL",
+          "freq": 0.385,
           "ev": null
         },
         {
-          "solver_action": "BET 100.000000",
-          "freq": 0.785,
+          "solver_action": "RAISE 194.000000",
+          "freq": 0.233,
+          "ev": null
+        },
+        {
+          "solver_action": "FOLD",
+          "freq": 0.382,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.382,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.385,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Raise to 10bb": {
-          "freq": 0.785,
+          "freq": 0.233,
           "ev": null,
           "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "CHECK.BET 47.000000",
       "solved_at": "2026-05-25"
     }
   },
@@ -9289,6 +9361,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -9711,6 +9784,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -9973,6 +10047,7 @@
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
   },
@@ -10405,42 +10480,47 @@
       "source": "TexasSolver",
       "hero_hand": "9c8c",
       "solver_actions": [
-        "CHECK",
-        "BET 321.000000"
+        "CALL",
+        "RAISE 795.000000",
+        "FOLD"
       ],
       "hero_strategy": [
         {
-          "solver_action": "CHECK",
-          "freq": 0.561,
+          "solver_action": "CALL",
+          "freq": 0.568,
           "ev": null
         },
         {
-          "solver_action": "BET 321.000000",
-          "freq": 0.439,
+          "solver_action": "RAISE 795.000000",
+          "freq": 0.1,
+          "ev": null
+        },
+        {
+          "solver_action": "FOLD",
+          "freq": 0.332,
           "ev": null
         }
       ],
       "options": {
         "Fold": {
-          "freq": null,
+          "freq": 0.332,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Call": {
-          "freq": null,
+          "freq": 0.568,
           "ev": null,
-          "ev_cost": null,
-          "unmatched": true
+          "ev_cost": null
         },
         "Raise to 32bb": {
-          "freq": 0.439,
+          "freq": 0.1,
           "ev": null,
           "ev_cost": null
         }
       },
       "best_solver_action": null,
       "best_scenario_action": null,
+      "picked_node_path": "BET 148.000000",
       "solved_at": "2026-05-25"
     }
   }

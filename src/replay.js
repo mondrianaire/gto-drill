@@ -614,9 +614,13 @@ export function buildSolverConfig(scen, opts = {}) {
     if (pot <= 0) return [];
     const pcts = new Set();
     for (const a of (scen.available_actions || [])) {
-      // Only bet/raise actions carry a sizing; skip Check, Fold, Call.
-      if (!/^(bet|raise)/i.test(a.trim())) continue;
-      const m = a.match(/(\d+(?:\.\d+)?)/);
+      // BET-shaped actions only (not Raise / Re-raise / 3-bet / Check-raise
+      // — those are raise actions and feed decisionStreetRaisePcts so the
+      // solver tree gets raise sizing modeled separately). Probe bets,
+      // overbets, donk bets are real bet actions.
+      const trimmed = a.trim();
+      if (!/^(bet|probe|overbet|donk)/i.test(trimmed)) continue;
+      const m = trimmed.match(/(\d+(?:\.\d+)?)/);
       if (!m) continue;
       const bb = parseFloat(m[1]);
       if (!Number.isFinite(bb) || bb <= 0) continue;
@@ -627,6 +631,83 @@ export function buildSolverConfig(scen, opts = {}) {
   }
   const scenBetPcts = decisionBetPcts();
 
+  // Facing-bet detection. When hero's `available_actions` are Fold / Call /
+  // [Raise N] they're responding to a pending bet/raise from villain — the
+  // last action on the decision street is a non-hero bet or raise. The
+  // solver has to actually MODEL that pending bet so its strategy tree
+  // contains hero's response node. Two pieces:
+  //   (a) The villain's bet size needs to be in the solver's bet tree so
+  //       the solver computes "what if villain bets X" → hero's response.
+  //   (b) set_dump_rounds 2 so the dump includes the hero-response child
+  //       node, not just the root.
+  // The merge step (gto-merge.mjs) then navigates the dumped tree to find
+  // hero's response and maps Fold / Call / Raise to that deeper node.
+  function pendingVillainBetPct() {
+    const acts = (replay.actions || []).filter((a) => a.street === decStreet);
+    if (!acts.length) return null;
+    const last = acts[acts.length - 1];
+    if (!last || last.actor === replay.hero_seat) return null;
+    if (last.type !== "bet" && last.type !== "raise") return null;
+    // Pot at the point just BEFORE villain's pending action. potAtDecisionBb
+    // already includes it; subtract the amount they just put in.
+    const prePot = Math.max(1, pot - (last.amount_bb || 0));
+    const pct = Math.round(((last.amount_bb || 0) / prePot) * 100);
+    return pct > 0 && pct < 1000 ? pct : null;
+  }
+  const villainBetPct = pendingVillainBetPct();
+  const facingBet = villainBetPct != null;
+  // When facing a bet, ALSO include villain's bet size in the decision-
+  // street bet tree so the solver models that line. Otherwise the dump's
+  // only "BET" branch is whatever scenBetPcts contains (which is hero's
+  // sizes — useless for finding hero's response to villain's actual bet).
+  const decisionStreetBetSizes = facingBet
+    ? [...new Set([...scenBetPcts, villainBetPct])].sort((a, b) => a - b)
+    : (scenBetPcts.length ? scenBetPcts : [50]);
+
+  // For facing-bet scenarios that include a Raise/Re-raise/Check-raise
+  // option, the solver needs a RAISE size in the bet tree at the
+  // decision street so hero's "Raise to N" can map. We extract the
+  // raise sizes from scenario action labels — they're expressed in bb
+  // and need translating to a % of the post-villain-bet pot (the pot at
+  // the moment hero raises). Cap at 1 raise size to keep the tree
+  // bounded (multiple raise sizes empirically segfault v0.2.0).
+  function decisionStreetRaisePcts() {
+    if (!facingBet || pot <= 0) return [];
+    const lastBetBb = (replay.actions || []).filter((a) => a.street === decStreet)
+      .slice(-1)[0]?.amount_bb || 0;
+    const postBetPot = pot;       // already includes villain's bet
+    const raises = [];
+    let hasShove = false;
+    for (const a of (scen.available_actions || [])) {
+      if (!/raise|3-?bet|shove|all-?in/i.test(a)) continue;
+      if (/shove|all-?in/i.test(a)) hasShove = true;
+      // Prefer "to N" sizing (e.g. "3-bet to 24bb", "Raise to 16bb"); else
+      // take the LAST numeric run (so "3-bet to 24bb" → 24, not 3, and
+      // "Re-raise 22bb" → 22, not the leading 22 of any prefix).
+      const mTo = a.match(/to\s+(\d+(?:\.\d+)?)\s*bb/i);
+      const mAll = [...a.matchAll(/(\d+(?:\.\d+)?)/g)];
+      const m = mTo || (mAll.length ? mAll[mAll.length - 1] : null);
+      if (!m) continue;
+      const raiseToBb = parseFloat(m[1]);
+      if (!Number.isFinite(raiseToBb) || raiseToBb <= lastBetBb) continue;
+      // TexasSolver's raise sizing: % of pot the raiser ADDS on top of
+      // the call. raise-to-N over a call-of-X bumps raiser's chips by
+      // (N - X). That extra is the "raise sizing"; expressed as % of
+      // the pot at the moment they raise (post-bet pot).
+      const additional = raiseToBb - lastBetBb;
+      const pct = Math.round((additional / postBetPot) * 100);
+      if (pct > 0 && pct < 1000) raises.push(pct);
+    }
+    // Fallback for shove/all-in with no numeric size: emit a large raise
+    // % that triggers TexasSolver's set_allin_threshold (default 0.67),
+    // which snaps any raise of ≥67% of remaining stack to all-in. 500%
+    // of post-bet pot is large enough to always trigger the threshold
+    // while staying within the script's < 1000 sanity cap.
+    if (!raises.length && hasShove) raises.push(500);
+    return raises.length ? [raises[0]] : [];   // cap at 1 to avoid segfault
+  }
+  const decisionStreetRaiseSizes = decisionStreetRaisePcts();
+
   const lines = [
     "set_pot " + chips(pot),
     "set_effective_stack " + chips(effStack),
@@ -634,12 +715,16 @@ export function buildSolverConfig(scen, opts = {}) {
     "set_range_oop " + (heroOop ? heroRange : villRange),
     "set_range_ip " + (heroOop ? villRange : heroRange),
   ];
-  // Decision street uses scenario-derived %s; other streets stay at 50%
-  // so the downstream tree remains bounded.
   for (const street of ["flop", "turn", "river"]) {
-    const sizes = (street === decStreet && scenBetPcts.length) ? scenBetPcts : [50];
+    const sizes = street === decStreet ? decisionStreetBetSizes : [50];
     for (const side of ["oop", "ip"]) {
       lines.push(`set_bet_sizes ${side},${street},bet,${sizes.join(",")}`);
+      // Add raise size only on the decision street + only when we have one.
+      // Empirically segfault-safe in v0.2.0 when bet has a SINGLE size +
+      // raise has a SINGLE size; multi-size combinations crash.
+      if (street === decStreet && decisionStreetRaiseSizes.length && decisionStreetBetSizes.length === 1) {
+        lines.push(`set_bet_sizes ${side},${street},raise,${decisionStreetRaiseSizes.join(",")}`);
+      }
     }
   }
   // NOTE: explicit `raise` and `allin` bet-size lines were dropped here
@@ -655,6 +740,11 @@ export function buildSolverConfig(scen, opts = {}) {
   // segfaults at ~iter 30-60 when target accuracy is below ~2.0 for
   // non-trivial range × bet-tree combinations. 5.0 stops at ~2-7% total
   // exploitability, plenty for the M5 visual freq bar.
+  // set_dump_rounds 2 — dumps the root + one level of children. Needed for
+  // facing-bet scenarios where hero's response lives at depth 2 in the
+  // tree (the BET child's strategy). For non-facing-bet scenarios this is
+  // harmless — the merge still reads the root node first and ignores the
+  // extra children if not needed.
   lines.push(
     "set_allin_threshold 0.67",
     "build_tree",
@@ -663,7 +753,7 @@ export function buildSolverConfig(scen, opts = {}) {
     "set_max_iteration 50",
     "set_use_isomorphism 1",
     "start_solve",
-    "set_dump_rounds 1",
+    "set_dump_rounds 2",
     "dump_result " + dumpName,
   );
   return lines.join("\n") + "\n";
