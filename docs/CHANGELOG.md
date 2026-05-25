@@ -45,6 +45,33 @@ lobby delete button silently no-op until the rules are live.
   avatar closes any open tooltip (scoped to the crowd element — no
   leaked global listener).
 
+### Fixed
+- **gto-batch-generate.mjs no longer updates HEADER content @12** (v2026-05-25.150).
+  Empirically discovered crash: every postflop scenario substituted by the
+  generator was hard-crashing GTO+ at file load (~7 s in, socket dropped),
+  regardless of the template's solved/unsolved state. The fix changes one
+  line of arithmetic in `generateForScenario`: don't shift @12 by
+  `netDelta`; restore it to the template's stored value.
+
+  Verification: `gto-verify-loads.mjs` on all 31 generated files = **31/31
+  ✅ loaded cleanly** in 17-24 ms each (vs 5-8 s crashes pre-fix).
+
+  Diagnosis: minimal-substitution bisection showed @12 updates kill GTO+
+  even when the shifted value is mathematically "correct" for a forward
+  pointer (`zz-txts` netDelta=-2 case: @12=894 crashes; @12 ∈ {0, 893,
+  895, 896, 901, 944} all load — only the "correctly shifted" value
+  crashes). Best current understanding: @12 is not a hard forward pointer
+  GTO+ requires to be accurate; leaving it stale-but-untouched is
+  empirically safe across every bisection case tested (netDelta from -359
+  to +5). The fix is empirical, not derived; if future scenarios push
+  netDelta into a new regime, re-run verify-loads as the ground-truth
+  oracle.
+
+  This unblocks the §8.1 GTO Summary Card's `≈X BB cost` annotation —
+  PROCESS FILES can now run the full 31-scenario batch in GTO+, after
+  which `gto-extract.mjs` pulls EV per scenario and `gto-merge.mjs`
+  populates `solver_data.options[a].ev_cost` for the M5 card to read.
+
 ### Changed
 - **Dual-lane solver-data with per-lane file separation** (v2026-05-25.149).
   Until now both extractors (`texas-extract.mjs`, `gto-extract.mjs`) wrote

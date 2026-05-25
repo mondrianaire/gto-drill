@@ -437,8 +437,8 @@ function generateForScenario(scen) {
   if (cursor < chosen.hdrContent.length) pieces.push(chosen.hdrContent.slice(cursor));
   let newContent = Buffer.concat(pieces);
 
-  // Net delta across all substitutions — used for @12 forward pointer and the
-  // HEADER section length / bytesum.
+  // Net delta across all substitutions — used for the HEADER section length
+  // and bytesum (in the preamble we rebuild below).
   const netDelta = newContent.length - chosen.hdrContent.length;
   // Per-substitution deltas — used for the two sibling pointers inside region B.
   // Region B has a 3-byte record per range with a length/offset byte that
@@ -454,13 +454,38 @@ function generateForScenario(scen) {
   // bogus hands added to hero when byte 18 was over-incremented).
   const heroDelta = heroRange.length - chosen.slots.hero.len;
   const villDelta = villRange.length - chosen.slots.vill.len;
-  const oldAt12 = chosen.hdrContent.readUInt32LE(12);
-  newContent.writeUInt32LE(oldAt12 + netDelta, 12);
   newContent[18] = (chosen.hdrContent[18] + heroDelta) & 0xff;
   newContent[23] = (chosen.hdrContent[23] + villDelta) & 0xff;
   // Single-byte arithmetic is safe for typical scenario deltas (< 256);
   // wider scenarios (e.g., 1326-combo vill) would need uint16 handling, but
   // we cap at template's range budget anyway via gto-template-check.
+
+  // HEADER content @12 was previously updated to (oldAt12 + netDelta). That
+  // looks like a forward pointer to a downstream lp-string anchor (the
+  // "deep stacks" display "40" atom), but empirically GTO+ HARD-CRASHES on
+  // load when @12 is updated for txt-slot length changes — even though the
+  // shifted offset is mathematically "correct" (it tracks where the anchor
+  // atom actually moved to).
+  //
+  // Reproducer: zz-txts test (pot "29.00"→"7.50", stack "100.0"→"95.5",
+  // netDelta=-2). With @12 = 896-2 = 894 → CRASH at GTO+ load. With @12
+  // left at the template's 896 (stale-but-untouched) → LOADS CLEANLY.
+  // Confirmed via single-byte @12 sweep: ONLY @12=894 (the "shifted"
+  // value) crashes; 893, 895, 896, 901, 944 all load.
+  //
+  // Same on the full bb-monster substitution (netDelta=-143): @12 left at
+  // template's 896 → LOADS; @12=753 (896-143) → CRASH.
+  //
+  // The current best understanding is that @12 is NOT a hard forward
+  // pointer GTO+ requires to be accurate — it's some derived field that
+  // GTO+ either tolerates being stale or interprets in a context-specific
+  // way that the shifted value happens to violate. Leaving it untouched is
+  // empirically safe across all bisection cases we've tested.
+  //
+  // Restore @12 to its template value (the splice may have overwritten it
+  // if a substitution span happened to overlap byte 12 — none currently do,
+  // but be defensive).
+  newContent.writeUInt32LE(chosen.hdrContent.readUInt32LE(12), 12);
 
   // Build full HEADER section + preamble
   const newSection = Buffer.concat([
