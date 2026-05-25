@@ -46,6 +46,52 @@ lobby delete button silently no-op until the rules are live.
   leaked global listener).
 
 ### Added
+- **Scenario-Briefing modal + Header-v2 tooltips** (v2026-05-25.148). Two
+  mockup items land together because they share the same `data/dictionary.json`
+  + scenario-flag infrastructure:
+
+  1. **Briefing modal for major-flag scenarios** —
+     `GTO-Duel-Special-Scenarios-Spec.md` §4 / mockup
+     `mockups/GTO-Duel-Scenario-Briefing.html`. Scenarios whose setup
+     materially changes what the player is judging (right now: hidden hole
+     cards — a range-vs-range spot) open a clickthrough briefing before
+     the hand becomes interactive. Centered modal over a scrim, focus
+     trapped on the `Start hand →` button, no Escape / scrim-tap exit
+     (the spec's deliberate one-friction-point so the player can't
+     miss the difference). After dismissal the hand displays normally
+     and a compact `⚠ HIDDEN CARDS` tag stays in the scenario header
+     (§5) — tap it to re-open the briefing in review mode (which DOES
+     allow Escape / scrim-tap dismissal because the player has already
+     read it). Per spec §6 the briefing re-arms on every scenario entry,
+     including Replay.
+
+  2. **Concept tags become tap-to-define** —
+     `mockups/GTO-Duel-Results-Header-v2.html`. The four `.gc-tag` boxes
+     on the M5 GTO Summary card are now wired to the same dictionary
+     tooltip used by inline term-triggers: hover on desktop, tap on
+     mobile, with the popover carrying the term + short definition + an
+     `Open in dictionary →` affordance. 6 of the 10 distinct
+     `concept_tags` in `data/scenarios.json` map cleanly to existing
+     dictionary entries (directly or via aliases — `bluffing` → bluff,
+     `bluff-catching` → bluff-catcher, `equity-realization`,
+     `value-betting` → value bet, `pot-control`, `icm`); the remaining
+     four (`aggression`, `board-texture`, `preflop`, `range-reading`)
+     stay as static prettified-label tags until their dictionary
+     entries land.
+
+  New exports in `src/ui.js`: `getScenarioFlags()` (the generic flag
+  model — minor and major flags as data, no bespoke UI per type),
+  `hasMajorScenarioFlag()`, `buildScenarioFlagTag()` (the persistent
+  header tag), and `buildScenarioBriefingModal()` (the popup). The
+  existing `buildScenarioInfo` pane is unchanged in look but now
+  scopes itself to MINOR flags only — major flags are surfaced via the
+  modal + header tag, and showing both would be a duplicate. The
+  `solo.js` render() now hosts a small briefing state-machine
+  (`activeBriefing`, `briefingDismissedFor`) so the gate-mode modal
+  fires once per scenario entry, the header tag re-opens it in review
+  mode mid-hand without re-gating, and `unmount()` tears down any
+  open modal so leaving the solo view doesn't orphan it.
+
 - **M5 — GTO Summary Card** (v2026-05-25.146). The reveal screen now leads
   with a single ~84px card that replaces three previously stacked elements
   (the lesson takeaway pill, the GTO line one-liner, and the verdict bar).

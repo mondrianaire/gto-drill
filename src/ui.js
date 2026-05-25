@@ -1150,6 +1150,39 @@ function prettifyConceptTag(tag) {
   return spaced.charAt(0).toUpperCase() + spaced.slice(1);
 }
 
+// Look up the dictionary entry that defines a concept-tag, if any.
+// Tries the tag verbatim ("bluffing", "icm", "bluff-catching" — these
+// match dict aliases) and the de-hyphenated form ("equity realization",
+// "pot control"). Returns null when the tag has no dictionary entry —
+// the M5 card falls back to a plain unwired tag in that case.
+function lookupConceptTagEntry(tag) {
+  if (!tag) return null;
+  const raw = String(tag).toLowerCase();
+  const spaced = raw.replace(/[-_]+/g, " ");
+  return lookupTerm(raw) || lookupTerm(spaced) || null;
+}
+
+// Render one concept tag on the M5 card. When a dictionary entry exists,
+// it's a real <button> with the shared term-tooltip wired (hover desktop,
+// tap mobile; tooltip carries the term head, short_def, and an "Open in
+// dictionary →" affordance) — Results-Header-v2 spec. When there is no
+// dictionary entry the tag stays a static <span> with a title attribute,
+// the prettified label being the best we can offer.
+function buildConceptTag(tag) {
+  const label = prettifyConceptTag(tag);
+  const entry = lookupConceptTagEntry(tag);
+  if (entry) {
+    const btn = h("button", {
+      type: "button",
+      class: "gc-tag gc-tag-term",
+      "aria-label": entry.term + " — tap for definition",
+    }, label);
+    wireTermTrigger(btn, entry);
+    return btn;
+  }
+  return h("span", { class: "gc-tag", title: label }, label);
+}
+
 // Extract a short, one-sentence reason for the verdict row. Prefer the
 // first sentence of scen.gto_explanation (the strategic preamble), bail
 // to a generic phrase otherwise.
@@ -1202,10 +1235,7 @@ export function buildGtoSummaryCard({ scen, userAction, gtoAction }) {
       h("span", { class: "gc-lname-ico", "aria-hidden": "true" }, "◆"),
       lesson
     ),
-    ...visibleTags.map((t) =>
-      h("span", { class: "gc-tag", title: prettifyConceptTag(t) },
-        prettifyConceptTag(t))
-    ),
+    ...visibleTags.map((t) => buildConceptTag(t)),
     overflowTags > 0
       ? h("span", { class: "gc-tag gc-tag-more",
                     title: tags.slice(VISIBLE_TAGS).map(prettifyConceptTag).join(", ") },
@@ -1296,6 +1326,250 @@ export function buildGtoSummaryCard({ scen, userAction, gtoAction }) {
   );
 }
 
+// ---------------------------------------------------------------------
+// Scenario flags (Special-Scenarios spec §2)
+// ---------------------------------------------------------------------
+// A flag is a structured object describing how this scenario deviates
+// from the default 100bb-cash-cards-shown baseline. Tier "minor" means
+// it's noted in the header tag only; tier "major" additionally triggers
+// the briefing modal before the hand becomes interactive.
+//
+// All UI downstream of getScenarioFlags is generic — adding a new
+// circumstance type is data-only (return a new entry from this function;
+// no other code needs to change).
+//
+// Each flag has:
+//   id          machine name, e.g. "hidden-cards"
+//   label       header-tag text, e.g. "Hidden cards" (the tag prefixes ⚠)
+//   title       briefing headline, e.g. "Hero's hole cards are hidden"
+//   explanation 1–2 sentence briefing body
+//   tier        "minor" | "major"
+
+/** Detected scenario flags, in display order. Empty array for a
+ *  fully-standard scenario. */
+export function getScenarioFlags(scen) {
+  const flags = [];
+  const replay = scen && scen.replay;
+  if (!replay) return flags;
+
+  // Hidden hole cards — range-vs-range spot. MAJOR.
+  // The player needs to know they're not judging a specific hand before
+  // they choose an action; this gates the hand.
+  const hasCards = replay.hero_cards && replay.hero_cards[0];
+  if (!hasCards) {
+    flags.push({
+      id: "hidden-cards",
+      label: "Hidden cards",
+      title: "Hero's hole cards are hidden",
+      explanation:
+        "Played without a specific Hero hand on purpose — it's a " +
+        "range-vs-range decision. Judge it from position, board texture, " +
+        "and the betting action.",
+      tier: "major",
+    });
+  }
+
+  // Tournament spot — MINOR (context only; the task is unchanged).
+  if (replay.format === "tournament") {
+    flags.push({
+      id: "tournament",
+      label: "Tournament",
+      title: "Tournament hand",
+      explanation:
+        "This is a tournament spot, not a cash game. Survival, pay jumps, " +
+        "and ICM pressure can pull the correct play away from the chip-EV " +
+        "answer you'd make in a cash game.",
+      tier: "minor",
+    });
+  }
+
+  // Non-100bb stack depth — MINOR (context only).
+  const depth = Number(replay.stack_depth_bb);
+  if (depth && depth !== 100) {
+    flags.push({
+      id: "stack-depth",
+      label: depth + "bb deep",
+      title: "Non-standard stack depth — " + depth + "bb effective",
+      explanation:
+        "Stacks are " + depth + "bb deep, not the usual 100bb. Standard " +
+        "100bb opening ranges and implied-odds math don't carry over " +
+        "directly — read the spot on its own terms.",
+      tier: "minor",
+    });
+  }
+
+  return flags;
+}
+
+/** Convenience: does this scenario have at least one MAJOR flag? Drives
+ *  whether the briefing modal gates the hand. */
+export function hasMajorScenarioFlag(scen) {
+  return getScenarioFlags(scen).some((f) => f.tier === "major");
+}
+
+/**
+ * Build the persistent flag tag for the scenario header (Special-Scenarios
+ * spec §5). Compact box, ⚠ + label, sits next to the Replay tag. Tappable
+ * iff onClick is supplied — major-flag scenarios pass it so tapping
+ * re-opens the briefing mid-hand.
+ *
+ * Renders as a <button> when tappable so it gets real keyboard focus and
+ * an accessible name; falls back to a plain <span> otherwise.
+ */
+export function buildScenarioFlagTag({ flag, onClick }) {
+  if (!flag) return null;
+  const txt = "⚠ " + flag.label;
+  if (typeof onClick === "function") {
+    const btn = h("button", {
+      type: "button",
+      class: "scenario-flag-tag",
+      "aria-label": flag.label + " — view scenario briefing",
+      title: "Tap to re-read the briefing",
+    }, txt);
+    btn.addEventListener("click", onClick);
+    return btn;
+  }
+  return h("span", { class: "scenario-flag-tag scenario-flag-tag-static" }, txt);
+}
+
+/**
+ * Build the scenario-briefing modal (Special-Scenarios spec §4 / mockup
+ * GTO-Duel-Scenario-Briefing.html). Centered popup over a scrim that
+ * dims the hand display behind it. The hand is non-interactive until the
+ * primary action is taken.
+ *
+ * Returns an object handle:
+ *   { root, focus, destroy }
+ *
+ * - `root` is the scrim element to append over the hand container. It
+ *   intercepts pointer + key events so the hand behind it doesn't
+ *   receive them; the only way past it is the primary button.
+ * - `focus()` moves keyboard focus into the modal and onto the primary
+ *   action. Call it after the root is appended to the DOM so that focus
+ *   trapping starts immediately.
+ * - `destroy()` removes the scrim, restores focus to the previously
+ *   focused element, and detaches the keydown trap.
+ *
+ * Modes:
+ *   - "gate" (default) — pre-hand briefing. The only dismissal path is
+ *     `Start hand`. No scrim-tap, no Escape — the player cannot skip.
+ *   - "review" — the same content, but dismissable on scrim tap and
+ *     Escape, and the primary button reads `Close`. Used when the user
+ *     re-opens the briefing mid-hand by tapping the header flag tag.
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ * @param {Array}  args.flags        Output of getScenarioFlags(scen).
+ * @param {"gate"|"review"} [args.mode]
+ * @param {Function} args.onDismiss  Called when the user dismisses.
+ */
+export function buildScenarioBriefingModal({ scen, flags, mode, onDismiss }) {
+  const list = Array.isArray(flags) ? flags : [];
+  if (list.length === 0) return null;
+  const reviewMode = mode === "review";
+  const primary = list.find((f) => f.tier === "major") || list[0];
+
+  // Capture the element that had focus before we open, so we can restore
+  // it on dismiss. Without this, focus would land on <body> after the
+  // modal goes away — a noticeable a11y regression.
+  const previouslyFocused = document.activeElement;
+  let removed = false;
+
+  const titleId = "sb-title-" + Math.random().toString(36).slice(2, 8);
+  const scenNum = String((scen && scen.scenario_id) || "").match(/(\d+)\s*$/);
+
+  const closeBtn = h("button", {
+    type: "button",
+    class: "sb-btn",
+  }, reviewMode ? "Close" : "Start hand →");
+
+  const tags = list.map((f) =>
+    h("span", { class: "sb-flag" }, f.label.toUpperCase()));
+
+  const modal = h("div", {
+    class: "sb-modal" + (reviewMode ? " is-review" : ""),
+    role: "dialog",
+    "aria-modal": "true",
+    "aria-labelledby": titleId,
+  },
+    h("div", { class: "sb-icon", "aria-hidden": "true" }, "⚠"),
+    h("div", { class: "sb-eyebrow" }, "THIS SCENARIO IS DIFFERENT"),
+    h("h2", { class: "sb-title", id: titleId }, primary.title),
+    h("p", { class: "sb-body" }, primary.explanation),
+    list.length > 1 ? h("div", { class: "sb-flags" }, ...tags) : null,
+    closeBtn,
+    scenNum
+      ? h("div", { class: "sb-foot" }, "Scenario #" + scenNum[1])
+      : null
+  );
+
+  const root = h("div", {
+    class: "sb-scrim" + (reviewMode ? " is-review" : ""),
+    // Hint to screen readers that the underlying page is inert while
+    // this is open.
+    "aria-hidden": "false",
+  }, modal);
+
+  // destroy({ silent }) — silent:true skips the onDismiss callback. The
+  // caller uses that path when tearing down the modal as part of an
+  // unrelated lifecycle event (a re-render, a route change). Default is
+  // false: a user-initiated dismissal that should fire onDismiss so the
+  // caller can update its gating state.
+  function destroy(opts) {
+    if (removed) return;
+    removed = true;
+    const silent = !!(opts && opts.silent);
+    document.removeEventListener("keydown", onKey, true);
+    if (root.parentNode) root.parentNode.removeChild(root);
+    // Restore focus to whatever the user had focused before the modal
+    // opened — skip when that node is gone or detached.
+    if (previouslyFocused && typeof previouslyFocused.focus === "function" &&
+        previouslyFocused.isConnected) {
+      try { previouslyFocused.focus(); } catch { /* ignore */ }
+    }
+    if (!silent && typeof onDismiss === "function") onDismiss();
+  }
+
+  // Focus-trap: keep tab cycles inside the modal. Only the primary
+  // button is focusable inside this modal — keep it simple: any Tab
+  // press wraps back to the primary.
+  function onKey(ev) {
+    if (ev.key === "Tab") {
+      ev.preventDefault();
+      closeBtn.focus();
+      return;
+    }
+    // Escape closes review-mode briefings only; gate mode has no
+    // skip-out path per spec §4.
+    if (ev.key === "Escape" && reviewMode) {
+      ev.preventDefault();
+      destroy();
+    }
+  }
+
+  closeBtn.addEventListener("click", () => destroy());
+
+  // Review mode: scrim tap dismisses. Gate mode: scrim tap is a no-op
+  // (the popup is the only path forward).
+  if (reviewMode) {
+    root.addEventListener("click", (ev) => {
+      if (ev.target === root) destroy();
+    });
+  }
+
+  document.addEventListener("keydown", onKey, true);
+
+  function focus() {
+    // Defer so the browser has applied initial layout — focusing a
+    // detached element silently no-ops in some browsers.
+    requestAnimationFrame(() => {
+      try { closeBtn.focus(); } catch { /* ignore */ }
+    });
+  }
+
+  return { root, focus, destroy };
+}
+
 /**
  * Build the scenario INFO pane — a heads-up shown ABOVE the hand summary
  * for any scenario whose setup deviates from the default (100bb cash,
@@ -1304,10 +1578,10 @@ export function buildGtoSummaryCard({ scen, userAction, gtoAction }) {
  * assumptions. Returns null for a fully standard scenario (the common
  * case — no pane, no clutter).
  *
- * Detected deviations (all read from scen.replay):
- *   - format === "tournament"   → tournament pressures (ICM, pay jumps)
- *   - stack_depth_bb !== 100    → non-standard effective stacks
- *   - hero_cards missing        → range-vs-range spot, Hero's cards hidden
+ * This now handles ONLY minor flags (tournament, non-standard stack).
+ * Major flags (hidden cards) are surfaced through the briefing modal
+ * (Special-Scenarios spec §4) and their persistent header tag — the
+ * inline pane would be a duplicate of the briefing once dismissed.
  *
  * Decide-safe: this pane is visible during the decide phase, so it states
  * only factual setup + neutral reasoning — never the GTO answer.
@@ -1316,51 +1590,18 @@ export function buildGtoSummaryCard({ scen, userAction, gtoAction }) {
  * @param {Object} args.scen
  */
 export function buildScenarioInfo({ scen }) {
-  const replay = scen && scen.replay;
-  if (!replay) return null;
-
-  const items = [];
-
-  if (replay.format === "tournament") {
-    items.push({
-      head: "Tournament hand",
-      reason: "This is a tournament spot, not a cash game. Survival, pay " +
-        "jumps, and ICM pressure can pull the correct play away from the " +
-        "chip-EV answer you'd make in a cash game.",
-    });
-  }
-
-  const depth = Number(replay.stack_depth_bb);
-  if (depth && depth !== 100) {
-    items.push({
-      head: "Non-standard stack depth — " + depth + "bb effective",
-      reason: "Stacks are " + depth + "bb deep, not the usual 100bb. " +
-        "Standard 100bb opening ranges and implied-odds math don't carry " +
-        "over directly — read the spot on its own terms.",
-    });
-  }
-
-  const hasCards = replay.hero_cards && replay.hero_cards[0];
-  if (!hasCards) {
-    items.push({
-      head: "Hero's hole cards are hidden",
-      reason: "This spot is played without a specific Hero hand on " +
-        "purpose — it's a range-vs-range decision. Judge it from " +
-        "position, board texture, and the betting action.",
-    });
-  }
-
-  if (items.length === 0) return null;
+  const minor = getScenarioFlags(scen).filter((f) => f.tier === "minor");
+  if (minor.length === 0) return null;
 
   return h("div", { class: "scenario-info" },
     h("div", { class: "scenario-info-label" },
       h("span", { class: "scenario-info-icon", "aria-hidden": "true" }, "ⓘ"),
       "Heads-up — this scenario is different"
     ),
-    ...items.map((it) =>
+    ...minor.map((f) =>
       h("div", { class: "scenario-info-item" },
-        h("div", { class: "scenario-info-head" }, it.head),
-        h("div", { class: "scenario-info-reason" }, richText(it.reason, scen))
+        h("div", { class: "scenario-info-head" }, f.title),
+        h("div", { class: "scenario-info-reason" }, richText(f.explanation, scen))
       )
     )
   );
