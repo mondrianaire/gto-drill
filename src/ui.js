@@ -806,9 +806,12 @@ export function buildCrowdBreakdown({ scen, responses, userAction }) {
     (byAction[a] = byAction[a] || []).push(r);
   }
 
-  // One avatar for a response. If the player left a comment, the
-  // avatar gets a green note-dot and a hover (desktop) / tap (mobile)
-  // popover showing the comment — a mini player-info card.
+  // One avatar for a response. If the player left a comment, the avatar
+  // gets a green GLOW RING and a hover (desktop) / tap (mobile) tooltip
+  // showing name + their pick + the take text — per Results-View-Spec
+  // §5 (comments-as-glow, mockup GTO-Duel-Results-Social-v2.html). The
+  // dot indicator from v.117 is gone; a ring on the avatar itself is
+  // quieter and reads as part of the avatar at a glance.
   function crowdAvatar(r) {
     const name = r.displayName || "Player";
     const av = buildAvatar(name, r.photoURL || null);
@@ -819,33 +822,42 @@ export function buildCrowdBreakdown({ scen, responses, userAction }) {
       return av;
     }
     const noteAction = r.noteAction && String(r.noteAction).trim();
-    const wrap = h("div",
-      { class: "crowd-avatar-wrap has-note", role: "button", tabindex: "0",
-        "aria-label": name + " left a comment" },
+    const noteConf = Number(r.noteConfidence);
+    // Header context — mockup shows "Squeeze · conf 5" so the take is
+    // anchored to what the player actually picked AT THE TIME they wrote
+    // the take (not their current answer if they later retested).
+    const ctxBits = [];
+    if (noteAction) ctxBits.push(noteAction);
+    if (noteConf >= 1 && noteConf <= 5) ctxBits.push("conf " + noteConf);
+    const ctx = ctxBits.join(" · ");
+    const wrap = h("button",
+      { type: "button", class: "crowd-avatar-wrap has-note",
+        "aria-label": name + " left a take — tap to read",
+        "aria-haspopup": "true", "aria-expanded": "false" },
       av,
-      h("span", { class: "crowd-note-dot", "aria-hidden": "true" }),
-      h("div", { class: "crowd-note-pop" },
-        h("div", { class: "crowd-note-pop-name" }, name),
-        // The answer this comment was written about — keeps it honest
-        // even if the player later changed their answer on a retest.
-        noteAction
-          ? h("div", { class: "crowd-note-pop-ctx" }, "Answered “" + noteAction + "”")
-          : null,
+      h("div", { class: "crowd-note-pop", role: "tooltip" },
+        h("div", { class: "crowd-note-pop-head" },
+          h("span", { class: "crowd-note-pop-name" }, name),
+          ctx ? h("span", { class: "crowd-note-pop-ctx" }, ctx) : null
+        ),
         h("p", { class: "crowd-note-pop-text" }, "“" + note + "”")
       )
     );
     function openExclusive() {
-      // Tap-to-toggle (mobile); close any other open popover first.
+      // Tap-to-toggle (mobile); close any other open tooltip first.
       const wasOpen = wrap.classList.contains("pop-open");
       const root = wrap.closest(".crowd-breakdown");
       if (root) root.querySelectorAll(".crowd-avatar-wrap.pop-open")
-        .forEach((w) => w.classList.remove("pop-open"));
-      if (!wasOpen) wrap.classList.add("pop-open");
+        .forEach((w) => {
+          w.classList.remove("pop-open");
+          w.setAttribute("aria-expanded", "false");
+        });
+      if (!wasOpen) {
+        wrap.classList.add("pop-open");
+        wrap.setAttribute("aria-expanded", "true");
+      }
     }
     wrap.addEventListener("click", (ev) => { ev.stopPropagation(); openExclusive(); });
-    wrap.addEventListener("keydown", (ev) => {
-      if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); openExclusive(); }
-    });
     return wrap;
   }
   // Per-action stats — count, %, average confidence, blind-spot flag.
@@ -959,7 +971,29 @@ export function buildCrowdBreakdown({ scen, responses, userAction }) {
     ));
   }
 
-  return h("div", { class: "crowd-breakdown" }, header, lowSample, rows);
+  // First-encounter hint — Results-View-Spec §5: "Green ring on an
+  // avatar = a take is available · tap to read." Only shown when at
+  // least one response in the displayed pool has a glow-ring (i.e.,
+  // there's actually a take to discover); otherwise it's noise.
+  const hasAnyTake = list.some((r) => r && r.note && String(r.note).trim());
+  const hint = hasAnyTake
+    ? h("p", { class: "crowd-hint" },
+        h("span", { class: "crowd-hint-dot", "aria-hidden": "true" }),
+        "Green ring = left a take · tap an avatar to read it")
+    : null;
+
+  // Close any open avatar tooltip when the user taps outside it. Scoped
+  // to the crowd element so we don't leak a global listener; the click
+  // inside crowdAvatar() already stopPropagation()s so it never reaches
+  // here.
+  const root = h("div", { class: "crowd-breakdown" }, header, lowSample, rows, hint);
+  root.addEventListener("click", () => {
+    root.querySelectorAll(".crowd-avatar-wrap.pop-open").forEach((w) => {
+      w.classList.remove("pop-open");
+      w.setAttribute("aria-expanded", "false");
+    });
+  });
+  return root;
 }
 
 /**
