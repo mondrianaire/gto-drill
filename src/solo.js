@@ -9,7 +9,7 @@
 import { listScenarios } from "./scenarios.js";
 import { mountReplay, buildSpotSummary, buildRunoutStrip, buildHeroStrip, buildDecidePrompt } from "./replay.js";
 import { mountEquityPanel } from "./equity-panel.js";
-import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown, buildScenarioInfo, buildRetestCompare } from "./ui.js";
+import { richText, buildRevealResult, buildVillainRangeBlock, buildGtoRead, buildLessonTakeaway, buildGtoSummaryCard, buildGtoExplanation, buildOptionsAnalysis, buildCrowdBreakdown, buildScenarioInfo, buildRetestCompare } from "./ui.js";
 import { recordResponse, readScenarioResponses, readMyResponses, saveResponseComment, getCurrentUser } from "./state.js";
 
 // -----------------------------------------------------------------------
@@ -677,7 +677,18 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
       // equity panel + Test it so clicking flows into verification.
       const villainRangeBlock = buildVillainRangeBlock({ scen, onRangeClick: openWithRange });
 
-      // GTO line — a small one-line blurb naming the solver's choice.
+      // M5 GTO summary card (Results-View-Spec §3) — one ~84px card
+      // carrying lesson + concept tags, the solver-mix bar (when
+      // scen.solver_data is populated), and the verdict + EV + why.
+      // Replaces buildLessonTakeaway + buildGtoRead + the verdict bar
+      // inside buildRevealResult.
+      const gtoSummaryCard = buildGtoSummaryCard({
+        scen, userAction: draft.action, gtoAction: gto,
+      });
+
+      // (legacy gtoRead — kept available for future non-reveal callers;
+      // the reveal layout no longer mounts it.)
+      // eslint-disable-next-line no-unused-vars
       const gtoRead = buildGtoRead({ scen, gtoAction: gto });
 
       // GTO description preamble — paragraph that introduces the
@@ -717,8 +728,15 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
         userAction: draft.action,
         gtoAction: gto,
         confidence: draft.confidence,
+        // M5 GTO summary card already carries the verdict; suppress the
+        // duplicate verdict bar inside the result block (Results-View-Spec §3).
+        hideVerdict: true,
       });
 
+      // (legacy lesson takeaway pill — folded into the M5 summary card's
+      // row-1 lesson title. Kept built so non-reveal callers can still use
+      // it; the reveal layout no longer mounts it.)
+      // eslint-disable-next-line no-unused-vars
       const takeaway = buildLessonTakeaway({ scen });
       // Retest comparison — only when the player has answered this
       // scenario before: their previous answer + a then-vs-now verdict.
@@ -783,9 +801,8 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
       );
 
       body = h("div", { class: "hand-reveal" },
-        takeaway,           // LEAD: one-line lesson takeaway
-        gtoRead,            // GTO line: small blurb (the answer)
-        result,             // verdict + compact comparison
+        gtoSummaryCard,     // LEAD: M5 — lesson + solver mix + verdict + EV
+        result,             // comparison + opponent panel (verdict hidden — in card)
         retestCompare,      // then-vs-now (replays only; null otherwise)
         crowdHost,          // "how others played" crowd distribution
         accordion           // collapsible deeper-dive sections

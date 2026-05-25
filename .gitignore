@@ -6,3 +6,12 @@ data/MINIMAL-*.gto2
 data/*.gto2
 !data/test32.gto2
 !data/test332.gto2
+
+# Backup written by gto-merge.mjs before mutating scenarios.json
+data/scenarios.json.backup
+
+# Design mockup drop zone (see design-audit/mockups/README.md). Owner's
+# design property — kept local by default; whitelist specific files into
+# the repo by adding them as !design-audit/mockups/<name>.
+design-audit/mockups/*
+!design-audit/mockups/README.md

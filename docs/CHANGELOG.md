@@ -24,6 +24,33 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Added
+- **M5 — GTO Summary Card** (v2026-05-25.146). The reveal screen now leads
+  with a single ~84px card that replaces three previously stacked elements
+  (the lesson takeaway pill, the GTO line one-liner, and the verdict bar).
+  Three rows per the spec:
+  1. **Lesson + concept tags** — the scenario's `lesson_tag` as the title,
+     plus up to 4 `concept_tags` rendered as compact boxes (caps at +N for
+     scenarios with more than 4).
+  2. **Solver-mix bar** — a horizontal bar segmented by per-action
+     frequency from `scen.solver_data.options`, with the GTO segment in
+     green, the player's pick in pink with a `YOU` pin above it, and any
+     remaining lines in neutral grey. Includes a `≈X BB cost` annotation
+     on misses. Gracefully omitted when `solver_data` is absent — the
+     card still works as a tighter lesson+verdict block until the solver
+     pipeline lands data on this scenario.
+  3. **Verdict + EV + why** — `✓`/`✗` + EV-cost chip + one-sentence
+     reason (first sentence of `gto_explanation`).
+
+  New `buildGtoSummaryCard()` in `src/ui.js`. `buildRevealResult` now
+  accepts a `hideVerdict` option so it can keep showing the comparison +
+  opponent panel without duplicating the verdict the card carries. The
+  legacy `buildLessonTakeaway` + `buildGtoRead` are still exported for
+  any non-reveal callers but the reveal layout no longer mounts them.
+
+  Implements `GTO-Duel-Results-View-Spec.md` §3 / mockup
+  `design-audit/mockups/gto-duel-mobile-redesign/mockups/GTO-Duel-Results-GTO-Summary.html`.
+
 ### Changed
 - **Compact-view polish round** (v2026-05-23.143). Five small moves on the
   compact one-screen hand view that close the remaining recommendations from

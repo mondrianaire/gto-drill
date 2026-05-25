@@ -1078,6 +1078,10 @@ export function buildGtoRead({ scen, gtoAction }) {
  * Data source: scen.lesson_tag (string). Every scenario in the dataset
  * has one populated.
  *
+ * NOTE: as of v.144 (M5 GTO summary card) this pill is folded into the
+ * card's row-1 lesson title and is no longer mounted separately. The
+ * function is kept for any non-reveal callers (and tests).
+ *
  * @param {Object} args
  * @param {Object} args.scen
  */
@@ -1086,6 +1090,175 @@ export function buildLessonTakeaway({ scen }) {
   return h("div", { class: "lesson-takeaway" },
     h("span", { class: "lesson-takeaway-label" }, "💡 Lesson"),
     h("span", { class: "lesson-takeaway-text" }, scen.lesson_tag)
+  );
+}
+
+// ----- M5 — GTO summary card (Results-View-Spec §3) -----
+//
+// One ~84px card replacing three previously-stacked elements: the lesson
+// header, the verdict band, and the (long-buried) GTO reasoning. Three rows:
+//   1. lesson + concept-tag boxes
+//   2. solver-mix bar segmented by per-action frequency; YOU pin over the
+//      hero's pick (omitted when scen.solver_data is absent — the bar
+//      degrades quietly and the card still works)
+//   3. verdict ✓/✗ + EV cost + one-line "why"
+//
+// Replaces buildLessonTakeaway + buildGtoRead + the verdict portion of
+// buildRevealResult in the reveal layout (solo.js).
+//
+// The full reasoning paragraph stays in the "Study the line" accordion —
+// this card is the high-level view; the accordion is the deep read.
+
+// "equity-realization" → "Equity realization" for display.
+function prettifyConceptTag(tag) {
+  if (!tag) return "";
+  const spaced = String(tag).replace(/[-_]+/g, " ");
+  return spaced.charAt(0).toUpperCase() + spaced.slice(1);
+}
+
+// Extract a short, one-sentence reason for the verdict row. Prefer the
+// first sentence of scen.gto_explanation (the strategic preamble), bail
+// to a generic phrase otherwise.
+function shortReason(scen, isCorrect) {
+  const expl = (scen && scen.gto_explanation) || "";
+  if (expl) {
+    // Match up to the first sentence terminator that isn't inside a
+    // decimal like "3.5%". A naive .split(".")[0] would chop "3" off "3.5".
+    const m = expl.match(/^[^.!?]+(?:\.\d|\d\.)?[^.!?]*[.!?]/);
+    if (m) return m[0].trim();
+  }
+  if (isCorrect) return "You matched the GTO line.";
+  return "Off the GTO line.";
+}
+
+// Look up hero's frequency for an action in the merged solver_data.
+// Returns null if the data is missing or the action isn't mapped.
+function lookupSolverFreq(solverData, action) {
+  const o = solverData && solverData.options && solverData.options[action];
+  if (!o || o.unmatched) return null;
+  return typeof o.freq === "number" ? o.freq : null;
+}
+function lookupSolverEvCost(solverData, action) {
+  const o = solverData && solverData.options && solverData.options[action];
+  if (!o || o.unmatched) return null;
+  return typeof o.ev_cost === "number" ? o.ev_cost : null;
+}
+
+/**
+ * Build the GTO summary card (Results-View-Spec §3, mockup
+ * GTO-Duel-Results-GTO-Summary.html). The screen's title block and its
+ * highest-level GTO read.
+ *
+ * @param {Object} args
+ * @param {Object} args.scen
+ * @param {string} args.userAction      What the player picked
+ * @param {string} args.gtoAction       The solver's preferred line
+ */
+export function buildGtoSummaryCard({ scen, userAction, gtoAction }) {
+  if (!scen) return null;
+  const lesson = scen.lesson_tag || "GTO read";
+  const tags = Array.isArray(scen.concept_tags) ? scen.concept_tags : [];
+  const VISIBLE_TAGS = 4;                 // §3 "concept-tag overflow" — cap at 4 then +N
+  const visibleTags = tags.slice(0, VISIBLE_TAGS);
+  const overflowTags = tags.length - visibleTags.length;
+
+  // Row 1 — lesson + concept tag boxes
+  const lessonRow = h("div", { class: "gc-lesson" },
+    h("span", { class: "gc-lname" },
+      h("span", { class: "gc-lname-ico", "aria-hidden": "true" }, "◆"),
+      lesson
+    ),
+    ...visibleTags.map((t) =>
+      h("span", { class: "gc-tag", title: prettifyConceptTag(t) },
+        prettifyConceptTag(t))
+    ),
+    overflowTags > 0
+      ? h("span", { class: "gc-tag gc-tag-more",
+                    title: tags.slice(VISIBLE_TAGS).map(prettifyConceptTag).join(", ") },
+          "+" + overflowTags)
+      : null
+  );
+
+  // Row 2 — solver mix bar. Only built when solver_data has at least one
+  // matched option with a frequency. Otherwise omitted: the card still
+  // works as a tighter lesson/verdict block until the solver pipeline
+  // lands data on this scenario.
+  let barRow = null;
+  const solverData = scen.solver_data;
+  if (solverData && solverData.options && Object.keys(solverData.options).length) {
+    const actions = Array.isArray(scen.available_actions) ? scen.available_actions : [];
+    // Build segments in the order actions appear, skipping any with no
+    // matched frequency. Each segment's flex weight is the freq × 100.
+    const segments = [];
+    let totalWeight = 0;
+    for (const a of actions) {
+      const f = lookupSolverFreq(solverData, a);
+      if (f == null) continue;
+      const weight = Math.max(0, f * 100);
+      if (weight < 0.5) continue;             // skip near-zero lines to keep the bar legible
+      totalWeight += weight;
+      let kind = "fold";
+      if (a === gtoAction) kind = "gto";
+      else if (a === userAction) kind = "you";
+      segments.push({ action: a, weight, freq: f, kind });
+    }
+    if (segments.length && totalWeight > 0) {
+      // EV cost annotation — the cost of the user's deviation, if any.
+      const gtoEvCost = lookupSolverEvCost(solverData, gtoAction);
+      const userEvCost = lookupSolverEvCost(solverData, userAction);
+      const isCorrect = userAction === gtoAction;
+      const labelRight = isCorrect
+        ? h("span", { class: "gc-barlabel-v gc-barlabel-v-ok" },
+            "✓ " + gtoAction)
+        : (userEvCost != null
+            ? h("span", { class: "gc-barlabel-v gc-barlabel-v-miss" },
+                "≈" + userEvCost.toFixed(1) + " BB cost")
+            : null);
+      const labelLeft = h("span", { class: "gc-barlabel-l" }, "GTO STRATEGY — SOLVER MIX");
+
+      const barLabel = h("div", { class: "gc-barlabel" }, labelLeft, labelRight);
+      const bar = h("div", { class: "gc-bar", role: "img",
+                             "aria-label": "Solver strategy mix: " +
+                               segments.map((s) =>
+                                 s.action + " " + Math.round(s.freq * 100) + "%").join(", ") },
+        ...segments.map((s) => {
+          const pct = Math.round(s.freq * 100);
+          const inner = [
+            h("span", { class: "gc-seg-text" },
+              s.kind === "fold" ? (pct + "%") : (s.action + " " + pct + "%"))
+          ];
+          if (s.kind === "you" && !isCorrect) {
+            inner.unshift(h("span", { class: "gc-youpin", "aria-hidden": "true" }, "YOU"));
+          }
+          return h("div",
+            { class: "gc-seg gc-seg-" + s.kind, style: "flex:" + s.weight },
+            ...inner);
+        })
+      );
+      barRow = h("div", { class: "gc-bar-block" }, barLabel, bar);
+    }
+  }
+
+  // Row 3 — verdict + EV + why
+  const isCorrect = userAction === gtoAction;
+  const userEvCost = lookupSolverEvCost(solverData, userAction);
+  const evChip = (!isCorrect && userEvCost != null)
+    ? h("span", { class: "gc-why-ev" }, "≈" + userEvCost.toFixed(1) + " BB")
+    : null;
+  const whyRow = h("div", { class: "gc-why" },
+    h("span", { class: "gc-why-icon", "aria-hidden": "true" },
+      isCorrect ? "✓" : "✗"),
+    h("span", { class: "gc-why-text" },
+      evChip ? "It costs " : null,
+      evChip,
+      evChip ? ". " : null,
+      shortReason(scen, isCorrect))
+  );
+
+  return h("div", { class: "gto-card" + (isCorrect ? " is-ok" : " is-miss") },
+    lessonRow,
+    barRow,
+    whyRow
   );
 }
 
@@ -1229,11 +1402,14 @@ export function buildRetestCompare({ scen, prior, currentAction, gtoAction }) {
  * @param {number} args.confidence
  * @param {Object} [args.opponent]    — { name, photoURL?, action, confidence?, note? }
  */
-export function buildRevealResult({ scen, userAction, gtoAction, confidence, opponent }) {
+export function buildRevealResult({ scen, userAction, gtoAction, confidence, opponent, hideVerdict }) {
   const correct = userAction === gtoAction;
 
-  // Verdict bar — big red/green at-a-glance signal.
-  const verdict = h("div", { class: "reveal-verdict" },
+  // Verdict bar — big red/green at-a-glance signal. The M5 GTO summary
+  // card (Results-View-Spec §3) carries this verdict in a more compact
+  // form, so the reveal layout passes hideVerdict:true and skips this
+  // bar to avoid duplication.
+  const verdict = hideVerdict ? null : h("div", { class: "reveal-verdict" },
     h("span", { class: "reveal-verdict-icon", "aria-hidden": "true" }, correct ? "✓" : "✗"),
     h("span", { class: "reveal-verdict-text" }, correct ? "You matched the GTO line" : "Off the GTO line")
   );
