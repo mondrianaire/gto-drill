@@ -1,9 +1,17 @@
 #!/usr/bin/env node
-// texas-extract.mjs — parse TexasSolver JSON dumps into our solver-data.json
+// texas-extract.mjs — parse TexasSolver JSON dumps into our solver-data
 // schema. Reads every <scenario_id>.json in solver-output/texas/ and emits
-// solver-output/solver-data.json keyed by scenario_id, matching the shape
-// gto-extract.mjs already produces — so gto-merge.mjs runs against either
-// solver's output unchanged.
+// solver-output/solver-data-texas.json keyed by scenario_id, matching the
+// shape gto-extract.mjs already produces — so gto-merge.mjs reads both lane
+// files and unions them per-scenario (GTO+ wins on overlap because it has
+// EV and TexasSolver doesn't).
+//
+// Until v.148 both lanes wrote to a single solver-output/solver-data.json,
+// which meant running one lane after the other clobbered the first's data.
+// Lane-separated paths let TexasSolver freq + GTO+ EV coexist per
+// scenario, which is the practical end-state for the project (TexasSolver
+// covers all 31 scenarios cheaply; GTO+ adds EV for the ones the user
+// chooses to invest the solve time on).
 //
 // Target schema per scenario:
 //   {
@@ -32,7 +40,7 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "..");
 const DUMP_DIR = join(REPO_ROOT, "solver-output/texas");
-const OUT_FILE = join(REPO_ROOT, "solver-output/solver-data.json");
+const OUT_FILE = join(REPO_ROOT, "solver-output/solver-data-texas.json");
 const SCENARIOS = JSON.parse(readFileSync(join(REPO_ROOT, "data/scenarios.json"), "utf8"));
 
 if (!existsSync(DUMP_DIR)) {

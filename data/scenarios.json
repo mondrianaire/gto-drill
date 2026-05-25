@@ -237,8 +237,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 70.000000",
+      "best_scenario_action": "Bet 7bb (~30% pot)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -693,8 +693,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 70.000000",
+      "best_scenario_action": "Bet 7bb (50% pot)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -1104,8 +1104,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "CHECK",
+      "best_scenario_action": "Check back",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -1356,8 +1356,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "RAISE 370.000000",
+      "best_scenario_action": "Raise to 16bb",
       "picked_node_path": "CHECK.BET 89.000000",
       "solved_at": "2026-05-25"
     }
@@ -1600,8 +1600,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "FOLD",
+      "best_scenario_action": "Fold",
       "picked_node_path": "CHECK.BET 325.000000",
       "solved_at": "2026-05-25"
     }
@@ -2041,8 +2041,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "CALL",
+      "best_scenario_action": "Call",
       "picked_node_path": "BET 160.000000",
       "solved_at": "2026-05-25"
     }
@@ -2240,8 +2240,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 20.000000",
+      "best_scenario_action": "Donk lead 2bb (~35%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -2691,8 +2691,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "CALL",
+      "best_scenario_action": "Call",
       "picked_node_path": "CHECK.BET 147.000000",
       "solved_at": "2026-05-25"
     }
@@ -3295,8 +3295,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 50.000000",
+      "best_scenario_action": "Bet 5bb (~25%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -3556,8 +3556,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 20.000000",
+      "best_scenario_action": "Bet 2bb (~35%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -3824,8 +3824,8 @@
           "unmatched": true
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "CALL",
+      "best_scenario_action": "Call",
       "picked_node_path": "BET 545.000000",
       "solved_at": "2026-05-25"
     }
@@ -4068,8 +4068,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "FOLD",
+      "best_scenario_action": "Fold",
       "picked_node_path": "CHECK.BET 166.000000",
       "solved_at": "2026-05-25"
     }
@@ -4346,8 +4346,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 40.000000",
+      "best_scenario_action": "Bet 4bb (~45%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -4726,8 +4726,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 219.000000",
+      "best_scenario_action": "Bet 22bb (~50% pot)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -5013,8 +5013,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 110.000000",
+      "best_scenario_action": "Bet 11bb (~45%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -5266,8 +5266,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "RAISE 147.000000",
+      "best_scenario_action": "Check-raise to 9bb",
       "picked_node_path": "BET 27.000000",
       "solved_at": "2026-05-25"
     }
@@ -5513,8 +5513,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 30.000000",
+      "best_scenario_action": "Probe bet 3bb (~50%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -5759,8 +5759,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "CHECK",
+      "best_scenario_action": "Check",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -6683,8 +6683,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "RAISE 835.000000",
+      "best_scenario_action": "3-bet to 38bb",
       "picked_node_path": "CHECK.BET 345.000000",
       "solved_at": "2026-05-25"
     }
@@ -6954,8 +6954,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 20.000000",
+      "best_scenario_action": "Bet 2bb (~30%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -7233,8 +7233,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 50.000000",
+      "best_scenario_action": "Bet 5bb (~55%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -7531,8 +7531,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 200.000000",
+      "best_scenario_action": "Overbet 20bb (~165%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -7776,8 +7776,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "FOLD",
+      "best_scenario_action": "Fold",
       "picked_node_path": "BET 168.000000",
       "solved_at": "2026-05-25"
     }
@@ -8015,8 +8015,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 60.000000",
+      "best_scenario_action": "Bet 6bb (~66%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -8271,8 +8271,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "CALL",
+      "best_scenario_action": "Call",
       "picked_node_path": "BET 77.000000",
       "solved_at": "2026-05-25"
     }
@@ -8837,8 +8837,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "CHECK",
+      "best_scenario_action": "Check",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -9081,8 +9081,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "CALL",
+      "best_scenario_action": "Call",
       "picked_node_path": "CHECK.BET 47.000000",
       "solved_at": "2026-05-25"
     }
@@ -9359,8 +9359,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 40.000000",
+      "best_scenario_action": "Bet 4bb (~45%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -9782,8 +9782,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 15.000000",
+      "best_scenario_action": "Bet 1.5bb (~27%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -10045,8 +10045,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "BET 60.000000",
+      "best_scenario_action": "Bet 6bb (~50%)",
       "picked_node_path": "",
       "solved_at": "2026-05-25"
     }
@@ -10518,8 +10518,8 @@
           "ev_cost": null
         }
       },
-      "best_solver_action": null,
-      "best_scenario_action": null,
+      "best_solver_action": "CALL",
+      "best_scenario_action": "Call",
       "picked_node_path": "BET 148.000000",
       "solved_at": "2026-05-25"
     }

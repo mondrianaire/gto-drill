@@ -1,8 +1,18 @@
 #!/usr/bin/env node
-// gto-merge.mjs — solver-agnostic merge step. Reads solver-output/
-// solver-data.json (regardless of whether GTO+ or TexasSolver produced it)
-// and writes a `solver_data` field onto each matching scenario in
+// gto-merge.mjs — solver-agnostic merge step. Unions data from both solver
+// lanes and writes a `solver_data` field onto each matching scenario in
 // data/scenarios.json. The §8.1 GTO Summary Card reads this field directly.
+//
+// Lane file precedence (lower wins where keys overlap, per-scenario):
+//   1. solver-output/solver-data-gto-plus.json  (highest — has EV)
+//   2. solver-output/solver-data-texas.json     (baseline freq, no EV)
+//   3. solver-output/solver-data.json           (legacy single-lane fallback)
+//
+// Each scenario is taken from the first lane that has data for it; scenarios
+// only in lower-precedence lanes still get merged. This lets TexasSolver
+// cover the full 31-scenario set cheaply while GTO+ adds EV (the "BB cost"
+// annotation on the M5 card) on whichever scenarios the user invests solve
+// time on.
 //
 // What gets added per scenario:
 //   solver_data: {
@@ -23,7 +33,7 @@
 // always recoverable with `mv data/scenarios.json.backup data/scenarios.json`.
 //
 // Usage:
-//   node scripts/gto-merge.mjs                 # merge everything in solver-data.json
+//   node scripts/gto-merge.mjs                 # merge everything
 //   node scripts/gto-merge.mjs --dry-run       # show what would change, write nothing
 //   node scripts/gto-merge.mjs <scenario_id>   # one scenario
 
@@ -34,35 +44,84 @@ import { fileURLToPath } from "node:url";
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = join(__dirname, "..");
 const SCENARIOS_PATH = join(REPO_ROOT, "data/scenarios.json");
-const SOLVER_DATA_PATH = join(REPO_ROOT, "solver-output/solver-data.json");
+const SOLVER_OUT_DIR = join(REPO_ROOT, "solver-output");
+const GTO_PLUS_PATH  = join(SOLVER_OUT_DIR, "solver-data-gto-plus.json");
+const TEXAS_PATH     = join(SOLVER_OUT_DIR, "solver-data-texas.json");
+const LEGACY_PATH    = join(SOLVER_OUT_DIR, "solver-data.json");
 const BACKUP_PATH = join(REPO_ROOT, "data/scenarios.json.backup");
 
 const args = process.argv.slice(2);
 const DRY_RUN = args.includes("--dry-run");
 const filter = args.find((a) => !a.startsWith("--")) || null;
 
-if (!existsSync(SOLVER_DATA_PATH)) {
-  console.error("❌ No solver-data.json at " + SOLVER_DATA_PATH);
-  console.error("   Run texas-extract.mjs (TexasSolver lane) or gto-extract.mjs (GTO+ lane).");
+// ===== Load + union the per-lane solver-data files =====
+//
+// Read each lane file that exists, tag every entry with the lane that
+// produced it, then union per scenario_id with GTO+ winning on overlap.
+// The result is one map { scenario_id → { lane, ...entry } } that
+// downstream code consumes uniformly.
+function loadLane(path, lane) {
+  if (!existsSync(path)) return null;
+  try {
+    const raw = JSON.parse(readFileSync(path, "utf8"));
+    const tagged = {};
+    for (const [id, entry] of Object.entries(raw)) {
+      tagged[id] = { __lane: lane, ...entry };
+    }
+    return tagged;
+  } catch (err) {
+    console.error("⚠  Failed to read " + path + ": " + err.message);
+    return null;
+  }
+}
+const laneGtoPlus = loadLane(GTO_PLUS_PATH, "GTO+");
+const laneTexas   = loadLane(TEXAS_PATH,    "TexasSolver");
+const laneLegacy  = loadLane(LEGACY_PATH,   "legacy");
+
+if (!laneGtoPlus && !laneTexas && !laneLegacy) {
+  console.error("❌ No solver-data files found in " + SOLVER_OUT_DIR);
+  console.error("   Expected one of:");
+  console.error("     solver-data-gto-plus.json   (run gto-extract.mjs)");
+  console.error("     solver-data-texas.json      (run texas-extract.mjs)");
+  console.error("     solver-data.json            (legacy single-lane output)");
   process.exit(1);
 }
 
+// Union in precedence order: GTO+ > TexasSolver > legacy. Later lanes only
+// fill in scenarios not covered by an earlier one.
+const SOLVER_DATA = {};
+for (const lane of [laneLegacy, laneTexas, laneGtoPlus]) {
+  if (!lane) continue;
+  for (const [id, entry] of Object.entries(lane)) {
+    SOLVER_DATA[id] = entry;                  // later lane overrides earlier
+  }
+}
+
+// Print which lanes contributed.
+const laneCounts = {};
+for (const entry of Object.values(SOLVER_DATA)) {
+  laneCounts[entry.__lane] = (laneCounts[entry.__lane] || 0) + 1;
+}
+const laneSummary = Object.entries(laneCounts)
+  .map(([k, v]) => k + "=" + v).join(", ");
+console.log("Lanes loaded: " + laneSummary);
+
 const SCENARIOS = JSON.parse(readFileSync(SCENARIOS_PATH, "utf8"));
-const SOLVER_DATA = JSON.parse(readFileSync(SOLVER_DATA_PATH, "utf8"));
 
 // ===== Source detection =====
+// Per-scenario lane tag wins (the union step already tagged each entry with
+// the lane that owned it). Fall back to label shape sniffing for legacy
+// entries that lost their lane stamp.
 // GTO+'s extractor produces actions like "Bet 9.25" / "Check" — title-cased
 // with bb-units in the bet size. TexasSolver's emit "BET 92" / "CHECK" —
 // uppercase, with chip-units (bb × 10). Pretty easy tell.
-function detectSource(solverData) {
-  const sample = Object.values(solverData).find((s) => Array.isArray(s.actions));
-  if (!sample) return "unknown";
-  const action = (sample.actions[0] || "").toString();
+function detectSource(entry) {
+  if (entry && entry.__lane && entry.__lane !== "legacy") return entry.__lane;
+  const action = (entry && entry.actions && entry.actions[0] || "").toString();
   if (/^[A-Z]+(\s|$)/.test(action)) return "TexasSolver";
   if (/^[A-Z][a-z]/.test(action)) return "GTO+";
   return "unknown";
 }
-const SOURCE = detectSource(SOLVER_DATA);
 
 // ===== Action mapping =====
 // Solver labels and scenario action labels both encode "what you do" plus
@@ -235,6 +294,9 @@ function mergeOne(scen, solverEntry) {
   if (!solverEntry || solverEntry.error || !solverEntry.actions) {
     return { skipped: true, reason: solverEntry?.error || "no solver data" };
   }
+  // Source is per-scenario (the union step tagged each entry with its
+  // lane). Fall back to label shape sniffing for legacy entries.
+  const SOURCE = detectSource(solverEntry);
   // For facing-bet scenarios, pick the hero-response node (depth ≥1 in
   // the tree). For typical scenarios, use the root (the existing default).
   let activeActions = solverEntry.actions;
@@ -305,10 +367,24 @@ function mergeOne(scen, solverEntry) {
     };
   }
 
+  // Pick the solver's "best" action — highest EV when available, highest
+  // freq as a fallback when EV is missing (TexasSolver dumps don't carry
+  // EV). Either way `best_solver_action` ends up populated for every
+  // merged scenario, not null for the no-EV case. The two metrics agree
+  // for most spots (the solver bets at the highest freq because that's
+  // the highest-EV move); they diverge for mixed strategies where small
+  // EV gaps shift the equilibrium.
   let bestSolver = null;
   let bestEv = -Infinity;
   for (const r of heroStrategy) {
     if (r.ev != null && r.ev > bestEv) { bestEv = r.ev; bestSolver = r.solver_action; }
+  }
+  if (bestSolver == null) {
+    let bestFreq = -Infinity;
+    for (const r of heroStrategy) {
+      const f = r.freq || 0;
+      if (f > bestFreq) { bestFreq = f; bestSolver = r.solver_action; }
+    }
   }
   let bestScen = null;
   for (const [scenAction, solverLabel] of Object.entries(mapping)) {
@@ -343,7 +419,7 @@ const targets = filter
   ? SCENARIOS.filter((s) => s.scenario_id === filter)
   : SCENARIOS;
 
-console.log(`Merging solver data (source detected: ${SOURCE}) into ${targets.length} scenario(s)\n`);
+console.log(`Merging solver data into ${targets.length} scenario(s)\n`);
 
 let merged = 0, skipped = 0, unmatched = 0;
 const unmatchedReports = [];
@@ -366,7 +442,13 @@ for (const scen of targets) {
     unmatched += optionUnmatched;
     unmatchedReports.push({ id: scen.scenario_id, count: optionUnmatched });
   }
-  console.log(`  ✅ ${scen.scenario_id.padEnd(50)} ${optionStrs}${optionUnmatched ? " ⚠" + optionUnmatched + "_unmatched" : ""}`);
+  // Lane tag in the line so the user can see whose data won this
+  // scenario at a glance. The tag is short ("GTO+", "Tex", "leg") to
+  // keep the column tight against ID + freqs.
+  const laneShort = r.merged.source === "GTO+" ? "GTO+"
+                  : r.merged.source === "TexasSolver" ? "Tex"
+                  : "leg";
+  console.log(`  ✅ ${scen.scenario_id.padEnd(50)} [${laneShort.padEnd(4)}] ${optionStrs}${optionUnmatched ? " ⚠" + optionUnmatched + "_unmatched" : ""}`);
 }
 
 if (!DRY_RUN && merged > 0) {
@@ -384,6 +466,18 @@ console.log("");
 console.log("─".repeat(70));
 console.log(`  ✅ merged:     ${merged}/${targets.length}`);
 console.log(`  ⏭  skipped:    ${skipped} (no solver data)`);
+// Per-lane breakdown of the merged scenarios — useful for the user to
+// see at a glance which lane fed how many scenarios, especially in a
+// dual-lane setup where GTO+ EV is layered onto a TexasSolver baseline.
+const mergedLaneCounts = {};
+for (const s of targets) {
+  if (s.solver_data && s.solver_data.source) {
+    mergedLaneCounts[s.solver_data.source] = (mergedLaneCounts[s.solver_data.source] || 0) + 1;
+  }
+}
+const mergedLaneSummary = Object.entries(mergedLaneCounts)
+  .map(([k, v]) => k + ": " + v).join(", ");
+if (mergedLaneSummary) console.log(`  📊 by lane:    ${mergedLaneSummary}`);
 if (unmatched) {
   console.log(`  ⚠  unmatched options across scenarios: ${unmatched}`);
   for (const u of unmatchedReports.slice(0, 10)) console.log(`        ${u.id}: ${u.count} unmatched`);

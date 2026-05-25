@@ -15,29 +15,29 @@ Two solver lanes converge at the same merge step:
 ```
 data/scenarios.json + data/preflop-ranges.json + src/range-canonicalize.js
    │
-   ├── TexasSolver lane ────────────────────────────────────────┐
-   │   (1) node scripts/texas-batch-generate.mjs                │
-   │       → solver-input/texas/<scenario_id>.txt               │
-   │   (2) node scripts/texas-batch-solve.mjs                   │
-   │       → solver-output/texas/<scenario_id>.json             │
-   │   (3) node scripts/texas-extract.mjs                       │
-   │       → solver-output/solver-data.json                     │
-   │                                                            │
-   ├── GTO+ lane ──────────────────────────────────────────────┐│
-   │   (1) node scripts/gto-batch-generate.mjs <template>      ││
-   │       → solver-output/<scenario_id>.gto2 (unsolved stubs) ││
-   │   (2) (optional) node scripts/gto-verify-loads.mjs        ││
-   │       → solver-output/load-verify-report.json             ││
-   │   (3) GTO+ → PROCESS FILES (hours, unattended)            ││
-   │       → solver-output/<scenario_id>.gto2 (solved)         ││
-   │   (4) node scripts/gto-extract.mjs                        ││
-   │       → solver-output/solver-data.json                    ││
-   │                                                            ││
-   ▼                                                            ▼
-   solver-output/solver-data.json  ◄────── (lanes converge here)
+   ├── TexasSolver lane ─────────────────────────────────────────────┐
+   │   (1) node scripts/texas-batch-generate.mjs                     │
+   │       → solver-input/texas/<scenario_id>.txt                    │
+   │   (2) node scripts/texas-batch-solve.mjs                        │
+   │       → solver-output/texas/<scenario_id>.json                  │
+   │   (3) node scripts/texas-extract.mjs                            │
+   │       → solver-output/solver-data-texas.json                    │
+   │                                                                 │
+   ├── GTO+ lane ───────────────────────────────────────────────────┐│
+   │   (1) node scripts/gto-batch-generate.mjs <template>           ││
+   │       → solver-output/<scenario_id>.gto2 (unsolved stubs)      ││
+   │   (2) (optional) node scripts/gto-verify-loads.mjs             ││
+   │       → solver-output/load-verify-report.json                  ││
+   │   (3) GTO+ → PROCESS FILES (hours, unattended)                 ││
+   │       → solver-output/<scenario_id>.gto2 (solved)              ││
+   │   (4) node scripts/gto-extract.mjs                             ││
+   │       → solver-output/solver-data-gto-plus.json                ││
+   │                                                                 ││
+   ▼                                                                 ▼
+   solver-output/solver-data-texas.json  +  solver-data-gto-plus.json
    │
-   │  (M) node scripts/gto-merge.mjs
-   ↓
+   │  (M) node scripts/gto-merge.mjs    ◄─── unions both lane files
+   ↓                                          per scenario; GTO+
 data/scenarios.json (now §8.1-ready, with solver_data per scenario)
 ```
 
@@ -51,9 +51,12 @@ data/scenarios.json (now §8.1-ready, with solver_data per scenario)
 | Per-file diagnostics | Exit code + stdout per file | Socket-driven verify script |
 | Platform | Windows + Mac + Linux | Windows only |
 | Result format | JSON dump per scenario | `.gto2` populated MAIN TREE |
-| **Recommended for** | **Batch processing of all 31 scenarios** | One-off solves where you want to visually inspect the tree |
+| EV per action in dump | ❌ (freq only) | ✅ (freq + EV) |
+| **Recommended for** | **Baseline coverage of all 31 scenarios** | Layered on top of TexasSolver for the §8.1 card's "≈X BB cost" annotation |
 
-Both lanes feed the same downstream `gto-merge.mjs`.
+Both lanes feed the same downstream `gto-merge.mjs`, which unions their per-scenario data — **GTO+ wins on overlap** because it carries EV that TexasSolver doesn't. Lane-separated output files mean running one after the other no longer clobbers the first's data; TexasSolver freq + GTO+ EV coexist per scenario.
+
+The typical setup: run TexasSolver across all 31 scenarios for cheap baseline coverage, then layer GTO+ on whichever subset of scenarios is worth the hours-long solve time for the EV annotation.
 
 ---
 
@@ -81,7 +84,7 @@ node scripts/texas-batch-generate.mjs
 # 2. Solve every config (sequential by default; --concurrency N for parallel)
 node scripts/texas-batch-solve.mjs
 
-# 3. Parse the JSON dumps into the canonical solver-data.json
+# 3. Parse the JSON dumps into solver-data-texas.json
 node scripts/texas-extract.mjs
 ```
 
@@ -241,31 +244,45 @@ The script:
   per-combo response into `{ COMBOS, EQUITY, FREQ_by_action, EV_by_action }`
 - Combo-weights to per-action **overall** frequencies (`'Bet 9.25': 0.78`)
 - Picks out hero's dealt-hand specific strategy
-- Writes `solver-output/solver-data.json`
+- Writes `solver-output/solver-data-gto-plus.json`
 
 ---
 
 ## The merge step (lanes converge)
 
-Whichever lane produced `solver-output/solver-data.json`, the merge is the
-same one-shot script:
+The merger reads both lane files and unions them per scenario:
 
 ```bash
 node scripts/gto-merge.mjs              # merge everything
 node scripts/gto-merge.mjs --dry-run    # preview without writing
+node scripts/gto-merge.mjs <scenario>   # one scenario by id
 ```
 
-What it does:
-- Auto-detects source (TexasSolver vs GTO+) from action-label conventions
-- For every scenario in `solver-data.json`, maps solver action labels
-  (`BET 20`, `Check`) onto scenario `available_actions` (`Bet 2bb (~35%)`,
-  `Check back`) using a fuzzy bet-size matcher
+What it reads (in this precedence order, per scenario):
+1. `solver-output/solver-data-gto-plus.json`  — highest, has EV
+2. `solver-output/solver-data-texas.json`     — baseline freq, no EV
+3. `solver-output/solver-data.json`           — legacy single-lane fallback
+
+Each scenario is fed by the highest-precedence lane that has data for it.
+Scenarios only in TexasSolver still get merged; scenarios only in GTO+ get
+merged with EV. Lane-tagged source flows through to `solver_data.source`
+on each scenario.
+
+What the merger does per scenario:
+- Maps solver action labels (`BET 20`, `Bet 9.25`, `Check`) onto scenario
+  `available_actions` (`Bet 2bb (~35%)`, `Check back`) using a fuzzy
+  bet-size matcher
 - Computes per-option `freq` (hero's hand's frequency for that line) and
-  `ev_cost` (max EV across options minus this option's EV)
+  `ev_cost` (max EV across options minus this option's EV — null on
+  TexasSolver-fed scenarios where EV is unavailable)
+- Picks `best_solver_action` by highest EV when available, falling back to
+  highest frequency for TexasSolver-fed scenarios (so the field is always
+  populated, never null)
 - Writes a `solver_data` field onto each matched scenario in
   `data/scenarios.json`, preserving every existing field verbatim
 - Saves a backup at `data/scenarios.json.backup` before touching the file
-- Reports per-scenario summary + counts of unmatched options
+- Reports per-scenario summary with a `[GTO+]` / `[Tex ]` lane tag, plus
+  a final breakdown by lane
 
 Shape of the data file (lane-independent):
 
@@ -346,8 +363,9 @@ Total active human time once template is built: **~3 clicks per batch run.**
 - `scripts/texas-batch-solve.mjs` — invokes `console_solver.exe` on every
   `.txt`. Auto-detects solver path; accepts `--solver-path`, `--concurrency`,
   `--timeout`.
-- `scripts/texas-extract.mjs` — parses TexasSolver JSON dumps into the
-  canonical `solver-output/solver-data.json` schema.
+- `scripts/texas-extract.mjs` — parses TexasSolver JSON dumps into
+  `solver-output/solver-data-texas.json` (lane-specific path so GTO+
+  data isn't clobbered if both lanes run).
 
 ### GTO+ lane
 - `scripts/gto-batch-generate.mjs` — generates `.gto2` setup files by
@@ -360,11 +378,15 @@ Total active human time once template is built: **~3 clicks per batch run.**
 - `scripts/gto-verify-loads.mjs` — socket-driven load test (between steps 1
   and 3); per-file ✅/❌ table plus a JSON report. Crash-resilient: reconnects
   to GTO+ after each crash so one bad scenario doesn't poison the run.
-- `scripts/gto-extract.mjs` — socket-driven extractor (step 4 of the GTO+ lane).
+- `scripts/gto-extract.mjs` — socket-driven extractor (step 4 of the GTO+
+  lane). Writes `solver-output/solver-data-gto-plus.json` (lane-specific
+  path so TexasSolver data isn't clobbered if both lanes run).
 
 ### Both lanes converge here
-- `scripts/gto-merge.mjs` — solver-agnostic. Reads `solver-data.json`,
-  writes `solver_data` field onto matched scenarios in `data/scenarios.json`,
+- `scripts/gto-merge.mjs` — solver-agnostic. Reads both lane files
+  (`solver-data-gto-plus.json` + `solver-data-texas.json`) and unions
+  them per scenario, GTO+ winning on overlap. Writes the merged
+  `solver_data` field onto matched scenarios in `data/scenarios.json`,
   with a backup at `data/scenarios.json.backup`.
 - `src/preflop-ranges.js` — shared `deriveRanges(scen)` used by both
   generators.

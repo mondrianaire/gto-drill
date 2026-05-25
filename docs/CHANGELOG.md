@@ -45,6 +45,35 @@ lobby delete button silently no-op until the rules are live.
   avatar closes any open tooltip (scoped to the crowd element — no
   leaked global listener).
 
+### Changed
+- **Dual-lane solver-data with per-lane file separation** (v2026-05-25.149).
+  Until now both extractors (`texas-extract.mjs`, `gto-extract.mjs`) wrote
+  to the same `solver-output/solver-data.json`, which meant running one
+  lane after the other clobbered the first's data. This kept the project
+  from doing the practical thing: run TexasSolver across all 31 scenarios
+  for cheap baseline freq, then layer GTO+ on top for the EV annotation
+  the M5 GTO Summary Card consumes (`≈X BB cost` on misses) — without
+  losing the TexasSolver freq for scenarios GTO+ doesn't solve.
+
+  Now:
+  - `texas-extract.mjs` writes `solver-output/solver-data-texas.json`
+  - `gto-extract.mjs`   writes `solver-output/solver-data-gto-plus.json`
+  - `gto-merge.mjs` reads BOTH lane files (plus the legacy single-file
+    `solver-data.json` for back-compat), unions them per scenario, and
+    GTO+ wins on overlap because it carries EV. Each merged scenario
+    gets a `source` tag (`"TexasSolver"` / `"GTO+"`) reflecting which
+    lane fed it.
+  - The merge output now shows a per-scenario lane tag
+    `[GTO+]`/`[Tex ]`/`[leg ]` and a final breakdown by lane.
+
+  Plus a bug fix in the merger: `best_solver_action` was null on every
+  TexasSolver-fed scenario because the picker required EV (which
+  TexasSolver dumps don't carry). It now falls back to the highest-
+  frequency action when EV is unavailable, so the field is always
+  populated. This refreshes `best_solver_action` + `best_scenario_action`
+  on all 31 previously-merged scenarios in `data/scenarios.json` — pure
+  null → populated, no behavior change beyond that.
+
 ### Added
 - **Scenario-Briefing modal + Header-v2 tooltips** (v2026-05-25.148). Two
   mockup items land together because they share the same `data/dictionary.json`
