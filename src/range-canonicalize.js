@@ -282,3 +282,48 @@ export function canonicalize(rangeStr) {
 
   return result;
 }
+
+// === Enumeration (TexasSolver-friendly emission) ==========================
+//
+// TexasSolver doesn't accept GTO+'s run notation (`99-22`, `AKs-A2s`). Its
+// console_solver parser rejects it with "range str len not valid" and exits
+// with code 3 before any solve work begins. It wants comma-separated atomic
+// tokens — one per hand class (`TT,99,88,...,22`). This expands a range
+// into that shape. Order is descending by rank to match TexasSolver's own
+// example configs.
+//
+// Use this when feeding a range to TexasSolver / console_solver; use
+// canonicalize() when feeding a range to GTO+ (binary substitution or paste).
+export function enumerate(rangeStr) {
+  const atoms = expandRange(rangeStr);
+  // Sort: pairs (high→low), suited (high→low), offsuit (high→low), specifics.
+  function key(a) {
+    if (a.kind === "pair") return [0, -rankIdx(a.rank), 0];
+    if (a.kind === "suited") return [1, -rankIdx(a.high), -rankIdx(a.low)];
+    if (a.kind === "offsuit") return [2, -rankIdx(a.high), -rankIdx(a.low)];
+    if (a.kind === "specific") return [3, -rankIdx(a.card1[0]), -rankIdx(a.card2[0])];
+    return [4, 0, 0];
+  }
+  const sorted = [...atoms].sort((a, b) => {
+    const ka = key(a), kb = key(b);
+    for (let i = 0; i < ka.length; i++) if (ka[i] !== kb[i]) return ka[i] - kb[i];
+    return 0;
+  });
+  const parts = sorted.map((a) => {
+    if (a.kind === "pair") return a.rank + a.rank;
+    if (a.kind === "suited") return a.high + a.low + "s";
+    if (a.kind === "offsuit") return a.high + a.low + "o";
+    if (a.kind === "specific") return a.card1 + a.card2;
+    return a.raw;
+  });
+  const result = parts.join(",");
+  const inCombos = countCombos(rangeStr);
+  const outCombos = countCombos(result);
+  if (inCombos !== outCombos) {
+    throw new Error(
+      `enumerate: combo count drift (in=${inCombos}, out=${outCombos}) — ` +
+      `input="${rangeStr.slice(0, 60)}…" output="${result.slice(0, 60)}…"`,
+    );
+  }
+  return result;
+}
