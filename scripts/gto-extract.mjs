@@ -73,9 +73,21 @@ async function connect() {
 
 async function init(sock) {
   sock.write(frame("init"));
-  const resp = await receive(sock, 5000);
+  // The init handshake replies in TWO framed chunks: first the assigned
+  // connection ID (`~C::<id>~`), then the auth confirmation (`~You are
+  // connected to GTO+~`). receive() resolves on the first `~`-terminated
+  // buffer, so the second chunk needs a follow-up read. Without this we
+  // bail at `~C::<id>~` thinking auth was refused.
+  // (Same fix as gto-verify-loads.mjs's init.)
+  let resp = await receive(sock, 5000);
   if (!resp.includes("You are connected to GTO+")) {
-    throw new Error("GTO+ refused connection: " + resp);
+    try {
+      const more = await receive(sock, 5000);
+      resp += more;
+    } catch { /* timeout — fall through to the explicit error below */ }
+  }
+  if (!resp.includes("You are connected to GTO+")) {
+    throw new Error("GTO+ refused connection: " + resp.slice(0, 160));
   }
   await sleep(SHORT_SLEEP);
 }
