@@ -34,6 +34,7 @@ import {
   readFileSync,
   readdirSync,
   mkdirSync,
+  renameSync,
   statSync,
   writeFileSync,
 } from "node:fs";
@@ -53,19 +54,29 @@ let filter = null;
 let solverPathArg = null;
 let concurrency = 1;
 let timeoutSec = 1800; // 30 min per solve — generous
+let useWsl = false;
+let wslDistro = "Ubuntu";
+let wslLibDir = null;
 
 for (let i = 0; i < args.length; i++) {
   const a = args[i];
   if (a === "--solver-path") solverPathArg = args[++i];
   else if (a === "--concurrency") concurrency = parseInt(args[++i], 10) || 1;
   else if (a === "--timeout") timeoutSec = parseInt(args[++i], 10) || 1800;
+  else if (a === "--wsl") useWsl = true;
+  else if (a === "--wsl-distro") { useWsl = true; wslDistro = args[++i]; }
+  else if (a === "--wsl-lib-dir") { useWsl = true; wslLibDir = args[++i]; }
   else if (!a.startsWith("--")) filter = a;
 }
 
 // ===== Solver path resolution =====
+// In native (non-WSL) mode we probe common install paths. In WSL mode the
+// path is a Linux mount path (/mnt/c/...) that's not reachable from
+// Windows fs, so we require an explicit --solver-path.
 function probeSolverPath() {
   if (solverPathArg) return solverPathArg;
   if (process.env.TEXAS_SOLVER_PATH) return process.env.TEXAS_SOLVER_PATH;
+  if (useWsl) return null;
   const home = os.homedir();
   const candidates = [
     "C:/Program Files/TexasSolver/console_solver.exe",
@@ -73,7 +84,7 @@ function probeSolverPath() {
     join(home, "Downloads/TexasSolver/console_solver.exe"),
     join(home, "Documents/TexasSolver/console_solver.exe"),
     join(home, "TexasSolver/console_solver.exe"),
-    // Linux / Mac
+    // Native Linux / Mac
     "/usr/local/bin/console_solver",
     "/opt/TexasSolver/console_solver",
     join(home, "TexasSolver/console_solver"),
@@ -92,23 +103,28 @@ if (!solverPath) {
   console.error("Tried:");
   console.error("  - --solver-path argument");
   console.error("  - $TEXAS_SOLVER_PATH environment variable");
-  console.error("  - Common install paths under Program Files / Downloads / Documents / home");
+  if (!useWsl) {
+    console.error("  - Common install paths under Program Files / Downloads / Documents / home");
+  }
   console.error("");
   console.error("Download TexasSolver from:");
   console.error("  https://github.com/bupticybee/TexasSolver/releases");
   console.error("");
   console.error("Then rerun with:");
-  console.error("  node scripts/texas-batch-solve.mjs --solver-path <path/to/console_solver.exe>");
+  console.error("  node scripts/texas-batch-solve.mjs --solver-path <path/to/console_solver>");
   console.error("");
-  console.error("Or set $TEXAS_SOLVER_PATH and rerun without --solver-path.");
+  console.error("Or for the WSL Linux build (works around the v0.2.0 Windows crash):");
+  console.error("  node scripts/texas-batch-solve.mjs --wsl --solver-path /mnt/c/.../console_solver --wsl-lib-dir /mnt/c/.../lib_local");
   process.exit(2);
 }
-if (!existsSync(solverPath)) {
+// Only validate path on disk when calling directly. Under WSL the path is
+// a Linux mount form not reachable from Windows existsSync().
+if (!useWsl && !existsSync(solverPath)) {
   console.error("❌ Solver path does not exist: " + solverPath);
   process.exit(2);
 }
 
-console.log(`Solver: ${solverPath}`);
+console.log(`Solver: ${solverPath}${useWsl ? " (via WSL " + wslDistro + ")" : ""}`);
 console.log(`Configs dir: ${IN_DIR}`);
 console.log(`Dumps dir:   ${OUT_DIR}`);
 console.log(`Concurrency: ${concurrency} (timeout: ${timeoutSec} s per solve)`);
@@ -130,18 +146,55 @@ if (!targets.length) {
 
 console.log(`Solving ${targets.length} scenario(s)\n`);
 
+// Convert C:\Users\…\file → /mnt/c/Users/…/file for WSL invocations.
+function winToWsl(winPath) {
+  return winPath
+    .replace(/^([A-Za-z]):/, (_, drv) => "/mnt/" + drv.toLowerCase())
+    .replace(/\\/g, "/");
+}
+// And the reverse, for finding the dump on the Windows side after a WSL
+// invocation moves it.
+function wslToWin(wslPath) {
+  return wslPath.replace(/^\/mnt\/([a-z])\//, (_, drv) => drv.toUpperCase() + ":/");
+}
+
 // ===== Per-solve runner =====
 function runOne(configFile) {
   return new Promise((res) => {
     const id = basename(configFile, ".txt");
     const configPath = resolve(IN_DIR, configFile);
     const t0 = Date.now();
-    // Spawn with cwd=OUT_DIR so the `dump_result <id>.json` lands here.
-    // Pass the config via -i flag (TexasSolver console convention).
-    const child = spawn(solverPath, ["-i", configPath], {
-      cwd: OUT_DIR,
-      stdio: ["ignore", "pipe", "pipe"],
-    });
+
+    let exe, exeArgs, spawnOpts;
+    if (useWsl) {
+      // The solver loads its hand-strength dictionary + game-tree files
+      // from `resources/` RELATIVE TO ITS OWN cwd. So we must cd to the
+      // solver's own directory (not OUT_DIR) before invoking — else the
+      // missing resource files cause an immediate segfault at "Iter: 0".
+      // dump_result still writes to cwd by default, so the JSON lands in
+      // the solver dir; we move it back to OUT_DIR in the close handler.
+      //
+      // MSYS_NO_PATHCONV=1 stops Git Bash / MSYS from translating
+      // /mnt/c/foo paths into Windows-form when the script is launched
+      // from a Git Bash environment. Without it, the Linux-form paths
+      // get mangled before reaching wsl.exe.
+      const wslCfg = winToWsl(configPath);
+      const solverDir = solverPath.substring(0, solverPath.lastIndexOf("/"));
+      const ldPrefix = wslLibDir ? `LD_LIBRARY_PATH="${wslLibDir}" ` : "";
+      const bashCmd = `cd "${solverDir}" && ${ldPrefix}./console_solver -i "${wslCfg}"`;
+      exe = "wsl.exe";
+      exeArgs = ["-d", wslDistro, "--", "bash", "-lc", bashCmd];
+      spawnOpts = {
+        stdio: ["ignore", "pipe", "pipe"],
+        env: { ...process.env, MSYS_NO_PATHCONV: "1", MSYS2_ARG_CONV_EXCL: "*" },
+      };
+    } else {
+      // Native (no WSL): cwd=OUT_DIR so dump_result lands directly.
+      exe = solverPath;
+      exeArgs = ["-i", configPath];
+      spawnOpts = { cwd: OUT_DIR, stdio: ["ignore", "pipe", "pipe"] };
+    }
+    const child = spawn(exe, exeArgs, spawnOpts);
     let stdoutTail = "", stderrTail = "";
     const cap = (where, chunk) => {
       const s = chunk.toString("utf8");
@@ -158,6 +211,17 @@ function runOne(configFile) {
     child.on("close", (code, signal) => {
       clearTimeout(killer);
       const ms = Date.now() - t0;
+      // Under WSL we cd'd to the solver dir, so the dump landed there.
+      // Move it back into OUT_DIR so the downstream extractor finds it.
+      if (useWsl) {
+        const winSolverPath = wslToWin(solverPath);
+        const solverDirWin = winSolverPath.substring(0, winSolverPath.lastIndexOf("/"));
+        const stagedDump = join(solverDirWin, id + ".json");
+        const finalDump = join(OUT_DIR, id + ".json");
+        if (existsSync(stagedDump)) {
+          try { renameSync(stagedDump, finalDump); } catch { /* fall through */ }
+        }
+      }
       const dumpPath = join(OUT_DIR, id + ".json");
       const dumpExists = existsSync(dumpPath);
       const dumpSize = dumpExists ? statSync(dumpPath).size : 0;
