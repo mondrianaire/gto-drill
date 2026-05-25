@@ -46,6 +46,35 @@ lobby delete button silently no-op until the rules are live.
   leaked global listener).
 
 ### Fixed
+- **gto-batch-generate.mjs preserves MAIN TREE from template** (v2026-05-25.152).
+  Empirical chain that uncovered this: PR #163 stopped the file-load crash
+  by fixing the @12 update, so 31/31 files passed `gto-verify-loads`. But
+  when the user clicked PROCESS FILES, GTO+ reported "31 files processed"
+  while writing nothing back to disk. Diagnosis: the substituter was
+  stripping the `MAIN TREE` section as if it held only stale solved
+  strategy. It actually holds the **built bet tree** GTO+ needs in place
+  before it will solve a file. Stripping it left every substituted file
+  with no tree → PROCESS FILES iterated, found no tree per file, silently
+  no-op'd.
+
+  Now `gto-batch-generate.mjs` preserves the entire `MAIN TREE` section
+  verbatim from the template. For unsolved-tree templates (the typical
+  case — saved with Build Tree clicked but Solve NOT clicked) this carries
+  only the tree structure (~10-50 KB). For solved templates (the user's
+  legacy `template-max.gto2`) it additionally carries the template's
+  strategy data, but PROCESS FILES re-solves over it so that's fine.
+
+  Net effect: substituted files grow from ~1 KB stubs to whatever the
+  template's MAIN TREE size is. bb-monster (substituted into a 44 KB
+  flop template) is now 44 KB and verifiably solves in GTO+ (~30 s for
+  a small flop spot).
+
+  Operationally this unblocks PROCESS FILES for the first time on the
+  full 31-file batch. Combined with the @12 fix (PR #163) and the
+  extract handshake fix (PR #164), the GTO+ lane is now end-to-end:
+  generate → load-verify → PROCESS FILES → extract → merge → M5 card
+  EV chip lights up.
+
 - **gto-extract.mjs init handshake race** (v2026-05-25.151). The GTO+
   socket auth handshake replies in TWO framed chunks back-to-back:
   first the assigned connection ID (`~C::<id>~`), then the auth
