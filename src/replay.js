@@ -7,11 +7,16 @@
 //
 // Also exports buildSolverConfig(scen) which produces a TexasSolver console
 // config for that scenario. The hero range is filled in from
-// deriveRanges() + the canonicalizer so the config is solve-ready straight
-// out of the Database console download (no manual paste step).
+// deriveRanges() + enumerate() so the config is solve-ready straight out of
+// the Database console download (no manual paste step). enumerate() (not
+// canonicalize()) is used because TexasSolver requires atomic enumeration
+// — its parser rejects GTO+'s `XX-YY` / `XYs-XZs` run notation with
+// "range str len not valid" and exits before solving. See
+// range-canonicalize.js for both functions; pick by which solver you're
+// feeding.
 
 import { deriveRanges } from "./preflop-ranges.js";
-import { canonicalize as canonicalizeRange } from "./range-canonicalize.js";
+import { enumerate as enumerateRange } from "./range-canonicalize.js";
 
 // -----------------------------------------------------------------------
 // Tiny DOM helper (kept local, like the other view modules).
@@ -504,20 +509,23 @@ export function buildSolverConfig(scen, opts = {}) {
   const authoredVill = authoredVillClasses.length ? authoredVillClasses.join(",") : null;
 
   // Pick ranges. Caller overrides > derived/authored > placeholder.
-  // Canonicalize anything we resolved to a real string so the config stays
-  // compact and matches GTO+'s vocabulary.
-  function canonOrNull(s) {
+  // ENUMERATE rather than canonicalize: TexasSolver requires atomic
+  // tokens (`TT,99,88,...,22`), not GTO+ run notation (`99-22`). Its
+  // parser rejects the run form with "range str len not valid" and the
+  // process exits with code 3 before any solve work begins. Use
+  // enumerate() here, canonicalize() for GTO+ binary substitution.
+  function enumOrNull(s) {
     if (!s) return null;
-    try { return canonicalizeRange(s); } catch { return s; }
+    try { return enumerateRange(s); } catch { return s; }
   }
   const heroRange =
-    canonOrNull(opts.heroRange) ||
-    canonOrNull(derivedHero) ||
+    enumOrNull(opts.heroRange) ||
+    enumOrNull(derivedHero) ||
     "PASTE_HERO_RANGE_HERE";
   const villRange =
-    canonOrNull(opts.villRange) ||
-    canonOrNull(authoredVill) ||
-    canonOrNull(derivedVill) ||
+    enumOrNull(opts.villRange) ||
+    enumOrNull(authoredVill) ||
+    enumOrNull(derivedVill) ||
     "PASTE_VILLAIN_RANGE_HERE";
 
   // OOP = whoever acts first postflop (the earlier seat).
@@ -527,44 +535,77 @@ export function buildSolverConfig(scen, opts = {}) {
 
   const dumpName = opts.dumpName || (scen.scenario_id + ".json");
 
-  return [
+  // Derive the bet sizes the solver should consider on the DECISION street
+  // from scen.available_actions. Without this, the solver uses a single
+  // default size (e.g. 50% pot) and the merge step collapses multiple
+  // scenario bets (`Bet 2bb (~35%)` and `Bet 4bb (~75%)`) onto the same
+  // solver action — producing identical freqs across distinct UI options.
+  // Sizes are expressed as % of pot (TexasSolver's `set_bet_sizes ...,bet,N`
+  // takes pot percentages; multiple sizes are comma-separated).
+  function streetForBoardLen(joinedLen) {
+    if (joinedLen === 6) return "flop";
+    if (joinedLen === 8) return "turn";
+    if (joinedLen === 10) return "river";
+    return null;
+  }
+  const decStreet = streetForBoardLen(board.join("").length);
+  function decisionBetPcts() {
+    if (pot <= 0) return [];
+    const pcts = new Set();
+    for (const a of (scen.available_actions || [])) {
+      // Only bet/raise actions carry a sizing; skip Check, Fold, Call.
+      if (!/^(bet|raise)/i.test(a.trim())) continue;
+      const m = a.match(/(\d+(?:\.\d+)?)/);
+      if (!m) continue;
+      const bb = parseFloat(m[1]);
+      if (!Number.isFinite(bb) || bb <= 0) continue;
+      const pct = Math.round((bb / pot) * 100);
+      if (pct > 0 && pct < 1000) pcts.add(pct);
+    }
+    return [...pcts].sort((a, b) => a - b);
+  }
+  const scenBetPcts = decisionBetPcts();
+
+  const lines = [
     "set_pot " + chips(pot),
     "set_effective_stack " + chips(effStack),
     "set_board " + board.join(","),
     "set_range_oop " + (heroOop ? heroRange : villRange),
     "set_range_ip " + (heroOop ? villRange : heroRange),
-    "set_bet_sizes oop,flop,bet,50",
-    "set_bet_sizes oop,flop,raise,60",
-    "set_bet_sizes oop,flop,allin",
-    "set_bet_sizes ip,flop,bet,50",
-    "set_bet_sizes ip,flop,raise,60",
-    "set_bet_sizes ip,flop,allin",
-    "set_bet_sizes oop,turn,bet,50",
-    "set_bet_sizes oop,turn,raise,60",
-    "set_bet_sizes oop,turn,donk,50",
-    "set_bet_sizes oop,turn,allin",
-    "set_bet_sizes ip,turn,bet,50",
-    "set_bet_sizes ip,turn,raise,60",
-    "set_bet_sizes ip,turn,allin",
-    "set_bet_sizes oop,river,bet,50",
-    "set_bet_sizes oop,river,raise,60,100",
-    "set_bet_sizes oop,river,allin",
-    "set_bet_sizes ip,river,bet,50",
-    "set_bet_sizes ip,river,raise,60,100",
-    "set_bet_sizes oop,river,donk,50",
-    "set_bet_sizes ip,river,allin",
+  ];
+  // Decision street uses scenario-derived %s; other streets stay at 50%
+  // so the downstream tree remains bounded.
+  for (const street of ["flop", "turn", "river"]) {
+    const sizes = (street === decStreet && scenBetPcts.length) ? scenBetPcts : [50];
+    for (const side of ["oop", "ip"]) {
+      lines.push(`set_bet_sizes ${side},${street},bet,${sizes.join(",")}`);
+    }
+  }
+  // NOTE: explicit `raise` and `allin` bet-size lines were dropped here
+  // after empirical testing — TexasSolver v0.2.0 (Linux) segfaults at
+  // Iter 0 when the bet tree includes per-side raise/allin lines alongside
+  // multi-size bet lines on the decision street. The simpler tree (bet
+  // sizes only) still answers the M5 card's question ("freq per bet size
+  // on the decision street"). Likewise `set_raise_limit` and
+  // `set_print_interval` from earlier versions of this template were
+  // unrecognized commands in v0.2.0 and are dropped.
+  //
+  // Accuracy 5.0 (vs the spec's typical 0.5) — TexasSolver v0.2.0
+  // segfaults at ~iter 30-60 when target accuracy is below ~2.0 for
+  // non-trivial range × bet-tree combinations. 5.0 stops at ~2-7% total
+  // exploitability, plenty for the M5 visual freq bar.
+  lines.push(
     "set_allin_threshold 0.67",
-    "set_raise_limit 3",
     "build_tree",
-    "set_thread_num 8",
-    "set_accuracy 0.5",
-    "set_max_iteration 200",
-    "set_print_interval 10",
+    "set_thread_num 4",
+    "set_accuracy 5.0",
+    "set_max_iteration 50",
     "set_use_isomorphism 1",
     "start_solve",
-    "set_dump_rounds 2",
+    "set_dump_rounds 1",
     "dump_result " + dumpName,
-  ].join("\n") + "\n";
+  );
+  return lines.join("\n") + "\n";
 }
 
 /**
