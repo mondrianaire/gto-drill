@@ -24,6 +24,37 @@ Both changes live in the repo's `firestore.rules`. Paste the full file
 into the Console and Publish — both the active-games panel and the
 lobby delete button silently no-op until the rules are live.
 
+### Changed
+- **Compact-view polish round** (v2026-05-23.143). Five small moves on the
+  compact one-screen hand view that close the remaining recommendations from
+  spec §6.1 / §7 and the decision-screen-recomposition design audit:
+  - **Confidence reveals after action is picked.** Move 04 of the audit:
+    "the player meets one question at a time." The 1–5 confidence strip + its
+    label are now hidden until an action lands, then slide in with a 280 ms
+    opacity/height transition (instant for `prefers-reduced-motion`). The
+    `.needs-confidence` glow + lock-in-button gate behave exactly as before.
+  - **Villain seat surfaced on the hero strip.** The compact layout otherwise
+    loses the positional opposition the oval table draws by placing seats
+    across the felt — a "vs BB" suffix on the hero seat label now restores it,
+    rendered in the project's villain accent so the opposition reads at a
+    glance without competing with the hero label. `primaryVillainSeat()`
+    picks the most-recent non-folded actor, falling back to the first non-hero
+    seat in table order.
+  - **SPR chip in the decide prompt.** Stack-to-Pot Ratio joins Pot / To call
+    / Pot odds when there's a board to act on — postflop's go/no-go shorthand.
+    Capped at "20+" to keep deep-stack start-of-flop spots from showing a
+    number the player can't usefully act on; rounded to 1 dp under 10, whole
+    numbers above.
+  - **View-toggle icon glyph.** The toggle picks up a CSS-masked SVG glyph
+    that mirrors the destination view — three rows when the target is compact,
+    an oval when the target is table. The mask uses `background-color:
+    currentColor`, so the existing dim → accent state change applies to the
+    glyph for free.
+  - **ROADMAP de-staled.** Wave 2's "Compressed four-stage workflow" and
+    "View toggle + first-run coach mark" rows were ⏳ open but actually
+    shipped in v.128–135 + v.131–132. Both flipped to ✅ with the version
+    trail.
+
 ### Fixed
 - **Batch generator: strip template's solved MAIN TREE** (v2026-05-22.139).
   `gto-batch-generate.mjs` was inheriting the template's MAIN TREE section

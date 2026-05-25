@@ -551,6 +551,25 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
         // (confRow is declared just below — only ever called after.)
         confRow.classList.toggle("needs-confidence", !!draft.action && !draft.confidence);
       }
+      // Confidence-block visibility — Move 04 in design-audit/decision-
+      // screen-recomposition.html: "Render confidence as a smaller, lighter
+      // 1-5 strip set apart below — ideally only surfacing once an action
+      // is picked, so the player meets one question at a time." We hide the
+      // whole confidence block (label + row) until an action lands; revealing
+      // it with an entrance animation keeps the decide screen at a single
+      // question until the player has answered the first one.
+      function refreshConfidenceVisibility() {
+        const show = !!draft.action;
+        if (show && confidenceBlock.hidden) {
+          confidenceBlock.hidden = false;
+          // Defer the .is-in toggle to the next frame so the CSS
+          // transition has a 'from' state to animate from.
+          requestAnimationFrame(() => confidenceBlock.classList.add("is-in"));
+        } else if (!show) {
+          confidenceBlock.hidden = true;
+          confidenceBlock.classList.remove("is-in");
+        }
+      }
 
       const actionRow = h("div", { class: "actions-row", role: "radiogroup", "aria-label": "Your move" });
       (scen.available_actions || []).forEach((a) => {
@@ -561,6 +580,7 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
           draft.action = a;
           actionRow.querySelectorAll(".action-btn").forEach((x) => x.classList.toggle("selected", x === btn));
           errorBox.textContent = "";
+          refreshConfidenceVisibility();
           refreshLockBtn();
         });
         actionRow.appendChild(btn);
@@ -577,6 +597,10 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
         });
         confRow.appendChild(btn);
       }
+      // Wrapper for the label + row so they show / hide as one block.
+      const confidenceBlock = h("div", { class: "confidence-block", hidden: true },
+        h("span", { class: "decide-label decide-label-sub" }, "How sure?  (1 = guess, 5 = certain)"),
+        confRow);
 
       // (The hand comment moved to AFTER the reveal — it's a comment
       // on the spot + GTO decision, not a pre-decision note.)
@@ -597,14 +621,17 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
       body = h("div", { class: "decide" },
         h("span", { class: "decide-label" }, "Your move"),
         actionRow,
-        h("span", { class: "decide-label decide-label-sub" }, "How sure?  (1 = guess, 5 = certain)"),
-        confRow,
+        confidenceBlock,
         lockInBtn
       );
 
       // Set initial visibility for the case where draft already had an
       // action+confidence from a prior render (e.g. user navigated away
       // and back without locking in).
+      refreshConfidenceVisibility();
+      // If we're seeded with an action, mark the block as "already in"
+      // (no entrance animation — the user didn't just pick it now).
+      if (draft.action) confidenceBlock.classList.add("is-in");
       refreshLockBtn();
       // No primaryBtn during decide — the lock-in button lives inside
       // the body. hand-nav stays empty until reveal.

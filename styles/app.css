@@ -890,7 +890,28 @@ form { margin-top: 8px; }
   font-size: 1rem;
   font-weight: 600;
 }
-/* Confidence — secondary: a compact, lighter strip. */
+/* Confidence — secondary: a compact, lighter strip. Wrapped in a
+   .confidence-block (label + row) so the whole question reveals as
+   one unit AFTER an action is picked (Move 04, decision-screen-
+   recomposition audit — "the player meets one question at a time").
+   .is-in is added on the frame after the block is unhidden so the
+   transition has a 'from' state. Reduced-motion users get the
+   final state instantly. */
+.confidence-block {
+  opacity: 0;
+  max-height: 0;
+  overflow: hidden;
+  transform: translateY(-4px);
+  transition: opacity 0.28s ease, max-height 0.28s ease, transform 0.28s ease;
+}
+.confidence-block.is-in {
+  opacity: 1;
+  max-height: 200px;
+  transform: translateY(0);
+}
+@media (prefers-reduced-motion: reduce) {
+  .confidence-block { transition: none; }
+}
 .decide .confidence-row { gap: 6px; margin: 0; }
 .decide .conf-btn {
   flex: 1 1 0;
@@ -3348,11 +3369,15 @@ form { margin-top: 8px; }
   color: var(--text-dim);
 }
 /* View toggle — switches the hand display between the animated oval
-   table and the compact one-screen layout (spec §6.1 / §7). */
+   table and the compact one-screen layout (spec §6.1 / §7).
+   The button label states the DESTINATION mode; the icon mirrors it
+   (rows glyph when the target is compact; oval glyph when the target
+   is table). CSS masks let the icons pick up the button's currentColor
+   so the dim → accent state change applies to the glyph for free. */
 .view-toggle {
   flex: 0 0 auto;
   min-height: 32px;
-  padding: 4px 11px;
+  padding: 4px 11px 4px 9px;
   font-size: 0.74rem;
   font-weight: 600;
   line-height: 1;
@@ -3361,11 +3386,38 @@ form { margin-top: 8px; }
   border: 1px solid var(--border-interactive);
   border-radius: 8px;
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.view-toggle::before {
+  content: "";
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  flex: 0 0 12px;
+  background-color: currentColor;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  /* Default state — current view is expanded, label says "Compact
+     view", icon is the three-rows glyph hinting at the target. */
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12"><rect x="1.5" y="2" width="9" height="1.6" rx="0.8" fill="black"/><rect x="1.5" y="5.2" width="9" height="1.6" rx="0.8" fill="black"/><rect x="1.5" y="8.4" width="9" height="1.6" rx="0.8" fill="black"/></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12"><rect x="1.5" y="2" width="9" height="1.6" rx="0.8" fill="black"/><rect x="1.5" y="5.2" width="9" height="1.6" rx="0.8" fill="black"/><rect x="1.5" y="8.4" width="9" height="1.6" rx="0.8" fill="black"/></svg>');
 }
 .view-toggle[aria-pressed="true"] {
   color: var(--accent);
   border-color: var(--accent);
   background: var(--accent-soft);
+}
+/* Pressed state — current view is compact, label says "Table view",
+   icon swaps to the oval-table glyph. */
+.view-toggle[aria-pressed="true"]::before {
+  -webkit-mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12"><ellipse cx="6" cy="6" rx="4.8" ry="2.8" fill="none" stroke="black" stroke-width="1.4"/></svg>');
+  mask-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 12 12"><ellipse cx="6" cy="6" rx="4.8" ry="2.8" fill="none" stroke="black" stroke-width="1.4"/></svg>');
 }
 @media (hover: hover) {
   .view-toggle:hover { border-color: var(--accent); color: var(--text); }
@@ -3559,6 +3611,18 @@ form { margin-top: 8px; }
   flex: 0 0 auto;
 }
 .hero-strip-seat b { color: var(--hero); font-weight: 700; }
+/* Positional opposition — "vs BB" appended to the hero seat label.
+   The hero stays the visual subject (full hero-blue on the seat letter
+   and "You"); the villain seat is rendered in the project's villain
+   accent so the opposition reads at a glance without ever competing
+   with the hero label for weight. */
+.hero-strip-vs {
+  color: var(--text-dim);
+  font-size: 0.78rem;
+  margin-left: 4px;
+  opacity: 0.85;
+}
+.hero-strip-vs b { color: var(--villain); font-weight: 700; opacity: 0.95; }
 .hero-strip-cards { display: flex; gap: 3px; flex: 0 0 auto; }
 .hero-strip-stack {
   margin-left: auto;

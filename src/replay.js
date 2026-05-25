@@ -306,10 +306,48 @@ export function buildRunoutStrip(replay) {
 }
 
 /**
+ * Identify the primary villain seat for the compact view's positional
+ * readout. Heuristic:
+ *   1. Most-recent non-hero actor among non-folded actions — the player
+ *      hero must actually respond to.
+ *   2. Else: first non-hero seat in the seat order, excluding any seat
+ *      that folded preflop.
+ * Returns null if no villain candidate exists (preflop walk, etc.).
+ */
+function primaryVillainSeat(replay) {
+  if (!replay || !replay.hero_seat) return null;
+  const hero = replay.hero_seat;
+  const actions = Array.isArray(replay.actions) ? replay.actions : [];
+  const folded = new Set();
+  for (const a of actions) if (a && a.type === "fold" && a.actor) folded.add(a.actor);
+  // 1. Last non-hero, non-folded actor.
+  for (let i = actions.length - 1; i >= 0; i--) {
+    const a = actions[i];
+    if (!a || !a.actor || a.actor === hero) continue;
+    if (folded.has(a.actor)) continue;
+    return a.actor;
+  }
+  // 2. First non-hero, non-folded seat by table order.
+  const seats = Array.isArray(replay.seats) ? replay.seats : [];
+  for (const s of seats) {
+    if (!s || !s.pos) continue;
+    if (s.pos === hero) continue;
+    if (folded.has(s.pos)) continue;
+    return s.pos;
+  }
+  return null;
+}
+
+/**
  * Compact one-line hero strip for the one-screen hand view (spec §6.1 /
  * mockup M3): the hero's seat, hole cards, and decision-point stack —
  * the compact layout's replacement for the oval table's hero seat.
  * Returns null if the replay names no hero seat.
+ *
+ * Also surfaces the primary villain seat ("vs BB") next to the hero
+ * label — the compact view otherwise loses the positional opposition
+ * the oval table draws by placing seats across the felt. The villain
+ * label is dimmed and smaller so the hero stays the visual subject.
  *
  * @param {Object} replay
  * @returns {HTMLElement|null}
@@ -329,9 +367,15 @@ export function buildHeroStrip(replay) {
       stackBb = Math.round(heroSeat.stack * 10) / 10;
     }
   } catch { /* malformed replay — omit the stack */ }
+  const villain = primaryVillainSeat(replay);
 
   return h("div", { class: "hero-strip" },
-    h("span", { class: "hero-strip-seat" }, h("b", null, seat), " · You"),
+    h("span", { class: "hero-strip-seat" },
+      h("b", null, seat), " · You",
+      villain
+        ? h("span", { class: "hero-strip-vs" }, " vs ", h("b", null, villain))
+        : null
+    ),
     cards
       ? h("div", { class: "hero-strip-cards" }, ...cards.map((c) => cardEl(c, "sm")))
       : null,
@@ -392,11 +436,17 @@ export function buildDecidePrompt(replay) {
   promptParts.push(document.createTextNode(" — your move"));
   const promptLine = h("p", { class: "decide-prompt-line" }, ...promptParts);
 
-  // Context chips — Pot, To call, Pot odds. To-call is omitted on a
+  // Context chips — Pot, To call, Pot odds, SPR. To-call is omitted on a
   // check-to-hero spot (no live bet); pot odds is omitted whenever
-  // to-call is zero (the metric undefined).
+  // to-call is zero (the metric undefined). SPR (Stack-to-Pot Ratio) is
+  // a postflop-only number — it tells the player how committed they are:
+  // low SPR = easy go/no-go, high SPR = more streets to navigate. Only
+  // shown on flop+ where it carries information; capped at "20+" so
+  // start-of-flop deep-stack spots don't blow out the chip with a number
+  // the player can't usefully act on.
   let displayPot = 0;
   let toCall = 0;
+  let heroStack = 0;
   try {
     const state = deriveState(replay, actions.length);
     displayPot = state.displayPot || 0;
@@ -405,6 +455,7 @@ export function buildDecidePrompt(replay) {
       (m, s) => Math.max(m, s.street || 0), 0);
     const heroStreet = (heroSeat && heroSeat.street) || 0;
     toCall = Math.max(0, maxStreet - heroStreet);
+    heroStack = (heroSeat && typeof heroSeat.stack === "number") ? heroSeat.stack : 0;
   } catch { /* fall through with zeros — chips degrade gracefully */ }
 
   const chipEl = (label, value) => h("div", { class: "decide-chip" },
@@ -415,6 +466,16 @@ export function buildDecidePrompt(replay) {
   if (toCall > 0) {
     const odds = (toCall / (displayPot + toCall)) * 100;
     chips.push(chipEl("Pot odds", Math.round(odds) + "%"));
+  }
+  if (streetLabel && displayPot > 0 && heroStack > 0) {
+    // SPR vs the live pot. Round to 1 decimal under 10; whole numbers
+    // above; cap at "20+" — past that the absolute ratio is noise.
+    const spr = heroStack / displayPot;
+    let sprStr;
+    if (spr >= 20) sprStr = "20+";
+    else if (spr >= 10) sprStr = String(Math.round(spr));
+    else sprStr = (Math.round(spr * 10) / 10).toString();
+    chips.push(chipEl("SPR", sprStr));
   }
 
   return h("div", { class: "decide-prompt" },
