@@ -46,6 +46,18 @@ lobby delete button silently no-op until the rules are live.
   leaked global listener).
 
 ### Fixed
+- **gto-extract.mjs init handshake race** (v2026-05-25.151). The GTO+
+  socket auth handshake replies in TWO framed chunks back-to-back:
+  first the assigned connection ID (`~C::<id>~`), then the auth
+  confirmation (`~You are connected to GTO+~`). `receive()` resolves on
+  the first `~`-terminated buffer, so the second chunk needs a follow-up
+  read — without it, the script bails at `~C::<id>~` thinking auth was
+  refused. `gto-verify-loads.mjs` had already fixed this and shipped the
+  pattern; `gto-extract.mjs` carried the old single-receive code. Now
+  ports the verify-loads fix verbatim. Operationally: the script can
+  now actually run; the previous "GTO+ refused connection: ~C::N~"
+  error is gone.
+
 - **gto-batch-generate.mjs no longer updates HEADER content @12** (v2026-05-25.150).
   Empirically discovered crash: every postflop scenario substituted by the
   generator was hard-crashing GTO+ at file load (~7 s in, socket dropped),
