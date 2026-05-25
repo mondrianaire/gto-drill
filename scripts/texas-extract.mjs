@@ -71,18 +71,38 @@ function findRootDecisionNode(obj) {
 }
 
 // Coerce TexasSolver's per-hand strategy into a normalised
-// { hand: { COMBOS, [action]: { FREQ, EV } } } map. Handles two common
-// shapes:
-//   strategy = { "AsAh": [0.78, 0.22], ... }
-//   strategy = { "AsAh": { actions: [0.78, 0.22], evs: [12.5, 5.0] }, ... }
-// COMBOS / weights pulled from sibling `weights` / `combos` / `range` maps.
+// { hand: { COMBOS, [action]: { FREQ, EV } } } map.
+//
+// TexasSolver v0.2.0 dump shape (verified empirically on a real solve):
+//   node = {
+//     actions: ["CHECK", "BET 28.000000"],
+//     childrens: { ... },               // typo in upstream — "childrens" not "children"
+//     node_type: "action_node",
+//     player: 0,                         // 0 = OOP, 1 = IP
+//     strategy: {
+//       actions: ["CHECK", "BET 28.000000"],
+//       strategy: { "2d2c": [0.78, 0.22], "AcKc": [...], ... }   // hand → freq[] per action
+//     }
+//   }
+// NO EV data is included in the dump — only frequencies, so `EV` is null in
+// every per-hand entry from this solver.
 function normalisePerHand(node) {
   const actions = node.actions || [];
-  const strat = node.strategy || node.strategies || node.actions_strategy || {};
+  const stratWrap = node.strategy || node.strategies || node.actions_strategy || null;
+  if (!stratWrap) return {};
+  // TexasSolver's nested form: stratWrap.strategy holds the hand→freq map.
+  // The legacy flat form (some forks): stratWrap IS the hand→freq map. We
+  // detect the nested form by checking whether stratWrap.strategy is an
+  // object (and not an array — sibling `actions` is an array of strings).
+  const strat = (stratWrap.strategy && typeof stratWrap.strategy === "object"
+                  && !Array.isArray(stratWrap.strategy))
+    ? stratWrap.strategy
+    : stratWrap;
   const evs = node.ev || node.evs || node.action_evs || {};
   const weights = node.weights || node.combos || node.range_weights || {};
   const hands = {};
   for (const hand of Object.keys(strat)) {
+    if (hand === "actions") continue;     // defensive: skip the sibling sentinel
     const s = strat[hand];
     const e = evs[hand] || null;
     let freqs = null, evList = null;
@@ -92,6 +112,10 @@ function normalisePerHand(node) {
       evList = s.evs || s.ev || null;
     }
     if (!freqs) continue;
+    // Reject array-of-strings (= the sibling actions array, not freqs) —
+    // would have produced NaN entries before the nested-form drill above
+    // was added.
+    if (typeof freqs[0] === "string") continue;
     const entry = { COMBOS: weights[hand] || 1.0 };
     for (let i = 0; i < actions.length; i++) {
       entry[actions[i]] = {
@@ -163,8 +187,15 @@ for (const f of files) {
   }
 
   const actions = node.actions || [];
-  const nextPlayer = (node.player || node.next_player || node.next_to_act || "")
-    .toString().toLowerCase().includes("ip") ? "ip" : "oop";
+  // TexasSolver: numeric `player` (0=OOP, 1=IP). Other solvers / older
+  // dump formats may use a string ("oop"/"ip") in next_player / next_to_act.
+  let nextPlayer = "oop";
+  if (typeof node.player === "number") {
+    nextPlayer = node.player === 1 ? "ip" : "oop";
+  } else if (node.next_player || node.next_to_act) {
+    nextPlayer = (node.next_player || node.next_to_act).toString()
+      .toLowerCase().includes("ip") ? "ip" : "oop";
+  }
   // TexasSolver dumps typically have only the next-to-act side's strategy
   // populated at the root node. The "other" side stays absent.
   const actorHands = normalisePerHand(node);
