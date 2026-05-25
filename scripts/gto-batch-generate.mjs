@@ -499,15 +499,32 @@ function generateForScenario(scen) {
 
   // Assemble file:
   //   new preamble + new HEADER         (substituted scenario data)
-  //   + bytes from end-of-template-HEADER up to template's MAIN TREE preamble
-  //                                       (any sections between HEADER and MAIN TREE — currently none, but defensive)
-  //   + EMPTY_MAIN_TREE                  (62 bytes — forces GTO+ to re-solve)
-  //   + bytes from end of template's MAIN TREE to end of file
-  //                                       (the 5 static sections after MAIN TREE)
+  //   + everything else from the template VERBATIM
+  //     (the MAIN TREE — the BUILT BET TREE — plus the 5 static sections
+  //     after it: LEGEND, EDITOR, FLOP FILTERS, DATABASE HEADER, TRAINER)
+  //
+  // We used to strip the template's MAIN TREE and replace it with a 62-byte
+  // EMPTY_MAIN_TREE stub, on the assumption that MAIN TREE held only the
+  // SOLVED strategy data (which would be stale for the substituted ranges).
+  // That was wrong. MAIN TREE actually carries the BUILT BET TREE structure
+  // itself — the game-tree nodes GTO+'s PROCESS FILES needs to have in
+  // place before it will solve a file. Stripping it left every substituted
+  // file with no tree, which is why PROCESS FILES silently no-op'd on the
+  // 31-file batch ("31 processed", zero files actually solved).
+  //
+  // For the user's unsolved-tree templates (saved with Build Tree clicked
+  // but Solve NOT clicked) MAIN TREE is ~10-50 KB of tree structure only,
+  // and that's exactly what PROCESS FILES needs. For solved templates,
+  // MAIN TREE additionally carries strategy data — preserving it means
+  // PROCESS FILES re-solves and overwrites that strategy, which is the
+  // intended behavior anyway.
+  //
+  // Net effect: substituted files are now ~MAIN-TREE-bytes larger than
+  // they were under the strip, and PROCESS FILES actually has something
+  // to solve.
   const hdrEnd = 16 + chosen.hdrSecLen;
-  const preMainTree = chosen.buf.slice(hdrEnd, chosen.mainTree.preambleStart);
-  const postMainTree = chosen.buf.slice(chosen.mainTree.sectionEnd);
-  const outFile = Buffer.concat([newPreamble, newSection, preMainTree, EMPTY_MAIN_TREE, postMainTree]);
+  const rest = chosen.buf.slice(hdrEnd);
+  const outFile = Buffer.concat([newPreamble, newSection, rest]);
 
   return {
     file: outFile,
