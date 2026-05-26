@@ -44,9 +44,15 @@ manual workflow. Detailed below in "Recommended path forward".
 
 ## Status: COMPLETE (within scope of this 2-hr engagement)
 
-GTO+ is currently hung from probe batch B. The user will need to
-File→Exit (if responsive enough) or kill via Task Manager before the next
-session can use the socket.
+Agent 4 killed the hung GTO+ process via `Stop-Process -Force` to leave the
+system in a clean state. **User action required before next socket work:**
+
+```powershell
+Start-Process "C:\Program Files\GTO\GTO.exe"
+```
+
+…then verify with `Test-NetConnection localhost -Port 55143 -InformationLevel
+Quiet` (should return True). See `docs/GTO-PLUS-HANG-RECOVERY.md`.
 
 ---
 
@@ -223,42 +229,32 @@ The 55143 socket really is the only programmatic interface.
 The user's underlying goal is to solve 31 postflop scenarios with minimal
 operator time. Given findings above:
 
-### Option 1 — Stop fighting the socket; ship the manual workflow (RECOMMENDED, lowest risk)
+| Path | Effort | Coverage | Risk | Recommended? |
+|---|---|---|---|---|
+| **A — Manual GUI workflow** (load library → Build → Solve → Save × 31) | ~5 min × 31 = ~2.5 hr operator time, once | 31/31 scenarios with EV | Low (known to work) | **Yes — ship this** |
+| **B — TexasSolver-only (drop EV from §8.1 v1)** | 0 additional hr (already done) | 31/31 freq only, no EV | Low (already running) | Yes if §8.1 can ship without EV cost |
+| **C — Windows-MCP/AHK GUI automation** | 2-4 hr to script + debug | All scenarios + reusable for future adds | Medium (brittle to GTO+ window changes) | Only if scenario library will grow significantly |
+| **D — More socket probes** | 1-2 hr per round | Speculative | High (each batch can hang GTO+) | No — candidate space exhausted |
+| **E — Runtime memory dump of GTO.exe** | 4+ hr, requires re-doing per GTO+ release | Could recover dispatcher table | Very high (no precedent, breaks every update) | No |
 
-`docs/GTO-PLUS-MANUAL-WORKFLOW.md` already documents the load-from-library
-flow. User estimate: ~5 min per scenario × 31 scenarios = ~2.5 hr total
-operator time. **One-time cost**, then 31 solved files unlock the §8.1
-card permanently. This pays back the investigation cost in ~1 evening.
+**Author's pick**: **A + B in parallel.** Ship TexasSolver-only freq data
+to §8.1 immediately so the card is unblocked. Layer GTO+'s EV annotation
+across the 31 scenarios over a single ~2.5 hr manual session as a separate
+follow-up; the merge step (`gto-merge.mjs`) already unions both lanes
+correctly. This avoids spending another agent-session on automation that
+won't pay back unless the scenario library doubles.
 
-### Option 2 — GUI automation via Windows-MCP / AutoHotkey
+### What unlocks more (out-of-budget but worth knowing)
 
-The Windows-MCP server is available in this session (`mcp__Windows-MCP__*`)
-and could script GUI clicks. Approach:
+If a future engagement wants to revisit:
 
-1. `mcp__Windows-MCP__Screenshot` to find Build/Solve/Save button positions
-2. `mcp__Windows-MCP__Click` to drive the workflow
-3. Loop: for each library entry → click load → click Build → click Solve
-   (wait until idle) → File → Save As → type filename
-
-**Risk**: brittle to GTO+ window resize / layout drift. **Effort**: 2-4 hr
-to script and debug. **Payoff**: re-runnable across scenarios and across
-future scenario additions. Worth it if the scenario library will grow
-beyond the current 31.
-
-### Option 3 — Switch fully to TexasSolver for the FREQ lane
-
-Already partly done. TexasSolver has a pure CLI and is unattended.
-Only loss: GTO+'s EV-per-action annotation. If the §8.1 card can be
-shipped without EV cost in v1 (showing freq only), this completely
-bypasses the GTO+ blocker.
-
-### NOT recommended
-
-- More socket probes — exhausted the candidate space, no signal.
-- Runtime memory probing of `GTO.exe` to recover the encrypted
-  dispatcher table — brittle, breaks every GTO+ update, no public
-  precedent.
-- Waiting on vendor to add a scripting API — no roadmap signal in changelog.
+- **Path C (GUI automation) is the only feasible "more automation" route.**
+  Start with `mcp__Windows-MCP__Snapshot` to capture the GTO+ UI tree —
+  the snapshot includes button coordinates and labels, so the script can
+  click by label rather than by pixel (more resilient to window resizes).
+- **Vendor outreach** — the gtoplus.com support email could be asked
+  directly whether a documented scripting API is on the roadmap. Zero
+  signal in the public changelog, but a private feature flag is possible.
 
 ---
 
