@@ -402,9 +402,15 @@ console.log("New library size: " + newLib.length + " bytes (was " + libBuf.lengt
 const hdrTagStart = newLib.indexOf("[HEADER]");
 const hdrCloseStart = newLib.indexOf("[/HEADER]");
 if (hdrTagStart >= 0 && hdrCloseStart > hdrTagStart) {
+  // HEADER @+16 — fuzzy "count" field. Empirical OOM from setting it to
+  // actual tree count (37): GTO+'s Quickload dialog crashes with "out of
+  // memory" because it apparently pre-allocates per-entry buffers based
+  // on this value. The original 4-example library has count=4 and GTO+
+  // tolerates count<actual just fine (verified: count=4 with 5 actual
+  // trees loads cleanly after the user's Store action). So we LEAVE THIS
+  // FIELD UNTOUCHED — let it inherit the source's value.
   const countFieldOff = hdrTagStart + 16;
-  const oldCount = newLib.readUInt32LE(countFieldOff);
-  // Count [TREE] markers in the new buffer
+  const inheritedCount = newLib.readUInt32LE(countFieldOff);
   let treeCount = 0;
   for (let i = 0; i < newLib.length - 6; i++) {
     if (newLib[i] === 0x5b && newLib[i+1] === 0x54 && newLib[i+2] === 0x52 &&
@@ -412,8 +418,7 @@ if (hdrTagStart >= 0 && hdrCloseStart > hdrTagStart) {
       treeCount++;
     }
   }
-  console.log("HEADER count field: " + oldCount + " → " + treeCount);
-  newLib.writeUInt32LE(treeCount, countFieldOff);
+  console.log("HEADER count: inherited=" + inheritedCount + " (NOT bumped to actual " + treeCount + " — OOM risk)");
 
   // Recompute the HEADER section's preamble bytesum. The HEADER preamble lives
   // in the FIRST 16 bytes of the file: <u32 sec_len><4 zero><u32 inner_sum><4 zero>
