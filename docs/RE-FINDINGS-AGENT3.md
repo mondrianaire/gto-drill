@@ -78,3 +78,61 @@ GTO+ config dir at `C:\Program Files\GTO\config\` contains many config files we 
 4. Try the "Import preflop ranges" menu and observe what file it asks for
 5. Check if `dynamicconditions.txt` controls anything useful
 
+## CHECKPOINT 2 — Menu items and DATABASE mode (30 min in)
+
+**english.txt is the Rosetta Stone**. Every menu item, button, error, and import format is listed there in plaintext. Agent 4 already identified this but didn't get to mine it for our specific menu items.
+
+### Full picture of the 6 priority menu items
+
+| # | Menu item | What it does (per english.txt strings) | Useful? |
+|---|---|---|---|
+| 1 | **Import preflop ranges (newdefs2 or newdefs3)** | Opens a directory picker; reads `newdefs3.txt` or `newdefs2.txt` from chosen dir; loads named ranges into the preflop editor as draggable predef labels. ASCII binary format (see Checkpoint 1). | **⭐ HIGH** — write 31×2 named ranges, user drags them in |
+| 2 | **Newdefs3.txt direct write** | Same end-state as #1 but skip the file picker — just write to `C:\Program Files\GTO\config\newdefs3.txt` (with backup), restart GTO+ once, ranges appear in editor automatically | **⭐⭐ HIGHEST** — same data, no menu interaction |
+| 3 | **Open: Only load a selection of trees from a database (Alt+W)** | Filter when opening a DATABASE savefile (.gto2 in database mode). Shows tree list, user ticks which to load. **Requires a database .gto2 to already exist.** | **⭐⭐⭐ GAME-CHANGER** if we can generate the database file |
+| 4 | **Open: Load a selection of files from a directory (Ctrl+W)** | Opens directory picker; lists all .gto2 files; user picks which to load. Loads SELECTED tree first (just one). After load, the SOLVER editor's "Activate database mode" + "Add current tree" + "PROCESS DATABASE" path can batch-solve them | **⭐⭐ HIGH** — batched per-scenario load |
+| 5 | **Open: Convert to "Basic" storage** | Saves a smaller variant of the file by stripping "Extensive" solved data. NOT useful for generating new scenarios. | ❌ |
+| 6 | **Import JSON ICM model** | MTT-only. Sets per-stack-size ICM equity adjustments. Not relevant for our cash-game scenarios. | ❌ |
+
+### NEWLY DISCOVERED features (not in mission targets but possibly relevant)
+
+#### DATABASE MODE (⭐⭐⭐ POTENTIAL GAME-CHANGER)
+
+GTO+ has a built-in **multi-tree-in-one-file** mode:
+
+- `Activate database mode` — converts current single-tree session into a database
+- `Add current tree to database` — current tree becomes one entry in the DB
+- `Add X random flops` — auto-generate flops for variety
+- `Import flops from file` — load a .txt list of flops, auto-build trees for each
+- `Add trees to database / solve all trees in database` — batch-solve
+- **`PROCESS DATABASE`** — one-click solve every tree in DB
+- `Export the trees in your database into separate savefiles` — split back to individual .gto2 files
+- `Merge contents of multiple savefiles into a single database` — merge 31 individual .gto2 into one DB. Enter code `MERGE` to invoke.
+- `Regularly store backup to /tmp/last_database.gto2`
+
+**THE ANSWER MAY BE**:
+1. Use existing `gto-library-emit.mjs` to write 31 quickload entries
+2. User loads each + builds tree + saves (~5 min total, per existing MANUAL workflow doc)
+3. User: Solver Editor → enter code `MERGE` → point at the directory with 31 .gto2 → produces ONE database file
+4. User: PROCESS DATABASE → solves all 31 trees overnight
+5. User: Export database → 31 separate solved .gto2 files (auto-named by tree name)
+6. Existing `gto-extract.mjs` runs
+
+This is **5-step instead of 31-step manual solve**. The bottleneck (per-scenario human interaction for build+save) stays at ~5 min, but the SOLVE phase becomes fully unattended.
+
+#### `Process all .gto files in given directory` (FILE WINDOW)
+
+Already documented in manual workflow as PROCESS FILES. Same idea as PROCESS DATABASE but on a flat directory of separate .gto files rather than a database file. **This is what current workflow uses.** Confirmed at line 755 of english.txt.
+
+### Verified facts from english.txt
+
+- `newdefs3.txt (preflop ranges)` (line 258) — confirms newdefs3.txt **IS** the preflop ranges database
+- `Newdefs3.txt (GTO+/FlopzillaPro)` (line 211) — **format compatible with FlopzillaPro** — so any FlopzillaPro range export documentation may apply
+- `Newdefs2.txt (CREV/Flopzilla)` (line 212) — alternate import (CardRunnersEV/Flopzilla legacy)
+- `Failed to store settings to /config/default_tree_settings.txt` (line 461) — confirms `default_tree_settings.txt` is the tree-builder defaults file (read on tree creation; useful for setting our pot/stack defaults)
+- `Quickload` button creates library.txt entries — **the format we already emit**
+- `Convert to "Basic" storage` is a RAM optimization, not new-data path
+
+### What's NOT useful
+- ICM/JSON import — MTT only
+- Convert to "Basic" — RAM optimization
+- subsets.dat — encrypted/scrambled data (not a config file we can edit)
