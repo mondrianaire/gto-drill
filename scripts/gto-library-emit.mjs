@@ -273,11 +273,15 @@ function emitScenarioEntry(scen) {
   if (cursor < templateBuf.length) pieces.push(templateBuf.slice(cursor));
 
   const newEntry = Buffer.concat(pieces);
-  // Update the entry-internal size field @+18 by the cumulative delta. This is
-  // an INTERNAL field of the entry that points to inner data offset; it must
-  // be updated for GTO+ to walk the entry's structure correctly.
-  const newSizeField = templateSizeField + netDelta;
-  newEntry.writeUInt32LE(newSizeField, HEADER_SIZE_FIELD_OFF);
+  // @+18: AGENT 1 (2026-05-26) verified that GTO+ does NOT update this field
+  // when it itself saves an entry after the user changes pot/stack via the UI.
+  // Golden-diff proof: backup-1779759231891 (pot="10") vs live library
+  // (pot="7.50") have identical @+18=6764 even though entry length differs by
+  // +2 bytes. Patching with @+18 LEFT UNTOUCHED produces a byte-identical
+  // file to GTO+'s own save (zero-diff with cmp). So @+18 is part of a
+  // bet-tree config snapshot — it is NOT a length pointer. Inherit verbatim
+  // from the template; do not derive.
+  // (Prior behavior: newEntry.writeUInt32LE(templateSizeField + netDelta, 18))
 
   // Build the 16-byte preamble that GOES BEFORE the [TREE] tag. Inner bytesum
   // is computed over bytes between [TREE] (6 bytes) and [/TREE] (7 bytes),
