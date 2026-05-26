@@ -1,0 +1,86 @@
+# Batch A — REGISTERED GTO+ re-probe, informed by english.txt scan.
+# Focus on GUI-mirrored verbs and the hidden "Enter code" / batch features.
+
+# ===== 1. Known-good (sanity, with file already loaded) =====
+Request node data
+Request pot/stacks
+
+# ===== 2. GUI label EXACT strings =====
+Run solver
+Stop solver
+Build tree
+Build new tree
+Rebuild
+Rebuild database
+Build decision tree
+PROCESS FILES
+PROCESS DATABASE
+Process all .gto files in given directory
+Save
+Save As
+Save as
+New
+Open
+Solve current tree
+Re-build tree
+
+# ===== 3. Set with GUI labels =====
+Range 1 (OOP)
+Range 2 (IP)
+Set Range 1
+Set Range 2
+Set Range 1 (OOP)
+Set Range 2 (IP)
+Set Range 1: AA
+Set Range 2: AA
+
+# ===== 4. Enter code dialog passthrough =====
+Enter code
+Enter code: export_test
+export_test
+MERGE
+export_XXX
+
+# ===== 5. Generic file ops =====
+Save file
+Save file: C:\test.gto2
+Save current
+Export
+Export file
+Export file: C:\test.gto2
+Export: Current range as string
+
+# ===== 6. Take alternatives — peer of Take action =====
+Take build
+Take solve
+Take save
+Take open
+
+# ===== 7. License / mode =====
+License status
+Get license
+Is registered
+Set mode: solver
+Set mode: batch
+
+# ===== 8. Database/batch =====
+Add current tree to database
+Process database
+Add trees to database
+Activate database mode
+Database mode: on
+
+# ===== 9. Help / introspection (re-try) =====
+?
+HELP
+help
+Commands
+help me
+List commands
+
+# ===== 10. Quickload / library =====
+Quick-load
+LOAD ENTIRE TREE
+LOAD SELECTED TREE
+Store current tree
+Load library
