@@ -1,13 +1,14 @@
 # GTO Drill
 
-A crowd-powered GTO poker trainer hosted on GitHub Pages. Players sign in,
-play solver-verified poker scenarios, rate their confidence, and learn
-alongside a crowd — seeing how their reads compare to the field and to
-optimal play.
+A crowd-powered GTO poker trainer. Players sign in, play solver-verified
+poker scenarios, rate their confidence, and learn alongside a crowd — seeing
+how their reads compare to the field and to optimal play.
 
 ## Live URL
 
-https://mondrianaire.github.io/gto-drill/
+Currently: https://mondrianaire.github.io/gto-drill/ (GitHub Pages)
+Migrating to: https://gtopokerdrill.com (Firebase Hosting) — see
+[docs/HOSTING-MIGRATION.md](../docs/HOSTING-MIGRATION.md)
 
 ## Project structure
 

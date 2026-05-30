@@ -1,0 +1,36 @@
+# Per-PR preview deploys to Firebase Hosting.
+#
+# For every PR (including drafts), this workflow deploys the PR's branch to a
+# temporary Firebase Hosting "preview channel" and posts the preview URL as a
+# comment on the PR. The preview expires after 7 days.
+#
+# Lets you QA UI changes on a real CDN-served URL before merging — much closer
+# to the actual prod environment than the local dev server.
+#
+# Setup: same FIREBASE_SERVICE_ACCOUNT_GTO_POKER_QUI secret as the merge workflow.
+# Will NOT run on PRs from external forks (the secret is unavailable to fork PRs
+# by GitHub's design — prevents credential leak).
+
+name: Deploy preview to Firebase Hosting on PR
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build_and_preview:
+    if: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+    runs-on: ubuntu-latest
+    permissions:
+      checks: write
+      contents: read
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GTO_POKER_QUI }}
+          projectId: gto-poker-qui
+          expires: 7d

@@ -1,0 +1,66 @@
+{
+  "hosting": {
+    "public": ".",
+    "ignore": [
+      "firebase.json",
+      ".firebaserc",
+      ".firebase/**",
+      ".git/**",
+      ".github/**",
+      ".gitignore",
+      ".claude/**",
+      "node_modules/**",
+      "scripts/**",
+      "docs/**",
+      "design-audit/**",
+      "solver-input/**",
+      "solver-output/**",
+      "firestore.rules",
+      "package.json",
+      "package-lock.json",
+      "README.md",
+      "**/*.backup",
+      "**/.DS_Store"
+    ],
+    "headers": [
+      {
+        "source": "**/*.@(js|css|json)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=600, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "**/*.@(png|svg|jpg|jpeg|webp|ico)",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=86400"
+          }
+        ]
+      },
+      {
+        "source": "index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-cache, no-store, must-revalidate"
+          }
+        ]
+      },
+      {
+        "source": "manifest.json",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "public, max-age=3600"
+          }
+        ]
+      }
+    ],
+    "cleanUrls": false,
+    "trailingSlash": false
+  }
+}
