@@ -84,8 +84,18 @@ the repo and `git log`. If it already shipped, say so and delete the file
 merges, delete its plan file as part of wrapping up — that is the only durable
 fix.
 
+## GTO+ integration knowledge
+
+All reverse-engineering findings, dead-end documentation, working paths, and
+recipes for resuming any GTO+ work live in **`docs/GTO-PLUS-KNOWLEDGE-BASE.md`**.
+Future sessions should read that FIRST before touching any `scripts/gto-*` or
+`src/database.js` GTO+ walkthrough code — it captures ~14 hours of empirical RE
+across 5 research agents and prevents re-traversing dead ends (socket mutators,
+library.txt registry injection, MAIN TREE substitution).
+
 ## Documentation
 
+- [docs/GTO-PLUS-KNOWLEDGE-BASE.md](../docs/GTO-PLUS-KNOWLEDGE-BASE.md) — GTO+ RE master doc
 - [docs/CHANGELOG.md](../docs/CHANGELOG.md) — Release history
 - [docs/ROADMAP.md](../docs/ROADMAP.md) — Four-wave redesign plan
 - [docs/SCENARIOS.md](../docs/SCENARIOS.md) — Scenario research & curation
