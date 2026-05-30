@@ -1,0 +1,116 @@
+# Batch B — exhaust the dispatcher with peer forms of known commands.
+# Hypothesis: the dispatcher uses prefix matching or has a small set of
+# verb patterns. Test every reasonable permutation we haven't yet.
+
+# === Request variants (the surface that works) ===
+Request board
+Request hand
+Request handhistory
+Request hand history
+Request range
+Request range OOP
+Request range IP
+Request OOP range
+Request IP range
+Request actions
+Request action
+Request tree
+Request tree list
+Request file
+Request file list
+Request directory
+Request status
+Request version
+Request build
+Request build number
+Request settings
+Request configuration
+Request license
+Request rake
+Request stack
+Request pot
+Request boards
+Request flop
+Request turn
+Request river
+Request next
+Request previous
+Request available
+Request available actions
+Request iterations
+Request iteration
+Request progress
+Request dEV
+Request EV
+Request equity
+Request decision
+Request memory
+Request RAM
+Request all
+Request everything
+Request data
+
+# === Take variants ===
+Take action: 0
+Take action: 1
+Take node: 0
+Take previous
+Take next
+Take previous action
+Take next action
+Take back
+Take undo
+
+# === Goto / navigate forms ===
+Goto: 0
+Goto action: 0
+Goto node: 0
+Go to root
+Goto root
+Reset
+Reset position
+Back
+
+# === Less obvious mutator names ===
+Push: AA
+Add: AA
+Add range: AA
+Insert range: AA
+Insert: AA
+Write range: AA
+Put range: AA
+Range: AA
+Range OOP: AA
+Range IP: AA
+Range 1: AA
+Range 2: AA
+
+# === Other action mutators ===
+Iterate
+Iterate: 100
+Step
+Step solver
+Compute
+Compute: 1
+Run: 1
+Calc
+Calculate
+Score
+
+# === Trial/wishful ===
+Load library: C:\Program Files\GTO\config\library.txt
+Reload library
+Reread library
+Refresh library
+Resync
+Sync
+Reload
+Refresh
+Reset
+Apply
+Apply changes
+Apply settings
+Apply config
+Commit
+Configure
+Configure: pot=10

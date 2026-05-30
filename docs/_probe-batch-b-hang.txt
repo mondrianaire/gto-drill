@@ -1,0 +1,50 @@
+[NOVEL   ] Take action: 0
+           >> ~Next decision has been set.~
+[SILENT  ] Take action: 1
+[SILENT  ] Take node: 0
+[SILENT  ] Take previous
+[SILENT  ] Take next
+[SILENT  ] Take previous action
+[SILENT  ] Take next action
+[SILENT  ] Take back
+[SILENT  ] Take undo
+[SILENT  ] Goto: 0
+[SILENT  ] Goto action: 0
+[SILENT  ] Goto node: 0
+[SILENT  ] Go to root
+[SILENT  ] Goto root
+[SILENT  ] Reset
+[SILENT  ] Reset position
+[SILENT  ] Back
+[SILENT  ] Push: AA
+[SILENT  ] Add: AA
+[SILENT  ] Add range: AA
+[SILENT  ] Insert range: AA
+[SILENT  ] Insert: AA
+[SILENT  ] Write range: AA
+[SILENT  ] Put range: AA
+[SILENT  ] Range: AA
+[SILENT  ] Range OOP: AA
+[SILENT  ] Range IP: AA
+[SILENT  ] Range 1: AA
+[SILENT  ] Range 2: AA
+[SILENT  ] Iterate
+[SILENT  ] Iterate: 100
+[SILENT  ] Step
+[SILENT  ] Step solver
+[SILENT  ] Compute
+[SILENT  ] Compute: 1
+[SILENT  ] Run: 1
+[SILENT  ] Calc
+[SILENT  ] Calculate
+[SILENT  ] Score
+[SILENT  ] Load library: C:\Program Files\GTO\config\library.txt
+[SILENT  ] Reload library
+[SILENT  ] Reread library
+[SILENT  ] Refresh library
+[SILENT  ] Resync
+[SILENT  ] Sync
+[SILENT  ] Reload
+[SILENT  ] Refresh
+[SILENT  ] Reset
+[SILENT  ] Apply

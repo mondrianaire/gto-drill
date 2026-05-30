@@ -424,3 +424,73 @@ Total active human time once template is built: **~3 clicks per batch run.**
   edge cases: limped pots, ICM, BB-vs-SB), the solver gets a single-combo
   "range" and the equilibrium is degenerate. These need authored
   `hero_range` overrides or a chart for the missing archetype.
+
+## Socket protocol surface (May 2026 reconnaissance)
+
+Background: in May 2026 we attempted to pivot the GTO+ lane away from
+binary template substitution toward **socket-driven scenario solving** —
+connect to the running GTO+, configure ranges / board / pot / stack, build
+the bet tree, run CFR, save the solved file. This would have sidestepped
+the MAIN-TREE-vs-HEADER duplicate-data trap that makes substituted files
+load with the template's wide ranges and `AdAcAh` board even when HEADER
+substitution succeeded.
+
+**Result: the GTO+ socket protocol does not support this workflow.** The
+socket exposes a read-only / navigation API only. There is no command to
+set a range, build a tree, run the solver, or save a file.
+
+What we tried (~200 framed `~<cmd>~` probes against GTO+ v185):
+
+- Every `Set <noun>` form (`Set OOP range`, `Set IP range`, `Set board`,
+  `Set pot`, `Set stack`, `Set effective stacks`, …) → `~Instruction unknown.~`
+- Every `Build` / `Run` / `Solve` / `Start` / `Stop` form → unknown
+- Every `Save` / `Save file:` form → unknown
+- All variants explored: trailing colon, no colon, with/without arg,
+  lowercase / camelCase / snake_case, GUI-mirroring names
+  (`Run solver: start`, `Bet tree build`, `Solver start`, …)
+- Take-action peers (`Take instruction`, `Take config`, `Take range`) → unknown
+- Generic execution forms (`execute`, `do:`, `run:`) → unknown
+
+The only non-unknown reply across all 200 probes was `Take action: -1` →
+`~Action does not exist~` (the standard error for `Take action` with bad index).
+
+Confirmed vocabulary (the full known surface of the protocol):
+
+| Command | Purpose | Source |
+|---|---|---|
+| `init` | Auth handshake | bkushigian docs + our existing scripts |
+| `Load file: <abs path>` | Load a `.gto2` file | same |
+| `Request node data` | Get board + per-combo strategy | same |
+| `Request action data` | Get available actions | same |
+| `Request pot/stacks` | Get pot/stack values | same |
+| `Request current line` | Get the path to the current node | same |
+| `Take action: <n>` | Advance to action N from current node | same |
+| `Still processing instruction?` | Check if solver is still busy | same |
+
+`GTO.exe` is packed with **Winlicense** (`.winlice`/`.boot` PE sections), so
+static string extraction returned zero matches even for known commands like
+"Instruction unknown." Strings are decrypted in process memory at runtime.
+Runtime memory probing of the GTO+ process would be the only way to recover
+a complete dispatcher string table — that is out of scope (brittle vs.
+vendor updates, no guarantee of finding it, no public precedent).
+
+**Implication for the GTO+ lane:** the lane stays as-is — generate stubs
+with `gto-batch-generate.mjs`, configure-and-solve in the GUI or via
+`gto-pastepack.mjs`, extract via `gto-extract.mjs`. There is no near-term
+path to socket-driven batch solving without vendor cooperation.
+
+`scripts/gto-socket-solve.mjs` exists as a documented stub explaining this
+blocker so the next person investigating doesn't repeat the work.
+
+Hard fallbacks (in increasing operator-time savings):
+
+1. **Pastepack + manual GUI** — operator uses `gto-pastepack.mjs` output
+   to copy/paste each scenario's setup into the GUI, clicks Build /
+   Solve / Save. ~4 min per scenario today.
+2. **Pastepack + AHK macro for Build → Solve → Save** — script the three
+   clicks that follow paste. Could drop to ~30 s per scenario.
+3. **Full AutoHotkey GUI automation** — script everything including the
+   range-matrix paste, run unattended overnight. Brittle to GTO+ window
+   layout changes, but feasible.
+4. **Switch to TexasSolver for the FREQ lane** (already done) and use
+   GTO+ only where its EV annotation is required.

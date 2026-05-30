@@ -1,0 +1,5 @@
+Load file: C:\Users\mondr\Documents\Claude\Projects\gto-poker-async-duel-AB\.claude\worktrees\gifted-greider-5f4629\solver-output\bb-monster-draw-check-raise-023.gto2
+Request node data
+Request action data
+Request pot/stacks
+Request current line

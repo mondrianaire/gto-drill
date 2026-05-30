@@ -1,0 +1,165 @@
+# Probe list v2 — exhaustive re-test against REGISTERED GTO+ (post-license).
+#
+# Categories:
+#   1. Known-good (sanity) — confirm protocol still works
+#   2. Sibling forms of known commands (case/synonym/prefix swaps)
+#   3. GUI menu literal labels — what GTO+ actually shows in its menus/buttons
+#   4. Mutation candidates — set/build/solve/save
+#   5. Database / tree-iteration commands (the cshancock blocker)
+#   6. State / progress / metadata
+#   7. Help / introspection — "what can you do?"
+#   8. License-gated guesses
+
+# === 1. Known-good sanity checks ===
+Request node data
+Request action data
+Request pot/stacks
+Request current line
+Still processing instruction?
+
+# === 2. Sibling forms ===
+request node data
+REQUEST NODE DATA
+Request Node Data
+node data
+get_node_data
+GetNodeData
+Request all data
+Request data
+Request board
+Request ranges
+Request range
+Request OOP range
+Request IP range
+
+# === 3. GUI menu literal labels (from GTO+ UI / docs) ===
+Build tree
+Build Tree
+Run Solver
+Run solver
+Solve
+SOLVE
+Save file
+Save File
+Save
+Save as
+Save As
+New
+Open
+Open file
+Close
+Close file
+PROCESS FILES
+Process files
+Process Files
+Update tree
+Update Tree
+Add to library
+Save to library
+Clear
+Reset
+Reset tree
+Reload
+Reload file
+Refresh
+
+# === 4. Mutation candidates ===
+Set OOP range: AA
+Set IP range: AA
+Set OOP: AA
+Set IP: AA
+Set range: AA
+Set ranges: AA
+Set board: AdAcAh
+Set board: Ad Ac Ah
+Set pot: 100
+Set stack: 1000
+Set OOP stack: 1000
+Set IP stack: 1000
+Set stacks: 1000 1000
+Set effective stack: 1000
+Set rake: 0
+Set bet size: 50
+Set raise: 50
+Send range: AA
+Apply range: AA
+Update range: AA
+Configure range: AA
+Change range: AA
+
+# === 5. Database / tree-iteration (cshancock's blocker) ===
+Request tree list
+List trees
+Tree list
+Get tree
+Tree count
+Next tree
+Previous tree
+Goto tree: 0
+Goto tree 0
+Select tree: 0
+Set tree: 0
+Switch tree: 0
+Tree: 0
+Open tree: 0
+Next flop
+Previous flop
+Goto flop: 0
+Flop: 0
+
+# === 6. State / progress / metadata ===
+Request progress
+Progress
+Request iteration
+Iteration
+Request status
+Status
+Request file
+File
+Request version
+Version
+Request build
+Build
+About
+Request license
+License
+
+# === 7. Help / introspection ===
+Help
+help
+?
+HELP
+Commands
+List commands
+List
+Show commands
+Available commands
+API
+api
+Capabilities
+
+# === 8. License / registration-gated guesses ===
+Register
+Set license: 102E
+Activate
+Unlock
+Pro mode
+Pro
+Premium
+
+# === 9. Long-shot wildcards ===
+Connect
+Disconnect
+Quit
+Exit
+Stop
+Pause
+Resume
+Cancel
+Take action: 0
+Take action: 1
+Bet
+Check
+Call
+Fold
+Raise
