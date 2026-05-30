@@ -359,6 +359,252 @@ form { margin-top: 8px; }
 @media (hover: hover) {
   .db-cov-solver:hover { background: var(--bg-elev); color: var(--accent); }
 }
+/* Per-row GTO+ setup button — opens the walkthrough modal jumped to this
+   scenario. Visually parallel to .db-cov-solver but tinted hero-soft so the
+   two distinct actions don't look like a single button. */
+.db-cov-gtop {
+  flex: 0 0 auto;
+  align-self: stretch;
+  min-height: 0;
+  padding: 0 11px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--accent);
+  background: none;
+  border: none;
+  border-left: 1px solid var(--border);
+  border-radius: 0;
+  cursor: pointer;
+  white-space: nowrap;
+}
+@media (hover: hover) {
+  .db-cov-gtop:hover { background: var(--hero-soft); }
+}
+
+/* GTO+ batch banner — the "open walkthrough" CTA at the top of the
+   coverage list, only mounted when there are postflop scenarios to solve. */
+.db-gtop-banner {
+  background: var(--hero-soft);
+  border: 1px solid rgba(76, 182, 255, 0.4);
+  border-radius: 10px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.db-gtop-banner-text {
+  font-size: 0.84rem;
+  line-height: 1.45;
+  color: var(--text);
+}
+.db-gtop-banner-text strong { color: var(--accent); }
+.db-gtop-start {
+  align-self: flex-start;
+  background: var(--accent);
+  color: #061018;
+  border: 0;
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 0.86rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.db-gtop-start:active { transform: scale(0.98); filter: brightness(1.08); }
+
+/* GTO+ setup modal — the per-scenario paste-and-click walkthrough.
+   Same visual language as the scenario-briefing modal (sb-* classes) for
+   consistency, but a separate class namespace so layout tweaks here don't
+   ripple to the briefing. */
+.gtop-scrim {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 9, 13, 0.78);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 18px;
+  z-index: 1000;
+  animation: gtop-scrim-in 140ms ease-out;
+}
+@keyframes gtop-scrim-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.gtop-modal {
+  width: 100%;
+  max-width: 520px;
+  max-height: calc(100vh - 48px);
+  overflow-y: auto;
+  background: var(--bg-elev);
+  border: 1px solid var(--border-interactive);
+  border-radius: 14px;
+  padding: 18px 18px 14px;
+  box-shadow: var(--shadow-3), 0 20px 50px rgba(0, 0, 0, 0.7);
+  animation: gtop-modal-in 180ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+@keyframes gtop-modal-in {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+.gtop-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+.gtop-head-titles { flex: 1 1 auto; min-width: 0; }
+.gtop-eyebrow {
+  font-size: 0.6rem;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.gtop-title {
+  font-size: 1.05rem;
+  font-weight: 800;
+  margin: 0 0 2px;
+  color: var(--text);
+}
+.gtop-subtitle {
+  font-size: 0.78rem;
+  margin: 0;
+}
+.gtop-close {
+  flex: 0 0 28px;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  border: 1px solid var(--border-interactive);
+  border-radius: 6px;
+  color: var(--text-dim);
+  font-size: 1.1rem;
+  line-height: 1;
+  cursor: pointer;
+}
+.gtop-close:hover { background: var(--bg-elev-2); color: var(--text); }
+.gtop-context {
+  font-size: 0.74rem;
+  padding: 8px 10px;
+  background: var(--bg-elev-2);
+  border-radius: 6px;
+  margin-bottom: 12px;
+}
+
+.gtop-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  margin-bottom: 14px;
+}
+.gtop-step {
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.gtop-step-instruction {
+  background: var(--bg-elev-2);
+  border-style: dashed;
+}
+.gtop-step-head {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  margin-bottom: 5px;
+}
+.gtop-step-num {
+  font-size: 0.66rem;
+  font-weight: 800;
+  color: var(--accent);
+  letter-spacing: 0.04em;
+}
+.gtop-step-label {
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text);
+}
+.gtop-step-row {
+  display: flex;
+  align-items: stretch;
+  gap: 7px;
+}
+.gtop-step-value {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 7px 9px;
+  background: var(--bg);
+  border: 1px solid var(--border-interactive);
+  border-radius: 5px;
+  font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+  font-size: 0.74rem;
+  color: var(--text);
+  white-space: nowrap;
+  overflow-x: auto;
+  /* don't break user-selectable copy via mouse */
+  user-select: text;
+}
+.gtop-step-hint {
+  font-size: 0.7rem;
+  margin-top: 6px;
+  line-height: 1.4;
+}
+.gtop-copy-btn {
+  flex: 0 0 auto;
+  padding: 0 12px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: var(--accent);
+  background: var(--bg);
+  border: 1px solid rgba(76, 182, 255, 0.4);
+  border-radius: 5px;
+  cursor: pointer;
+  min-width: 64px;
+}
+.gtop-copy-btn:hover { background: var(--hero-soft); }
+.gtop-copy-btn.is-ok { background: rgba(74, 222, 128, 0.18); border-color: var(--ok); color: var(--ok); }
+.gtop-copy-btn.is-err { background: rgba(248, 113, 113, 0.15); border-color: var(--miss); color: var(--miss); }
+
+.gtop-nav {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+}
+.gtop-nav-spacer {
+  flex: 1 1 auto;
+  text-align: center;
+  font-size: 0.74rem;
+}
+.gtop-nav-btn {
+  flex: 0 0 auto;
+  min-height: 36px;
+  padding: 0 14px;
+  background: var(--bg-elev-2);
+  color: var(--text);
+  border: 1px solid var(--border-interactive);
+  border-radius: 999px;
+  font-family: inherit;
+  font-size: 0.82rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.gtop-nav-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+.gtop-nav-btn.primary {
+  background: var(--accent);
+  color: #061018;
+  border-color: var(--accent);
+}
+.gtop-nav-btn.primary:active { transform: scale(0.98); filter: brightness(1.08); }
+
+@media (prefers-reduced-motion: reduce) {
+  .gtop-scrim, .gtop-modal { animation: none; }
+}
+
 .db-cov-row.is-empty { color: var(--text-dim); }
 .db-cov-num { flex: 0 0 auto; font-weight: 700; color: var(--accent); min-width: 42px; }
 .db-cov-row.is-empty .db-cov-num { color: var(--text-dim); }
