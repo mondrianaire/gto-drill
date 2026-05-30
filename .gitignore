@@ -15,3 +15,11 @@ data/scenarios.json.backup
 # the repo by adding them as !design-audit/mockups/<name>.
 design-audit/mockups/*
 !design-audit/mockups/README.md
+
+# Firebase Hosting local cache + deploy artifacts. The .firebaserc and
+# firebase.json files ARE committed (config); .firebase/ is the local
+# deploy cache that should not be.
+.firebase/
+*.log
+firebase-debug.log
+firestore-debug.log

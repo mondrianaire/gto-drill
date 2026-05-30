@@ -1,0 +1,35 @@
+# Auto-deploy to Firebase Hosting live channel on every push to main.
+#
+# Setup required (one-time, in repo Settings → Secrets and variables → Actions):
+#   FIREBASE_SERVICE_ACCOUNT_GTO_POKER_QUI  — JSON contents of a Firebase
+#     service-account key with Firebase Hosting Admin role. Generate in
+#     Firebase Console → Project Settings → Service Accounts → Generate new
+#     private key. Paste the entire JSON file contents (curly braces and all)
+#     as the secret value.
+#
+# The repo is a static site with no build step — index.html + src/ + styles/ +
+# data/ + icons/ ship verbatim. firebase.json's `ignore` list keeps dev/server
+# files (scripts/, docs/, firestore.rules, etc.) out of the deploy.
+#
+# Auto-deploy preserves the "merge PR → live" reflex from GitHub Pages.
+
+name: Deploy to Firebase Hosting on merge
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: FirebaseExtended/action-hosting-deploy@v0
+        with:
+          repoToken: ${{ secrets.GITHUB_TOKEN }}
+          firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_GTO_POKER_QUI }}
+          channelId: live
+          projectId: gto-poker-qui
