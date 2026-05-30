@@ -382,7 +382,31 @@
       "bluffing"
     ],
     "priority": 3,
-    "complexity": 3
+    "complexity": 3,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "A5o BB vs CO 2.5bb open, 100bb 6-max. Premium A-blocker — solver mixes 3-bet bluff with some call and fold. 3-bet captures ~+0.2bb; call ~0bb; fold loses the bluff EV.",
+      "hero_hand": "As5h",
+      "options": {
+        "Fold": {
+          "freq": 0.2,
+          "ev": null,
+          "ev_cost": 0.2
+        },
+        "Call": {
+          "freq": 0.15,
+          "ev": null,
+          "ev_cost": 0.2
+        },
+        "3-bet to 11bb": {
+          "freq": 0.65,
+          "ev": null,
+          "ev_cost": 0
+        }
+      },
+      "best_scenario_action": "3-bet to 11bb",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "small-blind-vs-button-srp-turn-overbet-003",
@@ -819,7 +843,36 @@
       "equity-realization"
     ],
     "priority": 3,
-    "complexity": 3
+    "complexity": 3,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "22 UTG at 40bb 6-max. Below RFI threshold at reduced stack depth — implied odds gone. Any open or limp is small -EV.",
+      "hero_hand": "2c2d",
+      "options": {
+        "Fold": {
+          "freq": 1,
+          "ev": null,
+          "ev_cost": 0
+        },
+        "Open to 2.2bb": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.1
+        },
+        "Open to 3bb": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.12
+        },
+        "Limp": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.2
+        }
+      },
+      "best_scenario_action": "Fold",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "blind-vs-blind-river-thin-value-005",
@@ -1776,7 +1829,31 @@
       "equity-realization"
     ],
     "priority": 2,
-    "complexity": 2
+    "complexity": 2,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "55 vs CO open + BTN 3-bet IP to 9bb, 100bb. Pure call — set-mining at 12% × ~60bb implied is +EV. 4-bet stacks off vs better hands.",
+      "hero_hand": "5s5h",
+      "options": {
+        "Fold": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.4
+        },
+        "Call": {
+          "freq": 1,
+          "ev": null,
+          "ev_cost": 0
+        },
+        "4-bet to 22bb": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 1.9
+        }
+      },
+      "best_scenario_action": "Call",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "out-of-position-double-barrel-equity-realization-009",
@@ -2410,7 +2487,31 @@
       "preflop"
     ],
     "priority": 2,
-    "complexity": 2
+    "complexity": 2,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "A8o BTN 12bb folded to. Push-fold Nash: A8o is well above shove threshold (~+1.2bb). Min-raise commits too much at 12bb.",
+      "hero_hand": "As8h",
+      "options": {
+        "Fold": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 1.2
+        },
+        "Open shove all-in (12bb)": {
+          "freq": 1,
+          "ev": null,
+          "ev_cost": 0
+        },
+        "Min-raise to 4bb": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 1.7
+        }
+      },
+      "best_scenario_action": "Open shove all-in (12bb)",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "bluff-catcher-with-blocker-012",
@@ -2864,7 +2965,31 @@
       "aggression"
     ],
     "priority": 2,
-    "complexity": 2
+    "complexity": 2,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "98s BTN vs UTG limp, 100bb. Iso captures dead money + initiative IP — solver EV ~+0.8bb. Limping behind concedes initiative.",
+      "hero_hand": "8h9h",
+      "options": {
+        "Fold": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.8
+        },
+        "Limp behind": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.7
+        },
+        "Isolate to 5bb": {
+          "freq": 1,
+          "ev": null,
+          "ev_cost": 0
+        }
+      },
+      "best_scenario_action": "Isolate to 5bb",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "4bet-bluff-spot-014",
@@ -3026,7 +3151,31 @@
       "bluffing"
     ],
     "priority": 3,
-    "complexity": 4
+    "complexity": 4,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "A5s HJ opens, BTN 3-bets 9bb. A5s is premium 4-bet bluff (A-blocker). Solver EV ~+0.5bb. Call plays poorly OOP into 3-bet pot.",
+      "hero_hand": "As5s",
+      "options": {
+        "Fold": {
+          "freq": 0.3,
+          "ev": null,
+          "ev_cost": 0.5
+        },
+        "Call": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 2
+        },
+        "4-bet to 22bb": {
+          "freq": 0.7,
+          "ev": null,
+          "ev_cost": 0
+        }
+      },
+      "best_scenario_action": "4-bet to 22bb",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "calling-station-river-thin-call-015",
@@ -4496,7 +4645,31 @@
       "value-betting"
     ],
     "priority": 2,
-    "complexity": 2
+    "complexity": 2,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "AA UTG vs HJ raise after UTG limp. Re-raise captures max value; call slow-plays away EV; fold is catastrophic.",
+      "hero_hand": "AsAh",
+      "options": {
+        "Fold": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 8
+        },
+        "Call": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 5
+        },
+        "Re-raise to 14bb": {
+          "freq": 1,
+          "ev": null,
+          "ev_cost": 0
+        }
+      },
+      "best_scenario_action": "Re-raise to 14bb",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "four-bet-pot-range-cbet-021",
@@ -5942,7 +6115,31 @@
       "equity-realization"
     ],
     "priority": 3,
-    "complexity": 3
+    "complexity": 3,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "76s BTN vs BB 3-bet 11bb, 100bb. SC with position = excellent equity realization. Solver pure-calls. 4-bet has no blockers and gets shoved on.",
+      "hero_hand": "7h6h",
+      "options": {
+        "Fold": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.5
+        },
+        "Call": {
+          "freq": 1,
+          "ev": null,
+          "ev_cost": 0
+        },
+        "4-bet to 24bb": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 2.5
+        }
+      },
+      "best_scenario_action": "Call",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "bb-squeeze-vs-open-and-caller-027",
@@ -6132,7 +6329,31 @@
       "aggression"
     ],
     "priority": 3,
-    "complexity": 3
+    "complexity": 3,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "AJs BB vs HJ open + CO call. Premium squeeze: A-blocker + suited + dead money. Solver EV ~+2bb. Calling multiway OOP is much worse.",
+      "hero_hand": "AhJh",
+      "options": {
+        "Fold": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 2
+        },
+        "Call": {
+          "freq": 0.15,
+          "ev": null,
+          "ev_cost": 1.7
+        },
+        "Squeeze to 13bb": {
+          "freq": 0.85,
+          "ev": null,
+          "ev_cost": 0
+        }
+      },
+      "best_scenario_action": "Squeeze to 13bb",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "sb-vs-bb-raise-first-in-028",
@@ -6442,7 +6663,31 @@
       "preflop"
     ],
     "priority": 3,
-    "complexity": 3
+    "complexity": 3,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "K9s SB vs BB at 100bb. Modern SB strategy is strict raise-or-fold (no limp). K9s is firmly in the ~40% RFI raise range.",
+      "hero_hand": "Kd9d",
+      "options": {
+        "Fold": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.4
+        },
+        "Complete to 1bb": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 1
+        },
+        "Raise to 3.5bb": {
+          "freq": 1,
+          "ev": null,
+          "ev_cost": 0
+        }
+      },
+      "best_scenario_action": "Raise to 3.5bb",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "top-two-vs-check-raise-wet-board-029",
@@ -8404,7 +8649,31 @@
       "preflop"
     ],
     "priority": 5,
-    "complexity": 5
+    "complexity": 5,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "A9s BTN 20bb folded to, BUBBLE. Chip-EV shoves but ICM-adjusted folds — preservation of stack equity > chip gain on bubble.",
+      "hero_hand": "Ah9h",
+      "options": {
+        "Fold": {
+          "freq": 1,
+          "ev": null,
+          "ev_cost": 0
+        },
+        "Open-shove all-in (20bb)": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 1.5
+        },
+        "Min-raise to 4bb": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.5
+        }
+      },
+      "best_scenario_action": "Fold",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "bb-flat-offsuit-broadway-vs-btn-037",
@@ -8571,7 +8840,31 @@
       "equity-realization"
     ],
     "priority": 3,
-    "complexity": 3
+    "complexity": 3,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "KJo BB vs BTN 2.5bb open, 100bb. Clear call: solid equity + great pot odds. 3-bet too thin OOP; blocked by villain's continue range.",
+      "hero_hand": "KcJs",
+      "options": {
+        "Fold": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.6
+        },
+        "Call": {
+          "freq": 1,
+          "ev": null,
+          "ev_cost": 0
+        },
+        "3-bet to 11bb": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 0.8
+        }
+      },
+      "best_scenario_action": "Call",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "middle-set-on-flush-turn-038",
@@ -9531,7 +9824,26 @@
       "bluff-catching"
     ],
     "priority": 3,
-    "complexity": 3
+    "complexity": 3,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "AK vs BTN 5-bet shove 100bb. Vs typical (QQ+, AK) range, AK has ~40% equity and pot odds need ~37.6%. Pure call.",
+      "hero_hand": "AhKs",
+      "options": {
+        "Fold": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 4
+        },
+        "Call all-in": {
+          "freq": 1,
+          "ev": null,
+          "ev_cost": 0
+        }
+      },
+      "best_scenario_action": "Call all-in",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "range-cbet-small-dry-ace-board-042",
@@ -10239,7 +10551,31 @@
       "preflop"
     ],
     "priority": 3,
-    "complexity": 3
+    "complexity": 3,
+    "solver_data": {
+      "source": "preflop-derived-2026-05-30",
+      "notes": "JJ BTN vs BB 3-bet 11bb, 100bb. Strong hand IP = clear call. Modern solvers add a small 4-bet mix; fold is catastrophic.",
+      "hero_hand": "JsJd",
+      "options": {
+        "Fold": {
+          "freq": 0,
+          "ev": null,
+          "ev_cost": 4
+        },
+        "Call": {
+          "freq": 0.8,
+          "ev": null,
+          "ev_cost": 0
+        },
+        "4-bet to 24bb": {
+          "freq": 0.2,
+          "ev": null,
+          "ev_cost": 2
+        }
+      },
+      "best_scenario_action": "Call",
+      "solved_at": "2026-05-30"
+    }
   },
   {
     "scenario_id": "raise-river-with-the-nuts-045",
