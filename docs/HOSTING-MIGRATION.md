@@ -159,73 +159,54 @@ After flip:
 
 ---
 
-## Collaboration model — CODEOWNERS + branch ruleset
+## Collaboration model — branch ruleset only, no CODEOWNERS
 
-A `.github/CODEOWNERS` file + a `main` branch ruleset together govern who can land what:
+The repo has no `CODEOWNERS` file by design. Owner explicitly stated they need to be able to ship any change — including structural / sensitive files like `firestore.rules`, `firebase.json`, `LICENSE`, and workflows — without requiring the other author's intervention. Required-reviewer gates would block that.
 
-### CODEOWNERS rules (apply once the file is merged)
+Roles:
 
-| File pattern | Required reviewer |
-|---|---|
-| `/firestore.rules` | `@llamanftstaking-glitch` |
-| `/src/config.js` | `@llamanftstaking-glitch` |
-| `/.github/workflows/` | `@llamanftstaking-glitch` |
-| `/firebase.json`, `/.firebaserc` | `@llamanftstaking-glitch` |
-| `/LICENSE` | `@llamanftstaking-glitch` |
-| `/.github/CODEOWNERS` | `@llamanftstaking-glitch` |
-| Everything else | (no owner; no approval gate) |
+| Actor | Permission | What they can do |
+|---|---|---|
+| `mondrianaire` (owner) | Admin | Everything. Pushes branches, opens PRs, self-merges, edits settings. |
+| Claude (acting via `mondrianaire`'s gh CLI token) | Admin | Same as above. Pushes branches, opens PRs, self-merges. |
+| `llamanftstaking-glitch` (co-author) | Write | Pushes branches, opens PRs, reviews, comments. Cannot bypass the branch ruleset. |
 
-No catch-all `*` line: routine PRs (UI, scenarios, docs, scripts) ship under status-check + no-force-push protection alone, no human bottleneck. Only sensitive files require the second human's approval.
+Code review by `llamanftstaking-glitch` happens **voluntarily**: they have full read access to the repo, can review any PR, leave comments, request changes. But their approval is never required for merge — the owner can ship anything solo.
+
+If review-required gates are wanted later for specific files, re-introduce a `CODEOWNERS` file and flip the ruleset's `require_code_owner_review` back to `true`:
+
+```bash
+gh api -X PUT repos/mondrianaire/gto-drill/rulesets/17073827 \
+  --input docs/ruleset-with-code-owner-review.json
+```
 
 ### Branch ruleset for `main` (to apply via gh api or GitHub web UI)
 
-Settings:
+Settings (live now — ruleset ID `17073827`):
 - ✅ Restrict deletions
 - ✅ Block force pushes
 - ✅ Require pull request before merge
-- ✅ Require code-owner review (only triggers if PR touches a CODEOWNERS-listed file)
-- ❌ Required approving review count: 0 (CODEOWNERS handles the targeted gating)
-- ✅ Require status checks: `build_and_preview`
+- ❌ Required approving review count: 0 (no required reviewers)
+- ❌ Require code-owner review: false (no CODEOWNERS file — see above)
+- ✅ Require status checks: `build_and_preview` (Firebase preview deploy must build)
 - ✅ Require linear history
-- Bypass list: repo admin (mondrianaire) for emergencies
+- Bypass list: empty (rules apply uniformly to admin and write collaborators)
 
-This is applied via `gh api` after CODEOWNERS lands (avoids chicken-and-egg gating the very PR that introduces the rules):
+The combination above means:
+- Every change MUST go through a PR (no direct push to `main`)
+- The Firebase preview deploy must succeed before merge (broken builds are blocked)
+- No human approval is required — owner / Claude can self-merge any PR once CI passes
+- History stays linear and auditable (no force pushes ever)
+- Branch `main` can never be deleted
+
+To inspect or modify the active ruleset:
 
 ```bash
-gh api -X POST repos/mondrianaire/gto-drill/rulesets \
-  --input - <<'EOF'
-{
-  "name": "main protection",
-  "target": "branch",
-  "enforcement": "active",
-  "conditions": {"ref_name": {"include": ["refs/heads/main"], "exclude": []}},
-  "rules": [
-    {"type": "deletion"},
-    {"type": "non_fast_forward"},
-    {"type": "required_linear_history"},
-    {
-      "type": "pull_request",
-      "parameters": {
-        "required_approving_review_count": 0,
-        "dismiss_stale_reviews_on_push": true,
-        "require_code_owner_review": true,
-        "require_last_push_approval": false,
-        "required_review_thread_resolution": false
-      }
-    },
-    {
-      "type": "required_status_checks",
-      "parameters": {
-        "strict_required_status_checks_policy": false,
-        "required_status_checks": [{"context": "build_and_preview"}]
-      }
-    }
-  ]
-}
-EOF
+gh api repos/mondrianaire/gto-drill/rulesets/17073827            # read
+gh api -X PUT repos/mondrianaire/gto-drill/rulesets/17073827 \
+  --input <updated-ruleset.json>                                  # update
+gh api -X DELETE repos/mondrianaire/gto-drill/rulesets/17073827   # remove
 ```
-
-(Bypass actors omitted from the example — they require numeric actor IDs from the org/repo. Add via web UI under Settings → Rules → main protection → Bypass list.)
 
 ### Repo settings (already applied via API in the CODEOWNERS PR)
 
