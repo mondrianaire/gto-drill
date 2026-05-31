@@ -3903,6 +3903,26 @@ button.gc-tag.gc-tag-term.term-tip-active {
   border-radius: var(--radius-box);
   vertical-align: middle;
 }
+/* Stake tag — "CASH · 100BB". Matches the mockup's card-header
+   context line (GTO-Duel-Compressed-Workflow.html). Quieter than the
+   replay tag (neutral foreground, faint background) since stake is
+   ambient context, not a state notification. */
+.scenario-stake-tag {
+  margin-left: 8px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  color: var(--text-dim);
+  background: rgba(255, 255, 255, 0.04);
+  padding: 3px 7px;
+  border-radius: var(--radius-box);
+  vertical-align: middle;
+  white-space: nowrap;
+}
+.scenario-stake-sep {
+  margin: 0 2px;
+  opacity: 0.55;
+}
 /* Per-scenario flag tag — Special-Scenarios spec §5. A compact box
    that sits in the scenario header beside the Replay marker. For major
    flags this is a real <button> that re-opens the briefing modal in
@@ -4289,8 +4309,14 @@ button.scenario-flag-tag:focus-visible {
   display: inline-block;
   padding: 1px 6px;
   border-radius: 3px;
-  background: rgba(76, 182, 255, 0.14);
-  color: var(--accent);
+  /* Villain colors — the actor is always a villain per
+     buildDecidePrompt's hero-actor guard. Was hero blue
+     (rgba(76, 182, 255, 0.14) + var(--accent)) which broke the
+     project's hero-blue / villain-amber identity convention
+     on the decide screen — the BB / BTN tag was painted hero
+     even when it was the villain. */
+  background: var(--villain-soft);
+  color: var(--villain);
   letter-spacing: 0.04em;
   font-weight: 700;
   font-size: 12px;
