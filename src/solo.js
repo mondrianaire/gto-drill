@@ -509,12 +509,33 @@ export function mountSoloView(container, onExit, onPlayers, knowledgeLevel, onDa
         : null;
       return buildScenarioFlagTag({ flag, onClick });
     });
+    // Stake tag — "CASH · 100BB" / "TOURNAMENT · 40BB". Mirrors the
+    // mockup's card-header context line (GTO-Duel-Compressed-Workflow.html).
+    // Pulled from scen.replay.format + stack_depth_bb; both must be
+    // present for the tag to render.
+    const stakeFmt = scen.replay && typeof scen.replay.format === "string"
+      ? scen.replay.format
+      : null;
+    const stakeDepth = scen.replay && typeof scen.replay.stack_depth_bb === "number"
+      ? scen.replay.stack_depth_bb
+      : null;
+    const stakeTag = (stakeFmt && stakeDepth)
+      ? h("span", {
+          class: "scenario-stake-tag",
+          title: stakeFmt.charAt(0).toUpperCase() + stakeFmt.slice(1)
+            + " game at " + stakeDepth + "bb effective stacks",
+        },
+          stakeFmt.toUpperCase(),
+          h("span", { class: "scenario-stake-sep", "aria-hidden": "true" }, " · "),
+          stakeDepth + "BB")
+      : null;
     const headlineMain = h("span", { class: "scenario-headline-main" },
       scenNum ? "Scenario " : null,
       scenNum ? h("span", { class: "scenario-headline-num" }, "#" + scenNum[1]) : null,
       (scenNum && isReplay)
         ? h("span", { class: "scenario-replay-tag", title: "You've answered this scenario before" }, "Replay")
         : null,
+      stakeTag,
       ...headerFlagTags);
     // Four-dot PRE / FLOP / TURN / RIVER progress indicator (mockup M3 —
     // compressed-workflow pass). Dots before the decision street are
