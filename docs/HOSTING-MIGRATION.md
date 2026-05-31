@@ -102,18 +102,39 @@ After merge, the workflows are dormant until the **`FIREBASE_SERVICE_ACCOUNT_GTO
 
 ## Phase 3 — Firebase Auth allows the new domain
 
-**Critical: without this, Google Sign-in breaks on the new URL.**
+**Critical: without this, Google Sign-in returns "This domain is not authorized" on the new URL.**
 
-1. Open https://console.firebase.google.com/project/gto-poker-qui/authentication/settings
-2. Scroll to **Authorized domains**
-3. Click **Add domain**
-4. Add each of these (one at a time):
-   - `gtopokerdrill.com`
-   - `www.gtopokerdrill.com`
-   - `gto-poker-qui.web.app` (if not already there — it usually is by default)
-   - `gto-poker-qui.firebaseapp.com` (if not already there)
+### When to do this
 
-Localhost should already be in the list from previous setup.
+Do this **the moment Phase 2 verifies green** (DNS resolves + SSL cert provisioned). The actual sign-in test in Phase 4 will fail without it.
+
+### Quickstart — 60 seconds
+
+1. Direct link: https://console.firebase.google.com/project/gto-poker-qui/authentication/settings
+2. Scroll to the **Authorized domains** card
+3. Click **Add domain** → enter `gtopokerdrill.com` → Add
+4. Click **Add domain** → enter `www.gtopokerdrill.com` → Add
+5. Verify these are also in the list (Firebase usually adds them by default; if missing, add them):
+   - `gto-poker-qui.web.app`
+   - `gto-poker-qui.firebaseapp.com`
+   - `localhost`
+
+### What "done" looks like
+
+After saving, the Authorized domains list should include all 5:
+- ✓ `localhost` (for `npm start` dev work)
+- ✓ `gto-poker-qui.web.app` (Firebase's auto-domain)
+- ✓ `gto-poker-qui.firebaseapp.com` (Firebase's legacy auto-domain)
+- ✓ `gtopokerdrill.com` (production apex)
+- ✓ `www.gtopokerdrill.com` (production www)
+
+### Quick smoke test right after
+
+1. Open `https://gtopokerdrill.com` in an incognito window
+2. Click **Sign in with Google**
+3. Google popup → select your account
+4. Popup should close cleanly → you're signed in → your profile shows
+5. If you see "This domain is not authorized to run this operation" → the Auth update didn't propagate or wasn't saved. Re-check Step 3-4 above.
 
 ---
 
