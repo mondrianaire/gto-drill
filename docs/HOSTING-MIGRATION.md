@@ -142,11 +142,11 @@ Localhost should already be in the list from previous setup.
 
 ---
 
-## Phase 5 — Flip the repo to private
+## Phase 5 — Flip the repo to private + apply LICENSE
 
 **Only after Phase 4 fully verified on `gtopokerdrill.com`.**
 
-1. Add a `LICENSE` file: `Copyright (c) 2026 [your name]. All rights reserved.` (codifies what's already true under default copyright law).
+1. Add a `LICENSE` file: `Copyright (c) 2026 [your name]. All rights reserved.` (codifies what's already true under default copyright law). Will be added in a separate PR — touches CODEOWNERS-listed files so requires `@llamanftstaking-glitch` approval before merge.
 2. Disable GitHub Pages: https://github.com/mondrianaire/gto-drill/settings/pages → set source to "None"
 3. Flip the repo to private: https://github.com/mondrianaire/gto-drill/settings → scroll to **Danger Zone** → **Change repository visibility** → **Make private**
 4. Confirm warnings (GitHub will list what changes — Forks become detached, etc.)
@@ -156,6 +156,84 @@ After flip:
 - Existing forks remain public but have no claim on future work
 - The deployed site at `https://gtopokerdrill.com` is unaffected — it serves files from Firebase Hosting, not GitHub Pages
 - The Firebase Hosting workflow keeps working — it uses the GitHub secret you set up in Phase 1
+
+---
+
+## Collaboration model — CODEOWNERS + branch ruleset
+
+A `.github/CODEOWNERS` file + a `main` branch ruleset together govern who can land what:
+
+### CODEOWNERS rules (apply once the file is merged)
+
+| File pattern | Required reviewer |
+|---|---|
+| `/firestore.rules` | `@llamanftstaking-glitch` |
+| `/src/config.js` | `@llamanftstaking-glitch` |
+| `/.github/workflows/` | `@llamanftstaking-glitch` |
+| `/firebase.json`, `/.firebaserc` | `@llamanftstaking-glitch` |
+| `/LICENSE` | `@llamanftstaking-glitch` |
+| `/.github/CODEOWNERS` | `@llamanftstaking-glitch` |
+| Everything else | (no owner; no approval gate) |
+
+No catch-all `*` line: routine PRs (UI, scenarios, docs, scripts) ship under status-check + no-force-push protection alone, no human bottleneck. Only sensitive files require the second human's approval.
+
+### Branch ruleset for `main` (to apply via gh api or GitHub web UI)
+
+Settings:
+- ✅ Restrict deletions
+- ✅ Block force pushes
+- ✅ Require pull request before merge
+- ✅ Require code-owner review (only triggers if PR touches a CODEOWNERS-listed file)
+- ❌ Required approving review count: 0 (CODEOWNERS handles the targeted gating)
+- ✅ Require status checks: `build_and_preview`
+- ✅ Require linear history
+- Bypass list: repo admin (mondrianaire) for emergencies
+
+This is applied via `gh api` after CODEOWNERS lands (avoids chicken-and-egg gating the very PR that introduces the rules):
+
+```bash
+gh api -X POST repos/mondrianaire/gto-drill/rulesets \
+  --input - <<'EOF'
+{
+  "name": "main protection",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {"ref_name": {"include": ["refs/heads/main"], "exclude": []}},
+  "rules": [
+    {"type": "deletion"},
+    {"type": "non_fast_forward"},
+    {"type": "required_linear_history"},
+    {
+      "type": "pull_request",
+      "parameters": {
+        "required_approving_review_count": 0,
+        "dismiss_stale_reviews_on_push": true,
+        "require_code_owner_review": true,
+        "require_last_push_approval": false,
+        "required_review_thread_resolution": false
+      }
+    },
+    {
+      "type": "required_status_checks",
+      "parameters": {
+        "strict_required_status_checks_policy": false,
+        "required_status_checks": [{"context": "build_and_preview"}]
+      }
+    }
+  ]
+}
+EOF
+```
+
+(Bypass actors omitted from the example — they require numeric actor IDs from the org/repo. Add via web UI under Settings → Rules → main protection → Bypass list.)
+
+### Repo settings (already applied via API in the CODEOWNERS PR)
+
+- ✅ Auto-delete head branches after merge (cleans up `claude/...` branches)
+- ✅ Allow merge commits
+- ❌ Allow squash merging
+- ❌ Allow rebase merging
+- ✅ Allow auto-merge (lets `gh pr merge --auto` queue merges once status checks pass)
 
 ---
 
